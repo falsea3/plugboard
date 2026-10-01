@@ -184,7 +184,7 @@ jobs:
           Write-Host $text
           if ($text -notlike "*$env:VERSION*") { throw "the build reports '$text', not $env:VERSION" }
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: relay-db-${{ matrix.artifact }}
           path: release/*
