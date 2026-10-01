@@ -33,7 +33,7 @@
     "@tsconfig/svelte": "^5.0.8",
     "@types/node": "^22.20.4",
     "svelte-check": "^4.7.6",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vitest": "^3.2.7"
   }
 }
