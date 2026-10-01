@@ -20,6 +20,6 @@
     "frontend:e2e": "npm --workspace @relay-db/desktop-frontend run e2e"
   },
   "devDependencies": {
-    "sharp": "^0.34.5"
+    "sharp": "^0.35.5"
   }
 }
