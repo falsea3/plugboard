@@ -31,7 +31,7 @@
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/node": "^22.20.4",
+    "@types/node": "^26.6.3",
     "svelte-check": "^4.7.6",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"
