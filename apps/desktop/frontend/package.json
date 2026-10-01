@@ -34,6 +34,6 @@
     "@types/node": "^22.20.4",
     "svelte-check": "^4.7.6",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.7"
+    "vitest": "^5.0.2"
   }
 }
