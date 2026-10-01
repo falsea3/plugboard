@@ -21,6 +21,7 @@
   let pending = $state<{ script: string; writes: string[] } | null>(null);
 
   let editor = $state<EditorView>();
+  let hasSelection = $state(false);
   let run = $state<QueryRun | null>(null);
   let running = $state(false);
   let queryId = '';
@@ -136,8 +137,8 @@
     {#if running}
       <button class="btn sm" onclick={cancel}><Icon name="stop" size={11} />Stop</button>
     {:else}
-      <button class="btn sm primary" onclick={() => execute(false)} title="Run statement (⌘↵)"><Icon name="play" size={11} />Run</button>
-      <button class="btn sm" onclick={() => execute(true)} title="Run all (⇧⌘↵)">Run all</button>
+      <button class="btn sm primary" onclick={() => execute(false)} title={hasSelection ? 'Run the selected text (⌘↵)' : 'Run the statement under the cursor (⌘↵)'}><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run'}</button>
+      {#if !hasSelection}<button class="btn sm" onclick={() => execute(true)} title="Run all (⇧⌘↵)">Run all</button>{/if}
     {/if}
     <span class="faint small"><span class="kbd">⌘↵</span> statement · <span class="kbd">⇧⌘↵</span> all</span>
     {#if ws.readOnly}
@@ -147,7 +148,7 @@
   </div>
 
   <div class="editor" style:height="{editorHeight}px">
-    <SqlEditor bind:value={tab.sql} bind:editor {driver} tables={tableNames} defaultSchema={ws.schema} onrun={execute} />
+    <SqlEditor bind:value={tab.sql} bind:editor bind:hasSelection {driver} tables={tableNames} defaultSchema={ws.schema} onrun={execute} />
   </div>
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->

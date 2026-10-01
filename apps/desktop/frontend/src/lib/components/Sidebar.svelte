@@ -5,6 +5,7 @@
   import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
   import Icon from './Icon.svelte';
+  import Select from './Select.svelte';
   import Modal from './Modal.svelte';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
@@ -75,9 +76,7 @@
 
   {#if ws.session.schemas.length > 1}
     <div class="schema">
-      <select class="select" value={ws.schema} onchange={e => ws.setSchema(e.currentTarget.value)} aria-label="Schema">
-        {#each ws.session.schemas as s (s)}<option value={s}>{s}</option>{/each}
-      </select>
+      <Select value={ws.schema} options={ws.session.schemas.map(s => ({ value: s, label: s }))} onchange={s => ws.setSchema(s)} aria-label="Schema" />
     </div>
   {/if}
 

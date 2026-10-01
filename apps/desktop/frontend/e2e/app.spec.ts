@@ -51,3 +51,21 @@ test('asks before writing to a Production connection', async ({ page }) => {
   await page.getByRole('button', { name: 'Keep read-only' }).click();
   await expect(page.getByRole('switch', { name: /Read-only/ })).toHaveAttribute('aria-checked', 'true');
 });
+
+test('marks a typo while typing SQL', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await page.locator('.cm-content').click();
+  await page.keyboard.insertText('selec * from customers');
+  await expect(page.locator('.cm-lintRange-error')).toHaveText('selec');
+  await page.keyboard.press('ControlOrMeta+a');
+  await expect(page.getByRole('button', { name: 'Run selection' })).toBeVisible();
+});
+
+test('edits an enum cell from its list', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  await page.getByRole('grid').getByText('team').first().dblclick();
+  await page.getByRole('option', { name: 'pro' }).click();
+  await expect(page.getByText('1 change')).toBeVisible();
+});

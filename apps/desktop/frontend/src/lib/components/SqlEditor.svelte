@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Compartment, EditorState, Prec } from '@codemirror/state';
-  import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view';
+  import { drawSelection, EditorView, tooltips, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view';
   import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
   import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
   import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
   import { MySQL, PostgreSQL, SQLite, sql, type SQLNamespace } from '@codemirror/lang-sql';
+  import { linter } from '@codemirror/lint';
   import { tags as t } from '@lezer/highlight';
+  import { lintSql } from '../sqlLint';
   import type { Driver } from '../wire';
 
   let {
@@ -16,6 +18,7 @@
     defaultSchema = '',
     onrun,
     editor = $bindable<EditorView | undefined>(),
+    hasSelection = $bindable(false),
   }: {
     value?: string;
     driver: Driver;
@@ -23,6 +26,8 @@
     defaultSchema?: string;
     onrun: (all: boolean) => void;
     editor?: EditorView;
+    /** text is selected, so Run runs just that */
+    hasSelection?: boolean;
   } = $props();
 
   let host: HTMLDivElement;
@@ -58,6 +63,8 @@
     '.cm-matchingBracket': { backgroundColor: 'var(--accent-dim)', outline: '1px solid var(--accent)' },
     '.cm-placeholder': { color: 'var(--text-3)' },
     '.cm-tooltip': { border: '1px solid var(--border)', backgroundColor: 'var(--elevated)', borderRadius: '6px', overflow: 'hidden' },
+    '.cm-diagnostic': { padding: '6px 10px', fontFamily: 'var(--font-ui)', fontSize: '12px' },
+    '.cm-diagnostic-error': { borderLeft: '3px solid var(--danger)' },
     '.cm-tooltip-autocomplete > ul': { fontFamily: 'var(--font-mono)', fontSize: '12px' },
     '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'var(--accent)', color: 'var(--on-accent)' },
   });
@@ -68,6 +75,8 @@
       state: EditorState.create({
         doc: value,
         extensions: [
+          // Hints and completions float above the toolbar instead of being cut off by it.
+          tooltips({ parent: document.body }),
           lineNumbers(),
           highlightActiveLineGutter(),
           highlightActiveLine(),
@@ -79,6 +88,7 @@
           autocompletion({ activateOnTyping: true }),
           syntaxHighlighting(highlight),
           language.of(languageFor(driver, tables, defaultSchema)),
+          linter(v => lintSql(v.state.doc.toString(), driver === 'mysql').map(p => ({ ...p, severity: 'error' as const })), { delay: 500 }),
           placeholder('Write SQL…  ⌘↵ runs the statement under the cursor, ⇧⌘↵ runs everything'),
           Prec.highest(
             keymap.of([
@@ -90,6 +100,7 @@
           theme,
           EditorView.updateListener.of(u => {
             if (u.docChanged) value = u.state.doc.toString();
+            if (u.selectionSet) hasSelection = !u.state.selection.main.empty;
           }),
         ],
       }),

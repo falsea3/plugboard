@@ -2,6 +2,7 @@
   import { api, type AppInfo, type ThemeMode } from '../backend';
   import { app, type SettingsSection } from '../stores/app.svelte';
   import Icon, { type IconName } from './Icon.svelte';
+  import Select from './Select.svelte';
   import mark from '../assets/relay-db-mark.png';
 
   let info = $state<AppInfo | null>(null);
@@ -100,9 +101,9 @@
             <div class="label">Rows per page</div>
             <p class="hint">How many rows a table tab loads at a time.</p>
           </div>
-          <select class="select narrow" value={s.pageSize} onchange={e => app.updateSettings({ pageSize: Number(e.currentTarget.value) })}>
-            {#each pageSizes as n (n)}<option value={n}>{n.toLocaleString('en-US')}</option>{/each}
-          </select>
+          <div class="narrow">
+            <Select value={s.pageSize} options={pageSizes.map(n => ({ value: n, label: n.toLocaleString('en-US') }))} onchange={n => app.updateSettings({ pageSize: n })} aria-label="Rows per page" />
+          </div>
         </div>
 
         <div class="field row">

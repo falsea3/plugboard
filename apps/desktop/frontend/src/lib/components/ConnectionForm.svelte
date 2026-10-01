@@ -9,6 +9,7 @@
   import Modal from './Modal.svelte';
   import DriverMark from './DriverMark.svelte';
   import Icon from './Icon.svelte';
+  import Select from './Select.svelte';
   import { formatDuration, sqliteName } from '../format';
 
   let {
@@ -59,6 +60,12 @@
     { value: 'dev', label: 'Development' },
     { value: 'staging', label: 'Staging' },
     { value: 'prod', label: 'Production' },
+  ];
+  const sslModes = [
+    { value: '', label: 'Preferred', hint: 'encrypt if the server can' },
+    { value: 'disable', label: 'Disabled' },
+    { value: 'require', label: 'Required', hint: 'encrypt, trust any certificate' },
+    { value: 'verify-full', label: 'Verify certificate' },
   ];
   const sshAuths: { value: SSHAuth; label: string }[] = [
     { value: 'password', label: 'Password' },
@@ -240,9 +247,7 @@
         <label for="cf-name">Name</label>
         <div class="row">
           <input id="cf-name" class="input" bind:value={form.name} placeholder={form.driver === 'sqlite' ? 'Optional — named after the file' : 'Optional — e.g. Production replica'} autocomplete="off" spellcheck="false" />
-          <select class="select env" bind:value={form.env} onchange={onEnvChange} aria-label="Environment tag">
-            {#each envs as e (e.value)}<option value={e.value}>{e.label}</option>{/each}
-          </select>
+          <div class="env"><Select bind:value={form.env} options={envs} onchange={onEnvChange} aria-label="Environment tag" /></div>
         </div>
 
         {#if form.driver === 'sqlite'}
@@ -271,12 +276,7 @@
           <input id="cf-db" class="input" bind:value={form.database} placeholder={form.driver === 'postgres' ? 'Optional — defaults to postgres' : 'Optional'} spellcheck="false" autocomplete="off" />
 
           <label for="cf-ssl">SSL</label>
-          <select id="cf-ssl" class="select" bind:value={form.sslMode}>
-            <option value="">Preferred</option>
-            <option value="disable">Disabled</option>
-            <option value="require">Required</option>
-            <option value="verify-full">Verify certificate</option>
-          </select>
+          <Select id="cf-ssl" bind:value={form.sslMode} options={sslModes} aria-label="SSL" />
         {/if}
 
         <span></span>

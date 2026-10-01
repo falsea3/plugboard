@@ -25,6 +25,7 @@
   import { cellKind, copyText, calcColumnWidth, formatCell, isNumericType, toTSV } from '../format';
   import { copyToClipboard } from '../clipboard';
   import { startDrag } from '../drag';
+  import Select from './Select.svelte';
   import Icon from './Icon.svelte';
 
   type Sort = { column: string; desc: boolean } | null;
@@ -65,7 +66,9 @@
 
   let scroller = $state<HTMLDivElement>();
   let scrollTop = $state(0);
+  let scrollLeft = $state(0);
   let viewportH = $state(400);
+  let viewportW = $state(800);
   let widths = $state<number[]>([]);
   let selection = $state<Selection>(null);
   /** first row of a shift-click row range; the range ends at selection.row */
@@ -89,6 +92,24 @@
   const start = $derived(Math.max(0, Math.floor(scrollTop / ROW_H) - OVERSCAN));
   const end = $derived(Math.min(rows.length, Math.ceil((scrollTop + viewportH) / ROW_H) + OVERSCAN));
   const visible = $derived(rows.slice(start, end));
+
+  // Only the columns in view (and a screen's width either side) are drawn, so
+  // a wide table costs no more to scroll than a narrow one.
+  const colStarts = $derived.by(() => {
+    const out = [0];
+    for (const w of widths) out.push(out[out.length - 1] + w);
+    return out;
+  });
+  const shownCols = $derived.by(() => {
+    const from = scrollLeft - viewportW;
+    const to = scrollLeft + 2 * viewportW;
+    const out: number[] = [];
+    for (let c = 0; c < columns.length; c++) {
+      if (colStarts[c + 1] > from && colStarts[c] < to) out.push(c);
+    }
+    return out;
+  });
+  const leftPad = $derived(shownCols.length ? colStarts[shownCols[0]] : 0);
   const numeric = $derived(columns.map(c => isNumericType(c.type)));
   const keys = $derived(new Set(keyColumns));
 
@@ -192,15 +213,15 @@
     }
   }
 
-  function focusEditor(node: HTMLTextAreaElement | HTMLSelectElement) {
+  function focusEditor(node: HTMLTextAreaElement) {
     node.focus();
-    if (node instanceof HTMLTextAreaElement) node.setSelectionRange(node.value.length, node.value.length);
+    node.setSelectionRange(node.value.length, node.value.length);
   }
 
   /** Enum cells: picking a value commits it straight away. */
-  function onOptionPick(e: Event) {
+  function onOptionPick(value: string) {
     if (!cellEditor) return;
-    cellEditor.text = (e.currentTarget as HTMLSelectElement).value;
+    cellEditor.text = value;
     cellEditor.touched = true;
     commitEdit();
   }
@@ -389,7 +410,11 @@
   class="grid"
   bind:this={scroller}
   bind:clientHeight={viewportH}
-  onscroll={() => (scrollTop = scroller?.scrollTop ?? 0)}
+  bind:clientWidth={viewportW}
+  onscroll={() => {
+    scrollTop = scroller?.scrollTop ?? 0;
+    scrollLeft = scroller?.scrollLeft ?? 0;
+  }}
   {onkeydown}
   tabindex="0"
   role="grid"
@@ -399,7 +424,9 @@
   <div class="inner" style:width="{totalWidth}px" style:height="{HEADER_H + rows.length * ROW_H}px">
     <div class="header" role="row" style:height="{HEADER_H}px">
       <div class="rn corner" style:width="{rowNumberWidth}px"></div>
-      {#each columns as col, i (i)}
+      <div class="pad" style:width="{leftPad}px"></div>
+      {#each shownCols as i (i)}
+        {@const col = columns[i]}
         {@const sorted = sort?.column === col.name}
         <div class="th" class:sortable={!!onsort} class:num={numeric[i]} role="columnheader" style:width="{widths[i]}px" title="{col.name} · {col.type || 'unknown'}">
           <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
@@ -415,7 +442,8 @@
     </div>
 
     <div class="body" style:transform="translateY({start * ROW_H}px)">
-      {#each visible as row, vi (start + vi)}
+      <!-- Unkeyed: scrolling reuses the row elements and only swaps their contents. -->
+      {#each visible as row, vi}
         {@const r = start + vi}
         {@const rowSelected = selection?.row === r}
         {@const rowState = editing?.rowState(r) ?? ''}
@@ -437,7 +465,9 @@
           >
             {#if rowState === 'new'}<span class="new-mark">+</span>{:else if rowOffset === null}·{:else}{rowOffset + r + 1}{/if}
           </div>
-          {#each row as value, c (c)}
+          <div class="pad" style:width="{leftPad}px"></div>
+          {#each shownCols as c (c)}
+            {@const value = row[c]}
             {@const state = editing?.cellState(r, c) ?? ''}
             {@const kind = state === 'default' ? 'null' : cellKind(value, columns[c].type)}
             {@const isEditing = cellEditor?.r === r && cellEditor?.c === c}
@@ -455,10 +485,17 @@
               oncontextmenu={e => openMenu(e, r, c)}
             >
               {#if isEditing && cellEditor && cellEditor.options}
-                <select class="cell-editor list" value={cellEditor.text} onchange={onOptionPick} onkeydown={onEditorKey} onblur={onEditorBlur} use:focusEditor>
-                  {#if cellEditor.wasNull}<option value="" disabled>{state === 'default' ? 'DEFAULT' : 'NULL'}</option>{/if}
-                  {#each cellEditor.options as o (o)}<option value={o}>{o}</option>{/each}
-                </select>
+                <div class="cell-editor list">
+                  <Select
+                    value={cellEditor.text}
+                    options={cellEditor.options.map(o => ({ value: o, label: o }))}
+                    placeholder={cellEditor.wasNull ? (state === 'default' ? 'DEFAULT' : 'NULL') : ''}
+                    startOpen
+                    onchange={onOptionPick}
+                    onclose={picked => !picked && cancelEdit()}
+                    aria-label={columns[c].name}
+                  />
+                </div>
               {:else if isEditing && cellEditor}
                 <textarea
                   class="cell-editor"
@@ -568,6 +605,7 @@
 
   .body { position: absolute; top: 30px; left: 0; right: 0; will-change: transform; }
   .tr { display: flex; }
+  .pad { flex: none; }
   .tr.alt { background: var(--grid-row-alt); }
   .tr.row-selected .td { background: var(--grid-selected); }
 
@@ -611,7 +649,8 @@
   .td.edited { background: color-mix(in srgb, var(--warn) 16%, transparent); }
   .td.default { color: var(--text-3); font-style: italic; }
   .td.expr { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--text-2); font-style: italic; }
-  .cell-editor.list { height: 28px; padding: 0 6px; white-space: normal; cursor: default; }
+  .cell-editor.list { padding: 0; box-shadow: none; background: none; overflow: visible; white-space: normal; }
+  .cell-editor.list :global(.select-button) { height: 28px; border-radius: 3px; }
   .tr.new .td { background: color-mix(in srgb, var(--ok) 9%, transparent); }
   .tr.new .td.edited { background: color-mix(in srgb, var(--ok) 18%, transparent); }
   .tr.deleted .td { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--text-3); text-decoration: line-through; }

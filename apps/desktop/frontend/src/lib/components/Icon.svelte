@@ -26,6 +26,7 @@
   import rows from '@phosphor-icons/core/regular/rows.svg?raw';
   import folder from '@phosphor-icons/core/regular/folder-open.svg?raw';
   import check from '@phosphor-icons/core/regular/check-circle.svg?raw';
+  import checkMark from '@phosphor-icons/core/bold/check-bold.svg?raw';
   import alert from '@phosphor-icons/core/regular/warning-circle.svg?raw';
   import copy from '@phosphor-icons/core/regular/copy.svg?raw';
   import arrowUp from '@phosphor-icons/core/bold/arrow-up-bold.svg?raw';
@@ -48,7 +49,7 @@
     'chevron-left': chevronLeft, 'chevron-right': chevronRight, 'chevron-down': chevronDown, 'chevrons-left': chevronsLeft, 'chevrons-right': chevronsRight,
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
     arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, link, lock, lockOpen, tunnel, funnel,
-    download, update: arrowCircleUp,
+    download, update: arrowCircleUp, 'check-mark': checkMark,
   } as const;
 
   export type IconName = keyof typeof ICONS;

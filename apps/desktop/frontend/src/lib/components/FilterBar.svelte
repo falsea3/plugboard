@@ -35,6 +35,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import Icon from './Icon.svelte';
+  import Select from './Select.svelte';
 
   let {
     columns,
@@ -87,12 +88,8 @@
     <div class="row" data-row={row.id} class:off={!row.on}>
       <span class="join">{i === 0 ? 'Where' : 'and'}</span>
       <input type="checkbox" bind:checked={row.on} onchange={onapply} title={row.on ? 'Turn this condition off' : 'Turn this condition on'} />
-      <select class="select col" bind:value={row.column} aria-label="Column">
-        {#each columns as c (c.name)}<option value={c.name}>{c.name}</option>{/each}
-      </select>
-      <select class="select op" bind:value={row.op} aria-label="Operator" onchange={() => noValue(row.op) && onapply()}>
-        {#each OPS as o (o.value)}<option value={o.value}>{o.label}</option>{/each}
-      </select>
+      <div class="col"><Select bind:value={row.column} options={columns.map(c => ({ value: c.name, label: c.name }))} aria-label="Column" /></div>
+      <div class="op"><Select bind:value={row.op} options={OPS} onchange={op => noValue(op) && onapply()} aria-label="Operator" /></div>
       {#if noValue(row.op)}
         <span class="no-value" data-focus tabindex="-1"></span>
       {:else}
@@ -132,6 +129,7 @@
   .join { width: 42px; flex: none; text-align: right; color: var(--text-3); font-size: 12px; }
   .col { width: 180px; flex: none; height: 26px; }
   .op { width: 120px; flex: none; height: 26px; }
+  .col :global(.select-button), .op :global(.select-button) { height: 26px; }
   .value { flex: 1; min-width: 120px; height: 26px; }
   .no-value { flex: 1; }
   .actions { display: flex; align-items: center; gap: 6px; padding-left: 48px; }
