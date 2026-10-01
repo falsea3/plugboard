@@ -1,0 +1,113 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { Compartment, EditorState, Prec } from '@codemirror/state';
+  import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view';
+  import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
+  import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
+  import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
+  import { MySQL, PostgreSQL, SQLite, sql, type SQLNamespace } from '@codemirror/lang-sql';
+  import { tags as t } from '@lezer/highlight';
+  import type { Driver } from '../wire';
+
+  let {
+    value = $bindable(''),
+    driver,
+    tables = [],
+    defaultSchema = '',
+    onrun,
+    editor = $bindable<EditorView | undefined>(),
+  }: {
+    value?: string;
+    driver: Driver;
+    tables?: string[];
+    defaultSchema?: string;
+    onrun: (all: boolean) => void;
+    editor?: EditorView;
+  } = $props();
+
+  let host: HTMLDivElement;
+  const language = new Compartment();
+
+  const dialects = { postgres: PostgreSQL, mysql: MySQL, sqlite: SQLite };
+
+  function languageFor(driver: Driver, tables: string[], schema: string) {
+    const ns: SQLNamespace = {};
+    for (const name of tables) ns[name] = [];
+    return sql({ dialect: dialects[driver], schema: ns, defaultSchema: schema || undefined, upperCaseKeywords: true });
+  }
+
+  const highlight = HighlightStyle.define([
+    { tag: [t.keyword, t.operatorKeyword, t.modifier], color: 'var(--syn-kw)', fontWeight: '500' },
+    { tag: [t.string, t.special(t.string)], color: 'var(--syn-str)' },
+    { tag: [t.number, t.bool, t.null], color: 'var(--syn-num)' },
+    { tag: [t.lineComment, t.blockComment], color: 'var(--syn-comment)', fontStyle: 'italic' },
+    { tag: [t.typeName, t.standard(t.name)], color: 'var(--syn-type)' },
+    { tag: [t.operator, t.punctuation], color: 'var(--syn-op)' },
+    { tag: [t.function(t.variableName), t.special(t.name)], color: 'var(--syn-fn)' },
+  ]);
+
+  const theme = EditorView.theme({
+    '&': { height: '100%', fontSize: 'var(--editor-font-size, 13px)', backgroundColor: 'var(--bg)', color: 'var(--text)' },
+    '.cm-scroller': { fontFamily: 'var(--font-mono)', lineHeight: '1.6' },
+    '.cm-content': { padding: '10px 0', caretColor: 'var(--accent)' },
+    '.cm-gutters': { backgroundColor: 'var(--bg)', color: 'var(--text-3)', border: 'none', paddingLeft: '6px' },
+    '.cm-activeLineGutter': { backgroundColor: 'transparent', color: 'var(--text-2)' },
+    '.cm-activeLine': { backgroundColor: 'var(--grid-row-alt)' },
+    '.cm-cursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
+    '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': { backgroundColor: 'var(--grid-selected) !important' },
+    '.cm-matchingBracket': { backgroundColor: 'var(--accent-dim)', outline: '1px solid var(--accent)' },
+    '.cm-placeholder': { color: 'var(--text-3)' },
+    '.cm-tooltip': { border: '1px solid var(--border)', backgroundColor: 'var(--elevated)', borderRadius: '6px', overflow: 'hidden' },
+    '.cm-tooltip-autocomplete > ul': { fontFamily: 'var(--font-mono)', fontSize: '12px' },
+    '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'var(--accent)', color: 'var(--on-accent)' },
+  });
+
+  onMount(() => {
+    const view = new EditorView({
+      parent: host,
+      state: EditorState.create({
+        doc: value,
+        extensions: [
+          lineNumbers(),
+          highlightActiveLineGutter(),
+          highlightActiveLine(),
+          drawSelection(),
+          history(),
+          indentOnInput(),
+          bracketMatching(),
+          closeBrackets(),
+          autocompletion({ activateOnTyping: true }),
+          syntaxHighlighting(highlight),
+          language.of(languageFor(driver, tables, defaultSchema)),
+          placeholder('Write SQL…  ⌘↵ runs the statement under the cursor, ⇧⌘↵ runs everything'),
+          Prec.highest(
+            keymap.of([
+              { key: 'Mod-Enter', run: () => (onrun(false), true) },
+              { key: 'Shift-Mod-Enter', run: () => (onrun(true), true) },
+            ]),
+          ),
+          keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap, ...completionKeymap, indentWithTab]),
+          theme,
+          EditorView.updateListener.of(u => {
+            if (u.docChanged) value = u.state.doc.toString();
+          }),
+        ],
+      }),
+    });
+    editor = view;
+    view.focus();
+    return () => view.destroy();
+  });
+
+  $effect(() => {
+    const ext = languageFor(driver, tables, defaultSchema);
+    editor?.dispatch({ effects: language.reconfigure(ext) });
+  });
+</script>
+
+<div class="editor" bind:this={host}></div>
+
+<style>
+  .editor { height: 100%; overflow: hidden; }
+  .editor :global(.cm-editor.cm-focused) { outline: none; }
+</style>

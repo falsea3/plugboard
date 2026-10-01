@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relay DB</title>
+    <script>
+      (() => {
+        const p = navigator.platform || navigator.userAgent || '';
+        document.documentElement.dataset.platform = /Mac/i.test(p) ? 'darwin' : /Win/i.test(p) ? 'windows' : 'linux';
+        let mode = 'system';
+        try { mode = localStorage.getItem('relaydb.theme') || 'system'; } catch {}
+        const dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+    <style>
+      html, body, #app { width: 100%; height: 100%; margin: 0; }
+      html[data-theme="dark"] body { background: #111113; }
+      html[data-theme="light"] body { background: #ffffff; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

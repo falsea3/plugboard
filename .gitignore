@@ -1,0 +1,26 @@
+.DS_Store
+.idea/
+.vscode/
+
+node_modules/
+.cache/
+
+apps/desktop/build/bin/
+apps/desktop/frontend/dist/*
+!apps/desktop/frontend/dist/.gitkeep
+apps/desktop/frontend/wailsjs/
+apps/desktop/frontend/package.json.md5
+
+*.log
+.env
+.env.*
+dev/sample.db
+
+# Playwright runs (make screenshots, npm run frontend:e2e)
+apps/desktop/frontend/test-results/
+apps/desktop/frontend/playwright-report/
+
+# The update signing key never leaves the maintainer's machine and CI secrets.
+update-signing-key
+update-signing-key.pub
+release/

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Relay DB",
+  "outputfilename": "relay-db",
+  "frontend:dir": "frontend",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev -- --host 127.0.0.1",
+  "frontend:dev:serverUrl": "auto",
+  "info": {
+    "companyName": "Relay Client",
+    "productName": "Relay DB",
+    "productVersion": "0.1.0",
+    "copyright": "Copyright © 2026 Relay Client",
+    "comments": "Local-first desktop database client"
+  },
+  "author": {
+    "name": "Relay Client"
+  }
+}

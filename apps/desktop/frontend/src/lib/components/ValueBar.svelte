@@ -1,0 +1,38 @@
+<script lang="ts">
+  import type { CellValue, ResultColumn } from '../wire';
+  import { copyText } from '../format';
+  import { copyToClipboard } from '../clipboard';
+  import Icon from './Icon.svelte';
+
+  let { value, column }: { value: CellValue; column: ResultColumn } = $props();
+
+  const text = $derived(value === null ? 'NULL' : String(value));
+</script>
+
+<div class="value-bar">
+  <span class="col faint">{column.name}{column.type ? ` · ${column.type}` : ''}</span>
+  <span class="val mono" class:null={value === null} title={text}>{text}</span>
+  <button class="btn icon sm ghost" title="Copy value (⌘C)" onclick={() => copyToClipboard(copyText(value))}><Icon name="copy" size={12} /></button>
+</div>
+
+<style>
+  .value-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 55%;
+  }
+  .col { font-size: 11.5px; white-space: nowrap; }
+  .val {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11.5px;
+    color: var(--text-2);
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  .val.null { font-style: italic; color: var(--cell-null); }
+</style>

@@ -1,0 +1,111 @@
+/* Relay palette, shared with the Relay API client. */
+:root,
+:root[data-theme="dark"] {
+  --bg:            #111113;
+  --surface:       #0c0c0e;
+  --elevated:      #19191c;
+  --hover:         #1f1f23;
+  --active:        #26262b;
+  --border:        #2d2d32;
+  --border-subtle: #222226;
+
+  --text:   #ececef;
+  --text-2: #a6a6ae;
+  --text-3: #85858e;
+
+  --accent:       #5865f2;
+  --accent-dim:   rgba(88, 101, 242, 0.17);
+  --accent-hover: #6b77ff;
+  --on-accent:    #ffffff;
+
+  --ok:      #52c291;
+  --warn:    #e6b556;
+  --danger:  #f27f76;
+  --info:    #72abff;
+
+  /* connection environment tags */
+  --env-local:   #85858e;
+  --env-dev:     #52c291;
+  --env-staging: #e6b556;
+  --env-prod:    #f27f76;
+
+  /* data grid */
+  --grid-row-alt:  rgba(255, 255, 255, 0.018);
+  --grid-selected: rgba(88, 101, 242, 0.24);
+  --cell-null:     #6a6a73;
+  --cell-number:   #80d5bf;
+  --cell-bool:     #b996f7;
+
+  /* sql syntax */
+  --syn-kw:      #72abff;
+  --syn-str:     #e4c493;
+  --syn-num:     #80d5bf;
+  --syn-comment: #6a6a73;
+  --syn-type:    #b996f7;
+  --syn-op:      #a6a6ae;
+  --syn-fn:      #aab2ff;
+
+  --scroll-thumb:       #3a3a40;
+  --scroll-thumb-hover: #4a4a51;
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg:            #ffffff;
+  --surface:       #f7f7f8;
+  --elevated:      #f1f1f3;
+  --hover:         #ececef;
+  --active:        #e4e4e8;
+  --border:        #dfdfe4;
+  --border-subtle: #ececef;
+
+  --text:   #17171a;
+  --text-2: #50505a;
+  --text-3: #6b6b74;
+
+  --accent:       #4f5be8;
+  --accent-dim:   rgba(79, 91, 232, 0.10);
+  --accent-hover: #3c48d4;
+  --on-accent:    #ffffff;
+
+  --ok:     #137a4b;
+  --warn:   #9a5f00;
+  --danger: #c3352b;
+  --info:   #1c5fcf;
+
+  --env-local:   #6b6b74;
+  --env-dev:     #137a4b;
+  --env-staging: #b87400;
+  --env-prod:    #c3352b;
+
+  --grid-row-alt:  rgba(0, 0, 0, 0.022);
+  --grid-selected: rgba(79, 91, 232, 0.16);
+  --cell-null:     #9a9aa3;
+  --cell-number:   #0d7563;
+  --cell-bool:     #7443cc;
+
+  --syn-kw:      #1c5fcf;
+  --syn-str:     #8f5410;
+  --syn-num:     #0d7563;
+  --syn-comment: #8a8a93;
+  --syn-type:    #7443cc;
+  --syn-op:      #50505a;
+  --syn-fn:      #3c48d4;
+
+  --scroll-thumb:       #d4d4da;
+  --scroll-thumb-hover: #b4b4bc;
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--border);
+
+  color-scheme: light;
+}
+
+:root {
+  --font-ui: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --titlebar-h: 40px;
+  --row-h: 26px;
+}

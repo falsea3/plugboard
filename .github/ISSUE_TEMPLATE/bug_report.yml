@@ -1,0 +1,93 @@
+name: Bug report
+description: Something is broken or behaves unexpectedly in Relay DB.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more of this you fill in, the faster it gets fixed.
+
+        **Please scrub credentials first** — connection URLs, screenshots of the connection form and query text often carry hosts, user names and passwords.
+
+  - type: input
+    id: version
+    attributes:
+      label: Relay DB version
+      description: Settings ▸ About.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating system
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows 11
+        - Windows 10
+        - Linux (AppImage)
+        - Linux (other)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Database
+      options:
+        - PostgreSQL
+        - MySQL
+        - MariaDB
+        - SQLite
+        - Not database-specific
+    validations:
+      required: true
+
+  - type: input
+    id: engine-version
+    attributes:
+      label: Database version, and how you connect
+      description: Shown under the connection name in the sidebar. Mention it if you go through an SSH tunnel.
+      placeholder: "PostgreSQL 17.2, through an SSH bastion"
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps from opening the connection to the bug. A table definition or a short script helps a lot.
+      placeholder: |
+        1. Connect to a PostgreSQL database
+        2. Open a table with a `numeric(5,2)` column
+        3. Set a cell to 1.005 and commit
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened
+      description: Include the error text, and a screenshot if the bug is visual.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you send it
+      options:
+        - label: I'm on the latest Relay DB release (Settings ▸ About ▸ Check for updates)
+          required: true
+        - label: I searched the existing issues and didn't find this one
+          required: true
+        - label: This isn't a security problem (those go to [a private report](https://github.com/relay-client/relay-db/security/advisories/new) instead)
+          required: true

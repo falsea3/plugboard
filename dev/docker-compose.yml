@@ -1,0 +1,54 @@
+# Sample databases for developing Relay DB. `make db-up` / `make db-down`.
+# Ports are offset so they don't clash with a locally installed server, and
+# bound to 127.0.0.1: the passwords here are not meant for the network.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: relay
+      POSTGRES_PASSWORD: relay
+      POSTGRES_DB: shop
+    ports: ["127.0.0.1:55432:5432"]
+    volumes:
+      - ./seed/postgres.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relay -d shop"]
+      interval: 2s
+      retries: 30
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: relay
+      MYSQL_USER: relay
+      MYSQL_PASSWORD: relay
+      MYSQL_DATABASE: shop
+    ports: ["127.0.0.1:53306:3306"]
+    volumes:
+      - ./seed/mysql.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-urelay", "-prelay"]
+      interval: 2s
+      retries: 60
+
+  # SSH jump host for testing tunnels: ssh relay@127.0.0.1 -p 52222 (password relay).
+  # From inside, the databases are reachable as postgres:5432 and mysql:3306.
+  bastion:
+    image: alpine:3.20
+    command: >
+      sh -c "apk add --no-cache openssh >/dev/null && ssh-keygen -A
+      && (id relay >/dev/null 2>&1 || adduser -D relay) && echo relay:relay | chpasswd
+      && sed -i -e 's/^#*AllowTcpForwarding.*/AllowTcpForwarding yes/' -e 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+      && exec /usr/sbin/sshd -D -e"
+    ports: ["127.0.0.1:52222:22"]
+    volumes:
+      # Keep host keys across container re-creation, or Relay DB (rightly)
+      # refuses the "changed" key.
+      - bastion-keys:/etc/ssh
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 22"]
+      interval: 2s
+      retries: 60
+
+volumes:
+  bastion-keys:
