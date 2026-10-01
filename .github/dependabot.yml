@@ -1,11 +1,18 @@
 version: 2
 
+# Major versions of Go and npm packages change APIs and build tooling, so they
+# are upgraded by hand rather than by a bot; minor and patch updates come
+# grouped, one pull request per ecosystem.
+
 updates:
   - package-ecosystem: gomod
     directory: /apps/desktop
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       go-minor-and-patch:
         update-types: [minor, patch]
@@ -15,6 +22,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       npm-minor-and-patch:
         update-types: [minor, patch]
