@@ -38,12 +38,19 @@ func normalizeValue(v any, dbType string) any {
 		if math.IsNaN(x) || math.IsInf(x, 0) {
 			return strconv.FormatFloat(x, 'g', -1, 64)
 		}
+		if isFloat4(dbType) {
+			// pgx hands a PostgreSQL real over already widened to float64.
+			return normalizeValue(float32(x), dbType)
+		}
 		return x
 	case float32:
 		// Widening 0.1f to float64 gives 0.10000000149011612; go through the
 		// shortest 32-bit decimal instead so a real shows as written.
 		f, _ := strconv.ParseFloat(strconv.FormatFloat(float64(x), 'g', -1, 32), 64)
-		return normalizeValue(f, dbType)
+		if math.IsNaN(f) || math.IsInf(f, 0) {
+			return strconv.FormatFloat(f, 'g', -1, 64)
+		}
+		return f
 	case time.Time:
 		return formatTime(x, dbType)
 	case []byte:
@@ -69,6 +76,12 @@ func formatTime(t time.Time, dbType string) string {
 		return t.Format("2006-01-02 15:04:05.999999")
 	}
 	return t.Format("2006-01-02 15:04:05.999999Z07:00")
+}
+
+// isFloat4 reports single-precision column types: PostgreSQL real, MySQL
+// FLOAT. SQLite's REAL is a double.
+func isFloat4(t string) bool {
+	return t == "float4" || t == "float"
 }
 
 func isBinaryType(t string) bool {

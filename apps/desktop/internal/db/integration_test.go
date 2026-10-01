@@ -91,6 +91,12 @@ func TestPostgresServer(t *testing.T) {
 	if err != nil || len(page.Result.Rows) == 0 {
 		t.Fatalf("page = %+v, err = %v", page, err)
 	}
+
+	// A real shows as it was written, not as the float64 pgx widens it to.
+	res, err = s.Run(ctx, "select 5.2::real, 5.2::double precision")
+	if err != nil || res[0].Rows[0][0] != 5.2 || res[0].Rows[0][1] != 5.2 {
+		t.Fatalf("real/double = %v, err = %v", res, err)
+	}
 }
 
 func TestPostgresCancel(t *testing.T) {

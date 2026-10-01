@@ -20,3 +20,14 @@ func TestNormalizeValue(t *testing.T) {
 		}
 	}
 }
+
+// pgx widens a PostgreSQL real to float64 before we see it.
+func TestRealWidenedByTheDriver(t *testing.T) {
+	widened := float64(float32(5.2)) // 5.199999809265137
+	if got := normalizeValue(widened, "float4"); got != 5.2 {
+		t.Errorf("real = %v, want 5.2", got)
+	}
+	if got := normalizeValue(widened, "float8"); got != widened {
+		t.Errorf("double precision lost digits: %v", got)
+	}
+}

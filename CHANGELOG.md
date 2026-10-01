@@ -18,6 +18,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Fast scrolling through wide tables keeps up**: the grid draws only the columns in view and reuses rows instead of rebuilding them, so a frame takes a quarter of the time it did.
 - **Nothing bounces past its edges** on a trackpad any more.
 
+### Fixed
+
+- **A PostgreSQL `real` showed digits it doesn't have** — `5.2` came out as `5.199999809265137`, because the driver widens it to a double. It shows as stored now.
+
 ## [0.1.0] - 2026-10-01
 
 The first public release.
