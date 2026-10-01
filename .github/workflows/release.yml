@@ -23,7 +23,7 @@ jobs:
     name: Check the release can go out
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Notes in CHANGELOG.md
         run: python3 scripts/changelog.py notes "$GITHUB_REF_NAME" > /dev/null
       - name: Update signing key
@@ -59,7 +59,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-go@v5
         with:
@@ -199,7 +199,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v8
         with:
