@@ -16,7 +16,6 @@
     "desktop:dev": "make -C apps/desktop dev",
     "desktop:build": "make -C apps/desktop build",
     "icons": "node scripts/gen-appicon.mjs",
-    "icons:variants": "node scripts/icon-variants.mjs",
     "frontend:e2e": "npm --workspace @relay-db/desktop-frontend run e2e"
   },
   "devDependencies": {
