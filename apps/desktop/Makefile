@@ -3,7 +3,7 @@ SHELL := /bin/sh
 ROOT_DIR      := $(shell git -C $(CURDIR) rev-parse --show-toplevel 2>/dev/null || (cd ../.. && pwd))
 DESKTOP_DIR   := $(ROOT_DIR)/apps/desktop
 APP_NAME      := Relay DB
-WAILS_VERSION := v2.13.0
+WAILS_VERSION := v2.16.0
 WAILS_CMD     := $(shell command -v wails 2>/dev/null || { [ -x "$$HOME/go/bin/wails" ] && echo "$$HOME/go/bin/wails"; } || printf '%s' 'go run github.com/wailsapp/wails/v2/cmd/wails@$(WAILS_VERSION)')
 DEV_ENV       := RELAYDB_DISABLE_KEYCHAIN=1
 

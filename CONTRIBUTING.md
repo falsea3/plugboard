@@ -18,7 +18,7 @@ Requirements:
 
 - Go 1.26+
 - Node.js 22.12+
-- [Wails v2](https://wails.io/docs/gettingstarted/installation) — `go install github.com/wailsapp/wails/v2/cmd/wails@v2.13.0`
+- [Wails v2](https://wails.io/docs/gettingstarted/installation) — `go install github.com/wailsapp/wails/v2/cmd/wails@v2.16.0`
 - macOS: Xcode Command Line Tools
 - Linux: `libgtk-3-dev`, `libwebkit2gtk-4.0-dev`
 - Windows: NSIS, for installer builds

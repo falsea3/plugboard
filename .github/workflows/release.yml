@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  WAILS_VERSION: v2.13.0
+  WAILS_VERSION: v2.16.0
   UPDATE_REPOSITORY: ${{ github.repository }}
   UPDATE_PUBLIC_KEY: ${{ vars.UPDATE_PUBLIC_KEY }}
 
@@ -94,7 +94,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="${GITHUB_REF_NAME#v}"
+          export VERSION="${GITHUB_REF_NAME#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           # Info.plist and the Windows file properties take the version from wails.json.
           node -e "
