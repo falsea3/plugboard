@@ -80,7 +80,7 @@ jobs:
           RELAYDB_TEST_PG: 127.0.0.1:55432
           RELAYDB_TEST_MYSQL: 127.0.0.1:53306
           RELAYDB_TEST_SSH: 127.0.0.1:52222
-        run: go test -race -count=1 ./apps/desktop/internal/db/
+        run: go test -race -count=1 ./apps/desktop/internal/db/...
 
   server-versions:
     # The other releases make db-up-all starts, for what one does differently
@@ -106,7 +106,7 @@ jobs:
       - name: Start ${{ matrix.server }}
         run: docker compose -f dev/docker-compose.yml --profile all up -d --wait ${{ matrix.server }}
       - name: Test against it
-        run: env "${{ matrix.var }}=127.0.0.1:${{ matrix.port }}" go test -race -count=1 ./apps/desktop/internal/db/
+        run: env "${{ matrix.var }}=127.0.0.1:${{ matrix.port }}" go test -race -count=1 ./apps/desktop/internal/db/...
 
   go-cross-platform:
     name: Go tests (${{ matrix.os }})

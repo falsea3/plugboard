@@ -9,16 +9,12 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-// MenuEvent is the Wails event every menu command is emitted on. The frontend
-// owns all actions; the menu only names them, so a shortcut and a menu click
-// always do the same thing.
 const MenuEvent = "menu:command"
 
 type appMenu struct {
 	themes map[model.Theme]*menu.MenuItem
 }
 
-// setTheme moves the View ▸ Theme check mark after the theme changes elsewhere.
 func (m *appMenu) setTheme(ctx context.Context, theme model.Theme) {
 	if m == nil || ctx == nil {
 		return
@@ -29,7 +25,6 @@ func (m *appMenu) setTheme(ctx context.Context, theme model.Theme) {
 	runtime.MenuUpdateApplicationMenu(ctx)
 }
 
-// BuildMenu is a plain function rather than a method so Wails doesn't bind it.
 func BuildMenu(a *App) *menu.Menu {
 	emit := func(cmd string) menu.Callback {
 		return func(*menu.CallbackData) {
@@ -40,7 +35,6 @@ func BuildMenu(a *App) *menu.Menu {
 	}
 	root := menu.NewMenu()
 
-	// On macOS the first submenu is the application menu, titled with the app name.
 	app := root.AddSubmenu("Relay DB")
 	app.AddText("About Relay DB", nil, emit("about"))
 	app.AddSeparator()
@@ -62,8 +56,6 @@ func BuildMenu(a *App) *menu.Menu {
 	file.AddText("Close Tab", keys.CmdOrCtrl("w"), emit("close-tab"))
 	file.AddText("Close Connection", keys.Combo("w", keys.CmdOrCtrlKey, keys.ShiftKey), emit("close-connection"))
 
-	// Standard Undo/Redo/Cut/Copy/Paste/Select All. WKWebView only gets these
-	// shortcuts through the Edit menu, so it must stay.
 	root.Append(menu.EditMenu())
 
 	view := root.AddSubmenu("View")

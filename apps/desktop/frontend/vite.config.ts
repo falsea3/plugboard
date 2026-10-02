@@ -8,7 +8,6 @@ export default defineConfig({
   plugins: [
     svelte(),
     {
-      // go:embed needs frontend/dist to exist even in a clean checkout.
       name: 'keep-wails-dist-placeholder',
       closeBundle() {
         writeFileSync(resolve('dist/.gitkeep'), '');
@@ -17,7 +16,7 @@ export default defineConfig({
   ],
   clearScreen: false,
   test: {
-    include: ['src/**/*.test.ts'], // e2e/ belongs to Playwright
+    include: ['src/**/*.test.ts'],
   },
   server: {
     host: '127.0.0.1',

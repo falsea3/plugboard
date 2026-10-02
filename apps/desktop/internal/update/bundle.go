@@ -12,7 +12,6 @@ import (
 
 const lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 
-// runningBundle returns the .app the running executable lives in, or "".
 func runningBundle() string {
 	exe, err := os.Executable()
 	if err != nil {
@@ -32,9 +31,6 @@ func bundleOf(exe string) string {
 	return exe[:i+len(".app")]
 }
 
-// installBundle unpacks the zipped .app in archive and swaps its Contents
-// into bundle in one rename, keeping the old contents if that fails. The
-// staging folder sits inside bundle, so both renames stay on one volume.
 func installBundle(archive, bundle, version string) error {
 	stage, err := os.MkdirTemp(bundle, ".relay-db-update-")
 	if err != nil {
@@ -66,7 +62,6 @@ func installBundle(archive, bundle, version string) error {
 		}
 		return err
 	}
-	// Finder and the Dock cache the icon by the bundle's date.
 	now := time.Now()
 	_ = os.Chtimes(bundle, now, now)
 	_ = exec.Command(lsregister, "-f", bundle).Run()

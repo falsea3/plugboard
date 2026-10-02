@@ -20,21 +20,14 @@
     value: T;
     options: SelectOption<T>[];
     onchange?: (value: T) => void;
-    /**
-     * The list closed; picked says whether an option was chosen (maybe the one
-     * already set), key is the Escape or Tab that closed it.
-     */
     onclose?: (picked: boolean, key?: KeyboardEvent) => void;
-    /** shown when no option matches value */
     placeholder?: string;
     id?: string;
     class?: string;
-    /** open on mount, for editors that appear in place (a grid cell) */
     startOpen?: boolean;
     'aria-label'?: string;
   } = $props();
 
-  // Long lists (columns, schemas) get a search box at the top.
   const SEARCH_FROM = 20;
   const MAX_HEIGHT = 280;
 
@@ -79,8 +72,6 @@
     if (!open) return;
     open = false;
     onclose?.(picked, key);
-    // Focus goes back to the button, unless onchange or onclose moved it on
-    // (a grid cell editor hands it back to the grid).
     const at = document.activeElement;
     if (!at || at === document.body || popup?.contains(at)) button?.focus();
   }
@@ -120,7 +111,7 @@
   let typedAt = 0;
 
   function onListKey(e: KeyboardEvent) {
-    e.stopPropagation(); // Escape here closes the list, not the dialog around it
+    e.stopPropagation();
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
@@ -148,7 +139,6 @@
         hide(false, e);
         return;
     }
-    // Without a search box, typing jumps to the first option starting with it.
     if (!searchable && e.key.length === 1 && !e.metaKey && !e.ctrlKey) {
       const now = Date.now();
       typed = now - typedAt < 700 ? typed + e.key.toLowerCase() : e.key.toLowerCase();
@@ -165,8 +155,6 @@
     if (startOpen) show();
   });
 
-  // The list lives in <body>: inside a transformed ancestor (the grid's rows)
-  // position: fixed would be relative to that ancestor, not the window.
   function toBody(node: HTMLElement) {
     document.body.appendChild(node);
     return { destroy: () => node.remove() };

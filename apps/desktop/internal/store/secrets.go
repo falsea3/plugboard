@@ -20,9 +20,6 @@ type Secrets interface {
 
 const keyringService = "Relay DB"
 
-// NewSecrets returns the OS credential store, or a 0600 file in dir when the
-// keychain is disabled (RELAYDB_DISABLE_KEYCHAIN=1, used by `make dev` so dev
-// builds don't trigger keychain prompts on every rebuild).
 func NewSecrets(dir string) Secrets {
 	if os.Getenv("RELAYDB_DISABLE_KEYCHAIN") == "1" {
 		return &fileSecrets{path: filepath.Join(dir, "secrets.dev.json")}

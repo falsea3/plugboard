@@ -1,11 +1,6 @@
 import { app } from './stores/app.svelte';
 import type { ThemeMode } from './wire';
 
-// Every app action has one name. The native menu emits these names and the
-// keyboard handler maps shortcuts to them, so both paths do the same thing.
-// When the native menu owns a shortcut, WKWebView still delivers the keydown
-// to the page first; preventDefault() there keeps the menu from firing twice.
-
 export const REFRESH_EVENT = 'relaydb:refresh';
 export const FILTER_TABLES_EVENT = 'relaydb:filter-tables';
 export const COMMIT_EVENT = 'relaydb:commit';
@@ -99,7 +94,6 @@ export function handleShortcut(e: KeyboardEvent) {
   if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
   const key = e.key.toLowerCase();
 
-  // ⌘1–9 picks a tab, like a browser; ⌘9 is always the last one.
   if (!e.shiftKey && /^[1-9]$/.test(key)) {
     const ws = app.active;
     if (!ws || overlayOpen()) return;
@@ -111,7 +105,6 @@ export function handleShortcut(e: KeyboardEvent) {
 
   const command = SHORTCUTS[(e.shiftKey ? 'shift+' : '') + key];
   if (!command) return;
-  // ⌘F inside the SQL editor belongs to the editor.
   if ((command === 'filter' || command === 'filter-tables') && (e.target as HTMLElement | null)?.closest?.('.cm-editor')) return;
   e.preventDefault();
   if (overlayOpen() && command !== 'settings') return;

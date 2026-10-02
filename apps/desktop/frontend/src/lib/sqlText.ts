@@ -1,8 +1,5 @@
 import type { CellValue, Driver } from './wire';
 
-// SQL text built in the UI for the user to copy. Never executed by Relay DB;
-// statements that run go through the backend with bound parameters.
-
 export function quoteIdent(driver: Driver, name: string): string {
   if (driver === 'mysql') return '`' + name.replaceAll('`', '``') + '`';
   return '"' + name.replaceAll('"', '""') + '"';

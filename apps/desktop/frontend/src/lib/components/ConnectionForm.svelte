@@ -19,11 +19,9 @@
   }: {
     initial: Connection | null;
     onclose: () => void;
-    /** secrets is undefined when the profile saves them (use the stored ones). */
     onconnect: (c: Connection, secrets?: Partial<ConnectSecrets>) => void;
   } = $props();
 
-  // The form edits a snapshot; later changes to `initial` don't reset it.
   const start = untrack(() => initial);
   const editing = start !== null && start.id !== '';
   const blank = emptyConnection();
@@ -73,7 +71,6 @@
     { value: 'agent', label: 'SSH agent' },
   ];
   const hasStored = editing && start?.savePassword;
-  // A saved secret is only reused while what it unlocks stays the same (see store.secretFields).
   const sameText = (a = '', b = '') => a.trim().toLowerCase() === b.trim().toLowerCase();
   const dbMoved = $derived(
     !!start && (form.driver !== start.driver || !sameText(form.host, start.host) || Number(form.port) !== start.port || form.user !== start.user),
@@ -92,14 +89,12 @@
   function setDriver(d: Driver) {
     if (d === form.driver) return;
     const fresh = emptyConnection(d);
-    // Keep what isn't driver-specific.
     form = { ...fresh, id: form.id, name: form.name, env: form.env, password: form.password, savePassword: form.savePassword, readOnly: form.readOnly, ssh: form.ssh };
     if (d === 'sqlite') tab = 'general';
     test = null;
   }
 
   function onEnvChange() {
-    // New Production connections start read-only; an explicit choice wins.
     if (!readOnlyTouched && form.env === 'prod') form.readOnly = true;
   }
 

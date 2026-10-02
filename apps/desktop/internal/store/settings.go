@@ -10,8 +10,6 @@ import (
 	"github.com/relay-client/relay-db/apps/desktop/internal/model"
 )
 
-// Settings persists app preferences to settings.json. Unknown or out-of-range
-// values fall back to defaults, so an old or hand-edited file never breaks startup.
 type Settings struct {
 	mu   sync.Mutex
 	path string

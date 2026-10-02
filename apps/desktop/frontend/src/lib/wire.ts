@@ -43,7 +43,6 @@ export interface HostKeyChange {
   fingerprint: string;
 }
 
-/** An open session, or the SSH host key change that stopped it opening. */
 export interface ConnectResult {
   session?: SessionInfo;
   hostKeyChange?: HostKeyChange;
@@ -82,9 +81,7 @@ export interface Column {
   nullable: boolean;
   default: string | null;
   primaryKey: boolean;
-  /** allowed values of an enum column, in declaration order */
   enum: string[] | null;
-  /** shown as a hex preview, so the grid can't write it back */
   binary: boolean;
 }
 
@@ -102,7 +99,6 @@ export interface ResultSet {
   rowsAffected: number;
   hasRows: boolean;
   truncated: boolean;
-  /** came from a wrapped read; more chunks via RunMore from offset + rows.length */
   pageable: boolean;
   hasMore: boolean;
   offset: number;
@@ -128,7 +124,6 @@ export interface TableQuery {
   orderBy: string;
   orderDesc: boolean;
   filters: Filter[];
-  /** keyset paging in primary-key order */
   after?: CellValue[];
   before?: CellValue[];
   last?: boolean;
@@ -143,12 +138,9 @@ export interface RowCount {
 export interface TablePage {
   result: ResultSet;
   hasMore: boolean;
-  /** primary key columns the rows were sorted by when no sort was given */
   defaultOrder: string[] | null;
   hasPrev: boolean;
-  /** pages are found by primary key, not OFFSET */
   keyset: boolean;
-  /** first row index when the server worked it out, else -1 */
   offset: number;
 }
 
@@ -157,7 +149,6 @@ export interface QueryRun {
   error?: string;
   errorIndex: number;
   cancelled: boolean;
-  /** the editor's connection closed with a transaction open, so it was rolled back */
   rolledBack: boolean;
 }
 
@@ -166,7 +157,6 @@ export type ChangeKind = 'update' | 'insert' | 'delete';
 export interface RowChange {
   kind: ChangeKind;
   key: Record<string, CellValue>;
-  /** new values; {$expr} asks the server for now() or the column default */
   values: Record<string, CellValue | { $expr: 'now' | 'default' }>;
 }
 
@@ -180,21 +170,16 @@ export interface ApplyResult {
   applied: number;
   error?: string;
   failedIndex: number;
-  /** changes before the failed one stayed applied (MySQL commits each ALTER TABLE) */
   partial: boolean;
-  /** the user stopped it (structure changes) */
   cancelled: boolean;
 }
 
-/** One edit from the Structure tab; type and default are SQL as typed. */
 export interface ColumnChange {
   kind: ChangeKind;
-  /** the existing column (update, delete) */
   column: string;
   name?: string;
   type?: string;
   nullable?: boolean;
-  /** default changed; a null default drops it */
   defaultSet: boolean;
   default: string | null;
 }
@@ -221,7 +206,6 @@ export interface Settings {
   pageSize: number;
   editorFontSize: number;
   confirmProdWrites: boolean;
-  /** install a new release as soon as it is found */
   autoUpdate: boolean;
 }
 
@@ -233,16 +217,13 @@ export const DEFAULT_SETTINGS: Settings = {
   autoUpdate: false,
 };
 
-/** A release newer than the running app. */
 export interface UpdateInfo {
   version: string;
-  /** Markdown from the changelog */
   notes: string;
   publishedAt: string;
   releaseUrl: string;
 }
 
-/** available is absent when this is the newest release, or when the check failed (error). */
 export interface UpdateCheck {
   available?: UpdateInfo;
   error?: string;

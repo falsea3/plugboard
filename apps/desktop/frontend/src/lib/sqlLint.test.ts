@@ -16,7 +16,7 @@ describe('lintSql', () => {
       'select a, /* note */ b from t',
       "select E'it\\'s', 'C:\\' from t",
       'select * from t for update skip locked',
-      'sel', // still typing the first word
+      'sel',
       'select id, order_id, group_id, limit_amount from order_items',
       'select a$b$ from t',
       'get diagnostics condition 1 @msg = message_text',
@@ -26,7 +26,7 @@ describe('lintSql', () => {
     }
     expect(messages("select 'it\\'s' from t # comment (", true)).toEqual([]);
     expect(messages('select id, from_unixtime(created_at) from t', true)).toEqual([]);
-    expect(messages('select (1--1)', true)).toEqual([]); // MySQL: 1 - -1
+    expect(messages('select (1--1)', true)).toEqual([]);
     expect(messages('select (1 -- )', true)).toEqual(['This ( is never closed']);
   });
 
@@ -48,7 +48,7 @@ describe('lintSql', () => {
     expect(messages('selec * from t')).toEqual(['Unknown statement “selec” — did you mean SELECT?']);
     expect(marked('-- note\n  upadte t set a = 1')).toEqual(['upadte']);
     expect(messages('vaccum analyze')).toEqual(['Unknown statement “vaccum” — did you mean VACUUM?']);
-    expect(messages('frobnicate the database')).toEqual([]); // not a near miss: maybe something we don't know
+    expect(messages('frobnicate the database')).toEqual([]);
   });
 
   it('keeps checking the rest when a quote is left open', () => {

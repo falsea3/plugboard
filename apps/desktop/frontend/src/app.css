@@ -2,7 +2,6 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* A desktop app, not a page: nothing bounces past its edges on a trackpad. */
 * { overscroll-behavior: none; }
 
 html, body, #app {

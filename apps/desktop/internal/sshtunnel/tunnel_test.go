@@ -24,8 +24,6 @@ import (
 	"golang.org/x/crypto/ssh/knownhosts"
 )
 
-// testServer is a minimal in-process SSH server that accepts password "pw"
-// or the given client key, and serves direct-tcpip (local port forwarding).
 type testServer struct {
 	addr string
 	port int
@@ -34,7 +32,6 @@ type testServer struct {
 	conns *[]net.Conn
 }
 
-// dropAll cuts every SSH connection, like a server restart or a network blip.
 func (s testServer) dropAll() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -116,7 +113,6 @@ func serveConn(raw net.Conn, cfg *ssh.ServerConfig) {
 	}
 }
 
-// echoServer stands in for the database behind the bastion.
 func echoServer(t *testing.T) int {
 	t.Helper()
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -173,7 +169,7 @@ func TestPasswordTunnelForwardsTraffic(t *testing.T) {
 	}
 	defer tun.Close()
 	roundTrip(t, tun, "hello")
-	roundTrip(t, tun, "second connection") // each DB pool connection gets its own channel
+	roundTrip(t, tun, "second connection")
 
 	data, _ := os.ReadFile(known)
 	if !strings.Contains(string(data), host.PublicKey().Type()) {
@@ -231,7 +227,6 @@ func TestChangedHostKeyIsRefused(t *testing.T) {
 	}
 	tun.Close()
 
-	// Same address, different host key: a fresh server on a port we pin to the old entry.
 	second, _ := newSigner(t)
 	srv2 := startServer(t, second, nil)
 	data, _ := os.ReadFile(known)
@@ -246,7 +241,6 @@ func TestChangedHostKeyIsRefused(t *testing.T) {
 		t.Fatalf("err = %v, want host key change refusal", err)
 	}
 
-	// The user trusts the key they were shown: exactly that key is recorded.
 	if err := changed.Trust(known); err != nil {
 		t.Fatal(err)
 	}
@@ -256,7 +250,6 @@ func TestChangedHostKeyIsRefused(t *testing.T) {
 	}
 	tun.Close()
 
-	// A third key on the same address is refused again rather than trusted on first use.
 	third, _ := newSigner(t)
 	srv3 := startServer(t, third, nil)
 	data, _ = os.ReadFile(known)
@@ -267,8 +260,6 @@ func TestChangedHostKeyIsRefused(t *testing.T) {
 	}
 }
 
-// A server with several host keys, of which known_hosts has only one type:
-// the handshake must ask for that type rather than report a changed key.
 func TestKnownKeyOfAnotherTypeIsUsed(t *testing.T) {
 	known := filepath.Join(t.TempDir(), "known_hosts")
 	target := echoServer(t)
@@ -318,7 +309,6 @@ func TestTunnelReconnectsAfterDrop(t *testing.T) {
 	roundTrip(t, tun, "before")
 
 	srv.dropAll()
-	// Wait until the tunnel has noticed, as it would on a real drop.
 	deadline := time.Now().Add(3 * time.Second)
 	for {
 		mu.Lock()
@@ -330,7 +320,7 @@ func TestTunnelReconnectsAfterDrop(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	roundTrip(t, tun, "after") // a new local connection redials SSH
+	roundTrip(t, tun, "after")
 	if tun.LocalPort() != port {
 		t.Fatal("local port changed; drivers would lose the tunnel")
 	}

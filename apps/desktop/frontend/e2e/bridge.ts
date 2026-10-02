@@ -1,10 +1,5 @@
 import type { Page } from '@playwright/test';
 
-/**
- * Stands in for the Go backend (window.go.api.App) with a made-up "shop"
- * database, so the UI runs in a plain browser: no Wails, no servers, and
- * screenshots that never show anyone's real data.
- */
 export async function installBridge(page: Page) {
   await page.addInitScript(() => {
     const connections = [

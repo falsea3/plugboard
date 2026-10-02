@@ -1,6 +1,4 @@
 <script lang="ts" module>
-  // Phosphor Icons (MIT, https://phosphoricons.com). Imported one by one so only
-  // the glyphs we use end up in the bundle.
   import plus from '@phosphor-icons/core/regular/plus.svg?raw';
   import download from '@phosphor-icons/core/regular/download-simple.svg?raw';
   import arrowCircleUp from '@phosphor-icons/core/regular/arrow-circle-up.svg?raw';

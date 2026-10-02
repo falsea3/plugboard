@@ -1,5 +1,3 @@
-// Package sshtunnel forwards a local loopback port to a host reachable from an
-// SSH server, so database drivers can dial 127.0.0.1 and land behind a bastion.
 package sshtunnel
 
 import (
@@ -34,35 +32,26 @@ type Tunnel struct {
 	onState func(State, error)
 
 	mu     sync.Mutex
-	client *ssh.Client // nil after the SSH connection dropped
+	client *ssh.Client
 	closed bool
 
 	wg   sync.WaitGroup
 	stop chan struct{}
 }
 
-// State is reported through Options.OnState when the SSH link changes.
 type State string
 
 const (
-	StateLost        State = "lost"        // the SSH connection dropped
-	StateReconnected State = "reconnected" // a new SSH connection is up
-	StateFailed      State = "failed"      // reconnecting failed; retried on next use
+	StateLost        State = "lost"
+	StateReconnected State = "reconnected"
+	StateFailed      State = "failed"
 )
 
-// Options carries what the tunnel needs besides the connection profile.
 type Options struct {
-	// KnownHostsFile is Relay DB's own known_hosts. Hosts seen for the first
-	// time are recorded there; ~/.ssh/known_hosts is consulted read-only.
 	KnownHostsFile string
-	// OnState, if set, hears about drops and reconnects. Called without locks held.
-	OnState func(State, error)
+	OnState        func(State, error)
 }
 
-// Open connects to the SSH server in cfg and starts forwarding a fresh
-// 127.0.0.1 port to targetHost:targetPort as seen from that server. If the
-// SSH connection later drops, the next connection to the local port dials a
-// new one; the port itself never changes, so drivers keep working.
 func Open(ctx context.Context, cfg model.SSHTunnel, targetHost string, targetPort int, opts Options) (*Tunnel, error) {
 	if strings.TrimSpace(cfg.Host) == "" {
 		return nil, errors.New("SSH: no server to connect to — set the SSH host or the database host")
@@ -81,7 +70,7 @@ func Open(ctx context.Context, cfg model.SSHTunnel, targetHost string, targetPor
 		if err != nil {
 			return nil, err
 		}
-		defer closeAuth() // the agent is only needed during the handshake
+		defer closeAuth()
 		d := net.Dialer{Timeout: dialTimeout}
 		raw, err := d.DialContext(ctx, "tcp", addr)
 		if err != nil {
@@ -136,7 +125,6 @@ func Open(ctx context.Context, cfg model.SSHTunnel, targetHost string, targetPor
 	return t, nil
 }
 
-// LocalPort is the loopback port drivers should connect to.
 func (t *Tunnel) LocalPort() int {
 	return t.ln.Addr().(*net.TCPAddr).Port
 }
@@ -162,8 +150,6 @@ func (t *Tunnel) Close() error {
 	return err
 }
 
-// setClient installs c and watches it: when it dies, the tunnel forgets it
-// so the next use dials a new one.
 func (t *Tunnel) setClient(c *ssh.Client) {
 	t.mu.Lock()
 	t.client = c
@@ -183,10 +169,7 @@ func (t *Tunnel) setClient(c *ssh.Client) {
 	}()
 }
 
-// reconnectSoon redials in the background after a drop, so the tunnel is
-// usually back before the next query instead of making that query wait.
 func (t *Tunnel) reconnectSoon() {
-	// Add under the lock Close takes, so Close's Wait never races this Add.
 	t.mu.Lock()
 	if t.closed {
 		t.mu.Unlock()
@@ -212,11 +195,9 @@ func (t *Tunnel) reconnectSoon() {
 				return
 			}
 		}
-		// Still down: the next query will try again on its own.
 	}()
 }
 
-// current returns a live SSH client, dialing a new one if the last dropped.
 func (t *Tunnel) current() (*ssh.Client, error) {
 	t.mu.Lock()
 	if t.closed {
@@ -242,7 +223,7 @@ func (t *Tunnel) current() (*ssh.Client, error) {
 		c.Close()
 		return nil, net.ErrClosed
 	}
-	if t.client != nil { // another connection won the race; use it
+	if t.client != nil {
 		existing := t.client
 		t.mu.Unlock()
 		c.Close()
@@ -254,8 +235,6 @@ func (t *Tunnel) current() (*ssh.Client, error) {
 	return c, nil
 }
 
-// forget drops c if it's still the current client: a forward through it or
-// a keepalive on it failed.
 func (t *Tunnel) forget(c *ssh.Client) {
 	t.mu.Lock()
 	wasCurrent := t.client == c && !t.closed
@@ -295,11 +274,10 @@ func (t *Tunnel) forward(local net.Conn) {
 		}
 		var open *ssh.OpenChannelError
 		if errors.As(err, &open) {
-			// The SSH server is fine but refused this target; retrying won't help.
 			local.Close()
 			return
 		}
-		t.forget(c) // the link looked alive but isn't: reconnect and try once more
+		t.forget(c)
 	}
 	if remote == nil {
 		local.Close()
@@ -318,8 +296,6 @@ func (t *Tunnel) forward(local net.Conn) {
 	<-done
 }
 
-// keepAlive notices a dead link on an idle tunnel (NAT and firewall timeouts,
-// sleep/wake) instead of waiting for the next query to hit it.
 func (t *Tunnel) keepAlive() {
 	defer t.wg.Done()
 	tick := time.NewTicker(keepAliveInterval)
@@ -342,15 +318,12 @@ func (t *Tunnel) keepAlive() {
 	}
 }
 
-// authMethods returns how to log in as cfg says, and a func that releases
-// what they hold (the connection to the SSH agent).
 func authMethods(cfg model.SSHTunnel) ([]ssh.AuthMethod, func(), error) {
 	switch cfg.Auth {
 	case model.SSHAuthPassword, "":
 		pw := cfg.Password
 		return []ssh.AuthMethod{
 			ssh.Password(pw),
-			// Many servers only offer keyboard-interactive for passwords.
 			ssh.KeyboardInteractive(func(_, _ string, questions []string, _ []bool) ([]string, error) {
 				answers := make([]string, len(questions))
 				for i := range answers {
@@ -399,18 +372,10 @@ func authMethods(cfg model.SSHTunnel) ([]ssh.AuthMethod, func(), error) {
 	return nil, nil, fmt.Errorf("SSH: unsupported authentication %q", cfg.Auth)
 }
 
-// knownHosts checks server keys against Relay DB's own known_hosts and the
-// user's ~/.ssh/known_hosts. A server seen for the first time is trusted and
-// recorded in the app's file; a key that differs from a known one is refused
-// — the classic sign of a man-in-the-middle or a rebuilt server. With no app
-// file, unknown servers are accepted without being recorded.
 type knownHosts struct {
 	appFile string
 }
 
-// files lists the known_hosts files that exist, the app's first: per key type
-// the first entry found wins, so a key the user trusted in Relay DB takes
-// precedence over a stale one in ~/.ssh/known_hosts.
 func (k knownHosts) files() []string {
 	files := appendIfExists(nil, k.appFile)
 	if home, err := os.UserHomeDir(); err == nil {
@@ -443,10 +408,6 @@ func (k knownHosts) check(hostname string, remote net.Addr, key ssh.PublicKey) e
 	return writeKnownHost(k.appFile, hostname, key, false)
 }
 
-// algorithms lists the host key types on file for hostname, so the handshake
-// asks the server for one of those. Left to itself the client may negotiate a
-// type that isn't on file, and the known key would look changed. nil when the
-// host is new: any type will do.
 func (k knownHosts) algorithms(hostname string, remote net.Addr) []string {
 	for _, file := range k.files() {
 		check, err := knownhosts.New(file)
@@ -460,7 +421,6 @@ func (k knownHosts) algorithms(hostname string, remote net.Addr) []string {
 		var algos []string
 		for _, known := range keyErr.Want {
 			if t := known.Key.Type(); t == ssh.KeyAlgoRSA {
-				// One RSA key signs with any of these.
 				algos = append(algos, ssh.KeyAlgoRSASHA512, ssh.KeyAlgoRSASHA256, ssh.KeyAlgoRSA)
 			} else {
 				algos = append(algos, t)
@@ -471,8 +431,6 @@ func (k knownHosts) algorithms(hostname string, remote net.Addr) []string {
 	return nil
 }
 
-// probeKey is a key no server has: checking it against known_hosts lists the
-// keys on file for a host.
 var probeKey = func() ssh.PublicKey {
 	k, err := ssh.NewPublicKey(ed25519.PublicKey(make([]byte, ed25519.PublicKeySize)))
 	if err != nil {
@@ -481,8 +439,6 @@ var probeKey = func() ssh.PublicKey {
 	return k
 }()
 
-// HostKeyChangedError means the server presented a different key than the
-// one remembered for it: a rebuilt server, or someone in the middle.
 type HostKeyChangedError struct {
 	Host        string
 	Fingerprint string
@@ -493,16 +449,10 @@ func (e *HostKeyChangedError) Error() string {
 	return fmt.Sprintf("host key for %s has changed (now %s). If the server was rebuilt, trust the new key; otherwise someone may be intercepting the connection", e.Host, e.Fingerprint)
 }
 
-// Trust records the new key in Relay DB's own known_hosts, in place of what
-// was remembered for the host there, so the next connection expects exactly
-// this key. ~/.ssh/known_hosts is the user's and is never edited; the app's
-// file is read first, so the trusted key wins over a stale one there.
 func (e *HostKeyChangedError) Trust(appKnownHosts string) error {
 	return writeKnownHost(appKnownHosts, e.Host, e.Key, true)
 }
 
-// writeKnownHost appends key for host to file, first dropping the lines
-// already there for host when replace is set.
 func writeKnownHost(file, host string, key ssh.PublicKey, replace bool) error {
 	if err := os.MkdirAll(filepath.Dir(file), 0o700); err != nil {
 		return err

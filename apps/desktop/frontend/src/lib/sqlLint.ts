@@ -1,12 +1,5 @@
 import { dollarTagAt, lineCommentAt, statementRanges } from './sqlStatements';
 
-// Checks SQL as it's typed, for mistakes that are wrong in every dialect:
-// unclosed quotes, brackets and comments, a typo in the statement's first
-// word, a comma with nothing after it. A real parser would catch more, but the
-// ones tried flag valid PostgreSQL and MySQL too often (RETURNING on DELETE,
-// FILTER, VALUES…), and a red line under correct SQL is worse than none. The
-// server still reports everything else when the statement runs.
-
 export interface SqlProblem {
   from: number;
   to: number;
@@ -23,11 +16,9 @@ const STATEMENT_WORDS = new Set([
   'LISTEN', 'NOTIFY', 'UNLISTEN', 'LOAD', 'PRAGMA', 'ATTACH', 'DETACH', 'HANDLER', 'OPTIMIZE',
   'REPAIR', 'CHECK', 'CHECKSUM', 'FLUSH', 'KILL', 'PURGE', 'INSTALL', 'UNINSTALL', 'XA', 'HELP',
   'GET', 'SIGNAL', 'RESIGNAL', 'CLONE', 'CHANGE', 'STOP', 'RESTART', 'SHUTDOWN', 'BINLOG', 'CACHE',
-  // what a procedure body is made of, when a script splits one at its semicolons
   'IF', 'ELSE', 'ELSEIF', 'CASE', 'LOOP', 'WHILE', 'REPEAT', 'LEAVE', 'ITERATE', 'OPEN', 'RETURN',
 ]);
 
-/** Words that can't follow a comma: "select a, from t" is missing a column. */
 const AFTER_COMMA = new Set(['FROM', 'WHERE', 'GROUP', 'ORDER', 'HAVING', 'LIMIT']);
 
 export function lintSql(script: string, mysql: boolean): SqlProblem[] {
@@ -41,8 +32,8 @@ export function lintSql(script: string, mysql: boolean): SqlProblem[] {
 function lintStatement(s: string, mysql: boolean): SqlProblem[] {
   const problems: SqlProblem[] = [];
   const open: number[] = [];
-  const code: number[] = []; // offsets of characters outside quotes and comments
-  let cut = false; // an unclosed quote or comment runs to the end; brackets after it can't be told
+  const code: number[] = [];
+  let cut = false;
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
@@ -92,7 +83,6 @@ function lintStatement(s: string, mysql: boolean): SqlProblem[] {
   return problems;
 }
 
-/** Index of the quote closing the one at s[i], or -1. */
 function closingQuote(s: string, i: number, mysql: boolean): number {
   const q = s[i];
   const backslash = q !== '`' && (mysql || (q === "'" && /[Ee]/.test(s[i - 1] ?? '') && !/\w/.test(s[i - 2] ?? '')));
@@ -111,7 +101,6 @@ function trailingCommas(s: string, code: number[], mysql: boolean): SqlProblem[]
   for (const i of code) {
     if (s[i] !== ',') continue;
     const j = skipSpaceAndComments(s, i + 1, mysql);
-    // The whole word: order_id after a comma is a column, not ORDER.
     const word = /^[A-Za-z_][A-Za-z0-9_$]*/.exec(s.slice(j))?.[0].toUpperCase() ?? '';
     if (s[j] === ')' || AFTER_COMMA.has(word)) {
       problems.push({ from: i, to: i + 1, message: 'Nothing follows this comma' });
@@ -137,7 +126,7 @@ function skipSpaceAndComments(s: string, j: number, mysql: boolean): number {
 
 function firstWordTypo(s: string): SqlProblem | null {
   const m = /^(\s|\(|--[^\n]*\n?|#[^\n]*\n?|\/\*[\s\S]*?\*\/)*([A-Za-z_]+)(\s+\S)?/.exec(s);
-  if (!m || !m[3]) return null; // nothing after the word yet: still typing it
+  if (!m || !m[3]) return null;
   const word = m[2].toUpperCase();
   if (STATEMENT_WORDS.has(word)) return null;
   let best = '';
@@ -147,12 +136,11 @@ function firstWordTypo(s: string): SqlProblem | null {
     if (d < bestDistance) [best, bestDistance] = [k, d];
   }
   const limit = word.length >= 6 ? 2 : 1;
-  if (bestDistance > limit) return null; // not a near miss; maybe a statement we don't know
+  if (bestDistance > limit) return null;
   const from = m[0].length - m[2].length - (m[3]?.length ?? 0);
   return { from, to: from + m[2].length, message: `Unknown statement “${m[2]}” — did you mean ${best}?` };
 }
 
-/** Edits (insert, delete, change, swap two neighbours) to turn a into b. */
 function distance(a: string, b: string): number {
   const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array(b.length).fill(0)]);
   for (let j = 1; j <= b.length; j++) d[0][j] = j;

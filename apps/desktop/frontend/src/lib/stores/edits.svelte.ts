@@ -1,10 +1,8 @@
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type { CellValue, ResultColumn, RowChange } from '../wire';
 
-/** A cell of an inserted row that hasn't been given a value: the column default applies. */
 export const DEFAULT = Symbol('DEFAULT');
 
-/** A value the server computes: its clock (now) or the column default on an existing row. */
 export type Expr = { expr: 'now' | 'default' };
 export const NOW: Expr = { expr: 'now' };
 export const SET_DEFAULT: Expr = { expr: 'default' };
@@ -16,16 +14,10 @@ export type EditValue = CellValue | typeof DEFAULT | Expr;
 export type CellState = '' | 'edited' | 'default' | 'expr';
 export type RowState = '' | 'new' | 'deleted';
 
-/**
- * Pending edits for one page of a table. Row indexes below baseRows.length
- * are rows read from the server; the rest are rows added in the grid.
- */
 export class TableEdits {
-  /** row → column → new value, for rows read from the server */
   updates = new SvelteMap<number, SvelteMap<number, CellValue | Expr>>();
   deleted = new SvelteSet<number>();
   inserted = $state<EditValue[][]>([]);
-  /** display row of the change the server rejected, if any */
   failedRow = $state<number | null>(null);
 
   constructor(
@@ -55,7 +47,7 @@ export class TableEdits {
     const base = this.baseRows();
     if (r >= base.length) {
       const row = this.inserted[r - base.length];
-      return row && c < row.length ? row[c] : DEFAULT; // not ??: null is a value (NULL), not "unset"
+      return row && c < row.length ? row[c] : DEFAULT;
     }
     const row = this.updates.get(r);
     return row?.has(c) ? (row.get(c) as CellValue | Expr) : base[r][c];
@@ -73,7 +65,6 @@ export class TableEdits {
     return this.deleted.has(r) ? 'deleted' : '';
   }
 
-  /** The row whose change the server rejected on the last commit. */
   isFailed(r: number): boolean {
     return this.failedRow === r;
   }
@@ -86,11 +77,10 @@ export class TableEdits {
       if (row) row[c] = v;
       return;
     }
-    if (v === DEFAULT) return; // existing rows have no "default" to fall back to
+    if (v === DEFAULT) return;
     const original = base[r][c];
     let row = this.updates.get(r);
     if (sameValue(original, v)) {
-      // Editing a cell back to what the server has is no change at all.
       row?.delete(c);
       if (row && row.size === 0) this.updates.delete(r);
       return;
@@ -108,7 +98,6 @@ export class TableEdits {
     return this.rowCount - 1;
   }
 
-  /** Marks server rows for deletion and drops added rows outright. */
   deleteRows(rows: number[]) {
     this.failedRow = null;
     const base = this.baseRows().length;
@@ -129,11 +118,6 @@ export class TableEdits {
     this.failedRow = null;
   }
 
-  /**
-   * Builds the change set in the order the server applies it: deletes first
-   * (they may free unique values), then updates, then inserts. rows[i] is the
-   * display row of changes[i], to point at a failure.
-   */
   changes(columns: ResultColumn[], keyColumns: string[]): { changes: RowChange[]; rows: number[] } {
     const base = this.baseRows();
     const keyIdx = keyColumns.map(k => columns.findIndex(c => c.name === k));
@@ -172,7 +156,6 @@ function sameValue(a: CellValue, b: EditValue): boolean {
 
 type WireValue = RowChange['values'][string];
 
-/** Expressions travel as {"$expr": …}; the backend accepts only known ones. */
 function toWire(v: CellValue | Expr): WireValue {
   return isExpr(v) ? { $expr: v.expr } : v;
 }

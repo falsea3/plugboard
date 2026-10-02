@@ -28,10 +28,10 @@ PG_SERVERS    := 55432 55433
 MYSQL_SERVERS := 53306 53307 53310 53311 53312
 test-servers:
 	@cd apps/desktop && for port in $(PG_SERVERS); do \
-		echo "== PostgreSQL on :$$port"; RELAYDB_TEST_PG=127.0.0.1:$$port go test -count=1 ./internal/db/ || exit 1; done
+		echo "== PostgreSQL on :$$port"; RELAYDB_TEST_PG=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
 	@cd apps/desktop && for port in $(MYSQL_SERVERS); do \
-		echo "== MySQL/MariaDB on :$$port"; RELAYDB_TEST_MYSQL=127.0.0.1:$$port go test -count=1 ./internal/db/ || exit 1; done
-	@cd apps/desktop && echo "== SSH tunnels" && RELAYDB_TEST_PG=127.0.0.1:55432 RELAYDB_TEST_MYSQL=127.0.0.1:53306 RELAYDB_TEST_SSH=127.0.0.1:52222 go test -count=1 ./internal/db/
+		echo "== MySQL/MariaDB on :$$port"; RELAYDB_TEST_MYSQL=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
+	@cd apps/desktop && echo "== SSH tunnels" && RELAYDB_TEST_PG=127.0.0.1:55432 RELAYDB_TEST_MYSQL=127.0.0.1:53306 RELAYDB_TEST_SSH=127.0.0.1:52222 go test -count=1 ./internal/db/...
 
 db-down:
 	docker compose -f dev/docker-compose.yml --profile all down -v

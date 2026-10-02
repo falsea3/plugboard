@@ -52,7 +52,6 @@
     if (isProd && app.settings.confirmProdWrites && !ws.readOnly) {
       let writes: string[];
       try {
-        // The same check a read-only session refuses scripts by.
         writes = await api.writeStatements(session.sessionId, script);
       } catch (err) {
         app.notify(err);
@@ -267,7 +266,6 @@
     background: var(--surface);
   }
   .toolbar { border-bottom: 1px solid var(--border); }
-  /* 37px: lines up with the sidebar's bottom bar next to it */
   .footer { height: 37px; border-top: 1px solid var(--border); }
   .small { font-size: 12px; margin-left: 6px; white-space: nowrap; }
   .ro-chip {

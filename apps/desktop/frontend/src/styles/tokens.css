@@ -1,4 +1,3 @@
-/* Relay palette, shared with the Relay API client. */
 :root,
 :root[data-theme="dark"] {
   --bg:            #111113;
@@ -23,20 +22,17 @@
   --danger:  #f27f76;
   --info:    #72abff;
 
-  /* connection environment tags */
   --env-local:   #85858e;
   --env-dev:     #52c291;
   --env-staging: #e6b556;
   --env-prod:    #f27f76;
 
-  /* data grid */
   --grid-row-alt:  rgba(255, 255, 255, 0.018);
   --grid-selected: rgba(88, 101, 242, 0.24);
   --cell-null:     #6a6a73;
   --cell-number:   #80d5bf;
   --cell-bool:     #b996f7;
 
-  /* sql syntax */
   --syn-kw:      #72abff;
   --syn-str:     #e4c493;
   --syn-num:     #80d5bf;

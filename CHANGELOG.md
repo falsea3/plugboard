@@ -26,6 +26,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **NULL in a new row's cell turned into DEFAULT**, so the insert took the column's default instead of NULL.
 - **MySQL's `--` without a space was taken for a comment.** MySQL starts a comment only at `-- ` (there `1--1` is `1 - -1`), so `select 1--1; select 2` ran as one statement, and the read-only check didn't look past the dashes.
 - **A `$` inside a PostgreSQL name** (`a$b$`) was read as the start of a `$$` body, swallowing the rest of the script into one statement.
+- **A SQLite `FLOAT` column lost digits**: it was shown at single precision like a PostgreSQL `real`, though SQLite stores it as a double.
 - **A PostgreSQL `real` showed digits it doesn't have** — `5.2` came out as `5.199999809265137`, because the driver widens it to a double. It shows as stored now.
 
 ## [0.1.0] - 2026-10-01

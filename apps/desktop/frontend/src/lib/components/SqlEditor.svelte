@@ -5,8 +5,6 @@
   const setRan = StateEffect.define<{ from: number; to: number }>();
   const ranMark = Decoration.mark({ class: 'cm-ran' });
 
-  // The statement that last ran stays tinted until the text changes. It isn't
-  // selected: a selection would turn Run into "Run selection".
   const ranStatement = StateField.define<DecorationSet>({
     create: () => Decoration.none,
     update(marks, tr) {
@@ -18,7 +16,6 @@
     provide: f => EditorView.decorations.from(f),
   });
 
-  /** Tints the statement that just ran. */
   export function showRan(view: EditorView, from: number, to: number) {
     view.dispatch({ effects: setRan.of({ from, to }) });
   }
@@ -52,7 +49,6 @@
     defaultSchema?: string;
     onrun: (all: boolean) => void;
     editor?: EditorView;
-    /** text is selected, so Run runs just that */
     hasSelection?: boolean;
   } = $props();
 
@@ -102,7 +98,6 @@
       state: EditorState.create({
         doc: value,
         extensions: [
-          // Hints and completions float above the toolbar instead of being cut off by it.
           tooltips({ parent: document.body }),
           lineNumbers(),
           highlightActiveLineGutter(),

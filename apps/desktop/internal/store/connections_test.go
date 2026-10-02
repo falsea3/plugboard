@@ -155,8 +155,6 @@ func TestEmptySSHHostIsAllowed(t *testing.T) {
 	}
 }
 
-// A profile edited to point at another server must not take the old
-// password there: not on Test, and not on the next Connect after Save.
 func TestSecretsStayWithTheirServer(t *testing.T) {
 	s, _ := newTestStore(t)
 	c, _ := s.Save(model.Connection{

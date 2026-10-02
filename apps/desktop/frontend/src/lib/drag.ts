@@ -1,8 +1,3 @@
-/**
- * Follows a pointer drag started by e, calling move with how far the pointer
- * has gone since, until the button is released. The cursor is set on the whole
- * page meanwhile, so it doesn't flicker as the pointer leaves the handle.
- */
 export function startDrag(e: PointerEvent, cursor: string, move: (dx: number, dy: number) => void) {
   e.preventDefault();
   const x0 = e.clientX;

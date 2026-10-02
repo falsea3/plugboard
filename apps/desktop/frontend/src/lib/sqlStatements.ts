@@ -40,7 +40,6 @@ export function statementRanges(script: string, mysql: boolean): StatementRange[
   return out;
 }
 
-/** The statement containing pos, or the closest one before it. */
 export function statementAt(script: string, pos: number, mysql: boolean): StatementRange | null {
   const ranges = statementRanges(script, mysql);
   let best: StatementRange | null = null;
@@ -51,17 +50,12 @@ export function statementAt(script: string, pos: number, mysql: boolean): Statem
   return best;
 }
 
-/**
- * A comment to the end of the line starts at s[i]: --, and # in MySQL. MySQL
- * needs a space or control character after the dashes: there 1--1 is 1 - -1.
- */
 export function lineCommentAt(s: string, i: number, mysql: boolean): boolean {
   if (s[i] === '#') return mysql;
   if (s[i] !== '-' || s[i + 1] !== '-') return false;
   return !mysql || i + 2 >= s.length || s.charCodeAt(i + 2) <= 32;
 }
 
-/** The $$ or $tag$ opening a PostgreSQL dollar-quoted string at s[i], or null. A $ inside a name (a$b$) opens nothing. */
 export function dollarTagAt(s: string, i: number): string | null {
   if (i > 0 && /[\p{L}\p{N}_]/u.test(s[i - 1])) return null;
   return /^\$(?:[A-Za-z_][A-Za-z0-9_]*)?\$/.exec(s.slice(i, i + 64))?.[0] ?? null;
@@ -82,7 +76,6 @@ function skipQuoted(s: string, i: number, q: string, backslash: boolean): number
   return s.length - 1;
 }
 
-/** Every MySQL string treats backslash as an escape, PostgreSQL only E'…'; backtick identifiers never do. */
 function escapesBackslash(s: string, i: number, mysql: boolean): boolean {
   if (s[i] === '`') return false;
   if (mysql) return true;

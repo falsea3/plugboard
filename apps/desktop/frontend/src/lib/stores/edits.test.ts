@@ -27,7 +27,7 @@ describe('TableEdits', () => {
     e.set(0, 1, 'a@x');
     expect(e.cellState(0, 1)).toBe('');
     expect(e.dirty).toBe(false);
-    e.set(1, 0, '2'); // same value typed as text
+    e.set(1, 0, '2');
     expect(e.dirty).toBe(false);
   });
 
@@ -55,7 +55,7 @@ describe('TableEdits', () => {
   it('orders changes deletes → updates → inserts and maps them back to rows', () => {
     const e = setup();
     const added = e.addRow();
-    e.set(added, 1, 'b@x'); // reuses the email of the row deleted below
+    e.set(added, 1, 'b@x');
     e.set(2, 2, 'note');
     e.set(1, 2, 'edited but deleted');
     e.deleteRows([1]);

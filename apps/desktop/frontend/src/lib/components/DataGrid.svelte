@@ -1,22 +1,17 @@
 <script lang="ts" module>
   import type { CellValue, ResultColumn } from '../wire';
 
-  /** What a parent provides to make the grid editable. Row indexes are display rows. */
   export interface GridEditing {
     canEdit(r: number, c: number): boolean;
-    /** 'default': an added row's untouched cell; 'expr': set to a server expression like now() */
     cellState(r: number, c: number): '' | 'edited' | 'default' | 'expr';
     rowState(r: number): '' | 'new' | 'deleted';
     isFailed(r: number): boolean;
     commit(r: number, c: number, value: CellValue): void;
-    /** allowed values (enum columns): the cell editor becomes a list */
     options?(r: number, c: number): string[] | null;
   }
 
-  /** A context-menu entry the parent adds; 'sep' draws a divider. */
   export type MenuItem = { id: string; label: string; kbd?: string; danger?: boolean; disabled?: boolean } | 'sep';
 
-  /** Where a menu action applies: r is -1 for the column header menu. */
   export type MenuAt = { r: number; c: number; rows: number[] };
 </script>
 
@@ -46,17 +41,14 @@
   }: {
     columns: ResultColumn[];
     rows: CellValue[][];
-    /** row number of the first row; null when unknown (row numbers show as ·) */
     rowOffset?: number | null;
     sort?: Sort;
     keyColumns?: string[];
     onsort?: (column: string) => void;
     onselect?: (value: CellValue | undefined, column: ResultColumn | undefined) => void;
     editing?: GridEditing | null;
-    /** extra items for a cell (c ≥ 0) or row-number (c = -1) menu */
     cellMenu?: (r: number, c: number) => MenuItem[];
     headerMenu?: (c: number) => MenuItem[];
-    /** a parent menu item was picked, or a key bound to one was pressed; true = handled */
     onmenu?: (id: string, at: MenuAt) => boolean | void;
   } = $props();
 
@@ -71,12 +63,10 @@
   let viewportW = $state(800);
   let widths = $state<number[]>([]);
   let selection = $state<Selection>(null);
-  /** first row of a shift-click row range; the range ends at selection.row */
   let rowAnchor = $state<number | null>(null);
   let cellEditor = $state<{ r: number; c: number; text: string; wasNull: boolean; touched: boolean; options: string[] | null } | null>(null);
   let menu = $state<{ x: number; y: number; r: number; c: number } | null>(null);
 
-  // Re-measure columns whenever a new result shape arrives.
   let shapeKey = '';
   $effect.pre(() => {
     const key = columns.map(c => c.name + ':' + c.type).join('|');
@@ -93,8 +83,6 @@
   const end = $derived(Math.min(rows.length, Math.ceil((scrollTop + viewportH) / ROW_H) + OVERSCAN));
   const visible = $derived(rows.slice(start, end));
 
-  // Only the columns in view (and a screen's width either side) are drawn, so
-  // a wide table costs no more to scroll than a narrow one.
   const colStarts = $derived.by(() => {
     const out = [0];
     for (const w of widths) out.push(out[out.length - 1] + w);
@@ -137,7 +125,6 @@
     scroller?.focus({ preventScroll: true });
   }
 
-  /** Rows the row actions apply to: a shift-selected range, else the selected row. */
   function selectedRows(): number[] {
     if (!selection) return [];
     const a = rowAnchor ?? selection.row;
@@ -145,7 +132,6 @@
     return Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
   }
 
-  /** Rows a row action at r covers: the shift-selected range if r is in it, else just r. */
   export function selectedRowsFor(r: number): number[] {
     const rs = selectedRows();
     return rs.includes(r) ? rs : [r];
@@ -176,13 +162,10 @@
     const e = cellEditor;
     if (!e) return;
     cellEditor = null;
-    // Opening and leaving a NULL cell without typing must not turn it into ''.
     if (e.touched) editing?.commit(e.r, e.c, e.text);
     scroller?.focus({ preventScroll: true });
   }
 
-  // Leaving the cell commits; the whole window losing focus (⌘Tab to another
-  // app) does not, so the edit is still open on return.
   function onEditorBlur() {
     const blurred = cellEditor;
     setTimeout(() => {
@@ -209,7 +192,6 @@
     }
   }
 
-  /** Tab out of an editor: commit it and select the next (or previous) cell in the row. */
   function commitAndMove(delta: number) {
     const ed = cellEditor;
     if (!ed) return;
@@ -224,7 +206,6 @@
     node.setSelectionRange(node.value.length, node.value.length);
   }
 
-  /** Enum cells: picking a value commits it straight away. */
   function onOptionPick(value: string) {
     if (!cellEditor) return;
     cellEditor.text = value;
@@ -232,7 +213,6 @@
     commitEdit();
   }
 
-  /** The enum list closed: picking the value it already had still ends the edit, Tab moves on like in a text editor. */
   function onOptionClose(picked: boolean, key?: KeyboardEvent) {
     if (key?.key === 'Tab') {
       key.preventDefault();
@@ -244,7 +224,6 @@
     }
   }
 
-  /** Sends a parent action for the current selection. */
   function sendMenu(id: string): boolean {
     if (!selection || !onmenu) return false;
     const at = { r: selection.row, c: selection.col, rows: selectedRows() };
@@ -277,7 +256,6 @@
     scroller?.focus({ preventScroll: true });
   }
 
-  /** Built-in items plus the parent's, with stray dividers removed. */
   function menuItems(m: { r: number; c: number }): MenuItem[] {
     let items: MenuItem[];
     if (m.r === -1) {
@@ -314,11 +292,9 @@
     menu = { x: e.clientX, y: e.clientY, r, c };
   }
 
-  /** Scrolls row r (and column c, if ≥ 0) into view, selects it, and optionally starts editing. */
   export function showRow(r: number, c: number, startEditing: boolean) {
     selection = { row: r, col: c };
     rowAnchor = null;
-    // Rows may have just been added; wait for the DOM to grow first.
     tick().then(() => {
       scrollIntoView(r, c);
       if (startEditing && c >= 0) startEdit(r, c);
@@ -326,8 +302,6 @@
     });
   }
 
-  // Clicks inside the open editor (placing the caret, selecting a word) must
-  // not reach the cell, or the cell would take focus and close the editor.
   const inEditor = (e: Event) => (e.target as HTMLElement).closest('.cell-editor') !== null;
 
   const isMultiline = (text: string) => text.includes('\n') || text.length > 60;
@@ -361,7 +335,7 @@
           return;
         }
         if (e.key === ' ' && !mod && sendMenu('toggle')) {
-          e.preventDefault(); // a boolean flipped; anything else starts editing below
+          e.preventDefault();
           return;
         }
         if (e.key === 'Enter' && !mod) {
@@ -460,7 +434,6 @@
     </div>
 
     <div class="body" style:transform="translateY({start * ROW_H}px)">
-      <!-- Unkeyed: scrolling reuses the row elements and only swaps their contents. -->
       {#each visible as row, vi}
         {@const r = start + vi}
         {@const rowSelected = selection?.row === r}

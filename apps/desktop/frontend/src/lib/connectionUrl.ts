@@ -12,14 +12,8 @@ const SCHEMES: Record<string, Driver> = {
   file: 'sqlite',
 };
 
-/**
- * Parses a connection URL as printed by Heroku, Render, Supabase, Railway,
- * Prisma/.env files and JDBC, e.g. postgres://user:pass@host:5432/db?sslmode=require.
- * Throws with a readable message when the URL can't be used.
- */
 export function parseConnectionUrl(input: string): Connection {
   let raw = input.trim().replace(/^jdbc:/i, '');
-  // Strip a surrounding KEY="…" from a pasted .env line.
   raw = raw.replace(/^[A-Z0-9_]+\s*=\s*/i, '').replace(/^["']|["']$/g, '');
   const m = /^([a-z0-9+]+):/i.exec(raw);
   if (!m) throw new Error('Expected a URL like postgres://user:password@host:5432/database');
@@ -30,7 +24,6 @@ export function parseConnectionUrl(input: string): Connection {
   const c = emptyConnection(driver);
 
   if (driver === 'sqlite') {
-    // sqlite:///abs/path, sqlite:/abs/path, sqlite://./rel, file:/abs/path
     const path = decodeURIComponent(raw.slice(m[0].length).replace(/^\/\/(?=\/)/, '').replace(/^\/\/\.?/, '').split('?')[0]);
     if (!path) throw new Error('The SQLite URL has no file path');
     c.file = path;
@@ -54,7 +47,6 @@ export function parseConnectionUrl(input: string): Connection {
   if (driver === 'postgres') {
     const mode = q.get('sslmode');
     if (mode) c.sslMode = mode === 'verify-ca' ? 'verify-full' : mode === 'allow' ? '' : mode;
-    // Supabase/Neon-style URLs carry ssl=true instead of sslmode.
     else if (q.get('ssl') === 'true' || q.get('ssl') === '1') c.sslMode = 'require';
   } else {
     const mode = (q.get('ssl-mode') ?? q.get('sslmode') ?? '').toLowerCase();

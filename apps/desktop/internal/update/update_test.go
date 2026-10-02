@@ -21,7 +21,6 @@ import (
 	"aead.dev/minisign"
 )
 
-// release serves a fake GitHub release: latest.json plus files, all signed.
 type release struct {
 	t       *testing.T
 	key     minisign.PrivateKey
@@ -43,7 +42,6 @@ func newRelease(t *testing.T, version string) *release {
 	return &release{t: t, key: priv, files: map[string][]byte{}, version: version, notes: "- Faster"}
 }
 
-// add publishes a file signed for comment (normally the version and its name).
 func (r *release) add(name string, data []byte, comment string) {
 	r.files[name] = data
 	reader := minisign.NewReader(strings.NewReader(string(data)))
@@ -63,7 +61,6 @@ func (r *release) manifest(key, name string) []byte {
 	return data
 }
 
-// serve answers github.com release URLs from a local TLS server.
 func (r *release) serve(manifest []byte) {
 	t := r.t
 	srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -148,7 +145,6 @@ func TestInstallRefuses(t *testing.T) {
 			r.files["f"] = []byte("tampered")
 			return m
 		}, "0.1.0", ErrChecksum},
-		// A genuinely signed older release passed off as the new version.
 		{"signature for another version", func(r *release) []byte {
 			r.add("f", []byte("x"), signedComment("0.1.5", "f"))
 			return r.manifest("test", "f")
@@ -243,8 +239,6 @@ func TestBundleOf(t *testing.T) {
 	}
 }
 
-// A Mac asks latest.json for the build of its architecture: the release must
-// write both keys and sign both files, or one kind of Mac stops updating.
 func TestReleaseCoversEveryMac(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "..")
 	manifest, err := os.ReadFile(filepath.Join(root, "scripts", "make-latest-json.py"))

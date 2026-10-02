@@ -14,8 +14,6 @@ import (
 	"github.com/relay-client/relay-db/apps/desktop/internal/model"
 )
 
-// Connections persists connection profiles to connections.json in the app
-// data directory. Passwords are routed to Secrets and stripped before writing.
 type Connections struct {
 	mu      sync.Mutex
 	path    string
@@ -32,7 +30,6 @@ func (s *Connections) List() ([]model.Connection, error) {
 	return s.load()
 }
 
-// Get returns the profile with its saved secrets filled in, ready to dial.
 func (s *Connections) Get(id string) (model.Connection, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -49,10 +46,6 @@ func (s *Connections) Get(id string) (model.Connection, error) {
 	return c, nil
 }
 
-// FillSecrets fills the blank secrets of c from the saved profile with the
-// same id, to test an edited profile before saving it. A secret is only
-// filled while what it unlocks is unchanged: a profile edited to point at
-// another server never sends that server the old password.
 func (s *Connections) FillSecrets(c *model.Connection) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -71,9 +64,6 @@ func (s *Connections) FillSecrets(c *model.Connection) error {
 	return nil
 }
 
-// Save inserts or updates c. An empty secret on an existing profile keeps the
-// stored one, so the form never has to round-trip secrets — unless the
-// profile now points elsewhere, in which case the stored one is dropped.
 func (s *Connections) Save(c model.Connection) (model.Connection, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -196,7 +186,6 @@ func (s *Connections) write(all []model.Connection) error {
 	return writeFileAtomic(s.path, data, 0o600)
 }
 
-// Validate reports the first problem that would stop c from connecting.
 func Validate(c model.Connection) error {
 	if strings.TrimSpace(c.Name) == "" {
 		return errors.New("name is required")
@@ -214,7 +203,6 @@ func Validate(c model.Connection) error {
 		return fmt.Errorf("unsupported driver %q", c.Driver)
 	}
 	if c.SSH.Enabled && c.Driver != model.SQLite {
-		// An empty SSH host means "SSH into the database host" (see db.TunnelEndpoints).
 		if strings.TrimSpace(c.SSH.User) == "" {
 			return errors.New("SSH user is required")
 		}
@@ -231,9 +219,6 @@ func Validate(c model.Connection) error {
 	return nil
 }
 
-// secretFields are the Connection fields that live in the secret store
-// instead of connections.json. All follow the SavePassword switch. target is
-// what the secret unlocks; a saved secret is only reused while it stays the same.
 var secretFields = []struct {
 	name   string
 	slot   string

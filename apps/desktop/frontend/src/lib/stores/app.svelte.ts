@@ -11,7 +11,6 @@ export type TableTab = {
   schema: string;
   table: string;
   tableKind: TableInfo['kind'];
-  /** has edits that aren't committed yet (kept current by TableView) */
   dirty?: boolean;
 };
 
@@ -28,7 +27,6 @@ export type Toast = { id: number; kind: 'error' | 'info'; text: string };
 
 export type SettingsSection = 'general' | 'editor' | 'about';
 
-/** A newer release, from found to installed. */
 export type Update =
   | { status: 'available' | 'installing' | 'installed'; info: UpdateInfo }
   | { status: 'failed'; info: UpdateInfo; error: string };
@@ -36,12 +34,10 @@ export type Update =
 let seq = 0;
 const nextId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(++seq).toString(36)}`;
 
-/** One open connection: its catalog and its tabs. Several can be open at once. */
 export class Workspace {
   readonly id = nextId('ws');
   session = $state<SessionInfo>() as SessionInfo;
   switchingReadOnly = $state(false);
-  /** 'ok', or the SSH tunnel is down and being re-established */
   tunnel = $state<'ok' | 'lost' | 'failed'>('ok');
   schema = $state('');
   tables = $state<TableInfo[]>([]);
@@ -68,7 +64,6 @@ export class Workspace {
     return this.session.connection.readOnly;
   }
 
-  /** Reopens the session with read-only on or off; open tabs stay as they are. */
   async setReadOnly(on: boolean) {
     if (this.switchingReadOnly || on === this.readOnly) return;
     this.switchingReadOnly = true;
@@ -141,38 +136,31 @@ class AppState {
 
   workspaces = $state<Workspace[]>([]);
   activeId = $state('');
-  /** The connections list is showing even though workspaces are open. */
   showHome = $state(false);
   active = $derived(this.showHome ? null : (this.workspaces.find(w => w.id === this.activeId) ?? null));
 
   settings = $state<Settings>({ ...DEFAULT_SETTINGS });
 
-  // Overlays live here so the menu and shortcuts can open them from anywhere.
-  editing = $state<Connection | null | undefined>(undefined); // undefined = form closed, null = new
+  editing = $state<Connection | null | undefined>(undefined);
   passwordFor = $state<Connection | null>(null);
   switcherOpen = $state(false);
   settingsOpen = $state<SettingsSection | null>(null);
 
-  /** An SSH server presented a different key; waits for the user to trust it or not. */
   hostKeyChange = $state<(HostKeyChange & { connection: Connection; secrets?: Partial<ConnectSecrets> }) | null>(null);
 
-  /** Closing something with uncommitted edits waits here for confirmation. */
   pendingClose = $state<{ ws: Workspace; tabId?: string; tables: string[] } | null>(null);
 
   toasts = $state<Toast[]>([]);
 
   update = $state<Update | null>(null);
-  /** The update banner was closed; the update stays in Settings ▸ About. */
   updateDismissed = $state(false);
 
   async init() {
     onTunnelState(ev => this.onTunnel(ev));
     await Promise.all([this.loadConnections(), this.loadSettings()]);
-    // Let the window settle before going to the network.
     setTimeout(() => this.checkForUpdate(), 3000);
   }
 
-  /** Looks for a newer release; installs it straight away if the setting says so. Returns the check's error, if any. */
   async checkForUpdate(): Promise<string> {
     if (this.update?.status === 'installing' || this.update?.status === 'installed') return '';
     try {
@@ -199,7 +187,6 @@ class AppState {
     }
   }
 
-  /** Restarts into the installed update, after the same check closing a connection does. */
   restartToUpdate() {
     const dirty = this.workspaces.flatMap(ws => ws.dirtyTabs.map(t => t.table));
     if (dirty.length > 0) {
@@ -228,7 +215,6 @@ class AppState {
     try {
       this.settings = await api.getSettings();
     } catch {
-      // keep defaults
     }
     this.applySettings();
   }
@@ -279,11 +265,6 @@ class AppState {
     return this.workspaces.find(w => w.connection.id === connectionId);
   }
 
-  /**
-   * Opens a saved connection, or switches to it when it is already open.
-   * secrets is undefined until the user has been asked for the ones the
-   * profile doesn't save.
-   */
   async open(c: Connection, secrets?: Partial<ConnectSecrets>): Promise<boolean> {
     const existing = this.workspaceFor(c.id);
     if (existing) {
@@ -405,7 +386,6 @@ class AppState {
   }
 }
 
-/** Profiles that don't save secrets ask for them on every connect. */
 export function needsSecrets(c: Connection): boolean {
   return c.driver !== 'sqlite' && !c.savePassword;
 }

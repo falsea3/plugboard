@@ -6,7 +6,7 @@ const shotsDir = process.env.RELAYDB_SCREENSHOTS ?? '';
 
 async function shot(page: Page, name: string) {
   if (!shotsDir) return;
-  await page.mouse.move(0, 0); // no hover highlights in the picture
+  await page.mouse.move(0, 0);
   await page.screenshot({ path: join(shotsDir, `${name}.png`), animations: 'disabled' });
 }
 
@@ -124,7 +124,6 @@ test('leaves an enum cell when its value is picked again', async ({ page }) => {
   await expect(grid).toBeFocused();
   await expect(page.getByText('1 change')).toHaveCount(0);
 
-  // Tab leaves the list for the next cell, as it does from a text editor.
   await grid.getByText('team').first().dblclick();
   await page.keyboard.press('Tab');
   await expect(grid.locator('.select-button')).toHaveCount(0);

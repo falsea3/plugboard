@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/relay-client/relay-db/apps/desktop/internal/db"
+	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines"
 	"github.com/relay-client/relay-db/apps/desktop/internal/model"
 	"github.com/relay-client/relay-db/apps/desktop/internal/sshtunnel"
 	"github.com/relay-client/relay-db/apps/desktop/internal/store"
@@ -27,19 +28,15 @@ const (
 	catalogTimeout = 30 * time.Second
 )
 
-// App is the single object bound to the frontend. Every exported method shows
-// up as window.go.api.App.<Method> in the webview.
 type App struct {
 	ctx         context.Context
 	connections *store.Connections
 	settings    *store.Settings
 	menu        *appMenu
 
-	mu       sync.Mutex
-	sessions map[string]*db.Session
-	queries  map[string]context.CancelFunc
-	// changedKeys holds SSH host keys that differed from the remembered
-	// ones, by host, until the user trusts them or not.
+	mu          sync.Mutex
+	sessions    map[string]db.Session
+	queries     map[string]context.CancelFunc
 	changedKeys map[string]*sshtunnel.HostKeyChangedError
 }
 
@@ -48,13 +45,12 @@ func NewApp() *App {
 	return &App{
 		connections: store.NewConnections(dir, store.NewSecrets(dir)),
 		settings:    store.NewSettings(dir),
-		sessions:    map[string]*db.Session{},
+		sessions:    map[string]db.Session{},
 		queries:     map[string]context.CancelFunc{},
 		changedKeys: map[string]*sshtunnel.HostKeyChangedError{},
 	}
 }
 
-// DataDir is where Relay DB keeps its profile: ~/Library/Application Support/Relay DB on macOS.
 func DataDir() string {
 	if dir := os.Getenv("RELAYDB_DATA_DIR"); dir != "" {
 		return dir
@@ -66,7 +62,6 @@ func DataDir() string {
 	return filepath.Join(base, "Relay DB")
 }
 
-// knownHostsFile is Relay DB's own record of SSH host keys.
 func knownHostsFile() string {
 	return filepath.Join(DataDir(), "known_hosts")
 }
@@ -87,8 +82,6 @@ func (a *App) Shutdown(context.Context) {
 	}
 }
 
-// ShowWindow brings the window forward when the app is launched a second
-// time. A plain function rather than a method, so Wails doesn't bind it.
 func ShowWindow(a *App) {
 	if a.ctx == nil {
 		return
@@ -108,15 +101,11 @@ func (a *App) AppInfo() model.AppInfo {
 	}
 }
 
-// devBuild reports a build that isn't a release — make dev, or make build
-// between tags, which git describe versions like 0.2.0-3-gabc1234. Those
-// never update themselves.
 func devBuild() bool {
 	v := strings.TrimSpace(appVersion)
 	return v == "" || v == "dev" || strings.Contains(v, "-")
 }
 
-// CheckForUpdate looks for a newer release on GitHub.
 func (a *App) CheckForUpdate() model.UpdateCheck {
 	if devBuild() {
 		return model.UpdateCheck{Error: "This is a development build (" + appVersion + "); it doesn't update itself."}
@@ -128,8 +117,6 @@ func (a *App) CheckForUpdate() model.UpdateCheck {
 	return model.UpdateCheck{Available: info}
 }
 
-// InstallUpdate downloads, verifies and installs the newest release, and
-// returns its version. It takes effect when the app restarts (RestartApp).
 func (a *App) InstallUpdate() (string, error) {
 	if devBuild() {
 		return "", errors.New("development builds don't update themselves")
@@ -141,12 +128,10 @@ func (a *App) InstallUpdate() (string, error) {
 	return version, nil
 }
 
-// RestartApp quits and opens the app again, to switch to an installed update.
 func (a *App) RestartApp() error {
 	return update.Restart(func() { runtime.Quit(a.context()) })
 }
 
-// updateError says what went wrong in words the user can act on.
 func updateError(action string, err error) string {
 	var dnsErr *net.DNSError
 	switch {
@@ -173,7 +158,6 @@ func (a *App) SaveSettings(v model.Settings) (model.Settings, error) {
 	return saved, nil
 }
 
-// OpenDataFolder shows the profile directory (connections, settings) in Finder.
 func (a *App) OpenDataFolder() error {
 	dir := DataDir()
 	if err := os.MkdirAll(dir, 0o700); err != nil {
@@ -203,15 +187,12 @@ func (a *App) DeleteConnection(id string) error {
 	return a.connections.Delete(id)
 }
 
-// TestConnection dials c without saving it. When the form is editing a saved
-// profile and a secret field was left blank, the stored secret is used, as
-// long as the profile still points at the same server.
 func (a *App) TestConnection(c model.Connection) model.TestResult {
 	if err := a.connections.FillSecrets(&c); err != nil {
 		return model.TestResult{Error: err.Error()}
 	}
 	if c.Name == "" {
-		c.Name = "test" // the form names unnamed profiles on save
+		c.Name = "test"
 	}
 	if err := store.Validate(c); err != nil {
 		return model.TestResult{Error: err.Error()}
@@ -219,21 +200,18 @@ func (a *App) TestConnection(c model.Connection) model.TestResult {
 	ctx, cancel := context.WithTimeout(a.context(), connectTimeout)
 	defer cancel()
 	start := time.Now()
-	s, err := db.Open(ctx, "test", c, a.openOptions(""))
+	s, err := engines.Open(ctx, "test", c, a.openOptions(""))
 	if err != nil {
 		return model.TestResult{Error: err.Error()}
 	}
 	defer s.Close()
 	return model.TestResult{
 		Ok:            true,
-		ServerVersion: s.Version,
+		ServerVersion: s.ServerVersion(),
 		LatencyMs:     float64(time.Since(start).Microseconds()) / 1000,
 	}
 }
 
-// Connect opens a saved profile. Non-empty secrets override stored ones. An
-// SSH server whose key changed doesn't fail the call: the result carries the
-// change for the user to look at, and TrustHostKey to accept it.
 func (a *App) Connect(id string, secrets model.ConnectSecrets) (model.ConnectResult, error) {
 	c, err := a.connections.Get(id)
 	if err != nil {
@@ -256,8 +234,6 @@ func (a *App) Connect(id string, secrets model.ConnectSecrets) (model.ConnectRes
 	return model.ConnectResult{Session: &info}, nil
 }
 
-// TrustHostKey records the new key of an SSH host whose key changed, provided
-// it is still the key with the fingerprint the user was shown.
 func (a *App) TrustHostKey(host, fingerprint string) error {
 	a.mu.Lock()
 	changed := a.changedKeys[host]
@@ -272,7 +248,7 @@ func (a *App) TrustHostKey(host, fingerprint string) error {
 func (a *App) open(id string, c model.Connection) (model.SessionInfo, error) {
 	ctx, cancel := context.WithTimeout(a.context(), connectTimeout)
 	defer cancel()
-	s, err := db.Open(ctx, id, c, a.openOptions(id))
+	s, err := engines.Open(ctx, id, c, a.openOptions(id))
 	if err != nil {
 		return model.SessionInfo{}, err
 	}
@@ -282,24 +258,21 @@ func (a *App) open(id string, c model.Connection) (model.SessionInfo, error) {
 		return model.SessionInfo{}, err
 	}
 	a.mu.Lock()
-	a.sessions[s.ID] = s
+	a.sessions[id] = s
 	a.mu.Unlock()
 	return info, nil
 }
 
-// SetReadOnly reopens an open session with read-only switched on or off. The
-// server-side read-only mode is fixed per connection, so the pool (and the
-// SQL editor's pinned connection, with any open transaction) is replaced.
 func (a *App) SetReadOnly(sessionID string, readOnly bool) (model.SessionInfo, error) {
 	old, err := a.session(sessionID)
 	if err != nil {
 		return model.SessionInfo{}, err
 	}
-	c := old.Conn
+	c := old.Connection()
 	c.ReadOnly = readOnly
 	ctx, cancel := context.WithTimeout(a.context(), connectTimeout)
 	defer cancel()
-	s, err := db.Open(ctx, sessionID, c, a.openOptions(sessionID))
+	s, err := engines.Open(ctx, sessionID, c, a.openOptions(sessionID))
 	if err != nil {
 		return model.SessionInfo{}, err
 	}
@@ -315,7 +288,6 @@ func (a *App) SetReadOnly(sessionID string, readOnly bool) (model.SessionInfo, e
 	}
 	a.mu.Unlock()
 	if current != old {
-		// Disconnected or switched again while this one was opening.
 		s.Close()
 		return model.SessionInfo{}, errConnectionClosed
 	}
@@ -364,8 +336,6 @@ func (a *App) FetchTablePage(sessionID string, q model.TableQuery) (model.TableP
 	return s.TablePage(ctx, q)
 }
 
-// CountRows returns a table's row count: the engine's estimate (instant), or
-// the exact count when exact is set. queryID lets the UI cancel a slow count.
 func (a *App) CountRows(sessionID, queryID string, q model.TableQuery, exact bool) (model.RowCount, error) {
 	s, err := a.session(sessionID)
 	if err != nil {
@@ -376,9 +346,8 @@ func (a *App) CountRows(sessionID, queryID string, q model.TableQuery, exact boo
 	return s.CountRows(ctx, q, exact)
 }
 
-// ApplyChanges commits edits from a table tab in one transaction.
 func (a *App) ApplyChanges(sessionID string, cs model.ChangeSet) model.ApplyResult {
-	s, err := a.session(sessionID)
+	s, err := a.rowEditor(sessionID)
 	if err != nil {
 		return model.ApplyResult{Error: err.Error(), FailedIndex: -1}
 	}
@@ -397,11 +366,8 @@ func (a *App) ApplyChanges(sessionID string, cs model.ChangeSet) model.ApplyResu
 	return model.ApplyResult{Applied: n, FailedIndex: -1}
 }
 
-// ApplyStructure alters a table's columns from the Structure tab. A type
-// change can rewrite a big table, so there is no timeout: CancelQuery(queryID)
-// stops it.
 func (a *App) ApplyStructure(sessionID, queryID string, sc model.StructureChange) model.ApplyResult {
-	s, err := a.session(sessionID)
+	s, err := a.structureEditor(sessionID)
 	if err != nil {
 		return model.ApplyResult{Error: err.Error(), FailedIndex: -1}
 	}
@@ -420,9 +386,8 @@ func (a *App) ApplyStructure(sessionID, queryID string, sc model.StructureChange
 	return model.ApplyResult{Applied: n, FailedIndex: -1}
 }
 
-// PreviewStructure returns the SQL ApplyStructure would run, for display only.
 func (a *App) PreviewStructure(sessionID string, sc model.StructureChange) ([]string, error) {
-	s, err := a.session(sessionID)
+	s, err := a.structureEditor(sessionID)
 	if err != nil {
 		return nil, err
 	}
@@ -431,9 +396,8 @@ func (a *App) PreviewStructure(sessionID string, sc model.StructureChange) ([]st
 	return s.PreviewStructure(ctx, sc)
 }
 
-// PreviewChanges returns the SQL ApplyChanges would run, for display only.
 func (a *App) PreviewChanges(sessionID string, cs model.ChangeSet) ([]string, error) {
-	s, err := a.session(sessionID)
+	s, err := a.rowEditor(sessionID)
 	if err != nil {
 		return nil, err
 	}
@@ -442,8 +406,6 @@ func (a *App) PreviewChanges(sessionID string, cs model.ChangeSet) ([]string, er
 	return s.PreviewChanges(ctx, cs)
 }
 
-// RunQuery executes a script. Results of the statements that succeeded are
-// returned even when a later one fails, so the UI can show both.
 func (a *App) RunQuery(sessionID, queryID, script string) model.QueryRun {
 	s, err := a.session(sessionID)
 	if err != nil {
@@ -469,9 +431,6 @@ func (a *App) RunQuery(sessionID, queryID, script string) model.QueryRun {
 	return run
 }
 
-// WriteStatements lists the statements of script that may change data, for
-// the editor to confirm before running them on Production. It is the same
-// check a read-only session refuses scripts by.
 func (a *App) WriteStatements(sessionID, script string) ([]string, error) {
 	s, err := a.session(sessionID)
 	if err != nil {
@@ -480,7 +439,6 @@ func (a *App) WriteStatements(sessionID, script string) ([]string, error) {
 	return s.WriteStatements(script), nil
 }
 
-// RunMore fetches the next chunk of an editor result (see db.EditorChunk).
 func (a *App) RunMore(sessionID, queryID, statement string, offset int) (model.ResultSet, error) {
 	s, err := a.session(sessionID)
 	if err != nil {
@@ -491,8 +449,6 @@ func (a *App) RunMore(sessionID, queryID, statement string, offset int) (model.R
 	return s.RunMore(ctx, statement, offset)
 }
 
-// cancellable returns a context CancelQuery(queryID) can cancel, with a
-// timeout unless it is 0, and the func to call when the query is over.
 func (a *App) cancellable(queryID string, timeout time.Duration) (context.Context, func()) {
 	var ctx context.Context
 	var cancel context.CancelFunc
@@ -544,8 +500,6 @@ func (a *App) ChooseSSHKeyFile() (string, error) {
 	})
 }
 
-// TunnelEvent is emitted with a model.TunnelState when an open session's
-// SSH tunnel drops or comes back.
 const TunnelEvent = "session:tunnel"
 
 func (a *App) openOptions(sessionID string) db.OpenOptions {
@@ -570,7 +524,7 @@ func override(dst *string, typed string) {
 	}
 }
 
-func (a *App) session(id string) (*db.Session, error) {
+func (a *App) session(id string) (db.Session, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	s, ok := a.sessions[id]
@@ -578,6 +532,28 @@ func (a *App) session(id string) (*db.Session, error) {
 		return nil, errConnectionClosed
 	}
 	return s, nil
+}
+
+func (a *App) rowEditor(id string) (db.RowEditor, error) {
+	s, err := a.session(id)
+	if err != nil {
+		return nil, err
+	}
+	if ed, ok := s.(db.RowEditor); ok {
+		return ed, nil
+	}
+	return nil, db.ErrNotSupported
+}
+
+func (a *App) structureEditor(id string) (db.StructureEditor, error) {
+	s, err := a.session(id)
+	if err != nil {
+		return nil, err
+	}
+	if ed, ok := s.(db.StructureEditor); ok {
+		return ed, nil
+	}
+	return nil, db.ErrNotSupported
 }
 
 var errConnectionClosed = errors.New("connection is closed")

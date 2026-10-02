@@ -40,8 +40,6 @@
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.22));
   }
   .mark :global(title) { display: none; }
-  /* Brand colours, brightened: PostgreSQL blue, the orange of MySQL's dolphin
-     (its blue would be indistinguishable from Postgres), SQLite's light blue. */
   .postgres { background: linear-gradient(155deg, #6a9bff 0%, #3466e0 55%, #2a52bd 100%); }
   .mysql { background: linear-gradient(155deg, #ffb547 0%, #f28a12 55%, #d96d00 100%); }
   .sqlite { background: linear-gradient(155deg, #5fd3f5 0%, #149bd8 55%, #0b78b8 100%); }

@@ -8,7 +8,6 @@ function bridge(): GoApp {
   return app;
 }
 
-// Wails rejects with the Go error string; normalise it into an Error.
 async function call<T>(fn: (app: GoApp) => Promise<T>): Promise<T> {
   try {
     return await fn(bridge());
@@ -54,12 +53,10 @@ export const api = {
   restartApp: () => call(a => a.RestartApp()),
 };
 
-/** Subscribe to native menu commands; a no-op outside the desktop app. */
 export function onMenuCommand(cb: (command: string) => void): () => void {
   return window.runtime?.EventsOn?.('menu:command', data => cb(String(data))) ?? (() => {});
 }
 
-/** SSH tunnel drops and reconnects for open sessions. */
 export function onTunnelState(cb: (s: TunnelState) => void): () => void {
   return window.runtime?.EventsOn?.('session:tunnel', data => cb(data as TunnelState)) ?? (() => {});
 }

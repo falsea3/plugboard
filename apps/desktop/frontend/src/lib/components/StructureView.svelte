@@ -25,20 +25,14 @@
     table: string;
     driver: Driver;
     columns: Column[];
-    /** the connection is tagged Production */
     prod: boolean;
-    /** why the structure can't be changed, or '' */
     readOnlyReason: string;
-    /** uncommitted row edits in the Data tab, which a structure change would drop */
     rowChanges: number;
-    /** lets Stop cancel a running change */
     queryId: string;
-    /** the table changed: reload its columns and rows */
     onchanged: () => void;
     ondirty: (dirty: boolean) => void;
   } = $props();
 
-  // Columns of the grid.
   const COL_NAME = 0;
   const COL_NULLABLE = 2;
   const COL_DEFAULT = 3;
@@ -63,7 +57,6 @@
     ondirty(edits.dirty);
   });
 
-  // SQLite's ALTER TABLE can only rename, add and drop columns.
   const sqlite = $derived(driver === 'sqlite');
 
   const displayRows = $derived.by(() => {
@@ -144,14 +137,12 @@
     return false;
   }
 
-  /** Adds a column row and starts typing its name. */
   export function addColumn() {
     if (readOnlyReason) {
       app.notify(`Can’t add columns: ${readOnlyReason.toLowerCase()}.`, 'info');
       return;
     }
     const r = edits.addRow();
-    // A new column is nullable, has no default and isn't part of the key.
     edits.set(r, COL_NULLABLE, true);
     edits.set(r, COL_DEFAULT, null);
     edits.set(r, COL_KEY, false);
@@ -206,7 +197,6 @@
     try {
       const res = await api.applyStructure(sessionId, queryId, { schema, table, changes });
       if (res.cancelled && driver === 'mysql') {
-        // The server doesn't stop an ALTER TABLE when its client goes away.
         app.notify('Stopped. MySQL may still finish the statement that was running — refresh in a while to see the table as it ends up.', 'info');
         edits.discard();
         onchanged();
@@ -218,7 +208,6 @@
       }
       if (res.error) {
         if (res.partial) {
-          // MySQL kept what ran before the failure: show the table as it is now.
           app.notify(`${formatCount(res.applied, 'change')} applied before one failed — the table now shows what was saved. ${res.error}`);
           edits.discard();
           onchanged();

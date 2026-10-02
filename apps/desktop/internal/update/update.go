@@ -1,11 +1,3 @@
-// Package update finds a newer Relay DB on GitHub releases and installs it.
-//
-// Every release carries latest.json: the version, its notes and, per
-// platform, the URL, SHA-256 and minisign signature of the file to install.
-// An update is installed only when the file matches its checksum and carries
-// a signature from the key built into the app, whose trusted comment names
-// this very version and file — so an old signed release can't be passed off
-// as a new one.
 package update
 
 import (
@@ -30,12 +22,8 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-// Set at build time with -ldflags -X (see the release workflow).
 var (
-	// Repo is the GitHub repository releases come from.
-	Repo = "relay-client/relay-db"
-	// PublicKey is the minisign public key updates must be signed with.
-	// A build without one never installs an update.
+	Repo      = "relay-client/relay-db"
 	PublicKey = ""
 )
 
@@ -58,7 +46,6 @@ var (
 	ErrBundleNotRelayDB = errors.New("the downloaded app is not Relay DB")
 )
 
-// Manifest is latest.json.
 type Manifest struct {
 	Version     string              `json:"version"`
 	Notes       string              `json:"notes"`
@@ -66,14 +53,12 @@ type Manifest struct {
 	Platforms   map[string]Platform `json:"platforms"`
 }
 
-// Platform is the file one platform installs.
 type Platform struct {
 	URL       string `json:"url"`
 	SHA256    string `json:"sha256"`
 	Signature string `json:"signature"`
 }
 
-// Check returns the newest release when it is newer than current, or nil.
 func Check(ctx context.Context, current string) (*model.UpdateInfo, error) {
 	t, err := currentTarget()
 	if err != nil {
@@ -93,7 +78,7 @@ func check(ctx context.Context, current string, target target) (*model.UpdateInf
 		return nil, nil
 	}
 	if _, ok := m.Platforms[target.key]; !ok {
-		return nil, nil // released for other systems only; this one waits for the next
+		return nil, nil
 	}
 	version := strings.TrimPrefix(m.Version, "v")
 	return &model.UpdateInfo{
@@ -104,9 +89,6 @@ func check(ctx context.Context, current string, target target) (*model.UpdateInf
 	}, nil
 }
 
-// Install downloads the newest release, verifies it and puts it in place of
-// the running app; Restart then switches to it. It returns the installed
-// version. The release is looked up afresh rather than taken from the UI.
 func Install(ctx context.Context, current string) (string, error) {
 	t, err := currentTarget()
 	if err != nil {
@@ -155,18 +137,15 @@ func install(ctx context.Context, current string, target target) (string, error)
 	return version, selfupdate.Apply(f, selfupdate.Options{TargetPath: target.path})
 }
 
-// target is what an update replaces on this system, and the latest.json key
-// of the file that replaces it.
 type target struct {
 	key    string
-	path   string // the executable (or AppImage) to replace
-	bundle string // or, on macOS, the .app whose contents to replace
+	path   string
+	bundle string
 }
 
 func currentTarget() (target, error) {
 	switch runtime.GOOS {
 	case "darwin":
-		// The whole app is replaced, so its icon and Info.plist change with it.
 		bundle := runningBundle()
 		if bundle == "" {
 			return target{}, ErrNotUpdatable
@@ -180,8 +159,6 @@ func currentTarget() (target, error) {
 	return target{key: runtime.GOOS + "-" + runtime.GOARCH}, nil
 }
 
-// newer reports whether version is a later release than current. A dev build
-// is older than any release.
 func newer(version, current string) bool {
 	v := "v" + strings.TrimPrefix(strings.TrimSpace(version), "v")
 	c := "v" + strings.TrimPrefix(strings.TrimSpace(current), "v")
@@ -195,7 +172,6 @@ func manifestURL() string {
 	return "https://github.com/" + Repo + "/releases/latest/download/latest.json"
 }
 
-// trustedURL is the hook tests use to point downloads at a local server.
 var trustedURL = func(u *url.URL) bool {
 	if u.Scheme != "https" {
 		return false
@@ -204,7 +180,7 @@ var trustedURL = func(u *url.URL) bool {
 	case "github.com":
 		return strings.HasPrefix(u.Path, "/"+Repo+"/releases/")
 	case "objects.githubusercontent.com", "release-assets.githubusercontent.com":
-		return true // where GitHub redirects release downloads
+		return true
 	}
 	return false
 }
@@ -257,7 +233,6 @@ func fetchManifest(ctx context.Context) (*Manifest, error) {
 	return &m, nil
 }
 
-// download saves rawURL to a temporary file and returns its path.
 func download(ctx context.Context, rawURL string, limit int64) (string, error) {
 	resp, err := get(ctx, rawURL)
 	if err != nil {
@@ -298,8 +273,6 @@ func checkSHA256(file, want string) error {
 	return nil
 }
 
-// signedComment is the trusted comment the release workflow signs each file
-// with; it ties the signature to one version and one file.
 func signedComment(version, asset string) string {
 	return "relay-db v" + strings.TrimPrefix(version, "v") + " " + asset
 }

@@ -193,7 +193,6 @@
         addFilter(name, v === null ? 'not_null' : '!=', v === null ? '' : String(v));
         return true;
       case 'copy-insert': {
-        // The rows as stored: pending edits like now() or DEFAULT have no value to copy yet.
         const rows = (at.rows.length ? at.rows : [at.r]).filter(r => edits.rowState(r) !== 'new');
         const cols = page.result.columns.map(c => c.name);
         copyToClipboard(insertStatement(driver, tab.schema, tab.table, cols, rows.map(r => page!.result.rows[r])));
@@ -242,7 +241,6 @@
 
   let structure = $state<StructureView>();
   let structureDirty = $state(false);
-  /** Why the table's columns can't be changed, or '' when they can. */
   const structureReadOnlyReason = $derived(ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : '');
 
   type Nav = 'reload' | 'first' | 'next' | 'prev' | 'last';
@@ -317,11 +315,9 @@
       const c = await api.countRows(sessionId, `${tab.id}-quick`, countQuery(), false);
       if (c.known && !(count as RowCount | null)?.exact) count = c;
     } catch {
-      // estimates are best-effort
     }
   }
 
-  // A COUNT(*) on a big table can run for minutes; closing the tab stops it.
   const countId = untrack(() => `${tab.id}-count`);
   onDestroy(() => {
     if (counting) api.cancelQuery(countId);
@@ -358,7 +354,6 @@
   function refresh() {
     if (!canLeavePage()) return;
     if (structureDirty) {
-      // Pending structure edits point at columns by position.
       app.notify('Commit (⌘S) or discard the structure changes first.', 'info');
       return;
     }
@@ -368,7 +363,6 @@
 
   function onsort(column: string) {
     if (!canLeavePage()) return;
-    // Cycles asc → desc → default (primary key order).
     const cur = shownSort;
     if (cur?.column !== column) sort = { column, desc: false };
     else if (!cur.desc) sort = { column, desc: true };
@@ -389,11 +383,10 @@
     mode = 'data';
     showFilters = true;
     if (filterRows.length === 0) filterRows = [newFilter(page?.result.columns ?? columns)];
-    await tick(); // the bar mounts on this update
+    await tick();
     filterBar?.focus();
   }
 
-  /** Adds a filter condition from a menu: applied straight away, or focused for a value. */
   async function addFilter(column: string, op: FilterOp, value: string, apply = true) {
     const row = newFilter(columns, column, op, value);
     filterRows = [...filterRows, row];
@@ -473,7 +466,7 @@
         return;
       }
       app.notify(`Saved ${formatCount(res.applied, 'change')} to ${tab.table}.`, 'info');
-      if (count?.exact) count = { ...count, exact: false }; // inserts/deletes may have moved it
+      if (count?.exact) count = { ...count, exact: false };
       await loadPage();
     } catch (err) {
       saveError = err instanceof Error ? err.message : String(err);
@@ -657,7 +650,6 @@
     background: var(--surface);
   }
   .toolbar { border-bottom: 1px solid var(--border); }
-  /* 37px: lines up with the sidebar's bottom bar next to it */
   .footer { height: 37px; border-top: 1px solid var(--border); gap: 4px; min-width: 0; }
   .content { flex: 1; min-height: 0; position: relative; }
   .title { margin-left: 4px; font-size: 12px; }
