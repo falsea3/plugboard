@@ -7,6 +7,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-02
+
 ### Added
 
 - **Turn rows into SQL.** Right-click a row, or a selection of rows, and pick *Copy as SQL* or *Open SQL in new query*: SELECT, INSERT, UPDATE or DELETE, matched on the primary key. UPDATE is written one statement per row, with every column set to its current value, ready to edit.
