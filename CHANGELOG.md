@@ -8,8 +8,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-02
+
 ### Changed
 
+- **Tables load as you scroll.** The page buttons are gone: when you near the bottom, the next rows load by themselves, up to 100,000 rows. Edited cells stay edited while more rows load, so there's no need to commit first; while a new row waits to be saved, loading pauses until you commit or discard it.
+- **Fast scrolling no longer shows empty rows.** The grid scrolls itself on the wheel and trackpad and draws the rows in the same frame, so rows and their numbers stay in step however hard you flick. PageUp/PageDown move by a page, Home/End go to the first and last loaded row.
 - **Relay DB is now Plugboard.** Same app, new name: a database client called "something DB" read like a database. On first launch Plugboard moves your connections, settings and trusted SSH host keys over from Relay DB, and your saved passwords from the Keychain, so there is nothing to set up again.
 - Relay DB 0.3.0 doesn't update itself to Plugboard. Download Plugboard from GitHub, then delete Relay DB.
 - Connections show up as *Plugboard* in the database's session list (PostgreSQL's `application_name`).
