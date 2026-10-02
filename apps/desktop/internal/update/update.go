@@ -36,13 +36,13 @@ const (
 )
 
 var (
-	ErrNoPublicKey      = errors.New("this build has no update signing key")
-	ErrChecksum         = errors.New("the download doesn't match its checksum")
-	ErrSignature        = errors.New("the download isn't signed by Plugboard's release key")
-	ErrUntrustedURL     = errors.New("the update points outside Plugboard's GitHub releases")
-	ErrNotNewer         = errors.New("the release is not newer than this version")
-	ErrNoAsset          = errors.New("the release has no package for this system")
-	ErrNotUpdatable     = errors.New("this copy can't update itself: install Plugboard from a release")
+	ErrNoPublicKey        = errors.New("this build has no update signing key")
+	ErrChecksum           = errors.New("the download doesn't match its checksum")
+	ErrSignature          = errors.New("the download isn't signed by Plugboard's release key")
+	ErrUntrustedURL       = errors.New("the update points outside Plugboard's GitHub releases")
+	ErrNotNewer           = errors.New("the release is not newer than this version")
+	ErrNoAsset            = errors.New("the release has no package for this system")
+	ErrNotUpdatable       = errors.New("this copy can't update itself: install Plugboard from a release")
 	ErrBundleNotPlugboard = errors.New("the downloaded app is not Plugboard")
 )
 
