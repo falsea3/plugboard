@@ -7,6 +7,21 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-02
+
+### Added
+
+- **The database checks your SQL as you type.** When Relay DB's own checks find nothing, it asks the server to parse each statement — without running it, and not on the editor's connection, so an open transaction is safe — and underlines exactly where the server says the syntax is wrong, on PostgreSQL, MySQL, MariaDB and SQLite. A statement that fails when you run it is marked the same way.
+
+### Changed
+
+- **Mistakes are easier to see**: a thicker wavy underline, and a red dot beside the line.
+- **About says when Relay DB is up to date** instead of offering to check again.
+
+### Fixed
+
+- **The statement that ran stayed marked after the next run.** Running a selection or everything left the earlier mark in place, in the selection's colour, so it looked like the old text was still selected. Now whatever ran last gets a bar in the margin, gone at the next edit or click.
+
 ## [0.2.0] - 2026-10-02
 
 ### Added

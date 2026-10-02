@@ -15,7 +15,7 @@ body:
     attributes:
       label: Relay DB version
       description: Settings ▸ About.
-      placeholder: "0.2.0"
+      placeholder: "0.2.1"
     validations:
       required: true
 
