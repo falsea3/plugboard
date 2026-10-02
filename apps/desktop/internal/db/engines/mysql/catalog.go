@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func (Dialect) DefaultSchema(ctx context.Context, db *sql.DB, c model.Connection) (string, error) {

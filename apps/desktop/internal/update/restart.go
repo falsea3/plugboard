@@ -33,8 +33,8 @@ func relaunchCommand(pid string) (*exec.Cmd, error) {
 	}
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command",
-			"Wait-Process -Id "+pid+" -ErrorAction SilentlyContinue; Start-Process -FilePath $env:RELAYDB_RELAUNCH")
-		cmd.Env = append(os.Environ(), "RELAYDB_RELAUNCH="+exe)
+			"Wait-Process -Id "+pid+" -ErrorAction SilentlyContinue; Start-Process -FilePath $env:PLUGBOARD_RELAUNCH")
+		cmd.Env = append(os.Environ(), "PLUGBOARD_RELAUNCH="+exe)
 		return cmd, nil
 	}
 	return exec.Command("/bin/sh", "-c", `while kill -0 "$0" 2>/dev/null; do sleep 0.2; done; exec "$1"`, pid, exe), nil

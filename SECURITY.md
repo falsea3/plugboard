@@ -1,12 +1,12 @@
 # Security
 
-Relay DB holds database passwords and talks to production servers, so security
+Plugboard holds database passwords and talks to production servers, so security
 reports are welcome and handled first.
 
 Please report a vulnerability privately through GitHub's **Report a
 vulnerability** button on the repository's Security tab, not in a public issue.
-Include what you found, how to reproduce it, and the Relay DB version
-(`relay-db --version` or Settings ▸ About).
+Include what you found, how to reproduce it, and the Plugboard version
+(`plugboard --version` or Settings ▸ About).
 
 What counts, for example:
 

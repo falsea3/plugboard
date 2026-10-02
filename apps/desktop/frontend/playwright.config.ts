@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const screenshots = Boolean(process.env.RELAYDB_SCREENSHOTS);
+const screenshots = Boolean(process.env.PLUGBOARD_SCREENSHOTS);
 
 export default defineConfig({
   testDir: './e2e',

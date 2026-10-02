@@ -18,14 +18,14 @@
     {#if u.status === 'installing'}<Spinner size={15} />{:else}<Icon name={u.status === 'failed' ? 'alert' : 'update'} size={16} />{/if}
     <div class="body">
       {#if u.status === 'available'}
-        <div class="title">Relay DB {u.info.version} is available</div>
+        <div class="title">Plugboard {u.info.version} is available</div>
       {:else if u.status === 'installing'}
-        <div class="title">Installing Relay DB {u.info.version}…</div>
+        <div class="title">Installing Plugboard {u.info.version}…</div>
       {:else if u.status === 'installed'}
-        <div class="title">Relay DB {u.info.version} is installed</div>
+        <div class="title">Plugboard {u.info.version} is installed</div>
         <div class="sub">It starts with the next launch.</div>
       {:else if u.status === 'failed'}
-        <div class="title">Relay DB {u.info.version} couldn’t be installed</div>
+        <div class="title">Plugboard {u.info.version} couldn’t be installed</div>
         <div class="sub" title={u.error}>{u.error}</div>
       {/if}
       <div class="actions">

@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Relay DB</title>
+    <title>Plugboard</title>
     <script>
       (() => {
         const p = navigator.platform || navigator.userAgent || '';
         document.documentElement.dataset.platform = /Mac/i.test(p) ? 'darwin' : /Win/i.test(p) ? 'windows' : 'linux';
         let mode = 'system';
-        try { mode = localStorage.getItem('relaydb.theme') || 'system'; } catch {}
+        try { mode = localStorage.getItem('plugboard.theme') || 'system'; } catch {}
         const dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       })();

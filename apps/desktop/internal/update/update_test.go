@@ -113,10 +113,10 @@ func TestNewer(t *testing.T) {
 
 func TestInstallReplacesTheFile(t *testing.T) {
 	r := newRelease(t, "0.2.0")
-	r.add("relay-db-test", []byte("new build"), signedComment("0.2.0", "relay-db-test"))
-	r.serve(r.manifest("test", "relay-db-test"))
+	r.add("plugboard-test", []byte("new build"), signedComment("0.2.0", "plugboard-test"))
+	r.serve(r.manifest("test", "plugboard-test"))
 
-	exe := filepath.Join(t.TempDir(), "relay-db")
+	exe := filepath.Join(t.TempDir(), "plugboard")
 	os.WriteFile(exe, []byte("old build"), 0o755)
 	v, err := install(context.Background(), "0.1.0", target{key: "test", path: exe})
 	if err != nil || v != "0.2.0" {
@@ -128,7 +128,7 @@ func TestInstallReplacesTheFile(t *testing.T) {
 }
 
 func TestInstallRefuses(t *testing.T) {
-	exe := filepath.Join(t.TempDir(), "relay-db")
+	exe := filepath.Join(t.TempDir(), "plugboard")
 	for _, tc := range []struct {
 		name    string
 		setup   func(r *release) []byte
@@ -204,25 +204,25 @@ func TestInstallBundle(t *testing.T) {
 	dir := t.TempDir()
 	makeApp := func(path, version, exe string) {
 		os.MkdirAll(filepath.Join(path, "Contents", "MacOS"), 0o755)
-		os.WriteFile(filepath.Join(path, "Contents", "MacOS", "relay-db"), []byte(exe), 0o755)
+		os.WriteFile(filepath.Join(path, "Contents", "MacOS", "plugboard"), []byte(exe), 0o755)
 		plist := `<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleShortVersionString</key><string>` + version + `</string></dict></plist>`
 		os.WriteFile(filepath.Join(path, "Contents", "Info.plist"), []byte(plist), 0o644)
 	}
-	installed := filepath.Join(dir, "Relay DB.app")
+	installed := filepath.Join(dir, "Plugboard.app")
 	makeApp(installed, "0.1.0", "old")
-	makeApp(filepath.Join(dir, "new", "Relay DB.app"), "0.2.0", "new")
+	makeApp(filepath.Join(dir, "new", "Plugboard.app"), "0.2.0", "new")
 	archive := filepath.Join(dir, "update.app.zip")
-	if out, err := exec.Command("ditto", "-c", "-k", "--keepParent", filepath.Join(dir, "new", "Relay DB.app"), archive).CombinedOutput(); err != nil {
+	if out, err := exec.Command("ditto", "-c", "-k", "--keepParent", filepath.Join(dir, "new", "Plugboard.app"), archive).CombinedOutput(); err != nil {
 		t.Fatalf("zip: %v %s", err, out)
 	}
 
-	if err := installBundle(archive, installed, "0.3.0"); !errors.Is(err, ErrBundleNotRelayDB) {
+	if err := installBundle(archive, installed, "0.3.0"); !errors.Is(err, ErrBundleNotPlugboard) {
 		t.Fatalf("wrong version: err = %v", err)
 	}
 	if err := installBundle(archive, installed, "0.2.0"); err != nil {
 		t.Fatal(err)
 	}
-	if data, _ := os.ReadFile(filepath.Join(installed, "Contents", "MacOS", "relay-db")); string(data) != "new" {
+	if data, _ := os.ReadFile(filepath.Join(installed, "Contents", "MacOS", "plugboard")); string(data) != "new" {
 		t.Fatalf("executable = %q", data)
 	}
 	if entries, _ := os.ReadDir(installed); len(entries) != 1 {
@@ -231,10 +231,10 @@ func TestInstallBundle(t *testing.T) {
 }
 
 func TestBundleOf(t *testing.T) {
-	if got := bundleOf("/Applications/Relay DB.app/Contents/MacOS/relay-db"); got != "/Applications/Relay DB.app" {
+	if got := bundleOf("/Applications/Plugboard.app/Contents/MacOS/plugboard"); got != "/Applications/Plugboard.app" {
 		t.Fatalf("got %q", got)
 	}
-	if got := bundleOf("/usr/local/bin/relay-db"); got != "" {
+	if got := bundleOf("/usr/local/bin/plugboard"); got != "" {
 		t.Fatalf("got %q", got)
 	}
 }
@@ -250,7 +250,7 @@ func TestReleaseCoversEveryMac(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, arch := range []string{"arm64", "amd64"} {
-		file := "relay-db-darwin-" + arch + ".app.zip"
+		file := "plugboard-darwin-" + arch + ".app.zip"
 		if !strings.Contains(string(manifest), `"darwin-`+arch+`": "`+file+`"`) {
 			t.Errorf("make-latest-json.py has no darwin-%s → %s", arch, file)
 		}

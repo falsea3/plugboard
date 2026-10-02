@@ -12,7 +12,7 @@ const targets = [
   // Wails turns this into the .icns / .ico at build time.
   { path: join(root, 'apps', 'desktop', 'build', 'appicon.png'), size: 1024, trim: false },
   // In-app logo (home screen, About): the tile without the transparent margin.
-  { path: join(root, 'apps', 'desktop', 'frontend', 'src', 'lib', 'assets', 'relay-db-mark.png'), size: 144, trim: true },
+  { path: join(root, 'apps', 'desktop', 'frontend', 'src', 'lib', 'assets', 'plugboard-mark.png'), size: 144, trim: true },
 ];
 
 for (const t of targets) {

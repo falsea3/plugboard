@@ -1,4 +1,4 @@
-# Contributing to Relay DB
+# Contributing to Plugboard
 
 Thanks for wanting to help. Bug reports, docs fixes and pull requests are all welcome.
 
@@ -8,7 +8,7 @@ By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 - **Found a security problem?** Don't open a public issue. Follow [SECURITY.md](SECURITY.md).
 - **Fixing a bug?** Go ahead and open a pull request.
-- **Adding a feature or changing behaviour?** Open an issue first. Relay DB is deliberately
+- **Adding a feature or changing behaviour?** Open an issue first. Plugboard is deliberately
   local-first and careful with production data, and it's much cheaper to agree on the shape
   of a change before it's written than to turn down a finished pull request.
 
@@ -25,8 +25,8 @@ Requirements:
 - Docker, for the sample databases
 
 ```bash
-git clone https://github.com/relay-client/relay-db
-cd relay-db
+git clone https://github.com/relay-client/plugboard
+cd plugboard
 npm install
 make dev
 ```
@@ -74,7 +74,7 @@ The tests that need real servers skip themselves unless you point them at some:
 ```bash
 make db-up
 cd apps/desktop
-RELAYDB_TEST_PG=127.0.0.1:55432 RELAYDB_TEST_MYSQL=127.0.0.1:53306 RELAYDB_TEST_SSH=127.0.0.1:52222 go test ./internal/db/
+PLUGBOARD_TEST_PG=127.0.0.1:55432 PLUGBOARD_TEST_MYSQL=127.0.0.1:53306 PLUGBOARD_TEST_SSH=127.0.0.1:52222 go test ./internal/db/
 ```
 
 Run them when you touch anything that talks to a database: read-only enforcement, grid edits,
@@ -143,7 +143,7 @@ They come from the stand-in backend, so they're the same every time and hold no 
 
 ## Reporting bugs
 
-Use the issue templates. What helps most is the Relay DB version (Settings ▸ About), the
+Use the issue templates. What helps most is the Plugboard version (Settings ▸ About), the
 database and its version, and the smallest set of steps that shows the problem.
 
 **Scrub credentials from anything you attach.** Connection URLs, screenshots of the connection

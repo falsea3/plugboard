@@ -12,17 +12,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqlcore"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
-	"github.com/relay-client/relay-db/apps/desktop/internal/sshtunnel"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/sshtunnel"
 )
 
 func TestThroughSSH(t *testing.T) {
-	addr := os.Getenv("RELAYDB_TEST_SSH")
+	addr := os.Getenv("PLUGBOARD_TEST_SSH")
 	if addr == "" {
-		t.Skip("RELAYDB_TEST_SSH not set")
+		t.Skip("PLUGBOARD_TEST_SSH not set")
 	}
 	i := strings.LastIndex(addr, ":")
 	host := addr[:i]
@@ -44,9 +44,9 @@ func TestThroughSSH(t *testing.T) {
 }
 
 func TestSSHTunnelSurvivesServerRestart(t *testing.T) {
-	addr := os.Getenv("RELAYDB_TEST_SSH")
-	if addr == "" || os.Getenv("RELAYDB_TEST_SSH_RESTART") == "" {
-		t.Skip("RELAYDB_TEST_SSH and RELAYDB_TEST_SSH_RESTART not set")
+	addr := os.Getenv("PLUGBOARD_TEST_SSH")
+	if addr == "" || os.Getenv("PLUGBOARD_TEST_SSH_RESTART") == "" {
+		t.Skip("PLUGBOARD_TEST_SSH and PLUGBOARD_TEST_SSH_RESTART not set")
 	}
 	i := strings.LastIndex(addr, ":")
 	host := addr[:i]

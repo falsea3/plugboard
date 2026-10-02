@@ -1,7 +1,7 @@
 # Third-party notices
 
-Relay DB bundles these assets into the app. Their licences apply to them, not
-Relay DB's own MIT licence.
+Plugboard bundles these assets into the app. Their licences apply to them, not
+Plugboard's own MIT licence.
 
 | Asset | Used for | Licence |
 | --- | --- | --- |

@@ -2,7 +2,7 @@
 """Write latest.json, the manifest the in-app updater reads.
 
     make-latest-json.py --release-dir release --tag v0.2.0 \
-        --repo relay-client/relay-db --notes-file release-notes.md
+        --repo relay-client/plugboard --notes-file release-notes.md
 
 For each platform it records the URL and SHA-256 of the file that platform
 installs, and the URL of that file's minisign signature, which must sit next
@@ -21,12 +21,12 @@ from pathlib import Path
 # Platform key (see internal/update.currentTarget) → file it installs. The
 # AppImage's name carries the version, so it is filled in per release.
 ASSETS = {
-    "darwin-arm64": "relay-db-darwin-arm64.app.zip",
-    "darwin-amd64": "relay-db-darwin-amd64.app.zip",
-    "windows-amd64": "relay-db-windows-amd64.exe",
-    "windows-arm64": "relay-db-windows-arm64.exe",
-    "linux-amd64": "relay-db-linux-amd64",
-    "linux-amd64-appimage": "relay-db-{version}-linux-amd64.AppImage",
+    "darwin-arm64": "plugboard-darwin-arm64.app.zip",
+    "darwin-amd64": "plugboard-darwin-amd64.app.zip",
+    "windows-amd64": "plugboard-windows-amd64.exe",
+    "windows-arm64": "plugboard-windows-arm64.exe",
+    "linux-amd64": "plugboard-linux-amd64",
+    "linux-amd64-appimage": "plugboard-{version}-linux-amd64.AppImage",
 }
 
 

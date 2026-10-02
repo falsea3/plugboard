@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 	"github.com/wailsapp/wails/v2/pkg/menu"
 	"github.com/wailsapp/wails/v2/pkg/menu/keys"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -35,14 +35,14 @@ func BuildMenu(a *App) *menu.Menu {
 	}
 	root := menu.NewMenu()
 
-	app := root.AddSubmenu("Relay DB")
-	app.AddText("About Relay DB", nil, emit("about"))
+	app := root.AddSubmenu("Plugboard")
+	app.AddText("About Plugboard", nil, emit("about"))
 	app.AddSeparator()
 	app.AddText("Settings…", keys.CmdOrCtrl(","), emit("settings"))
 	app.AddSeparator()
-	app.AddText("Hide Relay DB", keys.CmdOrCtrl("h"), func(*menu.CallbackData) { runtime.Hide(a.ctx) })
+	app.AddText("Hide Plugboard", keys.CmdOrCtrl("h"), func(*menu.CallbackData) { runtime.Hide(a.ctx) })
 	app.AddSeparator()
-	app.AddText("Quit Relay DB", keys.CmdOrCtrl("q"), func(*menu.CallbackData) { runtime.Quit(a.ctx) })
+	app.AddText("Quit Plugboard", keys.CmdOrCtrl("q"), func(*menu.CallbackData) { runtime.Quit(a.ctx) })
 
 	file := root.AddSubmenu("File")
 	file.AddText("New Connection…", keys.CmdOrCtrl("n"), emit("new-connection"))

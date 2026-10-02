@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
-	"github.com/relay-client/relay-db/apps/desktop/internal/sshtunnel"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/sshtunnel"
 )
 
 type Session interface {

@@ -71,7 +71,7 @@
 <path d="M256 170H398" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
 <path d="M392 160L405 170L392 180" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="330" y="160" text-anchor="middle" font-family="Menlo, monospace" font-size="10" fill="white" fill-opacity="0.7">installs into</text>
-<text x="330" y="322" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="white" fill-opacity="0.95">Drag Relay DB to Applications</text>
+<text x="330" y="322" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="white" fill-opacity="0.95">Drag Plugboard to Applications</text>
 <text x="330" y="343" text-anchor="middle" font-family="Menlo, monospace" font-size="10.5" fill="white" fill-opacity="0.6">-- then open it from Launchpad or Spotlight</text>
 <defs>
 <linearGradient id="base" x1="0" y1="0" x2="660" y2="428" gradientUnits="userSpaceOnUse">

@@ -285,7 +285,7 @@
           </span>
           <span>
             <span class="toggle-title"><Icon name="lock" size={13} />Read-only</span>
-            <span class="toggle-hint">The session can only read. Writes are refused by Relay DB and by the server. You can switch it per session from the sidebar.</span>
+            <span class="toggle-hint">The session can only read. Writes are refused by Plugboard and by the server. You can switch it per session from the sidebar.</span>
           </span>
         </label>
       </div>
@@ -301,9 +301,9 @@
             <span class="toggle-title">Connect through an SSH server</span>
             <span class="toggle-hint">
               {#if sshViaDbHost}
-                Relay DB signs in to <strong>{form.host || 'the database host'}</strong> over SSH and reaches the database there on <code>127.0.0.1:{form.port || formEngine.defaultPort}</code>. Set an SSH host to go through a separate bastion instead.
+                Plugboard signs in to <strong>{form.host || 'the database host'}</strong> over SSH and reaches the database there on <code>127.0.0.1:{form.port || formEngine.defaultPort}</code>. Set an SSH host to go through a separate bastion instead.
               {:else}
-                Relay DB signs in to <strong>{form.ssh.host}</strong> and connects from there to <code>{form.host || '127.0.0.1'}:{form.port || formEngine.defaultPort}</code> — the database host as that server sees it.
+                Plugboard signs in to <strong>{form.ssh.host}</strong> and connects from there to <code>{form.host || '127.0.0.1'}:{form.port || formEngine.defaultPort}</code> — the database host as that server sees it.
               {/if}
             </span>
           </span>
@@ -343,7 +343,7 @@
           {/if}
 
           <span></span>
-          <p class="toggle-hint">Secrets follow “Save in Keychain” on the General tab. On first connect the server’s host key is remembered; if it ever changes, Relay DB refuses to connect.</p>
+          <p class="toggle-hint">Secrets follow “Save in Keychain” on the General tab. On first connect the server’s host key is remembered; if it ever changes, Plugboard refuses to connect.</p>
         {/if}
       </div>
     {/if}

@@ -1,4 +1,4 @@
-module github.com/relay-client/relay-db/apps/desktop
+module github.com/relay-client/plugboard/apps/desktop
 
 go 1.26.0
 

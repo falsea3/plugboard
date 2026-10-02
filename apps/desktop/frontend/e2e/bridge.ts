@@ -66,7 +66,7 @@ export async function installBridge(page: Page) {
     (window as any).go = {
       api: {
         App: {
-          AppInfo: () => ok({ name: 'Relay DB', version: '0.2.1', goVersion: 'go1.26.0', platform: 'darwin/arm64', dataDir: '/Users/demo/Library/Application Support/Relay DB', copyright: '© 2026 Relay Client' }),
+          AppInfo: () => ok({ name: 'Plugboard', version: '0.3.0', goVersion: 'go1.26.0', platform: 'darwin/arm64', dataDir: '/Users/demo/Library/Application Support/Plugboard', copyright: '© 2026 Relay Client' }),
           GetSettings: () => ok(settings),
           SaveSettings: (s: typeof settings) => ok(Object.assign(settings, s)),
           ListConnections: () => ok(connections),

@@ -18,31 +18,43 @@ type Secrets interface {
 	Delete(key string) error
 }
 
-const keyringService = "Relay DB"
+const (
+	keyringService    = "Plugboard"
+	oldKeyringService = "Relay DB"
+)
 
 func NewSecrets(dir string) Secrets {
-	if os.Getenv("RELAYDB_DISABLE_KEYCHAIN") == "1" {
+	if keychainDisabled() {
 		return &fileSecrets{path: filepath.Join(dir, "secrets.dev.json")}
 	}
-	return keychainSecrets{}
+	return keychainSecrets{service: keyringService}
 }
 
-type keychainSecrets struct{}
+func OldSecrets() Secrets {
+	if keychainDisabled() {
+		return nil
+	}
+	return keychainSecrets{service: oldKeyringService}
+}
 
-func (keychainSecrets) Get(key string) (string, error) {
-	v, err := keyring.Get(keyringService, key)
+func keychainDisabled() bool { return os.Getenv("PLUGBOARD_DISABLE_KEYCHAIN") == "1" }
+
+type keychainSecrets struct{ service string }
+
+func (k keychainSecrets) Get(key string) (string, error) {
+	v, err := keyring.Get(k.service, key)
 	if errors.Is(err, keyring.ErrNotFound) {
 		return "", ErrSecretNotFound
 	}
 	return v, err
 }
 
-func (keychainSecrets) Set(key, value string) error {
-	return keyring.Set(keyringService, key, value)
+func (k keychainSecrets) Set(key, value string) error {
+	return keyring.Set(k.service, key, value)
 }
 
-func (keychainSecrets) Delete(key string) error {
-	err := keyring.Delete(keyringService, key)
+func (k keychainSecrets) Delete(key string) error {
+	err := keyring.Delete(k.service, key)
 	if errors.Is(err, keyring.ErrNotFound) {
 		return ErrSecretNotFound
 	}

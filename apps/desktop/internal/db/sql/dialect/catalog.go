@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func Qualified(q interface{ QuoteIdent(string) string }, schema, table string) string {

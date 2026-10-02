@@ -1,38 +1,38 @@
 <div align="center">
 
-# Relay DB
+# Plugboard
 
 **A fast, local-first database client for PostgreSQL, MySQL and SQLite. No accounts, no cloud sync, no telemetry — just you and your data.**
 
-[![CI](https://github.com/relay-client/relay-db/actions/workflows/ci.yml/badge.svg)](https://github.com/relay-client/relay-db/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/relay-client/relay-db?sort=semver)](https://github.com/relay-client/relay-db/releases/latest)
+[![CI](https://github.com/relay-client/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/relay-client/plugboard/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/relay-client/plugboard?sort=semver)](https://github.com/relay-client/plugboard/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/relay-client/relay-db/releases/latest)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/relay-client/plugboard/releases/latest)
 
-The database counterpart of [Relay](https://github.com/relay-client/relay). Built with Go, Svelte 5 and Wails.
+The database counterpart of [Relay](https://github.com/relay-client/relay), formerly called Relay DB. Built with Go, Svelte 5 and Wails.
 
 </div>
 
-![Relay DB showing a PostgreSQL table](.github/assets/screenshots/table.png)
+![Plugboard showing a PostgreSQL table](.github/assets/screenshots/table.png)
 
 ---
 
 ## Download
 
-Grab the latest build from the [releases page](https://github.com/relay-client/relay-db/releases/latest).
+Grab the latest build from the [releases page](https://github.com/relay-client/plugboard/releases/latest).
 
 | Platform | File |
 | --- | --- |
-| macOS 12+ on Apple Silicon (M1 and later) | `-darwin-arm64.dmg` — drag Relay DB to Applications |
+| macOS 12+ on Apple Silicon (M1 and later) | `-darwin-arm64.dmg` — drag Plugboard to Applications |
 | macOS 12+ on Intel | `-darwin-amd64.dmg` |
 | Windows 10/11 (x64 or Arm64) | `-installer.exe` |
 | Linux (x64) | `.AppImage` — `chmod +x`, then run it |
 
-Relay DB looks for a new version when it starts and offers to install it, or installs it by itself if you turn that on in Settings. Every release ships SHA-256 checksums and signatures, and the app refuses an update that fails either. What changed in each version is in the [changelog](CHANGELOG.md).
+Plugboard looks for a new version when it starts and offers to install it, or installs it by itself if you turn that on in Settings. Every release ships SHA-256 checksums and signatures, and the app refuses an update that fails either. What changed in each version is in the [changelog](CHANGELOG.md).
 
 **The builds aren't signed by Apple or Microsoft yet**, so both systems warn on the first launch. Check the download against `SHA256SUMS.txt` on the release page, then:
 
-- **macOS** — *"can't be opened because Apple cannot check it"*: open it once, then click **Open Anyway** in System Settings ▸ Privacy & Security. If it says the app *is damaged*, run `xattr -dr com.apple.quarantine "/Applications/Relay DB.app"`.
+- **macOS** — *"can't be opened because Apple cannot check it"*: open it once, then click **Open Anyway** in System Settings ▸ Privacy & Security. If it says the app *is damaged*, run `xattr -dr com.apple.quarantine "/Applications/Plugboard.app"`.
 - **Windows** — SmartScreen's *"Windows protected your PC"*: click **More info** ▸ **Run anyway**.
 
 You do this once; updates the app installs itself don't ask again.
@@ -49,10 +49,10 @@ You do this once; updates the app installs itself don't ask again.
 - Passwords stay in the system keychain (Keychain, Windows Credential Manager, Secret Service) — never in a file on disk.
 
 **Hard to break production by accident**
-- **Read-only connections**, on by default for anything tagged Production. Relay DB refuses writing statements before they run, and the database session itself is read-only too, so a statement that slips past one still meets the other.
+- **Read-only connections**, on by default for anything tagged Production. Plugboard refuses writing statements before they run, and the database session itself is read-only too, so a statement that slips past one still meets the other.
 - Writes to a Production connection ask first, and show exactly what they will run.
 - Edits in the grid are applied in one transaction — every change lands, or none does — and a value too long for its column is an error, never quietly cut short.
-- If a connection drops while a statement is running, Relay DB never re-runs a write behind your back, and tells you when an open transaction was lost.
+- If a connection drops while a statement is running, Plugboard never re-runs a write behind your back, and tells you when an open transaction was lost.
 - A changed SSH host key is refused until you've seen the new fingerprint and trusted it.
 
 **Tables**
@@ -74,13 +74,13 @@ You do this once; updates the app installs itself don't ask again.
 - Keyboard-first (`Ctrl` instead of `⌘` on Windows and Linux): tabs with `⌘1`–`⌘9`, `⌘T` for a new query, `⌘W` to close, `⌘C` / `⇧⌘C` to copy a cell or a row, `⌘A` for the whole result as TSV.
 - Dark and light themes, or follow the system.
 
-**Local-first.** Your connections live in a plain JSON file in your profile folder and your passwords in the system keychain. Relay DB talks to your databases, your SSH servers and, at launch, to GitHub to look for updates — nothing else.
+**Local-first.** Your connections live in a plain JSON file in your profile folder and your passwords in the system keychain. Plugboard talks to your databases, your SSH servers and, at launch, to GitHub to look for updates — nothing else.
 
 | | Profile folder |
 | --- | --- |
-| macOS | `~/Library/Application Support/Relay DB` |
-| Windows | `%AppData%\Relay DB` |
-| Linux | `~/.config/Relay DB` |
+| macOS | `~/Library/Application Support/Plugboard` |
+| Windows | `%AppData%\Plugboard` |
+| Linux | `~/.config/Plugboard` |
 
 ---
 
@@ -89,8 +89,8 @@ You do this once; updates the app installs itself don't ask again.
 You need Go 1.26+, Node.js 22.12+ and the [Wails v2](https://wails.io/docs/gettingstarted/installation) CLI.
 
 ```bash
-git clone https://github.com/relay-client/relay-db
-cd relay-db
+git clone https://github.com/relay-client/plugboard
+cd plugboard
 npm install
 make dev
 ```

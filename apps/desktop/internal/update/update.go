@@ -18,12 +18,12 @@ import (
 
 	"aead.dev/minisign"
 	"github.com/minio/selfupdate"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 	"golang.org/x/mod/semver"
 )
 
 var (
-	Repo      = "relay-client/relay-db"
+	Repo      = "relay-client/plugboard"
 	PublicKey = ""
 )
 
@@ -38,12 +38,12 @@ const (
 var (
 	ErrNoPublicKey      = errors.New("this build has no update signing key")
 	ErrChecksum         = errors.New("the download doesn't match its checksum")
-	ErrSignature        = errors.New("the download isn't signed by Relay DB's release key")
-	ErrUntrustedURL     = errors.New("the update points outside Relay DB's GitHub releases")
+	ErrSignature        = errors.New("the download isn't signed by Plugboard's release key")
+	ErrUntrustedURL     = errors.New("the update points outside Plugboard's GitHub releases")
 	ErrNotNewer         = errors.New("the release is not newer than this version")
 	ErrNoAsset          = errors.New("the release has no package for this system")
-	ErrNotUpdatable     = errors.New("this copy can't update itself: install Relay DB from a release")
-	ErrBundleNotRelayDB = errors.New("the downloaded app is not Relay DB")
+	ErrNotUpdatable     = errors.New("this copy can't update itself: install Plugboard from a release")
+	ErrBundleNotPlugboard = errors.New("the downloaded app is not Plugboard")
 )
 
 type Manifest struct {
@@ -239,7 +239,7 @@ func download(ctx context.Context, rawURL string, limit int64) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	tmp, err := os.CreateTemp("", "relay-db-update-*")
+	tmp, err := os.CreateTemp("", "plugboard-update-*")
 	if err != nil {
 		return "", err
 	}
@@ -274,7 +274,7 @@ func checkSHA256(file, want string) error {
 }
 
 func signedComment(version, asset string) string {
-	return "relay-db v" + strings.TrimPrefix(version, "v") + " " + asset
+	return "plugboard v" + strings.TrimPrefix(version, "v") + " " + asset
 }
 
 func checkSignature(ctx context.Context, file, signatureURL, comment string) error {

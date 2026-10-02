@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/api"
+	"github.com/relay-client/plugboard/apps/desktop/internal/api"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -15,7 +15,7 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-const singleInstanceID = "com.relayclient.relaydb"
+const singleInstanceID = "com.relayclient.plugboard"
 
 func main() {
 	if len(os.Args) >= 2 {
@@ -29,7 +29,7 @@ func main() {
 
 	app := api.NewApp()
 	err := wails.Run(&options.App{
-		Title:     "Relay DB",
+		Title:     "Plugboard",
 		Width:     1320,
 		Height:    840,
 		MinWidth:  960,

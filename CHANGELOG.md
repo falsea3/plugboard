@@ -1,11 +1,18 @@
 # Changelog
 
-What changed in each Relay DB release, for the people using it. The section for
-a version is also its GitHub release notes and what the in-app updater shows
-under *What's new*, so write for someone deciding whether to restart now.
+What changed in each Plugboard release, for the people using it. Up to 0.3.0
+the app was called Relay DB. The section for a version is also its GitHub
+release notes and what the in-app updater shows under *What's new*, so write
+for someone deciding whether to restart now.
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Changed
+
+- **Relay DB is now Plugboard.** Same app, new name: a database client called "something DB" read like a database. On first launch Plugboard moves your connections, settings and trusted SSH host keys over from Relay DB, and your saved passwords from the Keychain, so there is nothing to set up again.
+- Relay DB 0.3.0 doesn't update itself to Plugboard. Download Plugboard from GitHub, then delete Relay DB.
+- Connections show up as *Plugboard* in the database's session list (PostgreSQL's `application_name`).
 
 ## [0.3.0] - 2026-10-02
 

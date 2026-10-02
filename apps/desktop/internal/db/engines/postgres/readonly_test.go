@@ -3,8 +3,8 @@ package postgres_test
 import (
 	"testing"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
 )
 
 func TestReadOnlyReason(t *testing.T) {

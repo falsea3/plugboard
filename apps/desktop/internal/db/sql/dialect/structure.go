@@ -3,7 +3,7 @@ package dialect
 import (
 	"strings"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func TypeChanged(cur model.Column, ch model.ColumnChange) bool {

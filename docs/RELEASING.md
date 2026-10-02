@@ -1,6 +1,6 @@
 # Releasing
 
-Maintainer notes. Contributors don't need any of this to build or test Relay DB.
+Maintainer notes. Contributors don't need any of this to build or test Plugboard.
 
 A release is a `v*` tag. Pushing one runs
 [`.github/workflows/release.yml`](../.github/workflows/release.yml), which builds

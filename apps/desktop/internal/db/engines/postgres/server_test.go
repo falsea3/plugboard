@@ -7,16 +7,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqlcore"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqltest"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltest"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func TestServer(t *testing.T) {
 	sqltest.Run(t, sqltest.Server{
-		Env:       "RELAYDB_TEST_PG",
+		Env:       "PLUGBOARD_TEST_PG",
 		Dialect:   postgres.Dialect{},
 		Schema:    "public",
 		True:      true,
@@ -25,7 +25,7 @@ func TestServer(t *testing.T) {
 }
 
 func TestCatalogAndValues(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	ctx := context.Background()
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 
@@ -80,7 +80,7 @@ func TestCatalogAndValues(t *testing.T) {
 }
 
 func TestCancel(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
@@ -107,7 +107,7 @@ func TestCancel(t *testing.T) {
 }
 
 func TestEditorConnectionLost(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	ctx := context.Background()
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 	kill := func() {
@@ -138,7 +138,7 @@ func TestEditorConnectionLost(t *testing.T) {
 }
 
 func TestReadOnlyBypass(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	c.ReadOnly = true
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 	_, err := s.Run(context.Background(), "select set_config('default_transaction_read_only', 'off', false);\n"+
@@ -150,7 +150,7 @@ func TestReadOnlyBypass(t *testing.T) {
 }
 
 func TestPagingInTransaction(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 	res, err := s.Run(context.Background(), "begin; select * from orders; select 1 as a, 2 as a; select 3; commit")
 	if err != nil {
@@ -165,7 +165,7 @@ func TestPagingInTransaction(t *testing.T) {
 }
 
 func TestEnumsAndExpressions(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	ctx := context.Background()
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 	if _, err := s.Run(ctx, `drop table if exists probe_mood; drop type if exists mood;
@@ -200,7 +200,7 @@ func TestEnumsAndExpressions(t *testing.T) {
 }
 
 func TestBigTable(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	ctx := context.Background()
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 	if r, err := s.Run(ctx, "select to_regclass('public.big_events') is not null"); err != nil || r[0].Rows[0][0] != true {
@@ -225,7 +225,7 @@ func TestBigTable(t *testing.T) {
 }
 
 func TestStructureTypeAndDefault(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_PG", model.Postgres)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_PG", model.Postgres)
 	ctx := context.Background()
 	s := sqltest.Open(t, postgres.Dialect{}, c)
 	s.Run(ctx, "drop table if exists zz_structure")

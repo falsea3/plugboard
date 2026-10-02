@@ -1,5 +1,5 @@
 name: Bug report
-description: Something is broken or behaves unexpectedly in Relay DB.
+description: Something is broken or behaves unexpectedly in Plugboard.
 title: "[bug] "
 labels: ["bug"]
 body:
@@ -13,7 +13,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Relay DB version
+      label: Plugboard version
       description: Settings ▸ About.
       placeholder: "0.3.0"
     validations:
@@ -85,9 +85,9 @@ body:
     attributes:
       label: Before you send it
       options:
-        - label: I'm on the latest Relay DB release (Settings ▸ About ▸ Check for updates)
+        - label: I'm on the latest Plugboard release (Settings ▸ About ▸ Check for updates)
           required: true
         - label: I searched the existing issues and didn't find this one
           required: true
-        - label: This isn't a security problem (those go to [a private report](https://github.com/relay-client/relay-db/security/advisories/new) instead)
+        - label: This isn't a security problem (those go to [a private report](https://github.com/relay-client/plugboard/security/advisories/new) instead)
           required: true

@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
-	"github.com/relay-client/relay-db/apps/desktop/internal/sshtunnel"
-	"github.com/relay-client/relay-db/apps/desktop/internal/store"
-	"github.com/relay-client/relay-db/apps/desktop/internal/update"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/sshtunnel"
+	"github.com/relay-client/plugboard/apps/desktop/internal/store"
+	"github.com/relay-client/plugboard/apps/desktop/internal/update"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -51,15 +51,17 @@ func NewApp() *App {
 	}
 }
 
+const oldDataDirName = "Relay DB"
+
 func DataDir() string {
-	if dir := os.Getenv("RELAYDB_DATA_DIR"); dir != "" {
+	if dir := os.Getenv("PLUGBOARD_DATA_DIR"); dir != "" {
 		return dir
 	}
 	base, err := os.UserConfigDir()
 	if err != nil {
 		base = os.TempDir()
 	}
-	return filepath.Join(base, "Relay DB")
+	return filepath.Join(base, "Plugboard")
 }
 
 func knownHostsFile() string {
@@ -68,6 +70,38 @@ func knownHostsFile() string {
 
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
+	dir := DataDir()
+	if os.Getenv("PLUGBOARD_DATA_DIR") == "" {
+		moveOldDataDir(dir)
+	}
+	moveOldSecrets(dir, a.connections, store.OldSecrets())
+}
+
+func moveOldDataDir(dir string) bool {
+	old := filepath.Join(filepath.Dir(dir), oldDataDirName)
+	if _, err := os.Lstat(dir); !errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	if info, err := os.Lstat(old); err != nil || !info.IsDir() {
+		return false
+	}
+	return os.Rename(old, dir) == nil
+}
+
+func moveOldSecrets(dir string, connections *store.Connections, old store.Secrets) {
+	if old == nil {
+		return
+	}
+	done := filepath.Join(dir, ".secrets-moved")
+	if _, err := os.Stat(done); err == nil {
+		return
+	}
+	if err := connections.MoveSecrets(old); err != nil {
+		return
+	}
+	if err := os.MkdirAll(dir, 0o700); err == nil {
+		_ = os.WriteFile(done, nil, 0o600)
+	}
 }
 
 func (a *App) Shutdown(context.Context) {
@@ -92,7 +126,7 @@ func ShowWindow(a *App) {
 
 func (a *App) AppInfo() model.AppInfo {
 	return model.AppInfo{
-		Name:      "Relay DB",
+		Name:      "Plugboard",
 		Version:   appVersion,
 		GoVersion: goruntime.Version(),
 		Platform:  goruntime.GOOS + "/" + goruntime.GOARCH,
@@ -137,10 +171,10 @@ func updateError(action string, err error) string {
 	switch {
 	case errors.As(err, &dnsErr), errors.Is(err, context.DeadlineExceeded):
 		return "Could not " + action + ": GitHub can't be reached. Check the internet connection."
-	case errors.Is(err, update.ErrChecksum), errors.Is(err, update.ErrSignature), errors.Is(err, update.ErrUntrustedURL), errors.Is(err, update.ErrBundleNotRelayDB):
+	case errors.Is(err, update.ErrChecksum), errors.Is(err, update.ErrSignature), errors.Is(err, update.ErrUntrustedURL), errors.Is(err, update.ErrBundleNotPlugboard):
 		return "Could not " + action + ": the download failed verification (" + err.Error() + "), so nothing was changed."
 	case errors.Is(err, os.ErrPermission):
-		return "Could not " + action + ": Relay DB may not replace itself where it is installed. Download the new version from GitHub instead."
+		return "Could not " + action + ": Plugboard may not replace itself where it is installed. Download the new version from GitHub instead."
 	}
 	return "Could not " + action + ": " + err.Error()
 }

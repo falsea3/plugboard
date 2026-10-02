@@ -8,7 +8,7 @@
   import Icon from './Icon.svelte';
   import Spinner from './Spinner.svelte';
   import Modal from './Modal.svelte';
-  import mark from '../assets/relay-db-mark.png';
+  import mark from '../assets/plugboard-mark.png';
 
   let query = $state('');
   let selectedId = $state('');
@@ -41,7 +41,7 @@
   <div class="panel">
     <aside class="brand">
       <img src={mark} alt="" width="72" height="72" draggable="false" />
-      <h1>Relay DB</h1>
+      <h1>Plugboard</h1>
       <p class="faint">{version ? `Version ${version}` : ' '}</p>
 
       <div class="actions">

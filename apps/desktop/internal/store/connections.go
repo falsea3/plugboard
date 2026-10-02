@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 type Connections struct {
@@ -138,6 +138,42 @@ func (s *Connections) find(id string) (model.Connection, bool, error) {
 		}
 	}
 	return model.Connection{}, false, nil
+}
+
+func (s *Connections) MoveSecrets(from Secrets) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	all, err := s.load()
+	if err != nil {
+		return err
+	}
+	var errs []error
+	for _, c := range all {
+		for _, f := range secretFields {
+			key := secretKey(c.ID, f.slot)
+			v, err := from.Get(key)
+			if errors.Is(err, ErrSecretNotFound) {
+				continue
+			}
+			if err != nil {
+				errs = append(errs, fmt.Errorf("read old %s of %s: %w", f.name, c.Name, err))
+				continue
+			}
+			if _, err := s.secrets.Get(key); errors.Is(err, ErrSecretNotFound) {
+				if err := s.secrets.Set(key, v); err != nil {
+					errs = append(errs, fmt.Errorf("save %s of %s: %w", f.name, c.Name, err))
+					continue
+				}
+			} else if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			if err := from.Delete(key); err != nil && !errors.Is(err, ErrSecretNotFound) {
+				errs = append(errs, err)
+			}
+		}
+	}
+	return errors.Join(errs...)
 }
 
 func (s *Connections) readSecrets(c *model.Connection) error {

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/sqlite"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/sqlite"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
 )
 
 func TestSyntaxErrors(t *testing.T) {

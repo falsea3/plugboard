@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqltext"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 const EditorChunk = 1000
@@ -27,13 +27,13 @@ func (s *Session) pageable(stmt string) bool {
 }
 
 func pagedSQL(stmt string, offset int) string {
-	return fmt.Sprintf("SELECT * FROM (\n%s\n) AS relaydb_q LIMIT %d OFFSET %d", stmt, EditorChunk+1, offset)
+	return fmt.Sprintf("SELECT * FROM (\n%s\n) AS plugboard_q LIMIT %d OFFSET %d", stmt, EditorChunk+1, offset)
 }
 
 func (s *Session) runPage(ctx context.Context, stmt string, offset int) (model.ResultSet, error) {
 	useSavepoint := s.Dialect.ErrorAbortsTransaction() && s.Dialect.TxStatus(s.editor) == dialect.TxOpen
 	if useSavepoint {
-		if _, err := s.editor.ExecContext(ctx, "SAVEPOINT relaydb_page"); err != nil {
+		if _, err := s.editor.ExecContext(ctx, "SAVEPOINT plugboard_page"); err != nil {
 			return model.ResultSet{}, err
 		}
 	}
@@ -48,9 +48,9 @@ func (s *Session) runPage(ctx context.Context, stmt string, offset int) (model.R
 	}()
 	if useSavepoint {
 		if err != nil {
-			s.editor.ExecContext(context.WithoutCancel(ctx), "ROLLBACK TO SAVEPOINT relaydb_page")
+			s.editor.ExecContext(context.WithoutCancel(ctx), "ROLLBACK TO SAVEPOINT plugboard_page")
 		} else {
-			s.editor.ExecContext(ctx, "RELEASE SAVEPOINT relaydb_page")
+			s.editor.ExecContext(ctx, "RELEASE SAVEPOINT plugboard_page")
 		}
 	}
 	if err != nil {

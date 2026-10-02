@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/mysql"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqltext"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/mysql"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
 )
 
 var (

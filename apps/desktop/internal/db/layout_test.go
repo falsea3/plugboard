@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-const module = "github.com/relay-client/relay-db/apps/desktop/internal/"
+const module = "github.com/relay-client/plugboard/apps/desktop/internal/"
 
 var driverImports = []string{"github.com/jackc/pgx", "github.com/go-sql-driver/mysql", "modernc.org/sqlite"}
 

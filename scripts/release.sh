@@ -37,6 +37,6 @@ printf 'Last release: %s\nNext:         v%s\n\n%s\n\nTag and push v%s? [y/N] ' "
 read -r answer
 [ "$answer" = y ] || [ "$answer" = Y ] || { echo "Aborted."; exit 1; }
 
-git tag -a "v$next" -m "Relay DB $next"
+git tag -a "v$next" -m "Plugboard $next"
 git push origin "v$next"
 echo "Pushed v$next — GitHub Actions is building the release."

@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { join } from 'node:path';
 import { installBridge } from './bridge';
 
-const shotsDir = process.env.RELAYDB_SCREENSHOTS ?? '';
+const shotsDir = process.env.PLUGBOARD_SCREENSHOTS ?? '';
 
 async function shot(page: Page, name: string) {
   if (!shotsDir) return;
@@ -159,7 +159,7 @@ test('says the app is up to date instead of offering the check again', async ({ 
   await page.getByRole('button', { name: 'Settings' }).click();
   await page.getByRole('dialog', { name: 'Settings' }).getByText('About', { exact: true }).click();
   await page.getByRole('button', { name: 'Check for updates' }).click();
-  await expect(page.getByText('Relay DB is up to date')).toBeVisible();
+  await expect(page.getByText('Plugboard is up to date')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Check for updates' })).toHaveCount(0);
 });
 

@@ -28,10 +28,10 @@ PG_SERVERS    := 55432 55433
 MYSQL_SERVERS := 53306 53307 53310 53311 53312
 test-servers:
 	@cd apps/desktop && for port in $(PG_SERVERS); do \
-		echo "== PostgreSQL on :$$port"; RELAYDB_TEST_PG=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
+		echo "== PostgreSQL on :$$port"; PLUGBOARD_TEST_PG=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
 	@cd apps/desktop && for port in $(MYSQL_SERVERS); do \
-		echo "== MySQL/MariaDB on :$$port"; RELAYDB_TEST_MYSQL=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
-	@cd apps/desktop && echo "== SSH tunnels" && RELAYDB_TEST_PG=127.0.0.1:55432 RELAYDB_TEST_MYSQL=127.0.0.1:53306 RELAYDB_TEST_SSH=127.0.0.1:52222 go test -count=1 ./internal/db/...
+		echo "== MySQL/MariaDB on :$$port"; PLUGBOARD_TEST_MYSQL=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
+	@cd apps/desktop && echo "== SSH tunnels" && PLUGBOARD_TEST_PG=127.0.0.1:55432 PLUGBOARD_TEST_MYSQL=127.0.0.1:53306 PLUGBOARD_TEST_SSH=127.0.0.1:52222 go test -count=1 ./internal/db/...
 
 db-down:
 	docker compose -f dev/docker-compose.yml --profile all down -v
@@ -42,7 +42,7 @@ sample-db:
 # The walkthrough in apps/desktop/frontend/e2e drives the UI against a
 # stand-in backend, so the pictures are the same every time and hold no real data.
 screenshots:
-	cd apps/desktop/frontend && RELAYDB_SCREENSHOTS="$(CURDIR)/.github/assets/screenshots" npx playwright test
+	cd apps/desktop/frontend && PLUGBOARD_SCREENSHOTS="$(CURDIR)/.github/assets/screenshots" npx playwright test
 
 release:
 	scripts/release.sh $(or $(v),patch)

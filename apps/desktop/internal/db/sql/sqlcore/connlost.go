@@ -10,7 +10,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
 )
 
 func (s *Session) connLost(err error) bool {

@@ -1,6 +1,6 @@
 import type { ThemeMode } from './wire';
 
-const STORAGE_KEY = 'relaydb.theme';
+const STORAGE_KEY = 'plugboard.theme';
 const media = matchMedia('(prefers-color-scheme: dark)');
 let mode: ThemeMode = 'system';
 

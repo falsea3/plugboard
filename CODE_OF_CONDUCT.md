@@ -54,7 +54,7 @@ event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the
 maintainers privately by opening a
-[private report](https://github.com/relay-client/relay-db/security/advisories/new) — it is
+[private report](https://github.com/relay-client/plugboard/security/advisories/new) — it is
 currently the only confidential channel on this repository, and reports sent there are
 visible only to the maintainers.
 

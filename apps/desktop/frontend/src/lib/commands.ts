@@ -1,11 +1,11 @@
 import { app } from './stores/app.svelte';
 import type { ThemeMode } from './wire';
 
-export const REFRESH_EVENT = 'relaydb:refresh';
-export const FILTER_TABLES_EVENT = 'relaydb:filter-tables';
-export const COMMIT_EVENT = 'relaydb:commit';
-export const ADD_ROW_EVENT = 'relaydb:add-row';
-export const FILTER_ROWS_EVENT = 'relaydb:filter-rows';
+export const REFRESH_EVENT = 'plugboard:refresh';
+export const FILTER_TABLES_EVENT = 'plugboard:filter-tables';
+export const COMMIT_EVENT = 'plugboard:commit';
+export const ADD_ROW_EVENT = 'plugboard:add-row';
+export const FILTER_ROWS_EVENT = 'plugboard:filter-rows';
 
 export function runCommand(command: string) {
   const ws = app.active;

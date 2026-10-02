@@ -32,7 +32,7 @@ func bundleOf(exe string) string {
 }
 
 func installBundle(archive, bundle, version string) error {
-	stage, err := os.MkdirTemp(bundle, ".relay-db-update-")
+	stage, err := os.MkdirTemp(bundle, ".plugboard-update-")
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func installBundle(archive, bundle, version string) error {
 		return err
 	}
 	if got != version {
-		return fmt.Errorf("%w: it says version %s, the release %s", ErrBundleNotRelayDB, got, version)
+		return fmt.Errorf("%w: it says version %s, the release %s", ErrBundleNotPlugboard, got, version)
 	}
 	current := filepath.Join(bundle, "Contents")
 	retired := filepath.Join(stage, "old-Contents")
@@ -86,7 +86,7 @@ func stagedContents(stage string) (string, error) {
 		}
 		return contents, nil
 	}
-	return "", ErrBundleNotRelayDB
+	return "", ErrBundleNotPlugboard
 }
 
 func bundleVersion(plist string) (string, error) {

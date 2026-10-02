@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/relay-client/relay-db/security/advisories/new
+    url: https://github.com/relay-client/plugboard/security/advisories/new
     about: Report it privately through a GitHub security advisory, not in a public issue.

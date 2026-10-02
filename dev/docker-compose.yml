@@ -102,7 +102,7 @@ services:
       && exec /usr/sbin/sshd -D -e"
     ports: ["127.0.0.1:52222:22"]
     volumes:
-      # Keep host keys across container re-creation, or Relay DB (rightly)
+      # Keep host keys across container re-creation, or Plugboard (rightly)
       # refuses the "changed" key.
       - bastion-keys:/etc/ssh
     healthcheck:

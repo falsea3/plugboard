@@ -128,7 +128,7 @@ jobs:
           set -euo pipefail
           flags=(-platform "${{ matrix.platform }}")
           if [ "$RUNNER_OS" = Windows ]; then flags+=(-nsis); fi
-          mod=github.com/relay-client/relay-db/apps/desktop/internal
+          mod=github.com/relay-client/plugboard/apps/desktop/internal
           wails build "${flags[@]}" -ldflags "-X $mod/api.appVersion=$VERSION -X $mod/update.Repo=$UPDATE_REPOSITORY -X $mod/update.PublicKey=$UPDATE_PUBLIC_KEY"
 
       - name: Package macOS
@@ -136,8 +136,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release
-          (cd "apps/desktop/build/bin" && ditto -c -k --keepParent "Relay DB.app" "$GITHUB_WORKSPACE/release/relay-db-darwin-${{ matrix.arch }}.app.zip")
-          apps/desktop/build/darwin/make-dmg.sh "apps/desktop/build/bin/Relay DB.app" "release/relay-db-$VERSION-darwin-${{ matrix.arch }}.dmg" "Relay DB $VERSION"
+          (cd "apps/desktop/build/bin" && ditto -c -k --keepParent "Plugboard.app" "$GITHUB_WORKSPACE/release/plugboard-darwin-${{ matrix.arch }}.app.zip")
+          apps/desktop/build/darwin/make-dmg.sh "apps/desktop/build/bin/Plugboard.app" "release/plugboard-$VERSION-darwin-${{ matrix.arch }}.dmg" "Plugboard $VERSION"
 
       - name: Package Windows
         if: runner.os == 'Windows'
@@ -146,26 +146,26 @@ jobs:
           New-Item -ItemType Directory -Force release | Out-Null
           $installer = Get-ChildItem apps\desktop\build\bin\*installer.exe | Select-Object -First 1
           if (-not $installer) { throw "NSIS installer not found in build\bin" }
-          Copy-Item $installer.FullName "release\relay-db-$env:VERSION-windows-${{ matrix.arch }}-installer.exe"
-          Copy-Item apps\desktop\build\bin\relay-db.exe "release\relay-db-windows-${{ matrix.arch }}.exe"
+          Copy-Item $installer.FullName "release\plugboard-$env:VERSION-windows-${{ matrix.arch }}-installer.exe"
+          Copy-Item apps\desktop\build\bin\plugboard.exe "release\plugboard-windows-${{ matrix.arch }}.exe"
 
       - name: Package Linux
         if: runner.os == 'Linux'
         run: |
           set -euo pipefail
           mkdir -p release AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/512x512/apps
-          cp apps/desktop/build/bin/relay-db release/relay-db-linux-amd64
-          cp apps/desktop/build/bin/relay-db AppDir/usr/bin/relay-db
-          cp apps/desktop/build/appicon.png AppDir/usr/share/icons/hicolor/512x512/apps/relay-db.png
-          cp apps/desktop/build/appicon.png AppDir/relay-db.png
-          printf '%s\n' '[Desktop Entry]' 'Type=Application' 'Name=Relay DB' 'Exec=relay-db' 'Icon=relay-db' \
-            'Categories=Development;Database;' 'Comment=Desktop database client' > AppDir/relay-db.desktop
-          cp AppDir/relay-db.desktop AppDir/usr/share/applications/
-          printf '%s\n' '#!/bin/sh' 'HERE="$(dirname "$(readlink -f "$0")")"' 'exec "$HERE/usr/bin/relay-db" "$@"' > AppDir/AppRun
-          chmod +x AppDir/AppRun AppDir/usr/bin/relay-db
+          cp apps/desktop/build/bin/plugboard release/plugboard-linux-amd64
+          cp apps/desktop/build/bin/plugboard AppDir/usr/bin/plugboard
+          cp apps/desktop/build/appicon.png AppDir/usr/share/icons/hicolor/512x512/apps/plugboard.png
+          cp apps/desktop/build/appicon.png AppDir/plugboard.png
+          printf '%s\n' '[Desktop Entry]' 'Type=Application' 'Name=Plugboard' 'Exec=plugboard' 'Icon=plugboard' \
+            'Categories=Development;Database;' 'Comment=Desktop database client' > AppDir/plugboard.desktop
+          cp AppDir/plugboard.desktop AppDir/usr/share/applications/
+          printf '%s\n' '#!/bin/sh' 'HERE="$(dirname "$(readlink -f "$0")")"' 'exec "$HERE/usr/bin/plugboard" "$@"' > AppDir/AppRun
+          chmod +x AppDir/AppRun AppDir/usr/bin/plugboard
           curl -fsSL -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
-          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "release/relay-db-$VERSION-linux-amd64.AppImage"
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "release/plugboard-$VERSION-linux-amd64.AppImage"
 
       - name: Smoke test
         if: runner.os != 'Windows'
@@ -174,9 +174,9 @@ jobs:
           set -euo pipefail
           if [ "$RUNNER_OS" = macOS ]; then
             check="$(mktemp -d)"
-            ditto -x -k "release/relay-db-darwin-${{ matrix.arch }}.app.zip" "$check"
-            bin="$check/Relay DB.app/Contents/MacOS/relay-db"
-            plist_version="$(plutil -extract CFBundleShortVersionString raw -o - "$check/Relay DB.app/Contents/Info.plist")"
+            ditto -x -k "release/plugboard-darwin-${{ matrix.arch }}.app.zip" "$check"
+            bin="$check/Plugboard.app/Contents/MacOS/plugboard"
+            plist_version="$(plutil -extract CFBundleShortVersionString raw -o - "$check/Plugboard.app/Contents/Info.plist")"
             [ "$plist_version" = "$VERSION" ] || { echo "::error::Info.plist says $plist_version, not $VERSION"; exit 1; }
             # Exactly the architecture the download is named for.
             want="$([ "${{ matrix.arch }}" = amd64 ] && echo x86_64 || echo arm64)"
@@ -188,8 +188,8 @@ jobs:
               exit 0
             fi
           else
-            bin=release/relay-db-linux-amd64
-            out="$("release/relay-db-$VERSION-linux-amd64.AppImage" --appimage-extract-and-run --version)"
+            bin=release/plugboard-linux-amd64
+            out="$("release/plugboard-$VERSION-linux-amd64.AppImage" --appimage-extract-and-run --version)"
             case "$out" in *"$VERSION"*) ;; *) echo "::error::the AppImage reports '$out', not $VERSION"; exit 1 ;; esac
           fi
           out="$("$bin" --version)"
@@ -202,7 +202,7 @@ jobs:
         run: |
           # A GUI-subsystem exe only writes to stdout when it is redirected to a file.
           $out = Join-Path $env:RUNNER_TEMP "version.txt"
-          $p = Start-Process -FilePath "release\relay-db-windows-${{ matrix.arch }}.exe" -ArgumentList "--version" `
+          $p = Start-Process -FilePath "release\plugboard-windows-${{ matrix.arch }}.exe" -ArgumentList "--version" `
             -Wait -PassThru -NoNewWindow -RedirectStandardOutput $out
           if ($p.ExitCode -ne 0) { throw "the build exited with $($p.ExitCode)" }
           $text = (Get-Content $out -Raw).Trim()
@@ -211,7 +211,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: relay-db-${{ matrix.artifact }}
+          name: plugboard-${{ matrix.artifact }}
           path: release/*
           if-no-files-found: error
           retention-days: 1
@@ -248,15 +248,15 @@ jobs:
           trap 'rm -f "$key"' EXIT
           printf '%s\n' "$UPDATE_SIGNING_KEY" > "$key"
           version="${GITHUB_REF_NAME#v}"
-          for name in relay-db-darwin-arm64.app.zip relay-db-darwin-amd64.app.zip relay-db-windows-amd64.exe relay-db-windows-arm64.exe \
-                      relay-db-linux-amd64 "relay-db-$version-linux-amd64.AppImage"; do
+          for name in plugboard-darwin-arm64.app.zip plugboard-darwin-amd64.app.zip plugboard-windows-amd64.exe plugboard-windows-arm64.exe \
+                      plugboard-linux-amd64 "plugboard-$version-linux-amd64.AppImage"; do
             # The trusted comment ties the signature to this version and file
             # (see internal/update.signedComment).
-            minisign -S -s "$key" -t "relay-db v$version $name" -m "release/$name"
+            minisign -S -s "$key" -t "plugboard v$version $name" -m "release/$name"
           done
           # The public key must verify what the private key signed, or no install could ever update.
           printf '%s\n' "untrusted comment: minisign public key" "$UPDATE_PUBLIC_KEY" > pub.key
-          minisign -V -p pub.key -m release/relay-db-linux-amd64
+          minisign -V -p pub.key -m release/plugboard-linux-amd64
 
       - name: Write latest.json and checksums
         run: |
@@ -272,7 +272,7 @@ jobs:
           set -euo pipefail
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" release/* --clobber
-            gh release edit "$GITHUB_REF_NAME" --title "Relay DB ${GITHUB_REF_NAME#v}" --notes-file release-notes.md
+            gh release edit "$GITHUB_REF_NAME" --title "Plugboard ${GITHUB_REF_NAME#v}" --notes-file release-notes.md
           else
-            gh release create "$GITHUB_REF_NAME" release/* --title "Relay DB ${GITHUB_REF_NAME#v}" --notes-file release-notes.md
+            gh release create "$GITHUB_REF_NAME" release/* --title "Plugboard ${GITHUB_REF_NAME#v}" --notes-file release-notes.md
           fi

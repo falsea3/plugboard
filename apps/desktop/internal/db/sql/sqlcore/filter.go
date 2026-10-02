@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []model.Filter) (string, []any, error) {

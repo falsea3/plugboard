@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func newTestStore(t *testing.T) (*Connections, string) {
@@ -197,6 +197,38 @@ func TestWithoutSecretsClearsEverySecret(t *testing.T) {
 	for _, f := range secretFields {
 		if *f.field(&c) != "" {
 			t.Errorf("%s survived WithoutSecrets", f.name)
+		}
+	}
+}
+
+func TestMoveSecretsFromTheOldKeychain(t *testing.T) {
+	s, dir := newTestStore(t)
+	kept, err := s.Save(model.Connection{Name: "kept", Driver: model.Postgres, Host: "a", User: "u", Password: "new", SavePassword: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	moved, err := s.Save(model.Connection{Name: "moved", Driver: model.Postgres, Host: "b", User: "u", SavePassword: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := &fileSecrets{path: filepath.Join(dir, "old.json")}
+	old.Set(secretKey(kept.ID, "password"), "stale")
+	old.Set(secretKey(moved.ID, "password"), "hunter2")
+	old.Set(secretKey(moved.ID, "ssh-passphrase"), "phrase")
+
+	if err := s.MoveSecrets(old); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := s.Get(kept.ID); got.Password != "new" {
+		t.Fatalf("kept password = %q, want the one already saved", got.Password)
+	}
+	got, _ := s.Get(moved.ID)
+	if got.Password != "hunter2" || got.SSH.Passphrase != "phrase" {
+		t.Fatalf("moved secrets = %q / %q", got.Password, got.SSH.Passphrase)
+	}
+	for _, key := range []string{secretKey(kept.ID, "password"), secretKey(moved.ID, "password"), secretKey(moved.ID, "ssh-passphrase")} {
+		if _, err := old.Get(key); err != ErrSecretNotFound {
+			t.Fatalf("%s is still in the old store", key)
 		}
 	}
 }

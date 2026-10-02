@@ -3,7 +3,7 @@ package db
 import (
 	"testing"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func TestTunnelEndpoints(t *testing.T) {

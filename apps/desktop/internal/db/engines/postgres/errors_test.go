@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
 )
 
 func TestSyntaxErrors(t *testing.T) {

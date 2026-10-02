@@ -2,16 +2,16 @@ SHELL := /bin/sh
 
 ROOT_DIR      := $(shell git -C $(CURDIR) rev-parse --show-toplevel 2>/dev/null || (cd ../.. && pwd))
 DESKTOP_DIR   := $(ROOT_DIR)/apps/desktop
-APP_NAME      := Relay DB
+APP_NAME      := Plugboard
 WAILS_VERSION := v2.16.0
 WAILS_CMD     := $(shell command -v wails 2>/dev/null || { [ -x "$$HOME/go/bin/wails" ] && echo "$$HOME/go/bin/wails"; } || printf '%s' 'go run github.com/wailsapp/wails/v2/cmd/wails@$(WAILS_VERSION)')
-DEV_ENV       := RELAYDB_DISABLE_KEYCHAIN=1
+DEV_ENV       := PLUGBOARD_DISABLE_KEYCHAIN=1
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null | sed 's/^v//')
 ifeq ($(VERSION),)
 VERSION := dev
 endif
-LDFLAGS := -X 'github.com/relay-client/relay-db/apps/desktop/internal/api.appVersion=$(VERSION)'
+LDFLAGS := -X 'github.com/relay-client/plugboard/apps/desktop/internal/api.appVersion=$(VERSION)'
 
 MAC_APP := $(DESKTOP_DIR)/build/bin/$(APP_NAME).app
 # build-macos builds for this Mac; MAC_ARCH=amd64 (or arm64) builds for the other.

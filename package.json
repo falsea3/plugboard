@@ -1,5 +1,5 @@
 {
-  "name": "relay-db-monorepo",
+  "name": "plugboard-monorepo",
   "private": true,
   "workspaces": [
     "apps/desktop/frontend"
@@ -8,15 +8,15 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "frontend:dev": "npm --workspace @relay-db/desktop-frontend run dev",
-    "frontend:build": "npm --workspace @relay-db/desktop-frontend run build",
-    "frontend:check": "npm --workspace @relay-db/desktop-frontend run check",
-    "frontend:test": "npm --workspace @relay-db/desktop-frontend run test",
+    "frontend:dev": "npm --workspace @plugboard/desktop-frontend run dev",
+    "frontend:build": "npm --workspace @plugboard/desktop-frontend run build",
+    "frontend:check": "npm --workspace @plugboard/desktop-frontend run check",
+    "frontend:test": "npm --workspace @plugboard/desktop-frontend run test",
     "backend:test": "make -C apps/desktop test",
     "desktop:dev": "make -C apps/desktop dev",
     "desktop:build": "make -C apps/desktop build",
     "icons": "node scripts/gen-appicon.mjs",
-    "frontend:e2e": "npm --workspace @relay-db/desktop-frontend run e2e"
+    "frontend:e2e": "npm --workspace @plugboard/desktop-frontend run e2e"
   },
   "devDependencies": {
     "sharp": "^0.35.5"

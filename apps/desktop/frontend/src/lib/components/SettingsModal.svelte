@@ -4,7 +4,7 @@
   import Icon, { type IconName } from './Icon.svelte';
   import Select from './Select.svelte';
   import Spinner from './Spinner.svelte';
-  import mark from '../assets/relay-db-mark.png';
+  import mark from '../assets/plugboard-mark.png';
 
   let info = $state<AppInfo | null>(null);
   api.appInfo().then(i => (info = i)).catch(() => {});
@@ -123,7 +123,7 @@
         <div class="field row">
           <div>
             <div class="label"><Icon name="update" size={13} />Install updates automatically</div>
-            <p class="hint">Relay DB checks GitHub for a new version at launch. On, it installs it right away and switches to it the next time you open the app; off, it asks first.</p>
+            <p class="hint">Plugboard checks GitHub for a new version at launch. On, it installs it right away and switches to it the next time you open the app; off, it asks first.</p>
           </div>
           <label class="switch">
             <input type="checkbox" checked={s.autoUpdate} onchange={e => app.updateSettings({ autoUpdate: e.currentTarget.checked })} />
@@ -160,7 +160,7 @@
       {:else}
         <div class="about">
           <img src={mark} alt="" width="80" height="80" draggable="false" />
-          <h2>Relay DB</h2>
+          <h2>Plugboard</h2>
           <p class="version">Version {info?.version ?? '—'}</p>
           <div class="update-row">
             {#if app.update?.status === 'available'}
@@ -172,7 +172,7 @@
               <span>Version {app.update.info.version} is installed.</span>
               <button class="btn sm primary" onclick={() => app.restartToUpdate()}>Restart now</button>
             {:else if upToDate}
-              <span class="up-to-date"><Icon name="check" size={13} />Relay DB is up to date</span>
+              <span class="up-to-date"><Icon name="check" size={13} />Plugboard is up to date</span>
             {:else}
               {#if app.update?.status === 'failed'}<span class="update-error" title={app.update.error}>{app.update.error}</span>{:else if checkError}<span class="update-error" title={checkError}>{checkError}</span>{/if}
               <button class="btn sm" onclick={checkForUpdate} disabled={checking}>{#if checking}<Spinner size={11} />Checking…{:else}Check for updates{/if}</button>
@@ -180,7 +180,7 @@
           </div>
           <p class="blurb">
             A native database client for PostgreSQL, MySQL and SQLite. Connections and credentials stay on this
-            computer — passwords are kept in the system keychain, and Relay DB has no accounts, no cloud sync
+            computer — passwords are kept in the system keychain, and Plugboard has no accounts, no cloud sync
             and no telemetry.
           </p>
           <dl class="details">

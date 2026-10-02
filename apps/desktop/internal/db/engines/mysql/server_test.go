@@ -7,16 +7,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/relay-client/relay-db/apps/desktop/internal/db"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/mysql"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqlcore"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqltest"
-	"github.com/relay-client/relay-db/apps/desktop/internal/model"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/mysql"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltest"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func TestServer(t *testing.T) {
 	sqltest.Run(t, sqltest.Server{
-		Env:       "RELAYDB_TEST_MYSQL",
+		Env:       "PLUGBOARD_TEST_MYSQL",
 		Dialect:   mysql.Dialect{},
 		Schema:    "shop",
 		True:      "1",
@@ -34,7 +34,7 @@ func show(s *string) string {
 }
 
 func TestCatalogAndValues(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_MYSQL", model.MySQL)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_MYSQL", model.MySQL)
 	ctx := context.Background()
 	s := sqltest.Open(t, mysql.Dialect{}, c)
 
@@ -86,7 +86,7 @@ func TestCatalogAndValues(t *testing.T) {
 }
 
 func TestEditorPaging(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_MYSQL", model.MySQL)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_MYSQL", model.MySQL)
 	s := sqltest.Open(t, mysql.Dialect{}, c)
 	res, err := s.Run(context.Background(), "select 1 as a, 2 as a; select * from orders order by id desc")
 	if err != nil {
@@ -101,7 +101,7 @@ func TestEditorPaging(t *testing.T) {
 }
 
 func TestEnumsAndExpressions(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_MYSQL", model.MySQL)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_MYSQL", model.MySQL)
 	ctx := context.Background()
 	s := sqltest.Open(t, mysql.Dialect{}, c)
 	cols, err := s.Columns(ctx, "shop", "orders")
@@ -126,7 +126,7 @@ func TestEnumsAndExpressions(t *testing.T) {
 }
 
 func TestRestatedColumns(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_MYSQL", model.MySQL)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_MYSQL", model.MySQL)
 	s := sqltest.Open(t, mysql.Dialect{}, c)
 	ctx := context.Background()
 	s.Run(ctx, "drop table if exists zz_restated")
@@ -163,7 +163,7 @@ func TestRestatedColumns(t *testing.T) {
 }
 
 func TestStructureDefinitions(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_MYSQL", model.MySQL)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_MYSQL", model.MySQL)
 	ctx := context.Background()
 	s := sqltest.Open(t, mysql.Dialect{}, c)
 	s.Run(ctx, "drop table if exists zz_structure")
@@ -225,7 +225,7 @@ func TestStructureDefinitions(t *testing.T) {
 }
 
 func TestLockWaitIsReset(t *testing.T) {
-	c := sqltest.Conn(t, "RELAYDB_TEST_MYSQL", model.MySQL)
+	c := sqltest.Conn(t, "PLUGBOARD_TEST_MYSQL", model.MySQL)
 	s := sqltest.Open(t, mysql.Dialect{}, c)
 	ctx := context.Background()
 	s.Run(ctx, "drop table if exists zz_wait")
