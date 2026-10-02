@@ -10,7 +10,7 @@
     options?(r: number, c: number): string[] | null;
   }
 
-  export type MenuItem = { id: string; label: string; kbd?: string; danger?: boolean; disabled?: boolean } | 'sep';
+  export type MenuItem = { id: string; label: string; kbd?: string; danger?: boolean; disabled?: boolean; items?: MenuItem[] } | 'sep';
 
   export type MenuAt = { r: number; c: number; rows: number[] };
 </script>
@@ -66,6 +66,7 @@
   let rowAnchor = $state<number | null>(null);
   let cellEditor = $state<{ r: number; c: number; text: string; wasNull: boolean; touched: boolean; options: string[] | null } | null>(null);
   let menu = $state<{ x: number; y: number; r: number; c: number } | null>(null);
+  let submenu = $state<number | null>(null);
 
   let shapeKey = '';
   $effect.pre(() => {
@@ -234,6 +235,7 @@
 
   function pick(id: string, m: { r: number; c: number }) {
     menu = null;
+    submenu = null;
     const { r, c } = m;
     switch (id) {
       case 'edit':
@@ -278,6 +280,7 @@
   function openHeaderMenu(e: MouseEvent, c: number) {
     e.preventDefault();
     commitEdit();
+    submenu = null;
     menu = { x: e.clientX, y: e.clientY, r: -1, c };
   }
 
@@ -289,6 +292,7 @@
       selection = { row: r, col: c };
       rowAnchor = null;
     }
+    submenu = null;
     menu = { x: e.clientX, y: e.clientY, r, c };
   }
 
@@ -515,14 +519,36 @@
     {@const items = menuItems(m)}
     {@const top = Math.max(8, Math.min(m.y, window.innerHeight - items.length * 27 - 16))}
     {@const left = Math.max(8, Math.min(m.x, window.innerWidth - 236))}
+    {@const flip = left + 2 * 236 > window.innerWidth}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div class="menu-backdrop" onclick={() => (menu = null)} oncontextmenu={e => { e.preventDefault(); menu = null; }}></div>
     <div class="menu" role="menu" style:left="{left}px" style:top="{top}px">
       {#each items as it, i (i)}
         {#if it === 'sep'}
           <div class="sep"></div>
+        {:else if it.items}
+          {@const up = top + (i + it.items.length) * 27 + 16 > window.innerHeight}
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <div class="sub-wrap" onmouseenter={() => (submenu = i)} onmouseleave={() => (submenu = null)}>
+            <button role="menuitem" aria-haspopup="menu" aria-expanded={submenu === i} class:open={submenu === i} disabled={it.disabled} onclick={() => (submenu = i)}>
+              {it.label}<span class="arrow"><Icon name="chevron-right" size={11} /></span>
+            </button>
+            {#if submenu === i}
+              <div class="menu sub" class:flip class:up role="menu">
+                {#each it.items as child, j (j)}
+                  {#if child === 'sep'}
+                    <div class="sep"></div>
+                  {:else}
+                    <button role="menuitem" class:danger={child.danger} disabled={child.disabled} onclick={() => pick(child.id, m)}>
+                      {child.label}{#if child.kbd}<span class="kbd">{child.kbd}</span>{/if}
+                    </button>
+                  {/if}
+                {/each}
+              </div>
+            {/if}
+          </div>
         {:else}
-          <button role="menuitem" class:danger={it.danger} disabled={it.disabled} onclick={() => pick(it.id, m)}>
+          <button role="menuitem" class:danger={it.danger} disabled={it.disabled} onclick={() => pick(it.id, m)} onmouseenter={() => (submenu = null)}>
             {it.label}{#if it.kbd}<span class="kbd">{it.kbd}</span>{/if}
           </button>
         {/if}
@@ -709,6 +735,13 @@
   .menu button.danger { color: var(--danger); }
   .menu button.danger:hover { color: var(--on-accent); background: var(--danger); }
   .menu .sep { height: 1px; margin: 4px 6px; background: var(--border-subtle); }
+  .sub-wrap { position: relative; }
+  .menu button .arrow { display: flex; margin-left: auto; color: var(--text-3); }
+  .menu button.open { background: var(--hover); }
+  .menu button:hover .arrow { color: inherit; }
+  .menu.sub { position: absolute; left: 100%; top: -4px; margin-left: 2px; }
+  .menu.sub.flip { left: auto; right: 100%; margin: 0 2px 0 0; }
+  .menu.sub.up { top: auto; bottom: -4px; }
 
   .empty {
     position: absolute;

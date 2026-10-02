@@ -5,12 +5,14 @@
   import { DEFAULT, NOW, SET_DEFAULT, TableEdits, exprLabel, isExpr } from '../stores/edits.svelte';
   import { ADD_ROW_EVENT, COMMIT_EVENT, FILTER_ROWS_EVENT, REFRESH_EVENT } from '../commands';
   import { formatCount, formatDuration, isTrue } from '../format';
-  import { insertStatement } from '../sqlText';
+  import { rowsStatement, type RowStatement } from '../sqlText';
   import { copyToClipboard } from '../clipboard';
   import DataGrid, { type GridEditing, type MenuAt, type MenuItem } from './DataGrid.svelte';
   import ValueBar from './ValueBar.svelte';
   import StructureView from './StructureView.svelte';
   import Icon from './Icon.svelte';
+  import LoadBar from './LoadBar.svelte';
+  import Spinner from './Spinner.svelte';
   import Modal from './Modal.svelte';
   import FilterBar, { newFilter, noValue, type FilterRow } from './FilterBar.svelte';
   import type { Filter, FilterOp } from '../wire';
@@ -29,6 +31,7 @@
   let columns = $state<Column[]>([]);
   let sort = $state<{ column: string; desc: boolean } | null>(null);
   let loading = $state(false);
+  let columnsLoading = $state(false);
   let error = $state('');
   let selected = $state<{ value: CellValue; column: ResultColumn } | null>(null);
   let loadSeq = 0;
@@ -52,6 +55,7 @@
 
   const keyColumns = $derived(columns.filter(c => c.primaryKey).map(c => c.name));
   const binary = $derived(new Set(columns.filter(c => c.kind === 'binary').map(c => c.name)));
+  const canFindRows = $derived(keyColumns.length > 0 && keyColumns.every(k => !binary.has(k)));
 
   const readOnlyReason = $derived.by(() => {
     if (ws.readOnly) return 'Read-only session';
@@ -126,7 +130,12 @@
         );
       }
     }
-    items.push('sep', { id: 'copy-insert', label: 'Copy as INSERT' });
+    const sqlRows = (grid?.selectedRowsFor(r) ?? [r]).filter(i => edits.rowState(i) !== 'new');
+    if (sqlRows.length > 0) {
+      const statements = (to: string): MenuItem[] =>
+        (['select', 'insert', 'update', 'delete'] as const).map(k => ({ id: `${to}:${k}`, label: k.toUpperCase(), disabled: k !== 'insert' && !canFindRows }));
+      items.push('sep', { id: 'sql-copy', label: 'Copy as SQL', items: statements('sql-copy') }, { id: 'sql-open', label: 'Open SQL in new query', items: statements('sql-open') });
+    }
     if (canEdit) {
       const rows = grid?.selectedRowsFor(r) ?? [r];
       const allDeleted = rows.every(i => edits.rowState(i) === 'deleted');
@@ -161,6 +170,13 @@
     return items;
   }
 
+  function rowsSQL(kind: RowStatement, rows: number[]): string {
+    const names = page!.result.columns.map(c => c.name);
+    const keep = names.flatMap((n, i) => (binary.has(n) ? [] : [i]));
+    const target = { schema: tab.schema, table: tab.table, columns: keep.map(i => names[i]), key: keyColumns };
+    return rowsStatement(kind, features, target, rows.map(r => keep.map(i => page!.result.rows[r][i])));
+  }
+
   function onmenu(id: string, at: MenuAt): boolean {
     if (!page) return false;
     const name = at.c >= 0 ? page.result.columns[at.c].name : '';
@@ -192,12 +208,15 @@
       case 'exclude-value':
         addFilter(name, v === null ? 'not_null' : '!=', v === null ? '' : String(v));
         return true;
-      case 'copy-insert': {
-        const rows = (at.rows.length ? at.rows : [at.r]).filter(r => edits.rowState(r) !== 'new');
-        const cols = page.result.columns.map(c => c.name);
-        copyToClipboard(insertStatement(features, tab.schema, tab.table, cols, rows.map(r => page!.result.rows[r])));
-        return true;
-      }
+    }
+    if (id.startsWith('sql-copy:') || id.startsWith('sql-open:')) {
+      const [to, kind] = id.split(':');
+      const rows = (at.rows.length ? at.rows : [at.r]).filter(r => edits.rowState(r) !== 'new');
+      if (rows.length === 0) return true;
+      const sql = rowsSQL(kind as RowStatement, rows);
+      if (to === 'sql-open') ws.newQuery(sql);
+      else copyToClipboard(sql);
+      return true;
     }
 
     if (!canEdit) {
@@ -338,10 +357,13 @@
   const countQuery = () => ({ schema: tab.schema, table: tab.table, offset: 0, limit: 0, orderBy: '', orderDesc: false, filters });
 
   async function loadColumns() {
+    columnsLoading = true;
     try {
       columns = await api.describeTable(sessionId, tab.schema, tab.table);
     } catch (err) {
       app.notify(err);
+    } finally {
+      columnsLoading = false;
     }
   }
 
@@ -513,7 +535,6 @@
     </div>
     <span class="title mono faint">{tab.schema}.<span class="muted">{tab.table}</span></span>
     <span style="flex:1"></span>
-    {#if loading}<span class="faint small">Loading…</span>{/if}
     <button
       class="btn sm ghost filter-btn"
       class:on={showFilters || filters.length > 0}
@@ -541,10 +562,13 @@
   {/if}
 
   <div class="content">
+    {#if loading || columnsLoading}<LoadBar label="Loading {tab.table}" />{/if}
     {#if error}
       <div class="error" role="alert"><Icon name="alert" /><span class="message">{error}</span></div>
     {:else if mode === 'data'}
-      {#if page}
+      {#if !page && loading}
+        <div class="waiting faint"><Spinner />Loading rows…</div>
+      {:else if page}
         <DataGrid
           bind:this={grid}
           columns={page.result.columns}
@@ -590,7 +614,7 @@
       <span style="flex:1"></span>
       <button class="btn sm ghost" onclick={discard} disabled={saving}>Discard</button>
       <button class="btn sm" onclick={() => showPreview(false)} disabled={saving}><Icon name="code" size={12} />Preview SQL</button>
-      <button class="btn sm primary" onclick={commit} disabled={saving}>{saving ? 'Saving…' : 'Commit'}<span class="kbd on-accent">⌘S</span></button>
+      <button class="btn sm primary" onclick={commit} disabled={saving}>{#if saving}<Spinner size={11} />Saving…{:else}Commit{/if}<span class="kbd on-accent">⌘S</span></button>
     </div>
   {:else if mode === 'data'}
     <div class="footer">
@@ -600,7 +624,7 @@
       <button class="btn icon sm ghost" title="Last page" disabled={!page?.hasMore || loading} onclick={() => go('last')}><Icon name="chevrons-right" size={13} /></button>
       <span class="small muted">{rangeLabel}</span>
       {#if page && !count?.exact && (page.hasMore || page.hasPrev)}
-        <button class="link-btn" onclick={countExactly} disabled={counting} title="Run COUNT(*) — can take a while on big tables">{counting ? 'Counting…' : 'Count'}</button>
+        <button class="link-btn" onclick={countExactly} disabled={counting} title="Run COUNT(*) — can take a while on big tables">{#if counting}<Spinner size={10} />Counting…{:else}Count{/if}</button>
       {/if}
       {#if filters.length > 0}<span class="filtered">filtered</span>{/if}
       {#if page}<span class="small faint">· {formatDuration(page.result.durationMs)}</span>{/if}
@@ -652,11 +676,15 @@
   .toolbar { border-bottom: 1px solid var(--border); }
   .footer { height: 37px; border-top: 1px solid var(--border); gap: 4px; min-width: 0; }
   .content { flex: 1; min-height: 0; position: relative; }
+  .waiting { display: flex; align-items: center; justify-content: center; gap: 8px; height: 100%; font-size: 12.5px; }
   .title { margin-left: 4px; font-size: 12px; }
   .small { font-size: 12px; padding: 0 4px; white-space: nowrap; }
   .strong { color: var(--text); font-weight: 600; }
 
   .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     border: 0;
     padding: 0 4px;
     background: transparent;

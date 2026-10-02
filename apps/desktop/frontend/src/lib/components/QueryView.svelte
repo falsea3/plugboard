@@ -11,6 +11,7 @@
   import DataGrid from './DataGrid.svelte';
   import ValueBar from './ValueBar.svelte';
   import Icon from './Icon.svelte';
+  import Spinner from './Spinner.svelte';
   import Modal from './Modal.svelte';
   import { startDrag } from '../drag';
 
@@ -27,12 +28,21 @@
   let hasSelection = $state(false);
   let run = $state<QueryRun | null>(null);
   let running = $state(false);
+  let elapsed = $state(0);
   let queryId = '';
   let resultIndex = $state(0);
   let editorHeight = $state(260);
   let selected = $state<{ value: CellValue; column: ResultColumn } | null>(null);
 
   const tableNames = $derived(ws.tables.map(t => t.name));
+
+  $effect(() => {
+    if (!running) return;
+    const started = performance.now();
+    elapsed = 0;
+    const timer = setInterval(() => (elapsed = performance.now() - started), 100);
+    return () => clearInterval(timer);
+  });
   const current = $derived(run?.results[resultIndex] ?? null);
 
   async function execute(all: boolean) {
@@ -171,7 +181,7 @@
 
   <div class="results">
     {#if running}
-      <div class="placeholder faint">Running…</div>
+      <div class="placeholder faint" role="status"><Spinner />Running…{#if elapsed >= 1000}<span class="elapsed">{(elapsed / 1000).toFixed(1)} s</span>{/if}</div>
     {:else if !run}
       <div class="placeholder faint">Results appear here.</div>
     {:else}
@@ -219,7 +229,7 @@
         onclick={loadMore}
         disabled={loadingMore || running}
         title="Runs the query again from row {(current.offset + current.rows.length + 1).toLocaleString('en-US')} and appends the next rows"
-      >{loadingMore ? 'Loading…' : 'Load 1,000 more'}</button>
+      >{#if loadingMore}<Spinner size={11} />Loading…{:else}Load 1,000 more{/if}</button>
     {:else if current?.truncated}
       <span class="small faint" title="Only the first rows of this statement were kept">— rows beyond this weren’t loaded</span>
     {/if}
@@ -320,6 +330,7 @@
     color: var(--text-2);
   }
   .placeholder.faint { color: var(--text-3); }
+  .elapsed { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
   .result-tabs {
     flex: none;
     display: flex;

@@ -7,6 +7,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Turn rows into SQL.** Right-click a row, or a selection of rows, and pick *Copy as SQL* or *Open SQL in new query*: SELECT, INSERT, UPDATE or DELETE, matched on the primary key. UPDATE is written one statement per row, with every column set to its current value, ready to edit.
+- **Open several tables at once.** ⌘-click or ⇧-click tables in the sidebar, then *Open* (or Enter).
+- **Each connection in the title bar shows how many tabs it has open.**
+- **Relay DB says when it's waiting**: a progress line while a table page loads, a spinner while a table opens, the tables load, a connection opens, a query runs — with how long it has been running — or rows are counted, saved or tested.
+- **A proper Mac installer window**: drag Relay DB onto Applications, with the app's own icon on the disk.
+
+### Changed
+
+- **Many open connections no longer run off the title bar.** They shrink like browser tabs, the current one stays readable and in view, and the strip scrolls with the wheel or trackpad.
+- *Copy as INSERT* moved into *Copy as SQL*. Binary columns are left out of generated SQL, since the grid shows them shortened.
+
 ## [0.2.1] - 2026-10-02
 
 ### Added

@@ -10,6 +10,7 @@
   import Modal from './Modal.svelte';
   import DriverMark from './DriverMark.svelte';
   import Icon from './Icon.svelte';
+  import Spinner from './Spinner.svelte';
   import Select from './Select.svelte';
   import { formatDuration } from '../format';
 
@@ -363,7 +364,7 @@
   </form>
 
   {#snippet footer()}
-    <button type="button" class="btn" onclick={runTest} disabled={testing}>{testing ? 'Testing…' : 'Test'}</button>
+    <button type="button" class="btn" onclick={runTest} disabled={testing}>{#if testing}<Spinner size={11} />Testing…{:else}Test{/if}</button>
     <span style="flex:1"></span>
     <button type="button" class="btn" onclick={onclose}>Cancel</button>
     <button type="button" class="btn" onclick={() => save(false)} disabled={saving}>Save</button>

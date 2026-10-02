@@ -6,6 +6,7 @@
   import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
   import Icon from './Icon.svelte';
+  import Spinner from './Spinner.svelte';
 
   let query = $state('');
   let index = $state(0);
@@ -88,7 +89,7 @@
             <div class="target">{connectionTarget(c)}</div>
           </div>
           {#if app.connectingId === c.id}
-            <span class="state">Connecting…</span>
+            <span class="state" role="status"><Spinner size={10} />Connecting…</span>
           {:else if isOpen}
             <span class="state open"><span class="dot"></span>{app.active?.connection.id === c.id ? 'Current' : 'Open'}</span>
           {/if}

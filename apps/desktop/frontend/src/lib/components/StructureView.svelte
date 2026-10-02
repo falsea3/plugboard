@@ -5,6 +5,7 @@
   import { formatCount, isTrue } from '../format';
   import DataGrid, { type GridEditing, type MenuAt, type MenuItem } from './DataGrid.svelte';
   import Icon from './Icon.svelte';
+  import Spinner from './Spinner.svelte';
   import Modal from './Modal.svelte';
 
   let {
@@ -254,7 +255,7 @@
       {/if}
       <button class="btn sm ghost" onclick={discard} disabled={saving}>Discard</button>
       <button class="btn sm" onclick={() => showPreview(false)} disabled={saving}><Icon name="code" size={12} />Preview SQL</button>
-      <button class="btn sm primary" onclick={commit} disabled={saving}>{saving ? 'Saving…' : 'Commit'}<span class="kbd on-accent">⌘S</span></button>
+      <button class="btn sm primary" onclick={commit} disabled={saving}>{#if saving}<Spinner size={11} />Saving…{:else}Commit{/if}<span class="kbd on-accent">⌘S</span></button>
     </div>
   {:else}
     <div class="footer">

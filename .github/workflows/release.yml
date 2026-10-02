@@ -84,6 +84,15 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_VERSION }}
 
+      - uses: actions/setup-python@v6
+        if: runner.os == 'macOS'
+        with:
+          python-version: '3.13'
+
+      - name: Install dmgbuild
+        if: runner.os == 'macOS'
+        run: pip install -r apps/desktop/build/darwin/requirements.txt
+
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |

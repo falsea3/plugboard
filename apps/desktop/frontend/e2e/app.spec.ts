@@ -162,3 +162,48 @@ test('says the app is up to date instead of offering the check again', async ({ 
   await expect(page.getByText('Relay DB is up to date')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Check for updates' })).toHaveCount(0);
 });
+
+test('opens a range of tables at once and counts them on the connection', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  const sidebar = page.getByRole('complementary');
+  await sidebar.getByText('customers', { exact: true }).click();
+  await sidebar.getByText('orders', { exact: true }).click({ modifiers: ['Shift'] });
+  await expect(sidebar.getByText('4 selected')).toBeVisible();
+  await sidebar.getByRole('button', { name: 'Open 4' }).click();
+  await expect(page.locator('[data-ws] .count')).toHaveText('4');
+  await expect(sidebar.getByText('4 selected')).toHaveCount(0);
+});
+
+test('turns rows into SQL from the context menu', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  await page.getByRole('grid').getByText('bob.kim2@example.com').click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Open SQL in new query' }).hover();
+  await page.getByRole('menuitem', { name: 'DELETE', exact: true }).click();
+  await expect(page.locator('.cm-content')).toHaveText('DELETE FROM "public"."customers"WHERE "id" = 2;');
+});
+
+test('shows that a table and a query are still loading', async ({ page }) => {
+  await page.addInitScript(() => {
+    const app = (window as any).go.api.App;
+    for (const name of ['FetchTablePage', 'RunQuery']) {
+      const real = app[name];
+      app[name] = (...args: unknown[]) => new Promise(resolve => setTimeout(() => resolve(real(...args)), 1200));
+    }
+  });
+  await page.reload();
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  await expect(page.getByText('Loading rows…')).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Loading customers' })).toBeAttached();
+  await expect(page.getByRole('grid').getByText('ann.novak1@example.com')).toBeVisible();
+  await expect(page.getByRole('progressbar')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await page.locator('.cm-content').click();
+  await page.keyboard.insertText('select 1');
+  await page.getByRole('button', { name: 'Run', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Running…' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Stop' })).toBeVisible();
+  await expect(page.getByRole('grid').getByText('1284390.50')).toBeVisible();
+});

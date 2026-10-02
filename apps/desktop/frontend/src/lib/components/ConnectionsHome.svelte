@@ -6,6 +6,7 @@
   import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
   import Icon from './Icon.svelte';
+  import Spinner from './Spinner.svelte';
   import Modal from './Modal.svelte';
   import mark from '../assets/relay-db-mark.png';
 
@@ -78,7 +79,7 @@
               <div class="target faint">{connectionTarget(c)}</div>
             </div>
             {#if app.connectingId === c.id}
-              <span class="faint connecting">Connecting…</span>
+              <span class="faint connecting" role="status"><Spinner size={11} />Connecting…</span>
             {:else}
               {@const isOpen = !!app.workspaceFor(c.id)}
               {#if isOpen}<span class="open-badge"><span class="dot"></span>Open</span>{/if}
@@ -92,7 +93,7 @@
         {:else}
           <li class="empty">
             {#if !app.connectionsLoaded}
-              <span class="faint">Loading…</span>
+              <span class="faint loading"><Spinner size={11} />Loading…</span>
             {:else if query}
               <span class="faint">No connections match “{query}”.</span>
             {:else}
@@ -212,7 +213,7 @@
   .row-actions { display: flex; gap: 2px; align-items: center; opacity: 0; transition: opacity 0.1s; }
   li:hover .row-actions, li.selected .row-actions { opacity: 1; }
   .row-actions .btn:last-child { margin-left: 6px; }
-  .connecting { font-size: 12px; }
+  .connecting, .loading { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
   .open-badge { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ok); margin-right: 4px; }
   .open-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .kbd.on-accent { margin-left: auto; border-color: rgba(255, 255, 255, 0.35); color: rgba(255, 255, 255, 0.8); }

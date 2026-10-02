@@ -5,9 +5,11 @@
   import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
   import Icon from './Icon.svelte';
+  import Spinner from './Spinner.svelte';
   import Select from './Select.svelte';
   import { engine } from '../engines';
   import Modal from './Modal.svelte';
+  import type { TableInfo } from '../wire';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
@@ -22,6 +24,49 @@
   const tables = $derived(visible.filter(t => t.kind === 'table'));
   const views = $derived(visible.filter(t => t.kind === 'view'));
   const activeTable = $derived(ws.activeTab?.kind === 'table' ? ws.activeTab : null);
+  const shown = $derived([...tables, ...views]);
+
+  const keyOf = (t: TableInfo) => `${t.schema}.${t.name}`;
+  let picked = $state<string[]>([]);
+  let anchor = $state('');
+  const pickedShown = $derived(shown.filter(t => picked.includes(keyOf(t))));
+
+  function onItemClick(e: MouseEvent, t: TableInfo) {
+    const key = keyOf(t);
+    if (e.metaKey || e.ctrlKey) {
+      picked = picked.includes(key) ? picked.filter(k => k !== key) : [...picked, key];
+      anchor = key;
+      return;
+    }
+    if (e.shiftKey) {
+      const from = shown.findIndex(x => keyOf(x) === (anchor || activeKey()));
+      const to = shown.indexOf(t);
+      if (from >= 0) {
+        picked = shown.slice(Math.min(from, to), Math.max(from, to) + 1).map(keyOf);
+        return;
+      }
+    }
+    picked = [];
+    anchor = key;
+    ws.openTable(t);
+  }
+
+  const activeKey = () => (activeTable ? `${activeTable.schema}.${activeTable.table}` : '');
+
+  function openPicked() {
+    const list = pickedShown;
+    for (const t of list) ws.openTable(t);
+    if (list.length > 0) ws.openTable(list[0]);
+    picked = [];
+  }
+
+  function onListKey(e: KeyboardEvent) {
+    if (e.key === 'Escape' && picked.length > 0) picked = [];
+    if (e.key === 'Enter' && pickedShown.length > 0) {
+      e.preventDefault();
+      openPicked();
+    }
+  }
 
   $effect(() => {
     const focus = () => {
@@ -70,7 +115,7 @@
     aria-checked={ws.readOnly}
     title={ws.readOnly ? 'Read-only is on: writes are refused. Click to allow writes for this session.' : 'Read-only is off: writes are allowed. Click to make this session read-only.'}
   >
-    <Icon name={ws.readOnly ? 'lock' : 'lockOpen'} size={13} />
+    {#if ws.switchingReadOnly}<Spinner size={12} />{:else}<Icon name={ws.readOnly ? 'lock' : 'lockOpen'} size={13} />{/if}
     <span>{ws.switchingReadOnly ? 'Reconnecting…' : 'Read-only'}</span>
     <span class="ro-switch" aria-hidden="true"></span>
   </button>
@@ -86,9 +131,10 @@
     <input class="input" bind:this={input} bind:value={filter} onkeydown={onFilterKey} placeholder="Filter tables" spellcheck="false" />
   </div>
 
-  <div class="list">
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="list" onkeydown={onListKey}>
     {#if ws.tablesLoading && ws.tables.length === 0}
-      <div class="note faint">Loading…</div>
+      <div class="note faint loading"><Spinner size={11} />Loading tables…</div>
     {:else if ws.tablesError}
       <div class="note error">{ws.tablesError}</div>
     {:else}
@@ -102,7 +148,8 @@
             <button
               class="item"
               class:active={activeTable?.table === t.name && activeTable?.schema === t.schema}
-              onclick={() => ws.openTable(t)}
+              class:picked={picked.includes(keyOf(t))}
+              onclick={e => onItemClick(e, t)}
               title={t.name}
             >
               <Icon name={group.icon} size={13} />
@@ -117,10 +164,19 @@
     {/if}
   </div>
 
+  {#if pickedShown.length > 0}
+    <div class="picked-bar">
+      <span class="small">{pickedShown.length} selected</span>
+      <span style="flex:1"></span>
+      <button class="btn sm ghost" onclick={() => (picked = [])}>Clear</button>
+      <button class="btn sm primary" onclick={openPicked}>Open {pickedShown.length}</button>
+    </div>
+  {/if}
+
   <div class="bottom">
     <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="code" size={13} />New query</button>
     <span style="flex:1"></span>
-    <button class="btn icon sm ghost" onclick={() => ws.loadTables()} title="Reload tables"><Icon name="refresh" size={13} /></button>
+    <button class="btn icon sm ghost" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables">{#if ws.tablesLoading}<Spinner size={12} label="Loading tables" />{:else}<Icon name="refresh" size={13} />{/if}</button>
   </div>
 </aside>
 
@@ -259,8 +315,11 @@
   .item.active { background: var(--accent-dim); color: var(--text); }
   .item :global(.icon) { color: var(--text-3); }
   .item.active :global(.icon) { color: var(--accent); }
+  .item.picked { background: var(--grid-selected); color: var(--text); }
+  .picked-bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-top: 1px solid var(--border-subtle); color: var(--text-2); }
   .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
   .note { padding: 12px 8px; font-size: 12px; }
+  .note.loading { display: flex; align-items: center; gap: 7px; }
   .note.error { color: var(--danger); user-select: text; -webkit-user-select: text; }
 
   .bottom {

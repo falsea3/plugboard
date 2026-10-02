@@ -21,3 +21,10 @@ for (const t of targets) {
   await img.resize(t.size, t.size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toFile(t.path);
   console.log('wrote', t.path);
 }
+
+const dmgBackground = readFileSync(join(root, 'design', 'dmg-background.svg'));
+for (const [suffix, scale] of [['', 1], ['@2x', 2]]) {
+  const path = join(root, 'apps', 'desktop', 'build', 'darwin', `dmg-background${suffix}.png`);
+  await sharp(dmgBackground, { density: 72 * scale }).png().toFile(path);
+  console.log('wrote', path);
+}

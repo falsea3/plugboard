@@ -1,6 +1,7 @@
 <script lang="ts">
   import { app } from '../stores/app.svelte';
   import Icon from './Icon.svelte';
+  import Spinner from './Spinner.svelte';
   import Modal from './Modal.svelte';
   import ReleaseNotes from './ReleaseNotes.svelte';
 
@@ -14,7 +15,7 @@
 
 {#if u && !app.updateDismissed}
   <div class="banner" role="status">
-    <Icon name={u.status === 'failed' ? 'alert' : 'update'} size={16} />
+    {#if u.status === 'installing'}<Spinner size={15} />{:else}<Icon name={u.status === 'failed' ? 'alert' : 'update'} size={16} />{/if}
     <div class="body">
       {#if u.status === 'available'}
         <div class="title">Relay DB {u.info.version} is available</div>
@@ -73,7 +74,7 @@
     font-size: 12.5px;
     animation: slide 0.18s ease-out;
   }
-  .banner > :global(.icon) { color: var(--accent); margin-top: 1px; }
+  .banner > :global(.icon), .banner > :global(.spinner) { color: var(--accent); margin-top: 1px; }
   .body { flex: 1; min-width: 0; }
   .title { font-weight: 600; color: var(--text); }
   .sub { margin-top: 2px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; }

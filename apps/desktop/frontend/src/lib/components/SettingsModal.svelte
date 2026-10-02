@@ -3,6 +3,7 @@
   import { app, type SettingsSection } from '../stores/app.svelte';
   import Icon, { type IconName } from './Icon.svelte';
   import Select from './Select.svelte';
+  import Spinner from './Spinner.svelte';
   import mark from '../assets/relay-db-mark.png';
 
   let info = $state<AppInfo | null>(null);
@@ -166,7 +167,7 @@
               <span>Version {app.update.info.version} is available.</span>
               <button class="btn sm primary" onclick={() => app.installUpdate()}>Install</button>
             {:else if app.update?.status === 'installing'}
-              <span>Installing {app.update.info.version}…</span>
+              <Spinner size={11} /><span>Installing {app.update.info.version}…</span>
             {:else if app.update?.status === 'installed'}
               <span>Version {app.update.info.version} is installed.</span>
               <button class="btn sm primary" onclick={() => app.restartToUpdate()}>Restart now</button>
@@ -174,7 +175,7 @@
               <span class="up-to-date"><Icon name="check" size={13} />Relay DB is up to date</span>
             {:else}
               {#if app.update?.status === 'failed'}<span class="update-error" title={app.update.error}>{app.update.error}</span>{:else if checkError}<span class="update-error" title={checkError}>{checkError}</span>{/if}
-              <button class="btn sm" onclick={checkForUpdate} disabled={checking}>{checking ? 'Checking…' : 'Check for updates'}</button>
+              <button class="btn sm" onclick={checkForUpdate} disabled={checking}>{#if checking}<Spinner size={11} />Checking…{:else}Check for updates{/if}</button>
             {/if}
           </div>
           <p class="blurb">

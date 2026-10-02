@@ -1,0 +1,90 @@
+<svg width="660" height="428" viewBox="0 0 660 428" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="660" height="428" fill="url(#base)"/>
+<rect width="660" height="428" fill="url(#grid)"/>
+<rect width="660" height="428" fill="url(#vignette)"/>
+<path d="M144 45.5C280 18 420 30 556 79.5" stroke="white" stroke-opacity="0.24" stroke-dasharray="3 4"/>
+<path d="M151 50.5L151 40.5" stroke="white" stroke-opacity="0.4" stroke-width="1.2"/>
+<path d="M556 74.5L547 79.5L556 84.5M556 79.5L547 79.5" stroke="white" stroke-opacity="0.4" stroke-width="1.2"/>
+<path d="M44 104C34 180 38 240 60 300" stroke="white" stroke-opacity="0.24" stroke-dasharray="3 4"/>
+<path d="M39 111L49 111" stroke="white" stroke-opacity="0.4" stroke-width="1.2"/>
+<path d="M65 300L60 291L55 300M60 300L60 291" stroke="white" stroke-opacity="0.4" stroke-width="1.2"/>
+<path d="M612 122C626 180 624 240 596 292" stroke="white" stroke-opacity="0.24" stroke-dasharray="3 4"/>
+<path d="M607 129L617 129" stroke="white" stroke-opacity="0.4" stroke-width="1.2"/>
+<path d="M601 292L596 283L591 292M596 292L596 283" stroke="white" stroke-opacity="0.4" stroke-width="1.2"/>
+<g>
+<rect x="-6" y="12" width="150" height="92" rx="7" fill="white" fill-opacity="0.07" stroke="white" stroke-opacity="0.22"/>
+<path d="M-6 36H144" stroke="white" stroke-opacity="0.18"/>
+<text x="4" y="28" font-family="Menlo, monospace" font-size="10" font-weight="bold" fill="white" fill-opacity="0.75">customers</text>
+<circle cx="6" cy="45.5" r="2.5" fill="#E6B556" fill-opacity="0.9"/>
+<text x="14" y="49" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">id</text>
+<text x="134" y="49" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+<text x="14" y="65" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">email</text>
+<text x="134" y="65" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">text</text>
+<text x="14" y="81" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">name</text>
+<text x="134" y="81" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">text</text>
+<text x="14" y="97" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">plan</text>
+<text x="134" y="97" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">plan</text>
+</g>
+<g>
+<rect x="556" y="30" width="150" height="92" rx="7" fill="white" fill-opacity="0.07" stroke="white" stroke-opacity="0.22"/>
+<path d="M556 54H706" stroke="white" stroke-opacity="0.18"/>
+<text x="566" y="46" font-family="Menlo, monospace" font-size="10" font-weight="bold" fill="white" fill-opacity="0.75">orders</text>
+<circle cx="568" cy="63.5" r="2.5" fill="#E6B556" fill-opacity="0.9"/>
+<text x="576" y="67" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">id</text>
+<text x="696" y="67" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+<circle cx="568" cy="79.5" r="2.2" stroke="white" stroke-opacity="0.5"/>
+<text x="576" y="83" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">customer_id</text>
+<text x="696" y="83" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+<text x="576" y="99" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">total</text>
+<text x="696" y="99" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">numeric</text>
+<text x="576" y="115" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">created_at</text>
+<text x="696" y="115" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">timestamptz</text>
+</g>
+<g>
+<rect x="22" y="300" width="150" height="76" rx="7" fill="white" fill-opacity="0.07" stroke="white" stroke-opacity="0.22"/>
+<path d="M22 324H172" stroke="white" stroke-opacity="0.18"/>
+<text x="32" y="316" font-family="Menlo, monospace" font-size="10" font-weight="bold" fill="white" fill-opacity="0.75">invoices</text>
+<circle cx="34" cy="333.5" r="2.5" fill="#E6B556" fill-opacity="0.9"/>
+<text x="42" y="337" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">id</text>
+<text x="162" y="337" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+<circle cx="34" cy="349.5" r="2.2" stroke="white" stroke-opacity="0.5"/>
+<text x="42" y="353" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">customer_id</text>
+<text x="162" y="353" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+<text x="42" y="369" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">amount</text>
+<text x="162" y="369" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">numeric</text>
+</g>
+<g>
+<rect x="494" y="292" width="156" height="76" rx="7" fill="white" fill-opacity="0.07" stroke="white" stroke-opacity="0.22"/>
+<path d="M494 316H650" stroke="white" stroke-opacity="0.18"/>
+<text x="504" y="308" font-family="Menlo, monospace" font-size="10" font-weight="bold" fill="white" fill-opacity="0.75">order_items</text>
+<circle cx="506" cy="325.5" r="2.5" fill="#E6B556" fill-opacity="0.9"/>
+<text x="514" y="329" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">id</text>
+<text x="640" y="329" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+<circle cx="506" cy="341.5" r="2.2" stroke="white" stroke-opacity="0.5"/>
+<text x="514" y="345" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">order_id</text>
+<text x="640" y="345" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+<circle cx="506" cy="357.5" r="2.2" stroke="white" stroke-opacity="0.5"/>
+<text x="514" y="361" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.55">product_id</text>
+<text x="640" y="361" text-anchor="end" font-family="Menlo, monospace" font-size="9" fill="white" fill-opacity="0.3">bigint</text>
+</g>
+<circle cx="256" cy="170" r="5" fill="white"/>
+<path d="M256 170H398" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M392 160L405 170L392 180" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="330" y="160" text-anchor="middle" font-family="Menlo, monospace" font-size="10" fill="white" fill-opacity="0.7">installs into</text>
+<text x="330" y="322" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="white" fill-opacity="0.95">Drag Relay DB to Applications</text>
+<text x="330" y="343" text-anchor="middle" font-family="Menlo, monospace" font-size="10.5" fill="white" fill-opacity="0.6">-- then open it from Launchpad or Spotlight</text>
+<defs>
+<linearGradient id="base" x1="0" y1="0" x2="660" y2="428" gradientUnits="userSpaceOnUse">
+<stop stop-color="#6672FD"/>
+<stop offset="0.55" stop-color="#5865F2"/>
+<stop offset="1" stop-color="#4650D6"/>
+</linearGradient>
+<pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+<path d="M20 0H0V20" stroke="white" stroke-opacity="0.045"/>
+</pattern>
+<radialGradient id="vignette" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(330 200) scale(470 340)">
+<stop offset="0.55" stop-color="#171A5C" stop-opacity="0"/>
+<stop offset="1" stop-color="#171A5C" stop-opacity="0.35"/>
+</radialGradient>
+</defs>
+</svg>
