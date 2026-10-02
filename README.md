@@ -23,7 +23,8 @@ Grab the latest build from the [releases page](https://github.com/relay-client/r
 
 | Platform | File |
 | --- | --- |
-| macOS 12+ (Apple Silicon and Intel) | `.dmg` — drag Relay DB to Applications |
+| macOS 12+ on Apple Silicon (M1 and later) | `-darwin-arm64.dmg` — drag Relay DB to Applications |
+| macOS 12+ on Intel | `-darwin-amd64.dmg` |
 | Windows 10/11 (x64 or Arm64) | `-installer.exe` |
 | Linux (x64) | `.AppImage` — `chmod +x`, then run it |
 

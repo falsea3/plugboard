@@ -21,7 +21,8 @@ from pathlib import Path
 # Platform key (see internal/update.currentTarget) → file it installs. The
 # AppImage's name carries the version, so it is filled in per release.
 ASSETS = {
-    "darwin-universal": "relay-db-darwin-universal.app.zip",
+    "darwin-arm64": "relay-db-darwin-arm64.app.zip",
+    "darwin-amd64": "relay-db-darwin-amd64.app.zip",
     "windows-amd64": "relay-db-windows-amd64.exe",
     "windows-arm64": "relay-db-windows-arm64.exe",
     "linux-amd64": "relay-db-linux-amd64",

@@ -2,7 +2,7 @@
 # Packs an .app into a disk image with an Applications shortcut beside it,
 # the usual drag-to-install layout. Uses only hdiutil, which every Mac has.
 #
-#   make-dmg.sh "build/bin/Relay DB.app" relay-db-0.2.0-darwin-universal.dmg "Relay DB 0.2.0"
+#   make-dmg.sh "build/bin/Relay DB.app" relay-db-0.2.0-darwin-arm64.dmg "Relay DB 0.2.0"
 set -eu
 
 app="${1:?usage: make-dmg.sh <app> <output.dmg> <volume name>}"

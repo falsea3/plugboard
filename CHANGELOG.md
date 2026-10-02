@@ -18,6 +18,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Drop-down lists are Relay DB's own** — the schema switcher, filters, the connection form, settings and enum cells — with search on long lists and full keyboard control.
 - **Fast scrolling through wide tables keeps up**: the grid draws only the columns in view and reuses rows instead of rebuilding them, so a frame takes a quarter of the time it did.
 - **Nothing bounces past its edges** on a trackpad any more.
+- **macOS has a download for Apple Silicon and one for Intel** instead of a universal app of both, so each is half the size. Updates bring each Mac the build for its processor; an Intel build running under Rosetta on Apple Silicon moves over to the native one. 0.1.0 can't find its file under the new names, so it has to be installed again by hand once.
 
 ### Fixed
 

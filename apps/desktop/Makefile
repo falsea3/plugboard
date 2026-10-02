@@ -14,6 +14,8 @@ endif
 LDFLAGS := -X 'github.com/relay-client/relay-db/apps/desktop/internal/api.appVersion=$(VERSION)'
 
 MAC_APP := $(DESKTOP_DIR)/build/bin/$(APP_NAME).app
+# build-macos builds for this Mac; MAC_ARCH=amd64 (or arm64) builds for the other.
+MAC_ARCH ?= $(shell go env GOARCH)
 
 .PHONY: help dev frontend install tidy check test build build-macos open clean
 
@@ -50,7 +52,7 @@ build:
 	cd $(DESKTOP_DIR) && $(WAILS_CMD) build -ldflags "$(LDFLAGS)"
 
 build-macos:
-	cd $(DESKTOP_DIR) && $(WAILS_CMD) build -platform darwin/universal -ldflags "$(LDFLAGS)"
+	cd $(DESKTOP_DIR) && $(WAILS_CMD) build -platform darwin/$(MAC_ARCH) -ldflags "$(LDFLAGS)"
 
 open:
 	open "$(MAC_APP)"

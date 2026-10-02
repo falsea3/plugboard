@@ -4,8 +4,9 @@ Maintainer notes. Contributors don't need any of this to build or test Relay DB.
 
 A release is a `v*` tag. Pushing one runs
 [`.github/workflows/release.yml`](../.github/workflows/release.yml), which builds
-macOS (universal), Windows (x64 and Arm64) and Linux (x64), signs the files the
-in-app updater installs, and publishes the GitHub release with `latest.json`.
+macOS (Apple Silicon and Intel, one download each), Windows (x64 and Arm64) and
+Linux (x64), signs the files the in-app updater installs, and publishes the
+GitHub release with `latest.json`.
 
 ## Once: update signing
 

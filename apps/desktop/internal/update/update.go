@@ -171,7 +171,7 @@ func currentTarget() (target, error) {
 		if bundle == "" {
 			return target{}, ErrNotUpdatable
 		}
-		return target{key: "darwin-universal", bundle: bundle}, nil
+		return target{key: "darwin-" + macArch(), bundle: bundle}, nil
 	case "linux":
 		if appImage := os.Getenv("APPIMAGE"); appImage != "" {
 			return target{key: "linux-" + runtime.GOARCH + "-appimage", path: appImage}, nil

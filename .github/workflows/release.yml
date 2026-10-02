@@ -19,7 +19,7 @@ env:
 
 jobs:
   prepare:
-    # Fails in seconds, before four platforms spend twenty minutes building.
+    # Fails in seconds, before five builds spend twenty minutes.
     name: Check the release can go out
     runs-on: ubuntu-24.04
     steps:
@@ -42,9 +42,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # One download per Mac architecture: a universal app is both builds
+          # in one, twice the size for everyone.
           - os: macos-latest
-            platform: darwin/universal
-            artifact: macos
+            platform: darwin/arm64
+            artifact: macos-arm64
+            arch: arm64
+          - os: macos-latest
+            platform: darwin/amd64
+            artifact: macos-amd64
+            arch: amd64
           - os: windows-latest
             platform: windows/amd64
             artifact: windows-amd64
@@ -120,8 +127,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release
-          (cd "apps/desktop/build/bin" && ditto -c -k --keepParent "Relay DB.app" "$GITHUB_WORKSPACE/release/relay-db-darwin-universal.app.zip")
-          apps/desktop/build/darwin/make-dmg.sh "apps/desktop/build/bin/Relay DB.app" "release/relay-db-$VERSION-darwin-universal.dmg" "Relay DB $VERSION"
+          (cd "apps/desktop/build/bin" && ditto -c -k --keepParent "Relay DB.app" "$GITHUB_WORKSPACE/release/relay-db-darwin-${{ matrix.arch }}.app.zip")
+          apps/desktop/build/darwin/make-dmg.sh "apps/desktop/build/bin/Relay DB.app" "release/relay-db-$VERSION-darwin-${{ matrix.arch }}.dmg" "Relay DB $VERSION"
 
       - name: Package Windows
         if: runner.os == 'Windows'
@@ -158,10 +165,19 @@ jobs:
           set -euo pipefail
           if [ "$RUNNER_OS" = macOS ]; then
             check="$(mktemp -d)"
-            ditto -x -k release/relay-db-darwin-universal.app.zip "$check"
+            ditto -x -k "release/relay-db-darwin-${{ matrix.arch }}.app.zip" "$check"
             bin="$check/Relay DB.app/Contents/MacOS/relay-db"
             plist_version="$(plutil -extract CFBundleShortVersionString raw -o - "$check/Relay DB.app/Contents/Info.plist")"
             [ "$plist_version" = "$VERSION" ] || { echo "::error::Info.plist says $plist_version, not $VERSION"; exit 1; }
+            # Exactly the architecture the download is named for.
+            want="$([ "${{ matrix.arch }}" = amd64 ] && echo x86_64 || echo arm64)"
+            archs="$(lipo -archs "$bin")"
+            [ "$archs" = "$want" ] || { echo "::error::the build is for '$archs', not $want"; exit 1; }
+            # The runner is Apple Silicon: the Intel build starts only under Rosetta.
+            if [ "$want" != "$(uname -m)" ] && ! arch -x86_64 /usr/bin/true 2>/dev/null; then
+              echo "::notice::No Rosetta on this runner: the $want build's architecture was checked, not run."
+              exit 0
+            fi
           else
             bin=release/relay-db-linux-amd64
             out="$("release/relay-db-$VERSION-linux-amd64.AppImage" --appimage-extract-and-run --version)"
@@ -223,7 +239,7 @@ jobs:
           trap 'rm -f "$key"' EXIT
           printf '%s\n' "$UPDATE_SIGNING_KEY" > "$key"
           version="${GITHUB_REF_NAME#v}"
-          for name in relay-db-darwin-universal.app.zip relay-db-windows-amd64.exe relay-db-windows-arm64.exe \
+          for name in relay-db-darwin-arm64.app.zip relay-db-darwin-amd64.app.zip relay-db-windows-amd64.exe relay-db-windows-arm64.exe \
                       relay-db-linux-amd64 "relay-db-$version-linux-amd64.AppImage"; do
             # The trusted comment ties the signature to this version and file
             # (see internal/update.signedComment).

@@ -242,3 +242,29 @@ func TestBundleOf(t *testing.T) {
 		t.Fatalf("got %q", got)
 	}
 }
+
+// A Mac asks latest.json for the build of its architecture: the release must
+// write both keys and sign both files, or one kind of Mac stops updating.
+func TestReleaseCoversEveryMac(t *testing.T) {
+	root := filepath.Join("..", "..", "..", "..")
+	manifest, err := os.ReadFile(filepath.Join(root, "scripts", "make-latest-json.py"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow, err := os.ReadFile(filepath.Join(root, ".github", "workflows", "release.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, arch := range []string{"arm64", "amd64"} {
+		file := "relay-db-darwin-" + arch + ".app.zip"
+		if !strings.Contains(string(manifest), `"darwin-`+arch+`": "`+file+`"`) {
+			t.Errorf("make-latest-json.py has no darwin-%s → %s", arch, file)
+		}
+		if !strings.Contains(string(workflow), file) {
+			t.Errorf("release.yml doesn't sign %s", file)
+		}
+	}
+	if a := macArch(); a != runtime.GOARCH && !(runtime.GOOS == "darwin" && a == "arm64") {
+		t.Errorf("macArch() = %s on %s/%s", a, runtime.GOOS, runtime.GOARCH)
+	}
+}
