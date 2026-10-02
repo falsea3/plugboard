@@ -4,11 +4,12 @@
   import { app, type TableTab, type Workspace } from '../stores/app.svelte';
   import { DEFAULT, NOW, SET_DEFAULT, TableEdits, exprLabel, isExpr } from '../stores/edits.svelte';
   import { ADD_ROW_EVENT, COMMIT_EVENT, FILTER_ROWS_EVENT, REFRESH_EVENT } from '../commands';
-  import { formatCount, formatDuration, isBoolType, isDateTimeType, isTextType } from '../format';
+  import { formatCount, formatDuration, isBoolType, isDateTimeType, isTextType, isTrue } from '../format';
   import { insertStatement } from '../sqlText';
   import { copyToClipboard } from '../clipboard';
   import DataGrid, { type GridEditing, type MenuAt, type MenuItem } from './DataGrid.svelte';
   import ValueBar from './ValueBar.svelte';
+  import StructureView from './StructureView.svelte';
   import Icon from './Icon.svelte';
   import Modal from './Modal.svelte';
   import FilterBar, { newFilter, noValue, type FilterRow } from './FilterBar.svelte';
@@ -61,7 +62,7 @@
   const canEdit = $derived(!readOnlyReason && columns.length > 0 && !!page);
 
   $effect(() => {
-    ondirty(edits.dirty);
+    ondirty(edits.dirty || structureDirty);
   });
 
   const driver = untrack(() => ws.connection.driver);
@@ -97,7 +98,6 @@
   };
 
   const boolValue = (on: boolean): CellValue => (driver === 'postgres' ? on : on ? 1 : 0);
-  const isTrue = (v: CellValue) => v === true || v === 1 || v === '1' || v === 't' || v === 'true';
 
   function cellMenu(r: number, c: number): MenuItem[] {
     const items: MenuItem[] = [];
@@ -240,14 +240,10 @@
     return false;
   }
 
-  const structureColumns: ResultColumn[] = [
-    { name: 'column', type: 'text' },
-    { name: 'type', type: 'text' },
-    { name: 'nullable', type: 'bool' },
-    { name: 'default', type: 'text' },
-    { name: 'primary key', type: 'bool' },
-  ];
-  const structureRows = $derived(columns.map(c => [c.name, c.type, c.nullable, c.default, c.primaryKey] as CellValue[]));
+  let structure = $state<StructureView>();
+  let structureDirty = $state(false);
+  /** Why the table's columns can't be changed, or '' when they can. */
+  const structureReadOnlyReason = $derived(ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : '');
 
   type Nav = 'reload' | 'first' | 'next' | 'prev' | 'last';
 
@@ -361,6 +357,11 @@
 
   function refresh() {
     if (!canLeavePage()) return;
+    if (structureDirty) {
+      // Pending structure edits point at columns by position.
+      app.notify('Commit (⌘S) or discard the structure changes first.', 'info');
+      return;
+    }
     loadColumns();
     loadPage();
   }
@@ -411,6 +412,10 @@
   }
 
   function addRow() {
+    if (mode === 'structure') {
+      structure?.addColumn();
+      return;
+    }
     if (!canEdit) {
       if (readOnlyReason) app.notify(`Can’t add rows: ${readOnlyReason.toLowerCase()}.`, 'info');
       return;
@@ -435,6 +440,10 @@
   }
 
   function commit() {
+    if (mode === 'structure') {
+      structure?.commit();
+      return;
+    }
     if (!edits.dirty || saving) return;
     if (ws.connection.env === 'prod' && app.settings.confirmProdWrites) {
       showPreview(true);
@@ -520,9 +529,15 @@
     >
       <Icon name="funnel" size={13} />Filter{#if filters.length > 0}<span class="count">{filters.length}</span>{/if}
     </button>
-    {#if readOnlyReason && columns.length > 0}
+    {#if mode === 'structure'}
+      {#if structureReadOnlyReason}
+        <span class="ro-reason" title="The structure can't be changed here"><Icon name="lock" size={11} />{structureReadOnlyReason}</span>
+      {:else}
+        <button class="btn sm ghost" onclick={addRow} title="Add column (⌘I)"><Icon name="plus" size={13} />Column</button>
+      {/if}
+    {:else if readOnlyReason && columns.length > 0}
       <span class="ro-reason" title="Editing is off for this table"><Icon name="lock" size={11} />{readOnlyReason}</span>
-    {:else if mode === 'data'}
+    {:else}
       <button class="btn sm ghost" onclick={addRow} disabled={!canEdit} title="Add row (⌘I)"><Icon name="plus" size={13} />Row</button>
     {/if}
     <button class="btn icon sm ghost" title="Refresh (⌘R)" onclick={refresh}><Icon name="refresh" size={13} /></button>
@@ -553,7 +568,20 @@
         />
       {/if}
     {:else}
-      <DataGrid columns={structureColumns} rows={structureRows} />
+      <StructureView
+        bind:this={structure}
+        {sessionId}
+        schema={tab.schema}
+        table={tab.table}
+        {driver}
+        {columns}
+        prod={ws.connection.env === 'prod'}
+        readOnlyReason={structureReadOnlyReason}
+        rowChanges={edits.count}
+        queryId={`${tab.id}-structure`}
+        onchanged={() => { loadColumns(); loadPage(); }}
+        ondirty={d => (structureDirty = d)}
+      />
     {/if}
   </div>
 
@@ -571,24 +599,20 @@
       <button class="btn sm" onclick={() => showPreview(false)} disabled={saving}><Icon name="code" size={12} />Preview SQL</button>
       <button class="btn sm primary" onclick={commit} disabled={saving}>{saving ? 'Saving…' : 'Commit'}<span class="kbd on-accent">⌘S</span></button>
     </div>
-  {:else}
+  {:else if mode === 'data'}
     <div class="footer">
-      {#if mode === 'data'}
-        <button class="btn icon sm ghost" title="First page" disabled={!page?.hasPrev || loading} onclick={() => go('first')}><Icon name="chevrons-left" size={13} /></button>
-        <button class="btn icon sm ghost" title="Previous page" disabled={!page?.hasPrev || loading} onclick={() => go('prev')}><Icon name="chevron-left" size={13} /></button>
-        <button class="btn icon sm ghost" title="Next page" disabled={!page?.hasMore || loading} onclick={() => go('next')}><Icon name="chevron-right" size={13} /></button>
-        <button class="btn icon sm ghost" title="Last page" disabled={!page?.hasMore || loading} onclick={() => go('last')}><Icon name="chevrons-right" size={13} /></button>
-        <span class="small muted">{rangeLabel}</span>
-        {#if page && !count?.exact && (page.hasMore || page.hasPrev)}
-          <button class="link-btn" onclick={countExactly} disabled={counting} title="Run COUNT(*) — can take a while on big tables">{counting ? 'Counting…' : 'Count'}</button>
-        {/if}
-        {#if filters.length > 0}<span class="filtered">filtered</span>{/if}
-        {#if page}<span class="small faint">· {formatDuration(page.result.durationMs)}</span>{/if}
-      {:else}
-        <span class="small muted">{formatCount(columns.length, 'column')}</span>
+      <button class="btn icon sm ghost" title="First page" disabled={!page?.hasPrev || loading} onclick={() => go('first')}><Icon name="chevrons-left" size={13} /></button>
+      <button class="btn icon sm ghost" title="Previous page" disabled={!page?.hasPrev || loading} onclick={() => go('prev')}><Icon name="chevron-left" size={13} /></button>
+      <button class="btn icon sm ghost" title="Next page" disabled={!page?.hasMore || loading} onclick={() => go('next')}><Icon name="chevron-right" size={13} /></button>
+      <button class="btn icon sm ghost" title="Last page" disabled={!page?.hasMore || loading} onclick={() => go('last')}><Icon name="chevrons-right" size={13} /></button>
+      <span class="small muted">{rangeLabel}</span>
+      {#if page && !count?.exact && (page.hasMore || page.hasPrev)}
+        <button class="link-btn" onclick={countExactly} disabled={counting} title="Run COUNT(*) — can take a while on big tables">{counting ? 'Counting…' : 'Count'}</button>
       {/if}
+      {#if filters.length > 0}<span class="filtered">filtered</span>{/if}
+      {#if page}<span class="small faint">· {formatDuration(page.result.durationMs)}</span>{/if}
       <span style="flex:1"></span>
-      {#if selected && mode === 'data'}
+      {#if selected}
         <ValueBar value={selected.value} column={selected.column} />
       {/if}
     </div>

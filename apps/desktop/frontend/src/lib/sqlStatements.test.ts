@@ -14,6 +14,7 @@ describe('statementRanges', () => {
 
   it('keeps PostgreSQL dollar-quoted bodies whole', () => {
     expect(texts('do $$ begin perform 1; end $$; select 2')).toEqual(['do $$ begin perform 1; end $$', 'select 2']);
+    expect(texts('select a$b$ from t; select 2')).toEqual(['select a$b$ from t', 'select 2']); // one name, no body
   });
 
   it('drops comment-only pieces', () => {
@@ -24,6 +25,8 @@ describe('statementRanges', () => {
     expect(texts("select 'a\\';b'; select 1 # ;\n", true)).toEqual(["select 'a\\';b'", 'select 1 # ;']);
     expect(texts("select d #> '{a}' from t; select 2")).toEqual(["select d #> '{a}' from t", 'select 2']);
     expect(texts('select `a\\`; select 2', true)).toEqual(['select `a\\`', 'select 2']);
+    expect(texts('select 1--1; select 2', true)).toEqual(['select 1--1', 'select 2']); // MySQL: 1 - -1
+    expect(texts('select 1--; x\n; select 2')).toEqual(['select 1--; x', 'select 2']);
   });
 
   it("reads PostgreSQL backslashes as escapes only in E'…' strings", () => {

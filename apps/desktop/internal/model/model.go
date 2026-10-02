@@ -290,10 +290,36 @@ type ChangeSet struct {
 	Changes []RowChange `json:"changes"`
 }
 
+// ColumnChange is one edit to a table's columns from the Structure tab.
+// Type and Default are SQL as the user wrote it: the column's type and an
+// expression for its default.
+type ColumnChange struct {
+	Kind ChangeKind `json:"kind"` // insert adds a column, update alters one, delete drops one
+	// Column is the existing column's name (update, delete).
+	Column   string  `json:"column"`
+	Name     *string `json:"name,omitempty"`
+	Type     *string `json:"type,omitempty"`
+	Nullable *bool   `json:"nullable,omitempty"`
+	// DefaultSet says Default changed; a nil Default then drops it.
+	DefaultSet bool    `json:"defaultSet"`
+	Default    *string `json:"default"`
+}
+
+type StructureChange struct {
+	Schema  string         `json:"schema"`
+	Table   string         `json:"table"`
+	Changes []ColumnChange `json:"changes"`
+}
+
 type ApplyResult struct {
 	Applied     int    `json:"applied"`
 	Error       string `json:"error,omitempty"`
 	FailedIndex int    `json:"failedIndex"`
+	// Partial says changes before the failed one stayed applied: MySQL
+	// commits every ALTER TABLE on its own.
+	Partial bool `json:"partial"`
+	// Cancelled says the user stopped it (structure changes).
+	Cancelled bool `json:"cancelled"`
 }
 
 // NewID returns a random id for connection profiles and sessions.

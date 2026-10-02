@@ -25,9 +25,7 @@ func SplitStatements(script string, mysql bool) []string {
 		switch c := script[i]; {
 		case c == '\'' || c == '"' || c == '`':
 			i = skipQuoted(script, i, c, escapesBackslash(script, i, mysql))
-		case c == '-' && i+1 < n && script[i+1] == '-':
-			i = skipLine(script, i)
-		case c == '#' && mysql:
+		case lineCommentAt(script, i, mysql):
 			i = skipLine(script, i)
 		case c == '/' && i+1 < n && script[i+1] == '*':
 			i = skipBlockComment(script, i)
@@ -62,6 +60,20 @@ func skipQuoted(s string, i int, q byte, backslashEscapes bool) int {
 		}
 	}
 	return len(s) - 1
+}
+
+// lineCommentAt reports a comment running to the end of the line from s[i]:
+// "--", and in MySQL "#". MySQL needs a space or control character after the
+// dashes — there 1--1 is 1 - -1, and SELECT 1--1 INTO OUTFILE … must not read
+// as a harmless SELECT 1.
+func lineCommentAt(s string, i int, mysql bool) bool {
+	if s[i] == '#' {
+		return mysql
+	}
+	if s[i] != '-' || i+1 >= len(s) || s[i+1] != '-' {
+		return false
+	}
+	return !mysql || i+2 >= len(s) || s[i+2] <= ' '
 }
 
 func skipLine(s string, i int) int {
@@ -104,8 +116,12 @@ func skipDollarQuoted(s string, i int) (int, bool) {
 	return len(s) - 1, true
 }
 
-// dollarTag recognises $$ and $tag$ openers. $1-style placeholders are not tags.
+// dollarTag recognises $$ and $tag$ openers. $1-style placeholders are not
+// tags, and neither is a $ inside a name: a$b$ is one identifier.
 func dollarTag(s string, i int) (string, bool) {
+	if i > 0 && (isWordByte(s[i-1]) || s[i-1] >= 0x80) {
+		return "", false
+	}
 	for j := i + 1; j < len(s); j++ {
 		c := rune(s[j])
 		if c == '$' {

@@ -53,7 +53,10 @@ export class TableEdits {
 
   value(r: number, c: number): EditValue {
     const base = this.baseRows();
-    if (r >= base.length) return this.inserted[r - base.length]?.[c] ?? DEFAULT;
+    if (r >= base.length) {
+      const row = this.inserted[r - base.length];
+      return row && c < row.length ? row[c] : DEFAULT; // not ??: null is a value (NULL), not "unset"
+    }
     const row = this.updates.get(r);
     return row?.has(c) ? (row.get(c) as CellValue | Expr) : base[r][c];
   }

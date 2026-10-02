@@ -1,7 +1,33 @@
+<script lang="ts" module>
+  import { StateEffect, StateField } from '@codemirror/state';
+  import { Decoration, EditorView, type DecorationSet } from '@codemirror/view';
+
+  const setRan = StateEffect.define<{ from: number; to: number }>();
+  const ranMark = Decoration.mark({ class: 'cm-ran' });
+
+  // The statement that last ran stays tinted until the text changes. It isn't
+  // selected: a selection would turn Run into "Run selection".
+  const ranStatement = StateField.define<DecorationSet>({
+    create: () => Decoration.none,
+    update(marks, tr) {
+      for (const e of tr.effects) {
+        if (e.is(setRan)) return e.value.from < e.value.to ? Decoration.set([ranMark.range(e.value.from, e.value.to)]) : Decoration.none;
+      }
+      return tr.docChanged ? Decoration.none : marks;
+    },
+    provide: f => EditorView.decorations.from(f),
+  });
+
+  /** Tints the statement that just ran. */
+  export function showRan(view: EditorView, from: number, to: number) {
+    view.dispatch({ effects: setRan.of({ from, to }) });
+  }
+</script>
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Compartment, EditorState, Prec } from '@codemirror/state';
-  import { drawSelection, EditorView, tooltips, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view';
+  import { drawSelection, tooltips, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view';
   import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
   import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
   import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
@@ -60,6 +86,7 @@
     '.cm-activeLine': { backgroundColor: 'var(--grid-row-alt)' },
     '.cm-cursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
     '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': { backgroundColor: 'var(--grid-selected) !important' },
+    '.cm-ran': { backgroundColor: 'var(--grid-selected)' },
     '.cm-matchingBracket': { backgroundColor: 'var(--accent-dim)', outline: '1px solid var(--accent)' },
     '.cm-placeholder': { color: 'var(--text-3)' },
     '.cm-tooltip': { border: '1px solid var(--border)', backgroundColor: 'var(--elevated)', borderRadius: '6px', overflow: 'hidden' },
@@ -81,6 +108,7 @@
           highlightActiveLineGutter(),
           highlightActiveLine(),
           drawSelection(),
+          ranStatement,
           history(),
           indentOnInput(),
           bracketMatching(),

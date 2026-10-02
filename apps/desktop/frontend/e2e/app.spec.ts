@@ -69,3 +69,64 @@ test('edits an enum cell from its list', async ({ page }) => {
   await page.getByRole('option', { name: 'pro' }).click();
   await expect(page.getByText('1 change')).toBeVisible();
 });
+
+test('adds and renames columns in the Structure tab', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  await page.getByRole('tab', { name: 'Structure' }).click();
+  await page.getByRole('button', { name: 'Column' }).click();
+  await page.keyboard.type('nickname');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('varchar(40)');
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('1 change')).toBeVisible();
+  await page.getByRole('button', { name: 'Preview SQL' }).click();
+  await expect(page.getByText('ADD COLUMN "nickname" varchar(40)', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Commit', exact: true }).last().click();
+  await expect(page.getByText('Saved 1 change to the structure of customers.')).toBeVisible();
+});
+
+test('won’t change the structure under uncommitted row edits', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  await page.getByRole('grid').getByText('team').first().dblclick();
+  await page.getByRole('option', { name: 'pro' }).click();
+  await page.getByRole('tab', { name: 'Structure' }).click();
+  await page.getByRole('button', { name: 'Column' }).click();
+  await page.keyboard.type('nickname');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('varchar(40)');
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: /^Commit/ }).click();
+  await expect(page.getByText('Commit or discard the 1 row change in Data first', { exact: false })).toBeVisible();
+});
+
+test('keeps Run all after running the statement under the cursor', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await page.locator('.cm-content').click();
+  await page.keyboard.insertText('select 1;\nselect 2;');
+  await page.keyboard.press('ControlOrMeta+Enter');
+  await expect(page.locator('.cm-ran')).toHaveText('select 2');
+  await expect(page.getByRole('button', { name: 'Run all' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Run selection' })).toHaveCount(0);
+});
+
+test('leaves an enum cell when its value is picked again', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  const grid = page.getByRole('grid');
+  await grid.getByText('team').first().dblclick();
+  await page.getByRole('option', { name: 'team' }).click();
+  await expect(grid.locator('.select-button')).toHaveCount(0);
+  await expect(grid).toBeFocused();
+  await expect(page.getByText('1 change')).toHaveCount(0);
+
+  // Tab leaves the list for the next cell, as it does from a text editor.
+  await grid.getByText('team').first().dblclick();
+  await page.keyboard.press('Tab');
+  await expect(grid.locator('.select-button')).toHaveCount(0);
+  await expect(grid).toBeFocused();
+});

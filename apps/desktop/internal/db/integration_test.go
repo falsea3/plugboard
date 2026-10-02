@@ -571,8 +571,9 @@ func TestEditorPagingServers(t *testing.T) {
 		if res[0].Pageable || len(res[0].Columns) != 2 {
 			t.Fatalf("duplicate names: pageable=%v cols=%v", res[0].Pageable, res[0].Columns)
 		}
-		if !res[1].HasMore || res[1].Rows[0][0] != int64(5000) {
-			t.Fatalf("order by survived the wrap? first id = %v", res[1].Rows[0][0])
+		// MariaDB drops ORDER BY inside the wrap, so there it runs as typed.
+		if res[1].Pageable == s.mariaDB() || res[1].Rows[0][0] != int64(5000) {
+			t.Fatalf("order by survived the wrap? pageable=%v first id = %v (%s)", res[1].Pageable, res[1].Rows[0][0], s.Version)
 		}
 	})
 }

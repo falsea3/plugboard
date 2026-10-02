@@ -20,15 +20,13 @@ export function statementRanges(script: string, mysql: boolean): StatementRange[
     const c = script[i];
     if (c === "'" || c === '"' || c === '`') {
       i = skipQuoted(script, i, c, escapesBackslash(script, i, mysql));
-    } else if (c === '-' && script[i + 1] === '-') {
-      i = skipLine(script, i);
-    } else if (c === '#' && mysql) {
+    } else if (lineCommentAt(script, i, mysql)) {
       i = skipLine(script, i);
     } else if (c === '/' && script[i + 1] === '*') {
       const end = script.indexOf('*/', i + 2);
       i = end < 0 ? n - 1 : end + 1;
     } else if (c === '$' && !mysql) {
-      const tag = /^\$(?:[A-Za-z_][A-Za-z0-9_]*)?\$/.exec(script.slice(i, i + 64))?.[0];
+      const tag = dollarTagAt(script, i);
       if (tag) {
         const end = script.indexOf(tag, i + tag.length);
         i = end < 0 ? n - 1 : end + tag.length - 1;
@@ -51,6 +49,22 @@ export function statementAt(script: string, pos: number, mysql: boolean): Statem
     if (pos <= r.to + 1) return pos >= r.from ? r : (best ?? r);
   }
   return best;
+}
+
+/**
+ * A comment to the end of the line starts at s[i]: --, and # in MySQL. MySQL
+ * needs a space or control character after the dashes: there 1--1 is 1 - -1.
+ */
+export function lineCommentAt(s: string, i: number, mysql: boolean): boolean {
+  if (s[i] === '#') return mysql;
+  if (s[i] !== '-' || s[i + 1] !== '-') return false;
+  return !mysql || i + 2 >= s.length || s.charCodeAt(i + 2) <= 32;
+}
+
+/** The $$ or $tag$ opening a PostgreSQL dollar-quoted string at s[i], or null. A $ inside a name (a$b$) opens nothing. */
+export function dollarTagAt(s: string, i: number): string | null {
+  if (i > 0 && /[\p{L}\p{N}_]/u.test(s[i - 1])) return null;
+  return /^\$(?:[A-Za-z_][A-Za-z0-9_]*)?\$/.exec(s.slice(i, i + 64))?.[0] ?? null;
 }
 
 function skipQuoted(s: string, i: number, q: string, backslash: boolean): number {

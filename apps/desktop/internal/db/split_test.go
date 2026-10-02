@@ -32,6 +32,7 @@ func TestSplitStatements(t *testing.T) {
 			[]string{"do $body$ begin perform 1; end $body$", "select 2"},
 		},
 		{"placeholder is not a tag", false, "select $1; select 2", []string{"select $1", "select 2"}},
+		{"dollar inside a name", false, "select a$b$ from t; select 2", []string{"select a$b$ from t", "select 2"}},
 		{"pg backslash is literal", false, `select 'C:\'; select 2`, []string{`select 'C:\'`, "select 2"}},
 		{"pg hash is an operator", false, "select d #> '{a}' from t; select 2", []string{"select d #> '{a}' from t", "select 2"}},
 		{"pg E-string escapes", false, `select E'it\'s; x'; select 2`, []string{`select E'it\'s; x'`, "select 2"}},
@@ -42,6 +43,9 @@ func TestSplitStatements(t *testing.T) {
 		{"mysql backtick", true, "select `a;b` from t; select 2", []string{"select `a;b` from t", "select 2"}},
 		{"mysql backtick has no escapes", true, "select `a\\`; select 2", []string{"select `a\\`", "select 2"}},
 		{"mysql hash comment", true, "select 1 # ; nope\n; select 2", []string{"select 1 # ; nope", "select 2"}},
+		{"mysql -- needs a space", true, "select 1--1; select 2", []string{"select 1--1", "select 2"}},
+		{"mysql -- comment", true, "select 1 -- ; nope\n; select 2", []string{"select 1 -- ; nope", "select 2"}},
+		{"pg -- needs no space", false, "select 1--; nope\n; select 2", []string{"select 1--; nope", "select 2"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

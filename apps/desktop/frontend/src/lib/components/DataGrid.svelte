@@ -205,12 +205,18 @@
       commitEdit();
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      const ed = cellEditor!;
-      commitEdit();
-      const col = Math.max(0, Math.min(columns.length - 1, ed.c + (e.shiftKey ? -1 : 1)));
-      selection = { row: ed.r, col };
-      scrollIntoView(ed.r, col);
+      commitAndMove(e.shiftKey ? -1 : 1);
     }
+  }
+
+  /** Tab out of an editor: commit it and select the next (or previous) cell in the row. */
+  function commitAndMove(delta: number) {
+    const ed = cellEditor;
+    if (!ed) return;
+    commitEdit();
+    const col = Math.max(0, Math.min(columns.length - 1, ed.c + delta));
+    selection = { row: ed.r, col };
+    scrollIntoView(ed.r, col);
   }
 
   function focusEditor(node: HTMLTextAreaElement) {
@@ -224,6 +230,18 @@
     cellEditor.text = value;
     cellEditor.touched = true;
     commitEdit();
+  }
+
+  /** The enum list closed: picking the value it already had still ends the edit, Tab moves on like in a text editor. */
+  function onOptionClose(picked: boolean, key?: KeyboardEvent) {
+    if (key?.key === 'Tab') {
+      key.preventDefault();
+      commitAndMove(key.shiftKey ? -1 : 1);
+    } else if (picked) {
+      commitEdit();
+    } else {
+      cancelEdit();
+    }
   }
 
   /** Sends a parent action for the current selection. */
@@ -492,7 +510,7 @@
                     placeholder={cellEditor.wasNull ? (state === 'default' ? 'DEFAULT' : 'NULL') : ''}
                     startOpen
                     onchange={onOptionPick}
-                    onclose={picked => !picked && cancelEdit()}
+                    onclose={onOptionClose}
                     aria-label={columns[c].name}
                   />
                 </div>

@@ -1,4 +1,4 @@
-import { statementRanges } from './sqlStatements';
+import { dollarTagAt, lineCommentAt, statementRanges } from './sqlStatements';
 
 // Checks SQL as it's typed, for mistakes that are wrong in every dialect:
 // unclosed quotes, brackets and comments, a typo in the statement's first
@@ -22,6 +22,9 @@ const STATEMENT_WORDS = new Set([
   'VACUUM', 'ANALYZE', 'ANALYSE', 'REINDEX', 'CLUSTER', 'REFRESH', 'CHECKPOINT', 'DISCARD',
   'LISTEN', 'NOTIFY', 'UNLISTEN', 'LOAD', 'PRAGMA', 'ATTACH', 'DETACH', 'HANDLER', 'OPTIMIZE',
   'REPAIR', 'CHECK', 'CHECKSUM', 'FLUSH', 'KILL', 'PURGE', 'INSTALL', 'UNINSTALL', 'XA', 'HELP',
+  'GET', 'SIGNAL', 'RESIGNAL', 'CLONE', 'CHANGE', 'STOP', 'RESTART', 'SHUTDOWN', 'BINLOG', 'CACHE',
+  // what a procedure body is made of, when a script splits one at its semicolons
+  'IF', 'ELSE', 'ELSEIF', 'CASE', 'LOOP', 'WHILE', 'REPEAT', 'LEAVE', 'ITERATE', 'OPEN', 'RETURN',
 ]);
 
 /** Words that can't follow a comma: "select a, from t" is missing a column. */
@@ -43,6 +46,7 @@ function lintStatement(s: string, mysql: boolean): SqlProblem[] {
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
+    const tag = c === '$' && !mysql ? dollarTagAt(s, i) : null;
     if (c === "'" || c === '"' || c === '`') {
       const end = closingQuote(s, i, mysql);
       if (end < 0) {
@@ -52,7 +56,7 @@ function lintStatement(s: string, mysql: boolean): SqlProblem[] {
         break;
       }
       i = end;
-    } else if ((c === '-' && s[i + 1] === '-') || (c === '#' && mysql)) {
+    } else if (lineCommentAt(s, i, mysql)) {
       const nl = s.indexOf('\n', i);
       i = nl < 0 ? s.length : nl;
     } else if (c === '/' && s[i + 1] === '*') {
@@ -63,8 +67,7 @@ function lintStatement(s: string, mysql: boolean): SqlProblem[] {
         break;
       }
       i = end + 1;
-    } else if (c === '$' && !mysql && /^\$([A-Za-z_][A-Za-z0-9_]*)?\$/.test(s.slice(i, i + 64))) {
-      const tag = /^\$([A-Za-z_][A-Za-z0-9_]*)?\$/.exec(s.slice(i, i + 64))![0];
+    } else if (tag) {
       const end = s.indexOf(tag, i + tag.length);
       if (end < 0) {
         problems.push({ from: i, to: s.length, message: `This ${tag} body is never closed: add ${tag}` });
@@ -108,7 +111,8 @@ function trailingCommas(s: string, code: number[], mysql: boolean): SqlProblem[]
   for (const i of code) {
     if (s[i] !== ',') continue;
     const j = skipSpaceAndComments(s, i + 1, mysql);
-    const word = /^[A-Za-z]+/.exec(s.slice(j))?.[0].toUpperCase() ?? '';
+    // The whole word: order_id after a comma is a column, not ORDER.
+    const word = /^[A-Za-z_][A-Za-z0-9_$]*/.exec(s.slice(j))?.[0].toUpperCase() ?? '';
     if (s[j] === ')' || AFTER_COMMA.has(word)) {
       problems.push({ from: i, to: i + 1, message: 'Nothing follows this comma' });
     }
@@ -119,7 +123,7 @@ function trailingCommas(s: string, code: number[], mysql: boolean): SqlProblem[]
 function skipSpaceAndComments(s: string, j: number, mysql: boolean): number {
   for (;;) {
     while (j < s.length && /\s/.test(s[j])) j++;
-    if (s.startsWith('--', j) || (mysql && s[j] === '#')) {
+    if (j < s.length && lineCommentAt(s, j, mysql)) {
       const nl = s.indexOf('\n', j);
       j = nl < 0 ? s.length : nl;
     } else if (s.startsWith('/*', j)) {

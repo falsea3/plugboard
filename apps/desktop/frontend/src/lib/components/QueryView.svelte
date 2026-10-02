@@ -5,7 +5,7 @@
   import { app, type QueryTab, type Workspace } from '../stores/app.svelte';
   import { statementAt } from '../sqlStatements';
   import { formatCount, formatDuration } from '../format';
-  import SqlEditor from './SqlEditor.svelte';
+  import SqlEditor, { showRan } from './SqlEditor.svelte';
   import DataGrid from './DataGrid.svelte';
   import ValueBar from './ValueBar.svelte';
   import Icon from './Icon.svelte';
@@ -45,7 +45,7 @@
       const stmt = statementAt(state.doc.toString(), sel.head, driver === 'mysql');
       if (!stmt) return;
       script = stmt.text;
-      editor.dispatch({ selection: { anchor: stmt.from, head: stmt.to } });
+      showRan(editor, stmt.from, stmt.to);
     }
     if (!script.trim()) return;
 

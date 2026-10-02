@@ -124,7 +124,7 @@ func stripStringsAndComments(s string, mysql bool) string {
 			end := skipQuoted(s, i, c, false)
 			b.WriteString(s[i : end+1])
 			i = end
-		case c == '-' && i+1 < len(s) && s[i+1] == '-', c == '#' && mysql:
+		case lineCommentAt(s, i, mysql):
 			i = skipLine(s, i)
 			b.WriteByte(' ')
 		case c == '/' && strings.HasPrefix(s[i:], "/*!") && mysql:

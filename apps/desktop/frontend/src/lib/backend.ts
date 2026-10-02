@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, GoApp, Settings, TableQuery, TunnelState } from './wire';
+import type { ChangeSet, ConnectSecrets, Connection, GoApp, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -44,6 +44,8 @@ export const api = {
   chooseSQLiteFile: () => call(a => a.ChooseSQLiteFile()),
   applyChanges: (sessionId: string, cs: ChangeSet) => call(a => a.ApplyChanges(sessionId, cs)),
   previewChanges: (sessionId: string, cs: ChangeSet) => call(a => a.PreviewChanges(sessionId, cs)),
+  applyStructure: (sessionId: string, queryId: string, sc: StructureChange) => call(a => a.ApplyStructure(sessionId, queryId, sc)),
+  previewStructure: (sessionId: string, sc: StructureChange) => call(a => a.PreviewStructure(sessionId, sc)),
   getSettings: () => call(a => a.GetSettings()),
   saveSettings: (s: Settings) => call(a => a.SaveSettings(s)),
   openDataFolder: () => call(a => a.OpenDataFolder()),

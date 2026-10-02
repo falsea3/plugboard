@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // isConnLost reports errors that mean "the connection under this query died"
@@ -38,16 +39,26 @@ func isConnLost(err error) bool {
 	return false
 }
 
+// isStalePlan reports PostgreSQL refusing a statement pgx prepared before
+// the table changed shape (an ALTER TABLE since). The server refuses it
+// before running anything and pgx drops the cached statement, so running it
+// again simply prepares it afresh.
+func isStalePlan(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "0A000" && strings.Contains(pgErr.Message, "cached plan")
+}
+
 // ErrConnLost is returned by the SQL editor when its connection died under a
 // statement it can't safely run again: one that may have written something,
 // or any statement inside a transaction. The user decides what to re-run.
 var ErrConnLost = errors.New("the connection to the database was lost; the next run opens a new one. Check whether the statement ran before running it again")
 
 // retry runs fn, and once more if the first attempt failed only because a
-// pooled connection had died. For reads and for writes that never reached COMMIT.
+// pooled connection had died or a cached statement went stale. For reads and
+// for writes that never reached COMMIT.
 func retry[T any](ctx context.Context, fn func() (T, error)) (T, error) {
 	v, err := fn()
-	if err != nil && isConnLost(err) && ctx.Err() == nil {
+	if err != nil && (isConnLost(err) || isStalePlan(err)) && ctx.Err() == nil {
 		return fn()
 	}
 	return v, err

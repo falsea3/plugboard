@@ -21,6 +21,23 @@ type Dialect interface {
 	ListSchemas(ctx context.Context, db *sql.DB) ([]string, error)
 	ListTables(ctx context.Context, db *sql.DB, schema string) ([]model.TableInfo, error)
 	ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error)
+	// ColumnDDL renders a Structure-tab change to the existing column cur as
+	// statements. table is the name as the catalog has it; alter is
+	// "ALTER TABLE <schema.table quoted> " for the statements to start with.
+	ColumnDDL(ctx context.Context, db *sql.DB, schema, table, alter string, cur model.Column, ch model.ColumnChange) ([]string, error)
+	// TransactionalDDL reports whether ALTER TABLE can be rolled back.
+	TransactionalDDL() bool
+	// LockWait returns the statement that makes ALTER TABLE give up after
+	// waiting seconds for a lock another transaction holds — run first on the
+	// connection, inside the transaction where DDL has one — and the one that
+	// undoes it before the connection goes back to the pool ("" for none).
+	LockWait(seconds int) (set, reset string)
+}
+
+// versioned is a dialect whose SQL depends on the server release; Open hands
+// it what ServerVersion said.
+type versioned interface {
+	forVersion(v string) Dialect
 }
 
 func DialectFor(d model.Driver) (Dialect, error) {

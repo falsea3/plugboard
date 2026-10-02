@@ -97,8 +97,11 @@ export async function installBridge(page: Page) {
           }),
           RunMore: () => ok(result([], [])),
           CancelQuery: () => ok(undefined),
-          ApplyChanges: () => ok({ applied: 0, failedIndex: -1 }),
+          ApplyChanges: () => ok({ applied: 0, failedIndex: -1, partial: false, cancelled: false }),
           PreviewChanges: () => ok([]),
+          ApplyStructure: () => ok({ applied: 1, failedIndex: -1, partial: false, cancelled: false }),
+          PreviewStructure: (_: string, sc: { table: string; changes: { kind: string; name?: string; type?: string }[] }) =>
+            ok(sc.changes.map(c => `ALTER TABLE "public"."${sc.table}" ${c.kind === 'insert' ? `ADD COLUMN "${c.name}" ${c.type}` : '…'}`)),
           ChooseSQLiteFile: () => ok(''),
           ChooseSSHKeyFile: () => ok(''),
           TrustHostKey: () => ok(undefined),

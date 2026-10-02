@@ -77,6 +77,7 @@ func TestReadOnlyReasonMySQL(t *testing.T) {
 	allowed := []string{
 		"select 'it\\'s; delete from t' from t",
 		"select 1 # delete from t",
+		"select 1 -- delete from t",
 		"set names utf8mb4",
 		"use shop",
 		"start transaction",
@@ -91,6 +92,7 @@ func TestReadOnlyReasonMySQL(t *testing.T) {
 		"set password = 'x'",
 		"set @@session.transaction_read_only = 0",
 		"select * from t /*! into outfile '/tmp/x' */",
+		"select 1--1 into outfile '/tmp/x'", // --1 is minus minus one, not a comment
 	}
 	for _, s := range allowed {
 		if v := ReadOnlyReason(s, model.MySQL); v != "" {

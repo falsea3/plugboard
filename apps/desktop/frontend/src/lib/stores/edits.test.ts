@@ -106,4 +106,14 @@ describe('TableEdits failures', () => {
     expect(e.rowState(1)).toBe('');
     expect(e.isFailed(1)).toBe(false);
   });
+
+  it('keeps NULL set on an added row instead of falling back to the default', () => {
+    const e = new TableEdits(() => [[1, 'a']], () => 2);
+    const r = e.addRow();
+    e.set(r, 1, null);
+    expect(e.value(r, 1)).toBeNull();
+    expect(e.changes([{ name: 'id', type: 'int' }, { name: 'name', type: 'text' }], ['id']).changes).toEqual([
+      { kind: 'insert', key: {}, values: { name: null } },
+    ]);
+  });
 });

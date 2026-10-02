@@ -397,6 +397,40 @@ func (a *App) ApplyChanges(sessionID string, cs model.ChangeSet) model.ApplyResu
 	return model.ApplyResult{Applied: n, FailedIndex: -1}
 }
 
+// ApplyStructure alters a table's columns from the Structure tab. A type
+// change can rewrite a big table, so there is no timeout: CancelQuery(queryID)
+// stops it.
+func (a *App) ApplyStructure(sessionID, queryID string, sc model.StructureChange) model.ApplyResult {
+	s, err := a.session(sessionID)
+	if err != nil {
+		return model.ApplyResult{Error: err.Error(), FailedIndex: -1}
+	}
+	ctx, done := a.cancellable(queryID, 0)
+	defer done()
+	n, partial, err := s.ApplyStructure(ctx, sc)
+	if err != nil {
+		res := model.ApplyResult{Applied: n, Partial: partial, Error: err.Error(), FailedIndex: -1, Cancelled: errors.Is(ctx.Err(), context.Canceled)}
+		var ae *db.ApplyError
+		if errors.As(err, &ae) {
+			res.FailedIndex = ae.Index
+			res.Error = ae.Err.Error()
+		}
+		return res
+	}
+	return model.ApplyResult{Applied: n, FailedIndex: -1}
+}
+
+// PreviewStructure returns the SQL ApplyStructure would run, for display only.
+func (a *App) PreviewStructure(sessionID string, sc model.StructureChange) ([]string, error) {
+	s, err := a.session(sessionID)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(a.context(), catalogTimeout)
+	defer cancel()
+	return s.PreviewStructure(ctx, sc)
+}
+
 // PreviewChanges returns the SQL ApplyChanges would run, for display only.
 func (a *App) PreviewChanges(sessionID string, cs model.ChangeSet) ([]string, error) {
 	s, err := a.session(sessionID)

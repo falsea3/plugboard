@@ -85,6 +85,9 @@ func Open(ctx context.Context, id string, c model.Connection, opts OpenOptions) 
 		closeTunnel()
 		return nil, err
 	}
+	if v, ok := d.(versioned); ok {
+		d = v.forVersion(version)
+	}
 	s := &Session{ID: id, Conn: c, Dialect: d, DB: pool, Version: version}
 	if tunnel != nil {
 		s.tunnel = tunnel
@@ -201,6 +204,9 @@ func (s *Session) onEditor(ctx context.Context, stmt string, run func() (model.R
 	}
 	inTx := s.inTransaction()
 	rs, err = run()
+	if err != nil && isStalePlan(err) && ctx.Err() == nil {
+		rs, err = run()
+	}
 	if err != nil && isConnLost(err) && ctx.Err() == nil && !inTx && !mayWrite(stmt, s.Conn.Driver) {
 		s.dropEditor()
 		if err = s.openEditor(ctx); err == nil {

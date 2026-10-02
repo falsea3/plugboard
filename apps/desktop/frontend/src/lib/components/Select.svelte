@@ -20,8 +20,11 @@
     value: T;
     options: SelectOption<T>[];
     onchange?: (value: T) => void;
-    /** the list closed; picked says whether a value was chosen */
-    onclose?: (picked: boolean) => void;
+    /**
+     * The list closed; picked says whether an option was chosen (maybe the one
+     * already set), key is the Escape or Tab that closed it.
+     */
+    onclose?: (picked: boolean, key?: KeyboardEvent) => void;
     /** shown when no option matches value */
     placeholder?: string;
     id?: string;
@@ -36,6 +39,7 @@
   const MAX_HEIGHT = 280;
 
   let button = $state<HTMLButtonElement>();
+  let popup = $state<HTMLDivElement>();
   let list = $state<HTMLDivElement>();
   let search = $state<HTMLInputElement>();
   let open = $state(false);
@@ -71,19 +75,22 @@
     scrollToActive();
   }
 
-  function hide(picked: boolean) {
+  function hide(picked: boolean, key?: KeyboardEvent) {
     if (!open) return;
     open = false;
-    button?.focus();
-    onclose?.(picked);
+    onclose?.(picked, key);
+    // Focus goes back to the button, unless onchange or onclose moved it on
+    // (a grid cell editor hands it back to the grid).
+    const at = document.activeElement;
+    if (!at || at === document.body || popup?.contains(at)) button?.focus();
   }
 
   function pick(o: SelectOption<T>) {
     if (o.disabled) return;
     const changed = o.value !== value;
     value = o.value;
-    hide(true);
     if (changed) onchange?.(o.value);
+    hide(true);
   }
 
   function move(delta: number) {
@@ -135,10 +142,10 @@
         return;
       case 'Escape':
         e.preventDefault();
-        hide(false);
+        hide(false, e);
         return;
       case 'Tab':
-        hide(false);
+        hide(false, e);
         return;
     }
     // Without a search box, typing jumps to the first option starting with it.
@@ -191,6 +198,7 @@
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
   <div class="backdrop" use:toBody onmousedown={() => hide(false)}></div>
   <div
+    bind:this={popup}
     use:toBody
     class="popup"
     class:above={pos.above}

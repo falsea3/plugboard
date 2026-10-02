@@ -9,6 +9,9 @@ export function isNumericType(type: string): boolean {
   return NUMERIC_TYPE.test(type.trim()) && !isArray(type);
 }
 
+/** A boolean cell's value as the engines and the grid editor give it: true, 1 (MySQL), 't', or typed text. */
+export const isTrue = (v: CellValue) => v === true || v === 1 || v === '1' || v === 't' || v === 'true';
+
 export type CellKind = 'null' | 'number' | 'bool' | 'text';
 
 export function cellKind(value: CellValue, type: string): CellKind {

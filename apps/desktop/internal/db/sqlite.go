@@ -99,3 +99,21 @@ func (d sqliteDialect) ListColumns(ctx context.Context, db *sql.DB, schema, tabl
 	}
 	return out, rows.Err()
 }
+
+func (sqliteDialect) TransactionalDDL() bool { return true }
+
+// LockWait: the busy_timeout set in Open already bounds the wait.
+func (sqliteDialect) LockWait(int) (set, reset string) { return "", "" }
+
+// ColumnDDL: of changes to a column, SQLite's ALTER TABLE can only rename it.
+// Changing a type, NOT NULL or a default means rebuilding the table, which is
+// left to the SQL editor.
+func (d sqliteDialect) ColumnDDL(_ context.Context, _ *sql.DB, _, _, alter string, cur model.Column, ch model.ColumnChange) ([]string, error) {
+	if typeChanged(cur, ch) || ch.DefaultSet || (ch.Nullable != nil && *ch.Nullable != cur.Nullable) {
+		return nil, errors.New("SQLite can only rename a column in place; changing its type, NULL or default means recreating the table in the SQL editor")
+	}
+	if name := nameOf(cur, ch); name != cur.Name {
+		return []string{alter + "RENAME COLUMN " + d.QuoteIdent(cur.Name) + " TO " + d.QuoteIdent(name)}, nil
+	}
+	return nil, nil
+}

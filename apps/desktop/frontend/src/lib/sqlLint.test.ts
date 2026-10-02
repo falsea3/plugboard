@@ -17,10 +17,17 @@ describe('lintSql', () => {
       "select E'it\\'s', 'C:\\' from t",
       'select * from t for update skip locked',
       'sel', // still typing the first word
+      'select id, order_id, group_id, limit_amount from order_items',
+      'select a$b$ from t',
+      'get diagnostics condition 1 @msg = message_text',
+      'clone local data directory = \'/tmp/c\'',
     ]) {
       expect(messages(sql), sql).toEqual([]);
     }
     expect(messages("select 'it\\'s' from t # comment (", true)).toEqual([]);
+    expect(messages('select id, from_unixtime(created_at) from t', true)).toEqual([]);
+    expect(messages('select (1--1)', true)).toEqual([]); // MySQL: 1 - -1
+    expect(messages('select (1 -- )', true)).toEqual(['This ( is never closed']);
   });
 
   it('flags unclosed quotes, brackets and comments', () => {

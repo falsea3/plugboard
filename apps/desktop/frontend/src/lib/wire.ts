@@ -180,6 +180,29 @@ export interface ApplyResult {
   applied: number;
   error?: string;
   failedIndex: number;
+  /** changes before the failed one stayed applied (MySQL commits each ALTER TABLE) */
+  partial: boolean;
+  /** the user stopped it (structure changes) */
+  cancelled: boolean;
+}
+
+/** One edit from the Structure tab; type and default are SQL as typed. */
+export interface ColumnChange {
+  kind: ChangeKind;
+  /** the existing column (update, delete) */
+  column: string;
+  name?: string;
+  type?: string;
+  nullable?: boolean;
+  /** default changed; a null default drops it */
+  defaultSet: boolean;
+  default: string | null;
+}
+
+export interface StructureChange {
+  schema: string;
+  table: string;
+  changes: ColumnChange[];
 }
 
 export interface AppInfo {
@@ -247,6 +270,8 @@ export interface GoApp {
   ChooseSQLiteFile(): Promise<string>;
   ApplyChanges(sessionId: string, cs: ChangeSet): Promise<ApplyResult>;
   PreviewChanges(sessionId: string, cs: ChangeSet): Promise<string[]>;
+  ApplyStructure(sessionId: string, queryId: string, sc: StructureChange): Promise<ApplyResult>;
+  PreviewStructure(sessionId: string, sc: StructureChange): Promise<string[]>;
   GetSettings(): Promise<Settings>;
   SaveSettings(s: Settings): Promise<Settings>;
   OpenDataFolder(): Promise<void>;

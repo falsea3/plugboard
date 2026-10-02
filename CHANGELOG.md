@@ -11,6 +11,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **The SQL editor points out mistakes as you type**: an unclosed quote, bracket or comment, a comma with nothing after it, a typo in the first word (`selec` → *did you mean SELECT?*). It only marks what is wrong in every database, so correct SQL is never underlined.
 - **Run selection**: with text selected, the Run button says so and runs just that.
+- **Change a table's columns in the Structure tab** — add, rename and drop columns, change their type, NULL and default — on PostgreSQL and MySQL. It works like editing rows: changes collect until ⌘S, *Preview SQL* shows the `ALTER TABLE` statements, Production asks first. PostgreSQL applies them all or none; MySQL commits each one, so when one fails Relay DB says which went through. A long change can be stopped, and one that would have to wait for a table another transaction holds gives up after 5 seconds instead of holding up every query on it. SQLite can rename, add and drop columns; for anything more its tables need recreating in the SQL editor.
 
 ### Changed
 
@@ -20,6 +21,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A table read failed after its columns changed** (*cached plan must not change result type*) on PostgreSQL, for example after an `ALTER TABLE` in the SQL editor. The read now simply runs again.
+- **NULL in a new row's cell turned into DEFAULT**, so the insert took the column's default instead of NULL.
+- **MySQL's `--` without a space was taken for a comment.** MySQL starts a comment only at `-- ` (there `1--1` is `1 - -1`), so `select 1--1; select 2` ran as one statement, and the read-only check didn't look past the dashes.
+- **A `$` inside a PostgreSQL name** (`a$b$`) was read as the start of a `$$` body, swallowing the rest of the script into one statement.
 - **A PostgreSQL `real` showed digits it doesn't have** — `5.2` came out as `5.199999809265137`, because the driver widens it to a double. It shows as stored now.
 
 ## [0.1.0] - 2026-10-01

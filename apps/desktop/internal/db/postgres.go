@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net"
 	"net/url"
 	"strconv"
@@ -127,4 +128,45 @@ func (postgresDialect) ListColumns(ctx context.Context, db *sql.DB, schema, tabl
 // server casts them to the column's type.
 func pgParam(n int, col model.Column) string {
 	return "CAST($" + strconv.Itoa(n) + "::text AS " + col.CastType + ")"
+}
+
+func (postgresDialect) TransactionalDDL() bool { return true }
+
+// LockWait is LOCAL: it ends with the transaction.
+func (postgresDialect) LockWait(seconds int) (set, reset string) {
+	return fmt.Sprintf("SET LOCAL lock_timeout = '%ds'", seconds), ""
+}
+
+func (d postgresDialect) ColumnDDL(_ context.Context, _ *sql.DB, _, _, alter string, cur model.Column, ch model.ColumnChange) ([]string, error) {
+	// One statement per property, under the old name; the rename goes last.
+	col := d.QuoteIdent(cur.Name)
+	var out []string
+	// A new type with a new default: the old default goes first, or the type
+	// change tries to cast it ('no' to boolean) and fails.
+	dropFirst := typeChanged(cur, ch) && ch.DefaultSet && cur.Default != nil
+	if dropFirst {
+		out = append(out, alter+"ALTER COLUMN "+col+" DROP DEFAULT")
+	}
+	if typeChanged(cur, ch) {
+		t := strings.TrimSpace(*ch.Type)
+		out = append(out, alter+"ALTER COLUMN "+col+" TYPE "+t+" USING "+col+"::"+t)
+	}
+	if ch.DefaultSet {
+		if ch.Default != nil {
+			out = append(out, alter+"ALTER COLUMN "+col+" SET DEFAULT "+*ch.Default)
+		} else if !dropFirst {
+			out = append(out, alter+"ALTER COLUMN "+col+" DROP DEFAULT")
+		}
+	}
+	if ch.Nullable != nil && *ch.Nullable != cur.Nullable {
+		if *ch.Nullable {
+			out = append(out, alter+"ALTER COLUMN "+col+" DROP NOT NULL")
+		} else {
+			out = append(out, alter+"ALTER COLUMN "+col+" SET NOT NULL")
+		}
+	}
+	if name := nameOf(cur, ch); name != cur.Name {
+		out = append(out, alter+"RENAME COLUMN "+col+" TO "+d.QuoteIdent(name))
+	}
+	return out, nil
 }
