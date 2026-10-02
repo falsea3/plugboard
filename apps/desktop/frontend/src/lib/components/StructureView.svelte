@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { api, type CellValue, type Column, type ColumnChange, type Driver, type ResultColumn, type RowChange } from '../backend';
+  import { api, type CellValue, type Column, type ColumnChange, type EngineFeatures, type ResultColumn, type RowChange } from '../backend';
   import { app } from '../stores/app.svelte';
   import { DEFAULT, TableEdits } from '../stores/edits.svelte';
   import { formatCount, isTrue } from '../format';
@@ -11,7 +11,7 @@
     sessionId,
     schema,
     table,
-    driver,
+    features,
     columns,
     prod,
     readOnlyReason,
@@ -23,7 +23,7 @@
     sessionId: string;
     schema: string;
     table: string;
-    driver: Driver;
+    features: EngineFeatures;
     columns: Column[];
     prod: boolean;
     readOnlyReason: string;
@@ -39,11 +39,11 @@
   const COL_KEY = 4;
 
   const gridColumns: ResultColumn[] = [
-    { name: 'column', type: 'text' },
-    { name: 'type', type: 'text' },
-    { name: 'nullable', type: 'bool' },
-    { name: 'default', type: 'text' },
-    { name: 'primary key', type: 'bool' },
+    { name: 'column', type: 'text', kind: 'text' },
+    { name: 'type', type: 'text', kind: 'text' },
+    { name: 'nullable', type: 'bool', kind: 'bool' },
+    { name: 'default', type: 'text', kind: 'text' },
+    { name: 'primary key', type: 'bool', kind: 'bool' },
   ];
   const rows = $derived(columns.map(c => [c.name, c.type, c.nullable, c.default, c.primaryKey] as CellValue[]));
   const edits = new TableEdits(() => rows, () => gridColumns.length);
@@ -57,7 +57,7 @@
     ondirty(edits.dirty);
   });
 
-  const sqlite = $derived(driver === 'sqlite');
+  const canAlter = $derived(features.canAlterColumns);
 
   const displayRows = $derived.by(() => {
     const out: CellValue[][] = [];
@@ -74,7 +74,7 @@
 
   function canEditCell(r: number, c: number): boolean {
     if (readOnlyReason || edits.rowState(r) === 'deleted' || c === COL_KEY) return false;
-    return !sqlite || edits.isNew(r) || c === COL_NAME;
+    return canAlter || edits.isNew(r) || c === COL_NAME;
   }
 
   const editing: GridEditing = {
@@ -196,8 +196,8 @@
     const { changes, rows: changeRows } = structureChange();
     try {
       const res = await api.applyStructure(sessionId, queryId, { schema, table, changes });
-      if (res.cancelled && driver === 'mysql') {
-        app.notify('Stopped. MySQL may still finish the statement that was running — refresh in a while to see the table as it ends up.', 'info');
+      if (res.cancelled && !features.transactionalDDL) {
+        app.notify('Stopped. What ran before stays, and the server may still finish the statement that was running — refresh in a while to see the table as it ends up.', 'info');
         edits.discard();
         onchanged();
         return;
@@ -259,7 +259,7 @@
   {:else}
     <div class="footer">
       <span class="small muted">{formatCount(columns.length, 'column')}</span>
-      {#if sqlite && !readOnlyReason}<span class="small faint">· SQLite can rename, add and drop columns here; anything else needs the SQL editor</span>{/if}
+      {#if !canAlter && !readOnlyReason}<span class="small faint">· This database can rename, add and drop columns here; anything else needs the SQL editor</span>{/if}
     </div>
   {/if}
 </div>
@@ -269,8 +269,8 @@
   <Modal title={p.confirm ? 'Change Production?' : 'Pending structure changes'} width={620} onclose={() => (preview = null)}>
     <p class="confirm-text">
       {#if p.confirm}<strong>{table}</strong> is on a connection tagged Production.{/if}
-      {#if driver === 'mysql'}
-        MySQL applies each statement on its own: if one fails, the ones before it stay applied.
+      {#if !features.transactionalDDL}
+        This database applies each statement on its own: if one fails, the ones before it stay applied.
       {:else}
         These statements run in one transaction — all of them apply, or none do.
       {/if}

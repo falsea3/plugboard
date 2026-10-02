@@ -95,11 +95,30 @@ type TunnelState struct {
 }
 
 type SessionInfo struct {
-	SessionID     string     `json:"sessionId"`
-	Connection    Connection `json:"connection"`
-	ServerVersion string     `json:"serverVersion"`
-	Schemas       []string   `json:"schemas"`
-	DefaultSchema string     `json:"defaultSchema"`
+	SessionID     string         `json:"sessionId"`
+	Connection    Connection     `json:"connection"`
+	ServerVersion string         `json:"serverVersion"`
+	Schemas       []string       `json:"schemas"`
+	DefaultSchema string         `json:"defaultSchema"`
+	Engine        EngineFeatures `json:"engine"`
+}
+
+type EngineFeatures struct {
+	Syntax             SQLSyntax `json:"syntax"`
+	BooleanType        bool      `json:"booleanType"`
+	CanUpdateToDefault bool      `json:"canUpdateToDefault"`
+	CanAlterColumns    bool      `json:"canAlterColumns"`
+	TransactionalDDL   bool      `json:"transactionalDDL"`
+}
+
+type SQLSyntax struct {
+	HashComments          bool `json:"hashComments"`
+	DashCommentNeedsSpace bool `json:"dashCommentNeedsSpace"`
+	BackslashEscapes      bool `json:"backslashEscapes"`
+	EscapeStrings         bool `json:"escapeStrings"`
+	DoubleQuotedStrings   bool `json:"doubleQuotedStrings"`
+	DollarQuotes          bool `json:"dollarQuotes"`
+	ExecutableComments    bool `json:"executableComments"`
 }
 
 type TableInfo struct {
@@ -109,20 +128,32 @@ type TableInfo struct {
 }
 
 type Column struct {
-	Name       string   `json:"name"`
-	Type       string   `json:"type"`
-	Nullable   bool     `json:"nullable"`
-	Default    *string  `json:"default"`
-	PrimaryKey bool     `json:"primaryKey"`
-	Enum       []string `json:"enum"`
-	Binary     bool     `json:"binary"`
-	CastType   string   `json:"-"`
+	Name       string     `json:"name"`
+	Type       string     `json:"type"`
+	Nullable   bool       `json:"nullable"`
+	Default    *string    `json:"default"`
+	PrimaryKey bool       `json:"primaryKey"`
+	Enum       []string   `json:"enum"`
+	Kind       ColumnKind `json:"kind"`
+	CastType   string     `json:"-"`
 }
 
 type ResultColumn struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name string     `json:"name"`
+	Type string     `json:"type"`
+	Kind ColumnKind `json:"kind"`
 }
+
+type ColumnKind string
+
+const (
+	KindOther    ColumnKind = ""
+	KindNumber   ColumnKind = "number"
+	KindBool     ColumnKind = "bool"
+	KindDateTime ColumnKind = "datetime"
+	KindText     ColumnKind = "text"
+	KindBinary   ColumnKind = "binary"
+)
 
 type ResultSet struct {
 	Statement    string         `json:"statement"`

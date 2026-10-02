@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { statementAt, statementRanges } from './sqlStatements';
+import engines from '../../e2e/engines.json';
 
-const texts = (s: string, mysql = false) => statementRanges(s, mysql).map(r => r.text);
+
+const pg = engines.postgres.syntax;
+const my = engines.mysql.syntax;
+const texts = (s: string, syntax = pg) => statementRanges(s, syntax).map(r => r.text);
 
 describe('statementRanges', () => {
   it('splits on top-level semicolons only', () => {
@@ -22,10 +26,10 @@ describe('statementRanges', () => {
   });
 
   it('honours MySQL hash comments and backslash escapes', () => {
-    expect(texts("select 'a\\';b'; select 1 # ;\n", true)).toEqual(["select 'a\\';b'", 'select 1 # ;']);
+    expect(texts("select 'a\\';b'; select 1 # ;\n", my)).toEqual(["select 'a\\';b'", 'select 1 # ;']);
     expect(texts("select d #> '{a}' from t; select 2")).toEqual(["select d #> '{a}' from t", 'select 2']);
-    expect(texts('select `a\\`; select 2', true)).toEqual(['select `a\\`', 'select 2']);
-    expect(texts('select 1--1; select 2', true)).toEqual(['select 1--1', 'select 2']);
+    expect(texts('select `a\\`; select 2', my)).toEqual(['select `a\\`', 'select 2']);
+    expect(texts('select 1--1; select 2', my)).toEqual(['select 1--1', 'select 2']);
     expect(texts('select 1--; x\n; select 2')).toEqual(['select 1--; x', 'select 2']);
   });
 
@@ -37,7 +41,7 @@ describe('statementRanges', () => {
 
   it('reports offsets that slice back to the text', () => {
     const s = '  select 1;\n\n  select 2  ';
-    for (const r of statementRanges(s, false)) expect(s.slice(r.from, r.to)).toBe(r.text);
+    for (const r of statementRanges(s, pg)) expect(s.slice(r.from, r.to)).toBe(r.text);
   });
 });
 
@@ -45,16 +49,16 @@ describe('statementAt', () => {
   const s = 'select 1;\nselect 2;\n\nselect 3';
 
   it('finds the statement under the cursor', () => {
-    expect(statementAt(s, 3, false)?.text).toBe('select 1');
-    expect(statementAt(s, s.indexOf('2'), false)?.text).toBe('select 2');
-    expect(statementAt(s, s.length, false)?.text).toBe('select 3');
+    expect(statementAt(s, 3, pg)?.text).toBe('select 1');
+    expect(statementAt(s, s.indexOf('2'), pg)?.text).toBe('select 2');
+    expect(statementAt(s, s.length, pg)?.text).toBe('select 3');
   });
 
   it('uses the statement just before the cursor when it sits after a semicolon', () => {
-    expect(statementAt(s, s.indexOf(';') + 1, false)?.text).toBe('select 1');
+    expect(statementAt(s, s.indexOf(';') + 1, pg)?.text).toBe('select 1');
   });
 
   it('returns null for an empty script', () => {
-    expect(statementAt('  ', 0, false)).toBeNull();
+    expect(statementAt('  ', 0, pg)).toBeNull();
   });
 });

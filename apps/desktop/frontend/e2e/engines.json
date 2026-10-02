@@ -1,0 +1,47 @@
+{
+  "mysql": {
+    "syntax": {
+      "hashComments": true,
+      "dashCommentNeedsSpace": true,
+      "backslashEscapes": true,
+      "escapeStrings": false,
+      "doubleQuotedStrings": true,
+      "dollarQuotes": false,
+      "executableComments": true
+    },
+    "booleanType": false,
+    "canUpdateToDefault": true,
+    "canAlterColumns": true,
+    "transactionalDDL": false
+  },
+  "postgres": {
+    "syntax": {
+      "hashComments": false,
+      "dashCommentNeedsSpace": false,
+      "backslashEscapes": false,
+      "escapeStrings": true,
+      "doubleQuotedStrings": false,
+      "dollarQuotes": true,
+      "executableComments": false
+    },
+    "booleanType": true,
+    "canUpdateToDefault": true,
+    "canAlterColumns": true,
+    "transactionalDDL": true
+  },
+  "sqlite": {
+    "syntax": {
+      "hashComments": false,
+      "dashCommentNeedsSpace": false,
+      "backslashEscapes": false,
+      "escapeStrings": false,
+      "doubleQuotedStrings": false,
+      "dollarQuotes": false,
+      "executableComments": false
+    },
+    "booleanType": false,
+    "canUpdateToDefault": false,
+    "canAlterColumns": false,
+    "transactionalDDL": true
+  }
+}

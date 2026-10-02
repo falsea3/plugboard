@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { lintSql } from './sqlLint';
+import engines from '../../e2e/engines.json';
 
-const messages = (sql: string, mysql = false) => lintSql(sql, mysql).map(p => p.message);
-const marked = (sql: string, mysql = false) => lintSql(sql, mysql).map(p => sql.slice(p.from, p.to));
+
+const pg = engines.postgres.syntax;
+const my = engines.mysql.syntax;
+const messages = (sql: string, syntax = pg) => lintSql(sql, syntax).map(p => p.message);
+const marked = (sql: string, syntax = pg) => lintSql(sql, syntax).map(p => sql.slice(p.from, p.to));
 
 describe('lintSql', () => {
   it('leaves valid SQL alone, including what parsers trip on', () => {
@@ -24,10 +28,10 @@ describe('lintSql', () => {
     ]) {
       expect(messages(sql), sql).toEqual([]);
     }
-    expect(messages("select 'it\\'s' from t # comment (", true)).toEqual([]);
-    expect(messages('select id, from_unixtime(created_at) from t', true)).toEqual([]);
-    expect(messages('select (1--1)', true)).toEqual([]);
-    expect(messages('select (1 -- )', true)).toEqual(['This ( is never closed']);
+    expect(messages("select 'it\\'s' from t # comment (", my)).toEqual([]);
+    expect(messages('select id, from_unixtime(created_at) from t', my)).toEqual([]);
+    expect(messages('select (1--1)', my)).toEqual([]);
+    expect(messages('select (1 -- )', my)).toEqual(['This ( is never closed']);
   });
 
   it('flags unclosed quotes, brackets and comments', () => {
@@ -57,7 +61,7 @@ describe('lintSql', () => {
 
   it('points at the right statement in a script', () => {
     const sql = "select 1;\nselect 'x from t;\n";
-    const [p] = lintSql(sql, false);
+    const [p] = lintSql(sql, pg);
     expect(sql.slice(p.from, p.to)).toBe("'x from t;\n".trimEnd());
   });
 });

@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/relay-client/relay-db/apps/desktop/internal/db"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/dialect"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/mysql"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/postgres"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sqlcore"
-	"github.com/relay-client/relay-db/apps/desktop/internal/db/sqlite"
+	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/mysql"
+	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/postgres"
+	"github.com/relay-client/relay-db/apps/desktop/internal/db/engines/sqlite"
+	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/sqlcore"
 	"github.com/relay-client/relay-db/apps/desktop/internal/model"
 )
 

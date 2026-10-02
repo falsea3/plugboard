@@ -1,4 +1,5 @@
-import { dollarTagAt, lineCommentAt, statementRanges } from './sqlStatements';
+import { dollarTagAt, escapesBackslash, lineCommentAt, statementRanges } from './sqlStatements';
+import type { SqlSyntax } from './wire';
 
 export interface SqlProblem {
   from: number;
@@ -21,15 +22,15 @@ const STATEMENT_WORDS = new Set([
 
 const AFTER_COMMA = new Set(['FROM', 'WHERE', 'GROUP', 'ORDER', 'HAVING', 'LIMIT']);
 
-export function lintSql(script: string, mysql: boolean): SqlProblem[] {
+export function lintSql(script: string, syntax: SqlSyntax): SqlProblem[] {
   const problems: SqlProblem[] = [];
-  for (const stmt of statementRanges(script, mysql)) {
-    problems.push(...lintStatement(stmt.text, mysql).map(p => ({ ...p, from: p.from + stmt.from, to: p.to + stmt.from })));
+  for (const stmt of statementRanges(script, syntax)) {
+    problems.push(...lintStatement(stmt.text, syntax).map(p => ({ ...p, from: p.from + stmt.from, to: p.to + stmt.from })));
   }
   return problems;
 }
 
-function lintStatement(s: string, mysql: boolean): SqlProblem[] {
+function lintStatement(s: string, syntax: SqlSyntax): SqlProblem[] {
   const problems: SqlProblem[] = [];
   const open: number[] = [];
   const code: number[] = [];
@@ -37,17 +38,17 @@ function lintStatement(s: string, mysql: boolean): SqlProblem[] {
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
-    const tag = c === '$' && !mysql ? dollarTagAt(s, i) : null;
+    const tag = c === '$' && syntax.dollarQuotes ? dollarTagAt(s, i) : null;
     if (c === "'" || c === '"' || c === '`') {
-      const end = closingQuote(s, i, mysql);
+      const end = closingQuote(s, i, syntax);
       if (end < 0) {
-        const what = c === "'" || (c === '"' && mysql) ? 'string' : 'quoted name';
+        const what = c === "'" || (c === '"' && syntax.doubleQuotedStrings) ? 'string' : 'quoted name';
         problems.push({ from: i, to: s.length, message: `This ${what} is never closed: add the ending ${c}` });
         cut = true;
         break;
       }
       i = end;
-    } else if (lineCommentAt(s, i, mysql)) {
+    } else if (lineCommentAt(s, i, syntax)) {
       const nl = s.indexOf('\n', i);
       i = nl < 0 ? s.length : nl;
     } else if (c === '/' && s[i + 1] === '*') {
@@ -77,15 +78,15 @@ function lintStatement(s: string, mysql: boolean): SqlProblem[] {
   }
   if (!cut) for (const i of open) problems.push({ from: i, to: i + 1, message: 'This ( is never closed' });
 
-  problems.push(...trailingCommas(s, code, mysql));
+  problems.push(...trailingCommas(s, code, syntax));
   const typo = firstWordTypo(s);
   if (typo) problems.push(typo);
   return problems;
 }
 
-function closingQuote(s: string, i: number, mysql: boolean): number {
+function closingQuote(s: string, i: number, syntax: SqlSyntax): number {
   const q = s[i];
-  const backslash = q !== '`' && (mysql || (q === "'" && /[Ee]/.test(s[i - 1] ?? '') && !/\w/.test(s[i - 2] ?? '')));
+  const backslash = escapesBackslash(s, i, syntax);
   for (let j = i + 1; j < s.length; j++) {
     if (s[j] === '\\' && backslash) j++;
     else if (s[j] === q) {
@@ -96,11 +97,11 @@ function closingQuote(s: string, i: number, mysql: boolean): number {
   return -1;
 }
 
-function trailingCommas(s: string, code: number[], mysql: boolean): SqlProblem[] {
+function trailingCommas(s: string, code: number[], syntax: SqlSyntax): SqlProblem[] {
   const problems: SqlProblem[] = [];
   for (const i of code) {
     if (s[i] !== ',') continue;
-    const j = skipSpaceAndComments(s, i + 1, mysql);
+    const j = skipSpaceAndComments(s, i + 1, syntax);
     const word = /^[A-Za-z_][A-Za-z0-9_$]*/.exec(s.slice(j))?.[0].toUpperCase() ?? '';
     if (s[j] === ')' || AFTER_COMMA.has(word)) {
       problems.push({ from: i, to: i + 1, message: 'Nothing follows this comma' });
@@ -109,10 +110,10 @@ function trailingCommas(s: string, code: number[], mysql: boolean): SqlProblem[]
   return problems;
 }
 
-function skipSpaceAndComments(s: string, j: number, mysql: boolean): number {
+function skipSpaceAndComments(s: string, j: number, syntax: SqlSyntax): number {
   for (;;) {
     while (j < s.length && /\s/.test(s[j])) j++;
-    if (j < s.length && lineCommentAt(s, j, mysql)) {
+    if (j < s.length && lineCommentAt(s, j, syntax)) {
       const nl = s.indexOf('\n', j);
       j = nl < 0 ? s.length : nl;
     } else if (s.startsWith('/*', j)) {

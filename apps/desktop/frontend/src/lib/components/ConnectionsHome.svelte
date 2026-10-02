@@ -1,6 +1,7 @@
 <script lang="ts">
   import { app } from '../stores/app.svelte';
-  import { api, DRIVER_LABELS, type Connection } from '../backend';
+  import { api, type Connection } from '../backend';
+  import { engine } from '../engines';
   import { connectionTarget } from '../format';
   import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
@@ -19,7 +20,7 @@
     const q = query.trim().toLowerCase();
     if (!q) return app.connections;
     return app.connections.filter(c =>
-      [c.name, c.host, c.database, c.file, c.env, DRIVER_LABELS[c.driver]].some(v => v?.toLowerCase().includes(q)),
+      [c.name, c.host, c.database, c.file, c.env, engine(c.driver).name].some(v => v?.toLowerCase().includes(q)),
     );
   });
 
@@ -72,7 +73,7 @@
               <div class="name">
               {c.name} <EnvBadge env={c.env} />
               {#if c.readOnly}<span class="marker ro-mark" title="Read-only"><Icon name="lock" size={11} /></span>{/if}
-              {#if c.ssh?.enabled && c.driver !== 'sqlite'}<span class="marker" title="Through SSH {c.ssh.user}@{c.ssh.host}"><Icon name="tunnel" size={12} /></span>{/if}
+              {#if c.ssh?.enabled && !engine(c.driver).file}<span class="marker" title="Through SSH {c.ssh.user}@{c.ssh.host}"><Icon name="tunnel" size={12} /></span>{/if}
             </div>
               <div class="target faint">{connectionTarget(c)}</div>
             </div>

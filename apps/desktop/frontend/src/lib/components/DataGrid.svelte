@@ -17,7 +17,7 @@
 
 <script lang="ts">
   import { tick } from 'svelte';
-  import { cellKind, copyText, calcColumnWidth, formatCell, isNumericType, toTSV } from '../format';
+  import { cellKind, copyText, calcColumnWidth, formatCell, toTSV } from '../format';
   import { copyToClipboard } from '../clipboard';
   import { startDrag } from '../drag';
   import Select from './Select.svelte';
@@ -98,7 +98,7 @@
     return out;
   });
   const leftPad = $derived(shownCols.length ? colStarts[shownCols[0]] : 0);
-  const numeric = $derived(columns.map(c => isNumericType(c.type)));
+  const numeric = $derived(columns.map(c => c.kind === 'number'));
   const keys = $derived(new Set(keyColumns));
 
   $effect(() => {
@@ -460,7 +460,7 @@
           {#each shownCols as c (c)}
             {@const value = row[c]}
             {@const state = editing?.cellState(r, c) ?? ''}
-            {@const kind = state === 'default' ? 'null' : cellKind(value, columns[c].type)}
+            {@const kind = state === 'default' ? 'null' : cellKind(value, columns[c].kind)}
             {@const isEditing = cellEditor?.r === r && cellEditor?.c === c}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <div

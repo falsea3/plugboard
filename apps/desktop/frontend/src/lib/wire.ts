@@ -67,6 +67,25 @@ export interface SessionInfo {
   serverVersion: string;
   schemas: string[];
   defaultSchema: string;
+  engine: EngineFeatures;
+}
+
+export interface EngineFeatures {
+  syntax: SqlSyntax;
+  booleanType: boolean;
+  canUpdateToDefault: boolean;
+  canAlterColumns: boolean;
+  transactionalDDL: boolean;
+}
+
+export interface SqlSyntax {
+  hashComments: boolean;
+  dashCommentNeedsSpace: boolean;
+  backslashEscapes: boolean;
+  escapeStrings: boolean;
+  doubleQuotedStrings: boolean;
+  dollarQuotes: boolean;
+  executableComments: boolean;
 }
 
 export interface TableInfo {
@@ -82,13 +101,16 @@ export interface Column {
   default: string | null;
   primaryKey: boolean;
   enum: string[] | null;
-  binary: boolean;
+  kind: ColumnKind;
 }
 
 export interface ResultColumn {
   name: string;
   type: string;
+  kind: ColumnKind;
 }
+
+export type ColumnKind = '' | 'number' | 'bool' | 'datetime' | 'text' | 'binary';
 
 export type CellValue = string | number | boolean | null;
 
@@ -272,34 +294,3 @@ declare global {
   }
 }
 
-export const DEFAULT_PORTS: Record<Driver, number> = {
-  postgres: 5432,
-  mysql: 3306,
-  sqlite: 0,
-};
-
-export const DRIVER_LABELS: Record<Driver, string> = {
-  postgres: 'PostgreSQL',
-  mysql: 'MySQL',
-  sqlite: 'SQLite',
-};
-
-export function emptyConnection(driver: Driver = 'postgres'): Connection {
-  return {
-    id: '',
-    name: '',
-    driver,
-    host: driver === 'sqlite' ? '' : '127.0.0.1',
-    port: DEFAULT_PORTS[driver],
-    user: driver === 'postgres' ? 'postgres' : driver === 'mysql' ? 'root' : '',
-    password: '',
-    savePassword: true,
-    database: '',
-    file: '',
-    sslMode: '',
-    env: '',
-    color: '',
-    readOnly: false,
-    ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '', password: '', passphrase: '' },
-  };
-}

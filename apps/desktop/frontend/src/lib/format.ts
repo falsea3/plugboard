@@ -1,21 +1,14 @@
-import type { CellValue, Connection } from './wire';
-
-const NUMERIC_TYPE = /^(int|integer|smallint|bigint|tinyint|mediumint|int2|int4|int8|serial|smallserial|bigserial|numeric|decimal|real|double|float|float4|float8|money|oid)\b/i;
-
-const isArray = (type: string) => type.trim().endsWith('[]');
-
-export function isNumericType(type: string): boolean {
-  return NUMERIC_TYPE.test(type.trim()) && !isArray(type);
-}
+import { engine } from './engines';
+import type { CellValue, ColumnKind, Connection } from './wire';
 
 export const isTrue = (v: CellValue) => v === true || v === 1 || v === '1' || v === 't' || v === 'true';
 
 export type CellKind = 'null' | 'number' | 'bool' | 'text';
 
-export function cellKind(value: CellValue, type: string): CellKind {
+export function cellKind(value: CellValue, kind: ColumnKind): CellKind {
   if (value === null) return 'null';
   if (typeof value === 'boolean') return 'bool';
-  if (typeof value === 'number' || isNumericType(type)) return 'number';
+  if (typeof value === 'number' || kind === 'number') return 'number';
   return 'text';
 }
 
@@ -44,7 +37,7 @@ export function formatCount(n: number, one: string, many = one + 's'): string {
 }
 
 export function connectionTarget(c: Connection): string {
-  if (c.driver === 'sqlite') {
+  if (engine(c.driver).file) {
     return c.file.split(/[\\/]/).pop() || c.file;
   }
   const port = c.port ? `:${c.port}` : '';
@@ -68,21 +61,4 @@ export function calcColumnWidth(name: string, type: string, rows: CellValue[][],
     if (len > longest) longest = len;
   }
   return Math.round(Math.min(Math.max(longest * charW + 24, 64), 360));
-}
-
-export function isBoolType(type: string): boolean {
-  return /^(boolean|bool)$/i.test(type.trim()) || /^tinyint\(1\)/i.test(type.trim());
-}
-
-export function isDateTimeType(type: string): boolean {
-  return /^(date|datetime|time|timetz|timestamp|timestamptz)\b/i.test(type.trim()) && !isArray(type);
-}
-
-export function isTextType(type: string): boolean {
-  return /char|text|clob|string/i.test(type) && !isArray(type);
-}
-
-export function sqliteName(path: string): string {
-  const file = path.split(/[\\/]/).pop() ?? '';
-  return file.replace(/\.(db|sqlite3?|db3)$/i, '') || file || 'SQLite';
 }

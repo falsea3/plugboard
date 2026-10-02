@@ -4,7 +4,7 @@
   import { app, type TableTab, type Workspace } from '../stores/app.svelte';
   import { DEFAULT, NOW, SET_DEFAULT, TableEdits, exprLabel, isExpr } from '../stores/edits.svelte';
   import { ADD_ROW_EVENT, COMMIT_EVENT, FILTER_ROWS_EVENT, REFRESH_EVENT } from '../commands';
-  import { formatCount, formatDuration, isBoolType, isDateTimeType, isTextType, isTrue } from '../format';
+  import { formatCount, formatDuration, isTrue } from '../format';
   import { insertStatement } from '../sqlText';
   import { copyToClipboard } from '../clipboard';
   import DataGrid, { type GridEditing, type MenuAt, type MenuItem } from './DataGrid.svelte';
@@ -51,7 +51,7 @@
   const shownSort = $derived(sort ?? (page?.defaultOrder?.length ? { column: page.defaultOrder[0], desc: false } : null));
 
   const keyColumns = $derived(columns.filter(c => c.primaryKey).map(c => c.name));
-  const binary = $derived(new Set(columns.filter(c => c.binary).map(c => c.name)));
+  const binary = $derived(new Set(columns.filter(c => c.kind === 'binary').map(c => c.name)));
 
   const readOnlyReason = $derived.by(() => {
     if (ws.readOnly) return 'Read-only session';
@@ -65,7 +65,7 @@
     ondirty(edits.dirty || structureDirty);
   });
 
-  const driver = untrack(() => ws.connection.driver);
+  const features = untrack(() => ws.session.engine);
 
   const info = $derived(new Map(columns.map(c => [c.name, c])));
   const colAt = (c: number): Column | undefined => (page ? info.get(page.result.columns[c]?.name) : undefined);
@@ -97,7 +97,7 @@
     options: (r, c) => colAt(c)?.enum ?? null,
   };
 
-  const boolValue = (on: boolean): CellValue => (driver === 'postgres' ? on : on ? 1 : 0);
+  const boolValue = (on: boolean): CellValue => (features.booleanType ? on : on ? 1 : 0);
 
   function cellMenu(r: number, c: number): MenuItem[] {
     const items: MenuItem[] = [];
@@ -107,14 +107,14 @@
       const v = displayRows[r]?.[c] ?? null;
       const name = page.result.columns[c].name;
       if (cellEditable(r, c) && col) {
-        if (isBoolType(col.type)) {
+        if (col.kind === 'bool') {
           if (v === null || !isTrue(v)) items.push({ id: 'set-true', label: 'Set true', kbd: 'Space' });
           if (v === null || isTrue(v)) items.push({ id: 'set-false', label: 'Set false', kbd: 'Space' });
         }
-        if (isDateTimeType(col.type)) items.push({ id: 'set-now', label: 'Set to now()' });
+        if (col.kind === 'datetime') items.push({ id: 'set-now', label: 'Set to now()' });
         if (col.nullable && v !== null) items.push({ id: 'null', label: 'Set NULL', kbd: '⌥⌫' });
         const isNew = edits.rowState(r) === 'new';
-        if (isNew ? edits.cellState(r, c) !== 'default' : col.default !== null && driver !== 'sqlite') {
+        if (isNew ? edits.cellState(r, c) !== 'default' : col.default !== null && features.canUpdateToDefault) {
           items.push({ id: 'set-default', label: 'Set DEFAULT' });
         }
       }
@@ -151,12 +151,12 @@
     ];
     if (sort && page.defaultOrder?.length) items.push({ id: 'sort-default', label: `Default order (${page.defaultOrder.join(', ')})` });
     items.push('sep');
-    if (col && isBoolType(col.type)) items.push({ id: 'f-true', label: 'Is true' }, { id: 'f-false', label: 'Is false' });
+    if (col && col.kind === 'bool') items.push({ id: 'f-true', label: 'Is true' }, { id: 'f-false', label: 'Is false' });
     if (col && col.enum?.length) for (const e of col.enum.slice(0, 8)) items.push({ id: 'f-enum:' + e, label: `Is “${e}”` });
     if (!col || col.nullable) items.push({ id: 'f-null', label: 'Is NULL' }, { id: 'f-not_null', label: 'Is not NULL' });
-    if (col && isTextType(col.type)) items.push({ id: 'f-empty', label: 'Is empty' }, { id: 'f-not_empty', label: 'Is not empty' });
+    if (col && col.kind === 'text') items.push({ id: 'f-empty', label: 'Is empty' }, { id: 'f-not_empty', label: 'Is not empty' });
     items.push('sep', { id: 'fv-=', label: 'Equals…' }, { id: 'fv-!=', label: 'Not equals…' });
-    if (!col || isTextType(col.type)) items.push({ id: 'fv-contains', label: 'Contains…' });
+    if (!col || col.kind === 'text') items.push({ id: 'fv-contains', label: 'Contains…' });
     else items.push({ id: 'fv->', label: 'Greater than…' }, { id: 'fv-<', label: 'Less than…' });
     return items;
   }
@@ -195,7 +195,7 @@
       case 'copy-insert': {
         const rows = (at.rows.length ? at.rows : [at.r]).filter(r => edits.rowState(r) !== 'new');
         const cols = page.result.columns.map(c => c.name);
-        copyToClipboard(insertStatement(driver, tab.schema, tab.table, cols, rows.map(r => page!.result.rows[r])));
+        copyToClipboard(insertStatement(features, tab.schema, tab.table, cols, rows.map(r => page!.result.rows[r])));
         return true;
       }
     }
@@ -226,7 +226,7 @@
         edits.set(at.r, at.c, boolValue(id === 'set-true'));
         return true;
       case 'toggle':
-        if (!isBoolType(col.type)) return false;
+        if (col.kind !== 'bool') return false;
         edits.set(at.r, at.c, boolValue(v === null ? true : !isTrue(v)));
         return true;
       case 'set-now':
@@ -566,7 +566,7 @@
         {sessionId}
         schema={tab.schema}
         table={tab.table}
-        {driver}
+        {features}
         {columns}
         prod={ws.connection.env === 'prod'}
         readOnlyReason={structureReadOnlyReason}

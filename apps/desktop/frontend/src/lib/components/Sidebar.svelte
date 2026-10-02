@@ -6,6 +6,7 @@
   import EnvBadge from './EnvBadge.svelte';
   import Icon from './Icon.svelte';
   import Select from './Select.svelte';
+  import { engine } from '../engines';
   import Modal from './Modal.svelte';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
@@ -54,7 +55,7 @@
     <div class="conn-meta">
       <div class="conn-name">{conn.name} <EnvBadge env={conn.env} /></div>
       <div class="conn-target">
-        {#if conn.ssh?.enabled && conn.driver !== 'sqlite'}<span class="via" class:down={ws.tunnel !== 'ok'} title={ws.tunnel !== 'ok' ? 'SSH connection lost — reconnecting' : `Through SSH ${conn.ssh.user}@${conn.ssh.host || conn.host}`}><Icon name="tunnel" size={11} />{ws.tunnel !== 'ok' ? 'SSH reconnecting…' : 'SSH'}</span>{/if}
+        {#if conn.ssh?.enabled && !engine(conn.driver).file}<span class="via" class:down={ws.tunnel !== 'ok'} title={ws.tunnel !== 'ok' ? 'SSH connection lost — reconnecting' : `Through SSH ${conn.ssh.user}@${conn.ssh.host || conn.host}`}><Icon name="tunnel" size={11} />{ws.tunnel !== 'ok' ? 'SSH reconnecting…' : 'SSH'}</span>{/if}
         {ws.session.serverVersion}
       </div>
     </div>

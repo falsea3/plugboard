@@ -4,6 +4,7 @@
   import { api, type CellValue, type QueryRun, type ResultColumn } from '../backend';
   import { app, type QueryTab, type Workspace } from '../stores/app.svelte';
   import { statementAt } from '../sqlStatements';
+  import { engine } from '../engines';
   import { formatCount, formatDuration } from '../format';
   import SqlEditor, { showRan } from './SqlEditor.svelte';
   import DataGrid from './DataGrid.svelte';
@@ -15,7 +16,8 @@
   let { ws, tab }: { ws: Workspace; tab: QueryTab } = $props();
 
   const session = untrack(() => ws.session);
-  const driver = session.connection.driver;
+  const dialect = engine(session.connection.driver).sqlDialect;
+  const syntax = session.engine.syntax;
   const isProd = session.connection.env === 'prod';
 
   let pending = $state<{ script: string; writes: string[] } | null>(null);
@@ -42,7 +44,7 @@
     } else if (all) {
       script = state.doc.toString();
     } else {
-      const stmt = statementAt(state.doc.toString(), sel.head, driver === 'mysql');
+      const stmt = statementAt(state.doc.toString(), sel.head, syntax);
       if (!stmt) return;
       script = stmt.text;
       showRan(editor, stmt.from, stmt.to);
@@ -147,7 +149,7 @@
   </div>
 
   <div class="editor" style:height="{editorHeight}px">
-    <SqlEditor bind:value={tab.sql} bind:editor bind:hasSelection {driver} tables={tableNames} defaultSchema={ws.schema} onrun={execute} />
+    <SqlEditor bind:value={tab.sql} bind:editor bind:hasSelection {dialect} {syntax} tables={tableNames} defaultSchema={ws.schema} onrun={execute} />
   </div>
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->

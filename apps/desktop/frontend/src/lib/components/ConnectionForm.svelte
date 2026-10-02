@@ -1,16 +1,17 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import {
-    api, DEFAULT_PORTS, DRIVER_LABELS, emptyConnection,
+    api,
     type Connection, type ConnectSecrets, type Driver, type Env, type SSHAuth, type TestResult,
   } from '../backend';
+  import { ENGINES, emptyConnection, engine, nameFromFile } from '../engines';
   import { app } from '../stores/app.svelte';
   import { parseConnectionUrl } from '../connectionUrl';
   import Modal from './Modal.svelte';
   import DriverMark from './DriverMark.svelte';
   import Icon from './Icon.svelte';
   import Select from './Select.svelte';
-  import { formatDuration, sqliteName } from '../format';
+  import { formatDuration } from '../format';
 
   let {
     initial,
@@ -51,7 +52,6 @@
   let urlError = $state('');
   let readOnlyTouched = editing;
 
-  const drivers: Driver[] = ['postgres', 'mysql', 'sqlite'];
   const envs: { value: Env; label: string }[] = [
     { value: '', label: 'None' },
     { value: 'local', label: 'Local' },
@@ -85,12 +85,13 @@
     return moved ? `Enter it again — the saved ${what} doesn't carry over to this change` : `Optional — keeps the saved ${what}`;
   }
   const sshViaDbHost = $derived(!form.ssh.host.trim());
+  const formEngine = $derived(engine(form.driver));
 
   function setDriver(d: Driver) {
     if (d === form.driver) return;
-    const fresh = emptyConnection(d);
+    const fresh = emptyConnection(engine(d));
     form = { ...fresh, id: form.id, name: form.name, env: form.env, password: form.password, savePassword: form.savePassword, readOnly: form.readOnly, ssh: form.ssh };
-    if (d === 'sqlite') tab = 'general';
+    if (engine(d).file) tab = 'general';
     test = null;
   }
 
@@ -133,7 +134,7 @@
       const path = await api.chooseSQLiteFile();
       if (path) {
         form.file = path;
-        if (!form.name) form.name = sqliteName(path);
+        if (!form.name) form.name = nameFromFile(formEngine, path);
       }
     } catch (err) {
       error = err instanceof Error ? err.message : String(err);
@@ -151,13 +152,14 @@
 
   function normalized(): Connection {
     const c = $state.snapshot(form) as Connection;
+    const e = engine(c.driver);
     c.name = c.name.trim();
     if (!c.name) {
-      c.name = c.driver === 'sqlite' ? sqliteName(c.file) : `${c.host}${c.database ? '/' + c.database : ''}`;
+      c.name = e.file ? nameFromFile(e, c.file) : `${c.host}${c.database ? '/' + c.database : ''}`;
     }
-    c.port = Number(c.port) || DEFAULT_PORTS[c.driver];
+    c.port = Number(c.port) || e.defaultPort;
     c.ssh.port = Number(c.ssh.port) || 22;
-    if (c.driver === 'sqlite') c.ssh.enabled = false;
+    if (e.file) c.ssh.enabled = false;
     return c;
   }
 
@@ -219,15 +221,15 @@
     {#if urlError}<div class="url-error">{urlError}</div>{/if}
 
     <div class="drivers" role="radiogroup" aria-label="Database">
-      {#each drivers as d (d)}
-        <button type="button" role="radio" aria-checked={form.driver === d} aria-label={DRIVER_LABELS[d]} class="driver" class:selected={form.driver === d} onclick={() => setDriver(d)}>
-          <DriverMark driver={d} size={26} />
-          <span>{DRIVER_LABELS[d]}</span>
+      {#each ENGINES as e (e.driver)}
+        <button type="button" role="radio" aria-checked={form.driver === e.driver} aria-label={e.name} class="driver" class:selected={form.driver === e.driver} onclick={() => setDriver(e.driver)}>
+          <DriverMark driver={e.driver} size={26} />
+          <span>{e.name}</span>
         </button>
       {/each}
     </div>
 
-    {#if form.driver !== 'sqlite'}
+    {#if !formEngine.file}
       <div class="tabs" role="tablist">
         <button type="button" role="tab" aria-selected={tab === 'general'} class:on={tab === 'general'} onclick={() => (tab = 'general')}>General</button>
         <button type="button" role="tab" aria-selected={tab === 'ssh'} class:on={tab === 'ssh'} onclick={() => (tab = 'ssh')}>
@@ -241,11 +243,11 @@
       <div class="grid">
         <label for="cf-name">Name</label>
         <div class="row">
-          <input id="cf-name" class="input" bind:value={form.name} placeholder={form.driver === 'sqlite' ? 'Optional — named after the file' : 'Optional — e.g. Production replica'} autocomplete="off" spellcheck="false" />
+          <input id="cf-name" class="input" bind:value={form.name} placeholder={formEngine.file ? 'Optional — named after the file' : 'Optional — e.g. Production replica'} autocomplete="off" spellcheck="false" />
           <div class="env"><Select bind:value={form.env} options={envs} onchange={onEnvChange} aria-label="Environment tag" /></div>
         </div>
 
-        {#if form.driver === 'sqlite'}
+        {#if formEngine.file}
           <label for="cf-file">File</label>
           <div class="row">
             <input id="cf-file" class="input mono" bind:value={form.file} placeholder="/path/to/database.db" spellcheck="false" />
@@ -255,7 +257,7 @@
           <label for="cf-host">Host</label>
           <div class="row">
             <input id="cf-host" class="input" bind:value={form.host} placeholder="127.0.0.1" spellcheck="false" autocomplete="off" />
-            <input class="input port" type="number" bind:value={form.port} min="1" max="65535" aria-label="Port" placeholder={String(DEFAULT_PORTS[form.driver])} />
+            <input class="input port" type="number" bind:value={form.port} min="1" max="65535" aria-label="Port" placeholder={String(formEngine.defaultPort)} />
           </div>
 
           <label for="cf-user">User</label>
@@ -268,7 +270,7 @@
           </div>
 
           <label for="cf-db">Database</label>
-          <input id="cf-db" class="input" bind:value={form.database} placeholder={form.driver === 'postgres' ? 'Optional — defaults to postgres' : 'Optional'} spellcheck="false" autocomplete="off" />
+          <input id="cf-db" class="input" bind:value={form.database} placeholder={formEngine.defaultDatabase ? `Optional — defaults to ${formEngine.defaultDatabase}` : 'Optional'} spellcheck="false" autocomplete="off" />
 
           <label for="cf-ssl">SSL</label>
           <Select id="cf-ssl" bind:value={form.sslMode} options={sslModes} aria-label="SSL" />
@@ -298,9 +300,9 @@
             <span class="toggle-title">Connect through an SSH server</span>
             <span class="toggle-hint">
               {#if sshViaDbHost}
-                Relay DB signs in to <strong>{form.host || 'the database host'}</strong> over SSH and reaches the database there on <code>127.0.0.1:{form.port || DEFAULT_PORTS[form.driver]}</code>. Set an SSH host to go through a separate bastion instead.
+                Relay DB signs in to <strong>{form.host || 'the database host'}</strong> over SSH and reaches the database there on <code>127.0.0.1:{form.port || formEngine.defaultPort}</code>. Set an SSH host to go through a separate bastion instead.
               {:else}
-                Relay DB signs in to <strong>{form.ssh.host}</strong> and connects from there to <code>{form.host || '127.0.0.1'}:{form.port || DEFAULT_PORTS[form.driver]}</code> — the database host as that server sees it.
+                Relay DB signs in to <strong>{form.ssh.host}</strong> and connects from there to <code>{form.host || '127.0.0.1'}:{form.port || formEngine.defaultPort}</code> — the database host as that server sees it.
               {/if}
             </span>
           </span>
@@ -349,7 +351,7 @@
       <div class="result" class:ok={test.ok} role="status">
         <Icon name={test.ok ? 'check' : 'alert'} />
         {#if test.ok}
-          <span>Connected{form.ssh.enabled && form.driver !== 'sqlite' ? ' via SSH' : ''} · {test.serverVersion} · {formatDuration(test.latencyMs)}</span>
+          <span>Connected{form.ssh.enabled && !formEngine.file ? ' via SSH' : ''} · {test.serverVersion} · {formatDuration(test.latencyMs)}</span>
         {:else}
           <span>{test.error}</span>
         {/if}

@@ -28,15 +28,16 @@
   import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
   import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
   import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
-  import { MySQL, PostgreSQL, SQLite, sql, type SQLNamespace } from '@codemirror/lang-sql';
+  import { sql, type SQLDialect, type SQLNamespace } from '@codemirror/lang-sql';
   import { linter } from '@codemirror/lint';
   import { tags as t } from '@lezer/highlight';
   import { lintSql } from '../sqlLint';
-  import type { Driver } from '../wire';
+  import type { SqlSyntax } from '../wire';
 
   let {
     value = $bindable(''),
-    driver,
+    dialect,
+    syntax,
     tables = [],
     defaultSchema = '',
     onrun,
@@ -44,7 +45,8 @@
     hasSelection = $bindable(false),
   }: {
     value?: string;
-    driver: Driver;
+    dialect: SQLDialect;
+    syntax: SqlSyntax;
     tables?: string[];
     defaultSchema?: string;
     onrun: (all: boolean) => void;
@@ -55,12 +57,10 @@
   let host: HTMLDivElement;
   const language = new Compartment();
 
-  const dialects = { postgres: PostgreSQL, mysql: MySQL, sqlite: SQLite };
-
-  function languageFor(driver: Driver, tables: string[], schema: string) {
+  function languageFor(dialect: SQLDialect, tables: string[], schema: string) {
     const ns: SQLNamespace = {};
     for (const name of tables) ns[name] = [];
-    return sql({ dialect: dialects[driver], schema: ns, defaultSchema: schema || undefined, upperCaseKeywords: true });
+    return sql({ dialect, schema: ns, defaultSchema: schema || undefined, upperCaseKeywords: true });
   }
 
   const highlight = HighlightStyle.define([
@@ -110,8 +110,8 @@
           closeBrackets(),
           autocompletion({ activateOnTyping: true }),
           syntaxHighlighting(highlight),
-          language.of(languageFor(driver, tables, defaultSchema)),
-          linter(v => lintSql(v.state.doc.toString(), driver === 'mysql').map(p => ({ ...p, severity: 'error' as const })), { delay: 500 }),
+          language.of(languageFor(dialect, tables, defaultSchema)),
+          linter(v => lintSql(v.state.doc.toString(), syntax).map(p => ({ ...p, severity: 'error' as const })), { delay: 500 }),
           placeholder('Write SQL…  ⌘↵ runs the statement under the cursor, ⇧⌘↵ runs everything'),
           Prec.highest(
             keymap.of([
@@ -134,7 +134,7 @@
   });
 
   $effect(() => {
-    const ext = languageFor(driver, tables, defaultSchema);
+    const ext = languageFor(dialect, tables, defaultSchema);
     editor?.dispatch({ effects: language.reconfigure(ext) });
   });
 </script>

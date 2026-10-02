@@ -1,9 +1,9 @@
 import {
-  api, onTunnelState, DEFAULT_SETTINGS, emptyConnection,
+  api, onTunnelState, DEFAULT_SETTINGS,
   type Connection, type ConnectSecrets, type HostKeyChange, type SessionInfo, type Settings, type TableInfo, type TunnelState, type UpdateInfo,
 } from '../backend';
 import { setThemeMode } from '../theme';
-import { sqliteName } from '../format';
+import { emptyConnection, engine, nameFromFile, sqlite } from '../engines';
 
 export type TableTab = {
   id: string;
@@ -362,12 +362,12 @@ class AppState {
     try {
       const file = await api.chooseSQLiteFile();
       if (!file) return;
-      const existing = this.connections.find(c => c.driver === 'sqlite' && c.file === file);
+      const existing = this.connections.find(c => c.driver === sqlite.driver && c.file === file);
       if (existing) {
         await this.open(existing);
         return;
       }
-      const saved = await this.saveConnection({ ...emptyConnection('sqlite'), name: sqliteName(file), file });
+      const saved = await this.saveConnection({ ...emptyConnection(sqlite), name: nameFromFile(sqlite, file), file });
       await this.open(saved);
     } catch (err) {
       this.notify(err);
@@ -387,7 +387,7 @@ class AppState {
 }
 
 export function needsSecrets(c: Connection): boolean {
-  return c.driver !== 'sqlite' && !c.savePassword;
+  return !engine(c.driver).file && !c.savePassword;
 }
 
 export const app = new AppState();

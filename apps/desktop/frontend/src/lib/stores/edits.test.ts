@@ -3,9 +3,9 @@ import { DEFAULT, TableEdits } from './edits.svelte';
 import type { CellValue, ResultColumn } from '../wire';
 
 const columns: ResultColumn[] = [
-  { name: 'id', type: 'int' },
-  { name: 'email', type: 'text' },
-  { name: 'note', type: 'text' },
+  { name: 'id', type: 'int', kind: 'number' },
+  { name: 'email', type: 'text', kind: 'text' },
+  { name: 'note', type: 'text', kind: 'text' },
 ];
 
 function setup() {
@@ -112,7 +112,7 @@ describe('TableEdits failures', () => {
     const r = e.addRow();
     e.set(r, 1, null);
     expect(e.value(r, 1)).toBeNull();
-    expect(e.changes([{ name: 'id', type: 'int' }, { name: 'name', type: 'text' }], ['id']).changes).toEqual([
+    expect(e.changes([{ name: 'id', type: 'int', kind: 'number' }, { name: 'name', type: 'text', kind: 'text' }], ['id']).changes).toEqual([
       { kind: 'insert', key: {}, values: { name: null } },
     ]);
   });

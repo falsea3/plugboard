@@ -1,7 +1,10 @@
 import type { Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+
+const engines = JSON.parse(readFileSync(new URL('./engines.json', import.meta.url), 'utf8'));
 
 export async function installBridge(page: Page) {
-  await page.addInitScript(() => {
+  await page.addInitScript((engines: Record<string, unknown>) => {
     const connections = [
       {
         id: 'shop', name: 'Shop', driver: 'postgres', host: 'db.internal', port: 5432, user: 'app', savePassword: true,
@@ -25,13 +28,13 @@ export async function installBridge(page: Page) {
       .concat([{ schema: 'public', name: 'order_summary', kind: 'view' }]);
 
     const columns = [
-      { name: 'id', type: 'bigint', nullable: false, default: "nextval('customers_id_seq'::regclass)", primaryKey: true, enum: null, binary: false },
-      { name: 'email', type: 'text', nullable: false, default: null, primaryKey: false, enum: null, binary: false },
-      { name: 'name', type: 'text', nullable: false, default: null, primaryKey: false, enum: null, binary: false },
-      { name: 'country', type: 'character(2)', nullable: true, default: null, primaryKey: false, enum: null, binary: false },
-      { name: 'plan', type: 'plan', nullable: false, default: "'free'::plan", primaryKey: false, enum: ['free', 'team', 'pro'], binary: false },
-      { name: 'is_active', type: 'boolean', nullable: false, default: 'true', primaryKey: false, enum: null, binary: false },
-      { name: 'created_at', type: 'timestamp with time zone', nullable: false, default: 'now()', primaryKey: false, enum: null, binary: false },
+      { name: 'id', type: 'bigint', nullable: false, default: "nextval('customers_id_seq'::regclass)", primaryKey: true, enum: null, kind: 'number' },
+      { name: 'email', type: 'text', nullable: false, default: null, primaryKey: false, enum: null, kind: 'text' },
+      { name: 'name', type: 'text', nullable: false, default: null, primaryKey: false, enum: null, kind: 'text' },
+      { name: 'country', type: 'character(2)', nullable: true, default: null, primaryKey: false, enum: null, kind: 'text' },
+      { name: 'plan', type: 'plan', nullable: false, default: "'free'::plan", primaryKey: false, enum: ['free', 'team', 'pro'], kind: '' },
+      { name: 'is_active', type: 'boolean', nullable: false, default: 'true', primaryKey: false, enum: null, kind: 'bool' },
+      { name: 'created_at', type: 'timestamp with time zone', nullable: false, default: 'now()', primaryKey: false, enum: null, kind: 'datetime' },
     ];
     const first = ['Ann', 'Bob', 'Chen', 'Dana', 'Eli', 'Fatima', 'Goran', 'Hana', 'Ivan', 'Jun', 'Kofi', 'Lena'];
     const last = ['Novak', 'Ito', 'Garcia', 'Smirnova', 'Okafor', 'Berg', 'Rossi', 'Kim', 'Haddad', 'Silva'];
@@ -53,7 +56,7 @@ export async function installBridge(page: Page) {
     });
 
     const result = (cols: string[], data: unknown[][], extra = {}) => ({
-      statement: '', columns: cols.map(name => ({ name, type: 'text' })), rows: data, rowsAffected: 0,
+      statement: '', columns: cols.map(name => ({ name, type: 'text', kind: 'text' })), rows: data, rowsAffected: 0,
       hasRows: true, truncated: false, pageable: true, hasMore: false, offset: 0, durationMs: 14.2, ...extra,
     });
 
@@ -72,14 +75,14 @@ export async function installBridge(page: Page) {
           TestConnection: () => ok({ ok: true, serverVersion: 'PostgreSQL 17.2', latencyMs: 18.4 }),
           Connect: (id: string) => {
             const c = connections.find(x => x.id === id)!;
-            return ok({ session: { sessionId: `s-${id}`, connection: c, serverVersion: 'PostgreSQL 17.2', schemas: ['analytics', 'public'], defaultSchema: 'public' } });
+            return ok({ session: { sessionId: `s-${id}`, connection: c, serverVersion: 'PostgreSQL 17.2', schemas: ['analytics', 'public'], defaultSchema: 'public', engine: engines[c.driver] } });
           },
           SetReadOnly: () => Promise.reject('not in the demo'),
           Disconnect: () => ok(undefined),
           ListTables: () => ok(tables),
           DescribeTable: () => ok(columns),
           FetchTablePage: (_: string, q: { limit: number }) =>
-            ok({ result: { ...result(columns.map(c => c.name), rows.slice(0, q.limit)), columns: columns.map(c => ({ name: c.name, type: c.type })), pageable: false },
+            ok({ result: { ...result(columns.map(c => c.name), rows.slice(0, q.limit)), columns: columns.map(c => ({ name: c.name, type: c.type, kind: c.kind })), pageable: false },
                  hasMore: true, defaultOrder: ['id'], hasPrev: false, keyset: true, offset: -1 }),
           CountRows: () => ok({ count: 24813, exact: false, known: true }),
           WriteStatements: (_: string, script: string) => ok(/\b(insert|update|delete|drop|alter)\b/i.test(script) ? [script] : []),
@@ -112,5 +115,5 @@ export async function installBridge(page: Page) {
       ClipboardSetText: () => ok(true),
       BrowserOpenURL: () => {},
     };
-  });
+  }, engines);
 }
