@@ -7,11 +7,13 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-02
+
 ### Added
 
 - **The SQL editor points out mistakes as you type**: an unclosed quote, bracket or comment, a comma with nothing after it, a typo in the first word (`selec` → *did you mean SELECT?*). It only marks what is wrong in every database, so correct SQL is never underlined.
 - **Run selection**: with text selected, the Run button says so and runs just that.
-- **Change a table's columns in the Structure tab** — add, rename and drop columns, change their type, NULL and default — on PostgreSQL and MySQL. It works like editing rows: changes collect until ⌘S, *Preview SQL* shows the `ALTER TABLE` statements, Production asks first. PostgreSQL applies them all or none; MySQL commits each one, so when one fails Relay DB says which went through. A long change can be stopped, and one that would have to wait for a table another transaction holds gives up after 5 seconds instead of holding up every query on it. SQLite can rename, add and drop columns; for anything more its tables need recreating in the SQL editor.
+- **Change a table's columns in the Structure tab** — add, rename and drop columns, change their type, NULL and default — on PostgreSQL, MySQL and MariaDB. It works like editing rows: changes collect until ⌘S, *Preview SQL* shows the `ALTER TABLE` statements, Production asks first. PostgreSQL applies them all or none; MySQL commits each one, so when one fails Relay DB says which went through. A long change can be stopped, and one that would have to wait for a table another transaction holds gives up after 5 seconds instead of holding up every query on it. SQLite can rename, add and drop columns; for anything more its tables need recreating in the SQL editor.
 
 ### Changed
 
