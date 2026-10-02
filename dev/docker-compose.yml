@@ -31,6 +31,72 @@ services:
       interval: 2s
       retries: 60
 
+  # Older and other servers, for checking what differs between versions:
+  # `make db-up-all` starts them too. Same user, password and shop database.
+  postgres14:
+    image: postgres:14-alpine
+    profiles: [all]
+    environment:
+      POSTGRES_USER: relay
+      POSTGRES_PASSWORD: relay
+      POSTGRES_DB: shop
+    ports: ["127.0.0.1:55433:5432"]
+    volumes:
+      - ./seed/postgres.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relay -d shop"]
+      interval: 2s
+      retries: 30
+
+  mysql80:
+    image: mysql:8.0
+    profiles: [all]
+    environment:
+      MYSQL_ROOT_PASSWORD: relay
+      MYSQL_USER: relay
+      MYSQL_PASSWORD: relay
+      MYSQL_DATABASE: shop
+    ports: ["127.0.0.1:53307:3306"]
+    volumes:
+      - ./seed/mysql.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-urelay", "-prelay"]
+      interval: 2s
+      retries: 60
+
+  # 10.4 has no RENAME COLUMN; 10.6 and 11.4 are the LTS releases.
+  mariadb104:
+    image: mariadb:10.4
+    profiles: [all]
+    environment: &mariadb-env
+      MARIADB_ROOT_PASSWORD: relay
+      MARIADB_USER: relay
+      MARIADB_PASSWORD: relay
+      MARIADB_DATABASE: shop
+    ports: ["127.0.0.1:53310:3306"]
+    volumes: &mariadb-seed
+      - ./seed/mysql.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck: &mariadb-health
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      retries: 60
+
+  mariadb106:
+    image: mariadb:10.6
+    profiles: [all]
+    environment: *mariadb-env
+    ports: ["127.0.0.1:53311:3306"]
+    volumes: *mariadb-seed
+    healthcheck: *mariadb-health
+
+  mariadb114:
+    image: mariadb:11.4
+    profiles: [all]
+    environment: *mariadb-env
+    ports: ["127.0.0.1:53312:3306"]
+    volumes: *mariadb-seed
+    healthcheck: *mariadb-health
+
   # SSH jump host for testing tunnels: ssh relay@127.0.0.1 -p 52222 (password relay).
   # From inside, the databases are reachable as postgres:5432 and mysql:3306.
   bastion:

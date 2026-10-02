@@ -82,6 +82,32 @@ jobs:
           RELAYDB_TEST_SSH: 127.0.0.1:52222
         run: go test -race -count=1 ./apps/desktop/internal/db/
 
+  server-versions:
+    # The other releases make db-up-all starts, for what one does differently
+    # from another: MariaDB writes column defaults as SQL, 10.4 has no RENAME
+    # COLUMN, older PostgreSQL catalogs…
+    name: Tests against ${{ matrix.server }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { server: postgres14, var: RELAYDB_TEST_PG, port: 55433 }
+          - { server: mysql80, var: RELAYDB_TEST_MYSQL, port: 53307 }
+          - { server: mariadb104, var: RELAYDB_TEST_MYSQL, port: 53310 }
+          - { server: mariadb106, var: RELAYDB_TEST_MYSQL, port: 53311 }
+          - { server: mariadb114, var: RELAYDB_TEST_MYSQL, port: 53312 }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/desktop/go.mod
+          cache-dependency-path: apps/desktop/go.sum
+      - name: Start ${{ matrix.server }}
+        run: docker compose -f dev/docker-compose.yml --profile all up -d --wait ${{ matrix.server }}
+      - name: Test against it
+        run: env "${{ matrix.var }}=127.0.0.1:${{ matrix.port }}" go test -race -count=1 ./apps/desktop/internal/db/
+
   go-cross-platform:
     name: Go tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

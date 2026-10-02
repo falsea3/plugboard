@@ -1,4 +1,17 @@
-SET SESSION cte_max_recursion_depth = 10000;
+-- Runs on MySQL 8.0+ and MariaDB 10.4+. Rows are made from a table of numbers
+-- rather than a recursive CTE, whose depth limit the two name differently.
+CREATE TEMPORARY TABLE seq (n INT PRIMARY KEY);
+INSERT INTO seq
+SELECT 1 + a.d + 10 * b.d + 100 * c.d + 1000 * e.d
+FROM (SELECT 0 AS d UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+      UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) a
+CROSS JOIN (SELECT 0 AS d UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+      UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) b
+CROSS JOIN (SELECT 0 AS d UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+      UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) c
+CROSS JOIN (SELECT 0 AS d UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+      UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) e;
+
 CREATE TABLE customers (
   id         BIGINT AUTO_INCREMENT PRIMARY KEY,
   email      VARCHAR(255) NOT NULL UNIQUE,
@@ -19,20 +32,20 @@ CREATE TABLE orders (
 );
 
 INSERT INTO customers (email, name, country, is_active, meta, created_at)
-WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 1500)
 SELECT CONCAT('user', n, '@example.com'),
        CONCAT(ELT(1 + n % 6, 'Ann', 'Bob', 'Chen', 'Dana', 'Eli', 'Fatima'), ' ', n),
        ELT(1 + n % 5, 'US', 'DE', 'RU', 'JP', NULL),
        n % 7 <> 0,
        IF(n % 3 = 0, JSON_OBJECT('plan', 'pro', 'seats', n % 10), NULL),
        NOW() - INTERVAL n HOUR
-FROM seq;
+FROM seq WHERE n <= 1500 ORDER BY n;
 
 INSERT INTO orders (customer_id, status, total, placed_at)
-WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 5000)
 SELECT 1 + (n * 7) % 1500, ELT(1 + n % 4, 'new', 'paid', 'shipped', 'cancelled'),
        ROUND(RAND() * 900 + 5, 2), NOW() - INTERVAL n MINUTE
-FROM seq;
+FROM seq WHERE n <= 5000 ORDER BY n;
+
+DROP TEMPORARY TABLE seq;
 
 CREATE VIEW order_summary AS
 SELECT c.id AS customer_id, c.name, COUNT(o.id) AS orders, SUM(o.total) AS revenue
