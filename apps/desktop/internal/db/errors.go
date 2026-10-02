@@ -18,6 +18,7 @@ type StatementError struct {
 	Index      int
 	Err        error
 	RolledBack bool
+	Position   int
 }
 
 func (e *StatementError) Error() string {

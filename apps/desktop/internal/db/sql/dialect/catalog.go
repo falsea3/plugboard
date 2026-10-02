@@ -24,6 +24,16 @@ func BaseType(t string) string {
 	return strings.ToLower(strings.TrimSpace(t))
 }
 
+func ByteOffset(s string, chars int) int {
+	for i := range s {
+		if chars == 0 {
+			return i
+		}
+		chars--
+	}
+	return len(s)
+}
+
 func FirstWord(t string) string {
 	t = strings.ToLower(strings.TrimSpace(t))
 	end := strings.IndexFunc(t, func(r rune) bool { return !(r == '_' || r >= 'a' && r <= 'z' || r >= '0' && r <= '9') })

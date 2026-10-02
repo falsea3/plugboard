@@ -24,6 +24,10 @@ type Session interface {
 	WriteStatements(script string) []string
 }
 
+type SyntaxChecker interface {
+	CheckSyntax(ctx context.Context, script string) ([]model.SyntaxProblem, error)
+}
+
 type RowEditor interface {
 	ApplyChanges(ctx context.Context, cs model.ChangeSet) (int, error)
 	PreviewChanges(ctx context.Context, cs model.ChangeSet) ([]string, error)

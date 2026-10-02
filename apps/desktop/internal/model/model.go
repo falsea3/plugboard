@@ -169,11 +169,18 @@ type ResultSet struct {
 }
 
 type QueryRun struct {
-	Results    []ResultSet `json:"results"`
-	Error      string      `json:"error,omitempty"`
-	ErrorIndex int         `json:"errorIndex"`
-	Cancelled  bool        `json:"cancelled"`
-	RolledBack bool        `json:"rolledBack"`
+	Results       []ResultSet `json:"results"`
+	Error         string      `json:"error,omitempty"`
+	ErrorIndex    int         `json:"errorIndex"`
+	ErrorPosition int         `json:"errorPosition"`
+	Cancelled     bool        `json:"cancelled"`
+	RolledBack    bool        `json:"rolledBack"`
+}
+
+type SyntaxProblem struct {
+	Index    int    `json:"index"`
+	Position int    `json:"position"`
+	Message  string `json:"message"`
 }
 
 type TableQuery struct {

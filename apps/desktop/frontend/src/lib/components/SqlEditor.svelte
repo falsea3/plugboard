@@ -1,17 +1,30 @@
 <script lang="ts" module>
-  import { StateEffect, StateField } from '@codemirror/state';
+  import { EditorState, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state';
   import { Decoration, EditorView, type DecorationSet } from '@codemirror/view';
+  import { forEachDiagnostic, setDiagnostics, type Diagnostic } from '@codemirror/lint';
+  import type { Problem } from '../sqlProblems';
 
   const setRan = StateEffect.define<{ from: number; to: number }>();
-  const ranMark = Decoration.mark({ class: 'cm-ran' });
+  const ranLine = Decoration.line({ class: 'cm-ran' });
+
+  function ranLines(state: EditorState, from: number, to: number): DecorationSet {
+    if (from >= to) return Decoration.none;
+    const lines = new RangeSetBuilder<Decoration>();
+    for (let pos = from; pos <= to; ) {
+      const line = state.doc.lineAt(pos);
+      lines.add(line.from, line.from, ranLine);
+      pos = line.to + 1;
+    }
+    return lines.finish();
+  }
 
   const ranStatement = StateField.define<DecorationSet>({
     create: () => Decoration.none,
     update(marks, tr) {
       for (const e of tr.effects) {
-        if (e.is(setRan)) return e.value.from < e.value.to ? Decoration.set([ranMark.range(e.value.from, e.value.to)]) : Decoration.none;
+        if (e.is(setRan)) return ranLines(tr.state, e.value.from, e.value.to);
       }
-      return tr.docChanged ? Decoration.none : marks;
+      return tr.docChanged || tr.selection ? Decoration.none : marks;
     },
     provide: f => EditorView.decorations.from(f),
   });
@@ -19,17 +32,24 @@
   export function showRan(view: EditorView, from: number, to: number) {
     view.dispatch({ effects: setRan.of({ from, to }) });
   }
+
+  export function showProblem(view: EditorView, p: Problem) {
+    const list: Diagnostic[] = [];
+    forEachDiagnostic(view.state, (d, from, to) => list.push({ ...d, from, to }));
+    list.push({ ...p, severity: 'error', source: 'server' });
+    view.dispatch(setDiagnostics(view.state, list));
+  }
 </script>
 
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Compartment, EditorState, Prec } from '@codemirror/state';
+  import { Compartment, Prec } from '@codemirror/state';
   import { drawSelection, tooltips, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view';
   import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
   import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
   import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
   import { sql, type SQLDialect, type SQLNamespace } from '@codemirror/lang-sql';
-  import { linter } from '@codemirror/lint';
+  import { linter, lintGutter } from '@codemirror/lint';
   import { tags as t } from '@lezer/highlight';
   import { lintSql } from '../sqlLint';
   import type { SqlSyntax } from '../wire';
@@ -40,6 +60,7 @@
     syntax,
     tables = [],
     defaultSchema = '',
+    check,
     onrun,
     editor = $bindable<EditorView | undefined>(),
     hasSelection = $bindable(false),
@@ -49,6 +70,7 @@
     syntax: SqlSyntax;
     tables?: string[];
     defaultSchema?: string;
+    check?: (doc: string) => Promise<Problem[]>;
     onrun: (all: boolean) => void;
     editor?: EditorView;
     hasSelection?: boolean;
@@ -82,7 +104,8 @@
     '.cm-activeLine': { backgroundColor: 'var(--grid-row-alt)' },
     '.cm-cursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
     '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': { backgroundColor: 'var(--grid-selected) !important' },
-    '.cm-ran': { backgroundColor: 'var(--grid-selected)' },
+    '.cm-ran': { boxShadow: 'inset 2px 0 0 var(--accent)' },
+    '.cm-lintRange-error': { backgroundImage: 'none', textDecoration: 'underline wavy var(--danger)', textDecorationThickness: '1.5px', textUnderlineOffset: '3px', textDecorationSkipInk: 'none' },
     '.cm-matchingBracket': { backgroundColor: 'var(--accent-dim)', outline: '1px solid var(--accent)' },
     '.cm-placeholder': { color: 'var(--text-3)' },
     '.cm-tooltip': { border: '1px solid var(--border)', backgroundColor: 'var(--elevated)', borderRadius: '6px', overflow: 'hidden' },
@@ -111,7 +134,20 @@
           autocompletion({ activateOnTyping: true }),
           syntaxHighlighting(highlight),
           language.of(languageFor(dialect, tables, defaultSchema)),
-          linter(v => lintSql(v.state.doc.toString(), syntax).map(p => ({ ...p, severity: 'error' as const })), { delay: 500 }),
+          linter(
+            async v => {
+              const doc = v.state.doc.toString();
+              const own: Diagnostic[] = lintSql(doc, syntax).map(p => ({ ...p, severity: 'error' }));
+              if (own.length > 0 || !check || !doc.trim()) return own;
+              try {
+                return (await check(doc)).map(p => ({ ...p, severity: 'error', source: 'server' }));
+              } catch {
+                return own;
+              }
+            },
+            { delay: 600 },
+          ),
+          lintGutter(),
           placeholder('Write SQL…  ⌘↵ runs the statement under the cursor, ⇧⌘↵ runs everything'),
           Prec.highest(
             keymap.of([

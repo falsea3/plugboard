@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/relay-client/relay-db/apps/desktop/internal/db/sql/dialect"
@@ -55,6 +56,39 @@ func (Dialect) BooleanType() bool { return false }
 func (Dialect) CanUpdateToDefault() bool { return false }
 
 func (Dialect) ReturnsRows(stmt string) bool { return sqltext.ReturnsRows(stmt, "PRAGMA") }
+
+var nearSyntaxError = regexp.MustCompile(`near "((?:[^"]|"")*)": syntax error`)
+
+func (Dialect) Classify(err error) dialect.ErrorKind {
+	msg := err.Error()
+	if strings.Contains(msg, ": syntax error") || strings.Contains(msg, "incomplete input") {
+		return dialect.BadSyntax
+	}
+	return dialect.Other
+}
+
+func (Dialect) ErrorPosition(err error, stmt string) int {
+	msg := err.Error()
+	if strings.Contains(msg, "incomplete input") {
+		return len(stmt)
+	}
+	m := nearSyntaxError.FindStringSubmatch(msg)
+	if m == nil {
+		return -1
+	}
+	return strings.Index(stmt, strings.ReplaceAll(m[1], `""`, `"`))
+}
+
+func (Dialect) ErrorMessage(err error) string {
+	msg := strings.TrimPrefix(err.Error(), "SQL logic error: ")
+	if i := strings.LastIndex(msg, " ("); i > 0 && strings.HasSuffix(msg, ")") {
+		msg = msg[:i]
+	}
+	if msg == "incomplete input" {
+		return "the statement ends too early"
+	}
+	return msg
+}
 
 func (Dialect) TypeOf(t string) dialect.Type {
 	t = strings.ToLower(strings.TrimSpace(t))

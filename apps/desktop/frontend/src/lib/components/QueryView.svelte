@@ -6,7 +6,8 @@
   import { statementAt } from '../sqlStatements';
   import { engine } from '../engines';
   import { formatCount, formatDuration } from '../format';
-  import SqlEditor, { showRan } from './SqlEditor.svelte';
+  import SqlEditor, { showProblem, showRan } from './SqlEditor.svelte';
+  import { serverProblems } from '../sqlProblems';
   import DataGrid from './DataGrid.svelte';
   import ValueBar from './ValueBar.svelte';
   import Icon from './Icon.svelte';
@@ -20,7 +21,7 @@
   const syntax = session.engine.syntax;
   const isProd = session.connection.env === 'prod';
 
-  let pending = $state<{ script: string; writes: string[] } | null>(null);
+  let pending = $state<{ script: string; base: number; writes: string[] } | null>(null);
 
   let editor = $state<EditorView>();
   let hasSelection = $state(false);
@@ -39,17 +40,21 @@
     const state = editor.state;
     const sel = state.selection.main;
     let script: string;
+    let base: number;
     if (!sel.empty) {
       script = state.sliceDoc(sel.from, sel.to);
+      base = sel.from;
     } else if (all) {
       script = state.doc.toString();
+      base = 0;
     } else {
       const stmt = statementAt(state.doc.toString(), sel.head, syntax);
       if (!stmt) return;
       script = stmt.text;
-      showRan(editor, stmt.from, stmt.to);
+      base = stmt.from;
     }
     if (!script.trim()) return;
+    showRan(editor, base, base + script.length);
 
     if (isProd && app.settings.confirmProdWrites && !ws.readOnly) {
       let writes: string[];
@@ -60,27 +65,36 @@
         return;
       }
       if (writes.length > 0) {
-        pending = { script, writes };
+        pending = { script, base, writes };
         return;
       }
     }
-    await runScript(script);
+    await runScript(script, base);
   }
 
-  async function runScript(script: string) {
+  async function runScript(script: string, base: number) {
+    const docAtRun = editor?.state.doc;
     running = true;
     queryId = `${tab.id}-${Date.now()}`;
     try {
       const r = await api.runQuery(session.sessionId, queryId, script);
       run = r;
+      if (r.error && r.errorIndex >= 0 && r.errorPosition >= 0 && editor && editor.state.doc === docAtRun) {
+        const [p] = serverProblems(script, base, syntax, [{ index: r.errorIndex, position: r.errorPosition, message: r.error }]);
+        if (p) showProblem(editor, p);
+      }
       const withRows = r.results.map((x, i) => (x.hasRows ? i : -1)).filter(i => i >= 0);
       resultIndex = withRows.length ? withRows[withRows.length - 1] : Math.max(0, r.results.length - 1);
       if (/\b(create|drop|alter|rename)\s/i.test(script)) ws.loadTables();
     } catch (err) {
-      run = { results: [], error: err instanceof Error ? err.message : String(err), errorIndex: -1, cancelled: false, rolledBack: false };
+      run = { results: [], error: err instanceof Error ? err.message : String(err), errorIndex: -1, errorPosition: -1, cancelled: false, rolledBack: false };
     } finally {
       running = false;
     }
+  }
+
+  async function checkSyntax(doc: string) {
+    return serverProblems(doc, 0, syntax, await api.checkSyntax(session.sessionId, doc));
   }
 
   function cancel() {
@@ -149,7 +163,7 @@
   </div>
 
   <div class="editor" style:height="{editorHeight}px">
-    <SqlEditor bind:value={tab.sql} bind:editor bind:hasSelection {dialect} {syntax} tables={tableNames} defaultSchema={ws.schema} onrun={execute} />
+    <SqlEditor bind:value={tab.sql} bind:editor bind:hasSelection {dialect} {syntax} check={checkSyntax} tables={tableNames} defaultSchema={ws.schema} onrun={execute} />
   </div>
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -233,7 +247,7 @@
       <span style="flex:1"></span>
       <!-- svelte-ignore a11y_autofocus -->
       <button class="btn" autofocus onclick={() => (pending = null)}>Cancel</button>
-      <button class="btn primary danger-fill" onclick={() => { const script = p.script; pending = null; runScript(script); }}>Run on Production</button>
+      <button class="btn primary danger-fill" onclick={() => { const { script, base } = p; pending = null; runScript(script, base); }}>Run on Production</button>
     {/snippet}
   </Modal>
 {/if}

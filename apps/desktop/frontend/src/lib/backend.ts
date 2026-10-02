@@ -37,6 +37,7 @@ export const api = {
     call(a => a.CountRows(sessionId, queryId, q, exact)),
   runQuery: (sessionId: string, queryId: string, sql: string) => call(a => a.RunQuery(sessionId, queryId, sql)),
   writeStatements: (sessionId: string, script: string) => call(a => a.WriteStatements(sessionId, script)),
+  checkSyntax: (sessionId: string, script: string) => call(a => a.CheckSyntax(sessionId, script)),
   runMore: (sessionId: string, queryId: string, statement: string, offset: number) =>
     call(a => a.RunMore(sessionId, queryId, statement, offset)),
   cancelQuery: (queryId: string) => call(a => a.CancelQuery(queryId)),

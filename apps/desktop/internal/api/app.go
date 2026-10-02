@@ -409,13 +409,13 @@ func (a *App) PreviewChanges(sessionID string, cs model.ChangeSet) ([]string, er
 func (a *App) RunQuery(sessionID, queryID, script string) model.QueryRun {
 	s, err := a.session(sessionID)
 	if err != nil {
-		return model.QueryRun{Results: []model.ResultSet{}, Error: err.Error(), ErrorIndex: -1}
+		return model.QueryRun{Results: []model.ResultSet{}, Error: err.Error(), ErrorIndex: -1, ErrorPosition: -1}
 	}
 	ctx, done := a.cancellable(queryID, 0)
 	defer done()
 
 	results, err := s.Run(ctx, script)
-	run := model.QueryRun{Results: results, ErrorIndex: -1}
+	run := model.QueryRun{Results: results, ErrorIndex: -1, ErrorPosition: -1}
 	if run.Results == nil {
 		run.Results = []model.ResultSet{}
 	}
@@ -425,10 +425,25 @@ func (a *App) RunQuery(sessionID, queryID, script string) model.QueryRun {
 		if errors.As(err, &se) {
 			run.ErrorIndex = se.Index
 			run.RolledBack = se.RolledBack
+			run.ErrorPosition = se.Position
 		}
 		run.Cancelled = errors.Is(ctx.Err(), context.Canceled)
 	}
 	return run
+}
+
+func (a *App) CheckSyntax(sessionID, script string) ([]model.SyntaxProblem, error) {
+	s, err := a.session(sessionID)
+	if err != nil {
+		return nil, err
+	}
+	checker, ok := s.(db.SyntaxChecker)
+	if !ok {
+		return []model.SyntaxProblem{}, nil
+	}
+	ctx, cancel := context.WithTimeout(a.context(), 5*time.Second)
+	defer cancel()
+	return checker.CheckSyntax(ctx, script)
 }
 
 func (a *App) WriteStatements(sessionID, script string) ([]string, error) {

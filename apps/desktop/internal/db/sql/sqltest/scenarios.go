@@ -249,3 +249,26 @@ func columnKinds(t *testing.T, srv Server, c model.Connection) {
 		}
 	}
 }
+
+func syntaxErrors(t *testing.T, srv Server, c model.Connection) {
+	s := Open(t, srv.Dialect, c)
+	ctx := context.Background()
+	problems, err := s.CheckSyntax(ctx, "select 1; selec 2; select * from customers where; select * from nope_table")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []model.SyntaxProblem{{Index: 1, Position: 0}, {Index: 2, Position: len("select * from customers where")}}
+	if len(problems) != len(want) {
+		t.Fatalf("problems = %+v", problems)
+	}
+	for i, p := range problems {
+		if p.Index != want[i].Index || p.Position != want[i].Position || p.Message == "" {
+			t.Errorf("problem %d = %+v, want index %d at %d", i, p, want[i].Index, want[i].Position)
+		}
+	}
+	_, err = s.Run(ctx, "select 1;\nselect * from customers wher id = 1")
+	var se *db.StatementError
+	if !errors.As(err, &se) || se.Index != 1 || se.Position < 0 {
+		t.Fatalf("run error = %#v", err)
+	}
+}

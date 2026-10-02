@@ -76,7 +76,7 @@ func (s *Session) RunMore(ctx context.Context, stmt string, offset int) (model.R
 	defer s.editorMu.Unlock()
 	rs, rolledBack, err := s.onEditor(ctx, stmt, func() (model.ResultSet, error) { return s.runPage(ctx, stmt, offset) })
 	if err != nil {
-		return model.ResultSet{}, &db.StatementError{Statement: stmt, Err: err, RolledBack: rolledBack}
+		return model.ResultSet{}, &db.StatementError{Statement: stmt, Err: err, RolledBack: rolledBack, Position: -1}
 	}
 	return rs, nil
 }

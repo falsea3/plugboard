@@ -109,7 +109,7 @@ test('keeps Run all after running the statement under the cursor', async ({ page
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1;\nselect 2;');
   await page.keyboard.press('ControlOrMeta+Enter');
-  await expect(page.locator('.cm-ran')).toHaveText('select 2');
+  await expect(page.locator('.cm-ran')).toHaveText('select 2;');
   await expect(page.getByRole('button', { name: 'Run all' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Run selection' })).toHaveCount(0);
 });
@@ -128,4 +128,37 @@ test('leaves an enum cell when its value is picked again', async ({ page }) => {
   await page.keyboard.press('Tab');
   await expect(grid.locator('.select-button')).toHaveCount(0);
   await expect(grid).toBeFocused();
+});
+
+test('marks what the last run ran, whatever ran before', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await page.locator('.cm-content').click();
+  await page.keyboard.insertText('select 1;\nselect 2;\nselect 3;');
+  await page.getByRole('button', { name: 'Run all' }).click();
+  await expect(page.locator('.cm-ran')).toHaveCount(3);
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+Home');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Shift+End');
+  await expect(page.locator('.cm-ran')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Run selection' }).click();
+  await expect(page.locator('.cm-ran')).toHaveCount(1);
+  await expect(page.locator('.cm-ran')).toHaveText('select 2;');
+});
+
+test('underlines what the server can\'t parse', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await page.locator('.cm-content').click();
+  await page.keyboard.insertText('select 1;\nselect * fron customers');
+  await expect(page.locator('.cm-lintRange-error')).toHaveText('fron');
+});
+
+test('says the app is up to date instead of offering the check again', async ({ page }) => {
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('dialog', { name: 'Settings' }).getByText('About', { exact: true }).click();
+  await page.getByRole('button', { name: 'Check for updates' }).click();
+  await expect(page.getByText('Relay DB is up to date')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Check for updates' })).toHaveCount(0);
 });

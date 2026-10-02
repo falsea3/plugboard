@@ -66,7 +66,7 @@ export async function installBridge(page: Page) {
     (window as any).go = {
       api: {
         App: {
-          AppInfo: () => ok({ name: 'Relay DB', version: '0.2.0', goVersion: 'go1.26.0', platform: 'darwin/arm64', dataDir: '/Users/demo/Library/Application Support/Relay DB', copyright: '© 2026 Relay Client' }),
+          AppInfo: () => ok({ name: 'Relay DB', version: '0.2.1', goVersion: 'go1.26.0', platform: 'darwin/arm64', dataDir: '/Users/demo/Library/Application Support/Relay DB', copyright: '© 2026 Relay Client' }),
           GetSettings: () => ok(settings),
           SaveSettings: (s: typeof settings) => ok(Object.assign(settings, s)),
           ListConnections: () => ok(connections),
@@ -86,12 +86,16 @@ export async function installBridge(page: Page) {
                  hasMore: true, defaultOrder: ['id'], hasPrev: false, keyset: true, offset: -1 }),
           CountRows: () => ok({ count: 24813, exact: false, known: true }),
           WriteStatements: (_: string, script: string) => ok(/\b(insert|update|delete|drop|alter)\b/i.test(script) ? [script] : []),
+          CheckSyntax: (_: string, script: string) =>
+            ok(script.split(';').map(t => t.trim()).filter(Boolean)
+              .map((t, index) => ({ index, position: t.search(/\bfron\b/), message: 'syntax error at or near "fron"' }))
+              .filter(p => p.position >= 0)),
           RunQuery: () => ok({
             results: [result(['country', 'customers', 'revenue'], [
               ['US', 6412, '1284390.50'], ['DE', 3180, '702118.00'], ['JP', 2957, '655004.75'], ['BR', 2210, '318760.20'],
               ['NL', 1874, '402551.10'], ['FR', 1602, '351920.00'], ['IN', 1544, '189402.35'],
             ])],
-            errorIndex: -1, cancelled: false, rolledBack: false,
+            errorIndex: -1, errorPosition: -1, cancelled: false, rolledBack: false,
           }),
           RunMore: () => ok(result([], [])),
           CancelQuery: () => ok(undefined),

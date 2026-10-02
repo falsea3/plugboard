@@ -30,6 +30,7 @@ func Run(t *testing.T, srv Server) {
 	t.Run("Structure", func(t *testing.T) { structure(t, srv, c) })
 	t.Run("TableBusy", func(t *testing.T) { tableBusy(t, srv, c) })
 	t.Run("ColumnKinds", func(t *testing.T) { columnKinds(t, srv, c) })
+	t.Run("SyntaxErrors", func(t *testing.T) { syntaxErrors(t, srv, c) })
 }
 
 func Conn(t *testing.T, env string, driver model.Driver) model.Connection {

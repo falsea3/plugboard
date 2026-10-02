@@ -24,7 +24,7 @@ func (s *Session) Run(ctx context.Context, script string) ([]model.ResultSet, er
 	if s.Conn.ReadOnly {
 		for i, stmt := range stmts {
 			if reason := ReadOnlyReason(s.Dialect, stmt); reason != "" {
-				return nil, &db.StatementError{Statement: stmt, Index: i, Err: &db.ReadOnlyError{Reason: reason}}
+				return nil, &db.StatementError{Statement: stmt, Index: i, Err: &db.ReadOnlyError{Reason: reason}, Position: -1}
 			}
 		}
 	}
@@ -34,7 +34,7 @@ func (s *Session) Run(ctx context.Context, script string) ([]model.ResultSet, er
 	for i, stmt := range stmts {
 		rs, rolledBack, err := s.onEditor(ctx, stmt, func() (model.ResultSet, error) { return s.runOne(ctx, stmt) })
 		if err != nil {
-			return results, &db.StatementError{Statement: stmt, Index: i, Err: err, RolledBack: rolledBack}
+			return results, &db.StatementError{Statement: stmt, Index: i, Err: err, RolledBack: rolledBack, Position: s.Dialect.ErrorPosition(err, stmt)}
 		}
 		s.editorTx = s.Dialect.TransactionAfter(stmt, s.editorTx)
 		results = append(results, rs)
@@ -170,4 +170,33 @@ func (s *Session) readRows(rows *sql.Rows, maxRows int) (model.ResultSet, error)
 
 func msSince(t time.Time) float64 {
 	return float64(time.Since(t).Microseconds()) / 1000
+}
+
+const maxChecked = 200
+
+func (s *Session) CheckSyntax(ctx context.Context, script string) ([]model.SyntaxProblem, error) {
+	stmts := sqltext.Split(script, s.Dialect.Syntax())
+	if len(stmts) > maxChecked {
+		stmts = stmts[:maxChecked]
+	}
+	conn, err := s.DB.Conn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	out := []model.SyntaxProblem{}
+	for i, stmt := range stmts {
+		prepared, err := conn.PrepareContext(ctx, stmt)
+		if err == nil {
+			prepared.Close()
+			continue
+		}
+		if ctx.Err() != nil {
+			return out, ctx.Err()
+		}
+		if s.Dialect.Classify(err) == dialect.BadSyntax {
+			out = append(out, model.SyntaxProblem{Index: i, Position: s.Dialect.ErrorPosition(err, stmt), Message: s.Dialect.ErrorMessage(err)})
+		}
+	}
+	return out, nil
 }

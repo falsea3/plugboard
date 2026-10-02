@@ -187,10 +187,64 @@ func (Dialect) Classify(err error) dialect.ErrorKind {
 		return dialect.ConnLost
 	}
 	var myErr *mysqldriver.MySQLError
-	if errors.As(err, &myErr) && myErr.Number == 1205 {
-		return dialect.LockTimeout
+	if errors.As(err, &myErr) {
+		switch myErr.Number {
+		case 1205:
+			return dialect.LockTimeout
+		case 1064, 1149:
+			return dialect.BadSyntax
+		}
 	}
 	return dialect.Other
+}
+
+var nearAtLine = regexp.MustCompile(`(?s)near '(.*)' at line (\d+)$`)
+
+func (Dialect) ErrorPosition(err error, stmt string) int {
+	var myErr *mysqldriver.MySQLError
+	if !errors.As(err, &myErr) {
+		return -1
+	}
+	m := nearAtLine.FindStringSubmatch(myErr.Message)
+	if m == nil {
+		return -1
+	}
+	if m[1] == "" {
+		return len(stmt)
+	}
+	line, _ := strconv.Atoi(m[2])
+	start := 0
+	for ; line > 1; line-- {
+		nl := strings.IndexByte(stmt[start:], '\n')
+		if nl < 0 {
+			break
+		}
+		start += nl + 1
+	}
+	near, _, _ := strings.Cut(m[1], "\n")
+	if i := strings.Index(stmt[start:], near); i >= 0 {
+		return start + i
+	}
+	return start
+}
+
+func (Dialect) ErrorMessage(err error) string {
+	var myErr *mysqldriver.MySQLError
+	if !errors.As(err, &myErr) {
+		return err.Error()
+	}
+	m := nearAtLine.FindStringSubmatch(myErr.Message)
+	if m == nil {
+		return myErr.Message
+	}
+	if m[1] == "" {
+		return "syntax error at the end of the statement"
+	}
+	near, _, _ := strings.Cut(m[1], "\n")
+	if r := []rune(near); len(r) > 40 {
+		near = string(r[:40]) + "…"
+	}
+	return "syntax error near '" + near + "'"
 }
 
 func (Dialect) EstimateRows(ctx context.Context, db *sql.DB, schema, table string) (int64, bool, error) {

@@ -47,6 +47,10 @@ func (Standard) ErrorAbortsTransaction() bool { return false }
 
 func (Standard) Classify(error) ErrorKind { return Other }
 
+func (Standard) ErrorPosition(error, string) int { return -1 }
+
+func (Standard) ErrorMessage(err error) string { return err.Error() }
+
 func (Standard) ReadKeywords() []string { return nil }
 
 func (Standard) LockWait(int) (set, reset string) { return "", "" }

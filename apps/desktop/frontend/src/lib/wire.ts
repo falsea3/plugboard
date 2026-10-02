@@ -170,8 +170,15 @@ export interface QueryRun {
   results: ResultSet[];
   error?: string;
   errorIndex: number;
+  errorPosition: number;
   cancelled: boolean;
   rolledBack: boolean;
+}
+
+export interface SyntaxProblem {
+  index: number;
+  position: number;
+  message: string;
 }
 
 export type ChangeKind = 'update' | 'insert' | 'delete';
@@ -268,6 +275,7 @@ export interface GoApp {
   CountRows(sessionId: string, queryId: string, q: TableQuery, exact: boolean): Promise<RowCount>;
   RunQuery(sessionId: string, queryId: string, sql: string): Promise<QueryRun>;
   WriteStatements(sessionId: string, script: string): Promise<string[]>;
+  CheckSyntax(sessionId: string, script: string): Promise<SyntaxProblem[]>;
   RunMore(sessionId: string, queryId: string, statement: string, offset: number): Promise<ResultSet>;
   CancelQuery(queryId: string): Promise<void>;
   ChooseSQLiteFile(): Promise<string>;

@@ -29,6 +29,7 @@ var (
 	_ db.Session         = (*Session)(nil)
 	_ db.RowEditor       = (*Session)(nil)
 	_ db.StructureEditor = (*Session)(nil)
+	_ db.SyntaxChecker   = (*Session)(nil)
 )
 
 func Open(ctx context.Context, id string, c model.Connection, d dialect.Dialect, opts db.OpenOptions) (*Session, error) {

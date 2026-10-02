@@ -159,3 +159,14 @@ func TestFloatIsDouble(t *testing.T) {
 		t.Fatalf("row = %#v", row)
 	}
 }
+
+func TestCheckSyntax(t *testing.T) {
+	s := openSQLite(t)
+	problems, err := s.CheckSyntax(context.Background(), "select 1; selec 2; select * from users where; select * from nope")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(problems) != 2 || problems[0].Index != 1 || problems[0].Position != 0 || problems[1].Index != 2 || problems[1].Position != len("select * from users where") {
+		t.Fatalf("problems = %+v", problems)
+	}
+}

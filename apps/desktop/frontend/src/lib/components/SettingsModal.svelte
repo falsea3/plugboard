@@ -37,14 +37,16 @@
   }
 
   let checking = $state(false);
-  let checkResult = $state('');
+  let checkError = $state('');
+  let upToDate = $state(false);
 
   async function checkForUpdate() {
     checking = true;
-    checkResult = '';
+    checkError = '';
     const error = await app.checkForUpdate();
     checking = false;
-    checkResult = error || (app.update ? '' : 'Relay DB is up to date.');
+    checkError = error;
+    upToDate = !error && !app.update;
   }
 
   const folderLabel = $derived(
@@ -168,8 +170,10 @@
             {:else if app.update?.status === 'installed'}
               <span>Version {app.update.info.version} is installed.</span>
               <button class="btn sm primary" onclick={() => app.restartToUpdate()}>Restart now</button>
+            {:else if upToDate}
+              <span class="up-to-date"><Icon name="check" size={13} />Relay DB is up to date</span>
             {:else}
-              {#if app.update?.status === 'failed'}<span class="update-error" title={app.update.error}>{app.update.error}</span>{:else if checkResult}<span>{checkResult}</span>{/if}
+              {#if app.update?.status === 'failed'}<span class="update-error" title={app.update.error}>{app.update.error}</span>{:else if checkError}<span class="update-error" title={checkError}>{checkError}</span>{/if}
               <button class="btn sm" onclick={checkForUpdate} disabled={checking}>{checking ? 'Checking…' : 'Check for updates'}</button>
             {/if}
           </div>
@@ -359,6 +363,7 @@
   .about img { border-radius: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); }
   .about h2 { margin: 14px 0 2px; font-size: 20px; }
   .update-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 6px 0 2px; font-size: 12px; color: var(--text-2); min-height: 24px; }
+  .up-to-date { display: inline-flex; align-items: center; gap: 6px; color: var(--ok); }
   .update-error { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--danger); }
   .version { margin: 0; font-size: 12.5px; color: var(--text-3); }
   .blurb { max-width: 430px; margin: 16px 0 18px; color: var(--text-2); line-height: 1.55; }

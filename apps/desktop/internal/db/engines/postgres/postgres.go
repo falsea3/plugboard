@@ -114,12 +114,30 @@ func (Dialect) Classify(err error) dialect.ErrorKind {
 		return dialect.Other
 	}
 	switch {
+	case pgErr.Code == "42601":
+		return dialect.BadSyntax
 	case pgErr.Code == "55P03":
 		return dialect.LockTimeout
 	case pgErr.Code == "0A000" && strings.Contains(pgErr.Message, "cached plan"):
 		return dialect.StalePlan
 	}
 	return dialect.Other
+}
+
+func (Dialect) ErrorPosition(err error, stmt string) int {
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) || pgErr.Position <= 0 {
+		return -1
+	}
+	return dialect.ByteOffset(stmt, int(pgErr.Position)-1)
+}
+
+func (Dialect) ErrorMessage(err error) string {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Message
+	}
+	return err.Error()
 }
 
 func (Dialect) EstimateRows(ctx context.Context, db *sql.DB, schema, table string) (int64, bool, error) {

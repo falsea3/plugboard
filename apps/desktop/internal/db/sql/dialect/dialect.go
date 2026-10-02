@@ -37,6 +37,8 @@ type Dialect interface {
 	TransactionAfter(stmt string, open bool) bool
 	ErrorAbortsTransaction() bool
 	Classify(err error) ErrorKind
+	ErrorPosition(err error, stmt string) int
+	ErrorMessage(err error) string
 
 	ReadKeywords() []string
 	WriteReason(keyword, body string) string
@@ -60,6 +62,7 @@ const (
 	ConnLost
 	StalePlan
 	LockTimeout
+	BadSyntax
 )
 
 type TxStatus int
