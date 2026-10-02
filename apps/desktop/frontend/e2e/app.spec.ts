@@ -24,7 +24,7 @@ test('connects, browses a table and runs a query', async ({ page }) => {
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const grid = page.getByRole('grid');
   await expect(grid.getByText('ann.novak1@example.com')).toBeVisible();
-  await expect(page.getByText(/Rows 1–300 of ~24,813/)).toBeVisible();
+  await expect(page.getByText('300 of ~24,813 rows loaded')).toBeVisible();
   await grid.getByText('dana.ito4@example.com').click();
   await shot(page, 'table');
 
@@ -206,4 +206,55 @@ test('shows that a table and a query are still loading', async ({ page }) => {
   await expect(page.getByRole('status').filter({ hasText: 'Running…' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Stop' })).toBeVisible();
   await expect(page.getByRole('grid').getByText('1284390.50')).toBeVisible();
+});
+
+test('keeps rows under the viewport while the wheel jumps', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  const grid = page.getByRole('grid');
+  await expect(grid.getByText('ann.novak1@example.com')).toBeVisible();
+  const misses = await grid.evaluate(async el => {
+    const out: string[] = [];
+    for (let i = 0; i < 30; i++) {
+      const down = i < 20;
+      const before = el.scrollTop;
+      el.dispatchEvent(new WheelEvent('wheel', { deltaY: down ? 3000 : -2200, bubbles: true, cancelable: true }));
+      const atEdge = down ? before >= el.scrollHeight - el.clientHeight - 1 : before <= 0;
+      if (el.scrollTop === before && !atEdge) out.push(`jump ${i}: the grid didn't scroll`);
+      const box = el.getBoundingClientRect();
+      for (const y of [box.top + box.height / 2, box.bottom - 12]) {
+        const hit = document.elementFromPoint(box.left + 200, y);
+        const row = hit?.closest('[role="row"]');
+        const number = row?.querySelector('.rn')?.textContent?.trim();
+        const middle = row ? row.getBoundingClientRect().top + 13 : y;
+        const want = String(Math.floor((el.scrollTop + middle - box.top - 30) / 26) + 1);
+        if (number !== want) out.push(`jump ${i}: at ${Math.round(y - box.top)}px row ${number ?? 'none'}, want ${want}`);
+      }
+      await new Promise(r => setTimeout(r, 0));
+    }
+    return out;
+  });
+  expect(misses).toEqual([]);
+});
+
+test('loads more rows as the table scrolls, and the paging keys go where they should', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  const grid = page.getByRole('grid');
+  await grid.getByText('ann.novak1@example.com').click();
+  await page.keyboard.press('End');
+  await expect(page.getByText('600 of ~24,813 rows loaded')).toBeVisible();
+  await page.keyboard.press('End');
+  await expect(page.getByText('900 of ~24,813 rows loaded')).toBeVisible();
+  await page.keyboard.press('End');
+  await page.keyboard.press('End');
+  await expect(page.getByText('1,200 rows', { exact: true })).toBeVisible();
+  await expect(grid.locator('.rn.active')).toHaveText('1200');
+  await page.keyboard.press('Home');
+  await expect(grid.locator('.rn.active')).toHaveText('1');
+  await page.keyboard.press('PageDown');
+  await expect(grid.locator('.rn.active')).not.toHaveText('1');
+  await expect(grid.getByText('ann.novak1@example.com')).toBeHidden();
+  await page.keyboard.press('PageUp');
+  await expect(grid.locator('.rn.active')).toHaveText('1');
 });

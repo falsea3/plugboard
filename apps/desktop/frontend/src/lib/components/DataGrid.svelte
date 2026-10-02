@@ -16,7 +16,7 @@
 </script>
 
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { flushSync, tick, untrack } from 'svelte';
   import { cellKind, copyText, calcColumnWidth, formatCell, toTSV } from '../format';
   import { copyToClipboard } from '../clipboard';
   import { startDrag } from '../drag';
@@ -38,6 +38,7 @@
     cellMenu,
     headerMenu,
     onmenu,
+    onend,
   }: {
     columns: ResultColumn[];
     rows: CellValue[][];
@@ -50,6 +51,7 @@
     cellMenu?: (r: number, c: number) => MenuItem[];
     headerMenu?: (c: number) => MenuItem[];
     onmenu?: (id: string, at: MenuAt) => boolean | void;
+    onend?: () => void;
   } = $props();
 
   const ROW_H = 26;
@@ -83,6 +85,43 @@
   const start = $derived(Math.max(0, Math.floor(scrollTop / ROW_H) - OVERSCAN));
   const end = $derived(Math.min(rows.length, Math.ceil((scrollTop + viewportH) / ROW_H) + OVERSCAN));
   const visible = $derived(rows.slice(start, end));
+  const bodyH = $derived(Math.max(0, Math.min(viewportH - HEADER_H, rows.length * ROW_H)));
+
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+  function scrollTo(top: number, left = scroller?.scrollLeft ?? 0) {
+    if (!scroller) return;
+    scroller.scrollTop = clamp(top, 0, scroller.scrollHeight - scroller.clientHeight);
+    scroller.scrollLeft = clamp(left, 0, scroller.scrollWidth - scroller.clientWidth);
+    scrollTop = scroller.scrollTop;
+    scrollLeft = scroller.scrollLeft;
+    flushSync();
+  }
+
+  export function scrollToTop() {
+    scrollTo(0, 0);
+  }
+
+  $effect(() => {
+    const el = scroller;
+    if (!el) return;
+    const onwheel = (e: WheelEvent) => {
+      if (e.ctrlKey || inEditor(e)) return;
+      const unit = e.deltaMode === 1 ? ROW_H : e.deltaMode === 2 ? el.clientHeight - HEADER_H : 1;
+      let dx = e.deltaX * unit;
+      let dy = e.deltaY * unit;
+      if (e.shiftKey && dx === 0) [dx, dy] = [dy, 0];
+      e.preventDefault();
+      scrollTo(el.scrollTop + dy, el.scrollLeft + dx);
+    };
+    el.addEventListener('wheel', onwheel, { passive: false });
+    return () => el.removeEventListener('wheel', onwheel);
+  });
+
+  $effect(() => {
+    if (!onend || rows.length === 0) return;
+    if (end >= rows.length - Math.max(OVERSCAN, Math.ceil(viewportH / ROW_H))) untrack(() => onend());
+  });
 
   const colStarts = $derived.by(() => {
     const out = [0];
@@ -312,15 +351,37 @@
 
   function scrollIntoView(row: number, col: number) {
     if (!scroller) return;
-    const top = row * ROW_H;
-    const bodyH = scroller.clientHeight - HEADER_H;
-    if (top < scroller.scrollTop) scroller.scrollTop = top;
-    else if (top + ROW_H > scroller.scrollTop + bodyH) scroller.scrollTop = top + ROW_H - bodyH;
-    if (col < 0) return;
-    const left = widths.slice(0, col).reduce((a, b) => a + b, 0);
-    const viewW = scroller.clientWidth - rowNumberWidth;
-    if (left < scroller.scrollLeft) scroller.scrollLeft = left;
-    else if (left + widths[col] > scroller.scrollLeft + viewW) scroller.scrollLeft = left + widths[col] - viewW;
+    let top = scroller.scrollTop;
+    const rowTop = row * ROW_H;
+    const viewH = scroller.clientHeight - HEADER_H;
+    if (rowTop < top) top = rowTop;
+    else if (rowTop + ROW_H > top + viewH) top = rowTop + ROW_H - viewH;
+    let left = scroller.scrollLeft;
+    if (col >= 0) {
+      const cellLeft = colStarts[col];
+      const viewW = scroller.clientWidth - rowNumberWidth;
+      if (cellLeft < left) left = cellLeft;
+      else if (cellLeft + widths[col] > left + viewW) left = cellLeft + widths[col] - viewW;
+    }
+    scrollTo(top, left);
+  }
+
+  function pageKey(e: KeyboardEvent): boolean {
+    if (!scroller || rows.length === 0 || inEditor(e)) return false;
+    if (e.key !== 'PageDown' && e.key !== 'PageUp' && e.key !== 'Home' && e.key !== 'End') return false;
+    e.preventDefault();
+    const pageRows = Math.max(1, Math.floor((scroller.clientHeight - HEADER_H) / ROW_H) - 1);
+    const step = e.key === 'PageDown' ? pageRows : e.key === 'PageUp' ? -pageRows : 0;
+    if (selection) {
+      const row = e.key === 'Home' ? 0 : e.key === 'End' ? rows.length - 1 : clamp(selection.row + step, 0, rows.length - 1);
+      selection = { row, col: selection.col };
+      rowAnchor = null;
+      if (step !== 0) scrollTo(scroller.scrollTop + step * ROW_H);
+      scrollIntoView(row, selection.col);
+    } else {
+      scrollTo(e.key === 'Home' ? 0 : e.key === 'End' ? scroller.scrollHeight : scroller.scrollTop + step * ROW_H);
+    }
+    return true;
   }
 
   async function onkeydown(e: KeyboardEvent) {
@@ -374,6 +435,7 @@
       await copyToClipboard(toTSV(columns.map(c => c.name), rows));
       return;
     }
+    if (pageKey(e)) return;
     const moves: Record<string, [number, number]> = {
       ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1],
       Tab: [0, e.shiftKey ? -1 : 1],
@@ -437,80 +499,82 @@
       {/each}
     </div>
 
-    <div class="body" style:transform="translateY({start * ROW_H}px)">
-      {#each visible as row, vi}
-        {@const r = start + vi}
-        {@const rowSelected = selection?.row === r}
-        {@const rowState = editing?.rowState(r) ?? ''}
-        <div
-          class="tr {rowState}"
-          class:alt={r % 2 === 1}
-          class:failed={editing?.isFailed(r) ?? false}
-          class:row-selected={inRowRange(r)}
-          role="row"
-          style:height="{ROW_H}px"
-        >
-          <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+    <div class="body" style:top="{HEADER_H}px" style:height="{bodyH}px">
+      <div class="rows" style:transform="translateY({start * ROW_H - scrollTop}px)">
+        {#each visible as row, vi}
+          {@const r = start + vi}
+          {@const rowSelected = selection?.row === r}
+          {@const rowState = editing?.rowState(r) ?? ''}
           <div
-            class="rn"
-            class:active={rowSelected || inRowRange(r)}
-            style:width="{rowNumberWidth}px"
-            onclick={e => selectRow(r, e.shiftKey)}
-            oncontextmenu={e => openMenu(e, r, -1)}
+            class="tr {rowState}"
+            class:alt={r % 2 === 1}
+            class:failed={editing?.isFailed(r) ?? false}
+            class:row-selected={inRowRange(r)}
+            role="row"
+            style:height="{ROW_H}px"
           >
-            {#if rowState === 'new'}<span class="new-mark">+</span>{:else if rowOffset === null}·{:else}{rowOffset + r + 1}{/if}
-          </div>
-          <div class="pad" style:width="{leftPad}px"></div>
-          {#each shownCols as c (c)}
-            {@const value = row[c]}
-            {@const state = editing?.cellState(r, c) ?? ''}
-            {@const kind = state === 'default' ? 'null' : cellKind(value, columns[c].kind)}
-            {@const isEditing = cellEditor?.r === r && cellEditor?.c === c}
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
             <div
-              class="td {kind} {state}"
-              class:num={numeric[c] || kind === 'number'}
-              class:selected={rowSelected && selection?.col === c}
-              class:editing={isEditing}
-              role="gridcell"
-              tabindex="-1"
-              style:width="{widths[c]}px"
-              onmousedown={e => e.button === 0 && !inEditor(e) && select(r, c)}
-              ondblclick={e => !inEditor(e) && startEdit(r, c)}
-              oncontextmenu={e => openMenu(e, r, c)}
+              class="rn"
+              class:active={rowSelected || inRowRange(r)}
+              style:width="{rowNumberWidth}px"
+              onclick={e => selectRow(r, e.shiftKey)}
+              oncontextmenu={e => openMenu(e, r, -1)}
             >
-              {#if isEditing && cellEditor && cellEditor.options}
-                <div class="cell-editor list">
-                  <Select
-                    value={cellEditor.text}
-                    options={cellEditor.options.map(o => ({ value: o, label: o }))}
-                    placeholder={cellEditor.wasNull ? (state === 'default' ? 'DEFAULT' : 'NULL') : ''}
-                    startOpen
-                    onchange={onOptionPick}
-                    onclose={onOptionClose}
-                    aria-label={columns[c].name}
-                  />
-                </div>
-              {:else if isEditing && cellEditor}
-                <textarea
-                  class="cell-editor"
-                  class:multi={isMultiline(cellEditor.text)}
-                  style:min-width="{widths[c]}px"
-                  bind:value={cellEditor.text}
-                  oninput={() => cellEditor && (cellEditor.touched = true)}
-                  onkeydown={onEditorKey}
-                  onblur={onEditorBlur}
-                  placeholder={cellEditor.wasNull ? (state === 'default' ? 'DEFAULT' : 'NULL') : ''}
-                  spellcheck="false"
-                  use:focusEditor
-                ></textarea>
-              {:else}
-                {state === 'default' ? 'DEFAULT' : formatCell(value)}
-              {/if}
+              {#if rowState === 'new'}<span class="new-mark">+</span>{:else if rowOffset === null}·{:else}{rowOffset + r + 1}{/if}
             </div>
-          {/each}
-        </div>
-      {/each}
+            <div class="pad" style:width="{leftPad}px"></div>
+            {#each shownCols as c (c)}
+              {@const value = row[c]}
+              {@const state = editing?.cellState(r, c) ?? ''}
+              {@const kind = state === 'default' ? 'null' : cellKind(value, columns[c].kind)}
+              {@const isEditing = cellEditor?.r === r && cellEditor?.c === c}
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <div
+                class="td {kind} {state}"
+                class:num={numeric[c] || kind === 'number'}
+                class:selected={rowSelected && selection?.col === c}
+                class:editing={isEditing}
+                role="gridcell"
+                tabindex="-1"
+                style:width="{widths[c]}px"
+                onmousedown={e => e.button === 0 && !inEditor(e) && select(r, c)}
+                ondblclick={e => !inEditor(e) && startEdit(r, c)}
+                oncontextmenu={e => openMenu(e, r, c)}
+              >
+                {#if isEditing && cellEditor && cellEditor.options}
+                  <div class="cell-editor list">
+                    <Select
+                      value={cellEditor.text}
+                      options={cellEditor.options.map(o => ({ value: o, label: o }))}
+                      placeholder={cellEditor.wasNull ? (state === 'default' ? 'DEFAULT' : 'NULL') : ''}
+                      startOpen
+                      onchange={onOptionPick}
+                      onclose={onOptionClose}
+                      aria-label={columns[c].name}
+                    />
+                  </div>
+                {:else if isEditing && cellEditor}
+                  <textarea
+                    class="cell-editor"
+                    class:multi={isMultiline(cellEditor.text)}
+                    style:min-width="{widths[c]}px"
+                    bind:value={cellEditor.text}
+                    oninput={() => cellEditor && (cellEditor.touched = true)}
+                    onkeydown={onEditorKey}
+                    onblur={onEditorBlur}
+                    placeholder={cellEditor.wasNull ? (state === 'default' ? 'DEFAULT' : 'NULL') : ''}
+                    spellcheck="false"
+                    use:focusEditor
+                  ></textarea>
+                {:else}
+                  {state === 'default' ? 'DEFAULT' : formatCell(value)}
+                {/if}
+              </div>
+            {/each}
+          </div>
+        {/each}
+      </div>
     </div>
   </div>
 
@@ -620,7 +684,8 @@
   }
   .resizer:hover { background: linear-gradient(to right, transparent 3px, var(--accent) 3px, var(--accent) 5px, transparent 5px); }
 
-  .body { position: absolute; top: 30px; left: 0; right: 0; will-change: transform; }
+  .body { position: sticky; }
+  .rows { will-change: transform; }
   .tr { display: flex; }
   .pad { flex: none; }
   .tr.alt { background: var(--grid-row-alt); }

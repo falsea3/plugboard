@@ -75,10 +75,15 @@
   const colAt = (c: number): Column | undefined => (page ? info.get(page.result.columns[c]?.name) : undefined);
 
   const displayRows = $derived.by(() => {
+    const base = page?.result.rows ?? [];
     const n = edits.rowCount;
     const cols = page?.result.columns.length ?? 0;
     const out: CellValue[][] = new Array(n);
     for (let r = 0; r < n; r++) {
+      if (r < base.length && !edits.updates.has(r)) {
+        out[r] = base[r];
+        continue;
+      }
       const row: CellValue[] = new Array(cols);
       for (let c = 0; c < cols; c++) {
         const v = edits.value(r, c);
@@ -186,7 +191,7 @@
     if (id === 'sort-asc' || id === 'sort-desc' || id === 'sort-default') {
       if (!canLeavePage()) return true;
       sort = id === 'sort-default' ? null : { column: name, desc: id === 'sort-desc' };
-      loadPage('first');
+      loadPage('start');
       return true;
     }
     if (id.startsWith('f-')) {
@@ -262,60 +267,41 @@
   let structureDirty = $state(false);
   const structureReadOnlyReason = $derived(ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : '');
 
-  type Nav = 'reload' | 'first' | 'next' | 'prev' | 'last';
+  const MAX_ROWS = 100_000;
 
-  let cursor = $state<{ after?: CellValue[]; before?: CellValue[]; last?: boolean }>({});
-
-  let firstRow = $state<number | null>(0);
   let count = $state<RowCount | null>(null);
   let counting = $state(false);
+  let loadingMore = $state(false);
+
+  const loadedRows = $derived(page?.result.rows.length ?? 0);
+  const newRowsPending = $derived(edits.rowCount > loadedRows);
+  const atLimit = $derived(loadedRows >= MAX_ROWS);
 
   const keyOf = (row: CellValue[]) =>
     (page?.defaultOrder ?? []).map(k => row[page!.result.columns.findIndex(c => c.name === k)]);
 
-  async function loadPage(nav: Nav = 'reload') {
+  const pageQuery = () => ({
+    schema: tab.schema,
+    table: tab.table,
+    orderBy: sort?.column ?? '',
+    orderDesc: sort?.desc ?? false,
+    filters,
+  });
+
+  async function loadPage(from: 'start' | 'reload' = 'reload') {
     const seq = ++loadSeq;
     const prev = page;
-    let next = cursor;
-    let knownStart: number | null = firstRow;
-    if (nav === 'first') {
-      next = {};
-      knownStart = 0;
-      pageSize = app.settings.pageSize;
-    } else if (nav === 'last') {
-      next = { last: true };
-    } else if (nav === 'next' && prev) {
-      const rows = prev.result.rows;
-      next = prev.keyset ? { after: keyOf(rows[rows.length - 1]) } : {};
-      knownStart = firstRow === null ? null : firstRow + rows.length;
-    } else if (nav === 'prev' && prev) {
-      next = prev.keyset ? { before: keyOf(prev.result.rows[0]) } : {};
-      knownStart = prev.keyset ? null : Math.max(0, (firstRow ?? 0) - pageSize);
-    }
+    const limit = from === 'reload' ? Math.min(MAX_ROWS, Math.max(pageSize, loadedRows)) : pageSize;
     loading = true;
+    loadingMore = false;
     error = '';
     try {
-      const p = await api.fetchTablePage(sessionId, {
-        schema: tab.schema,
-        table: tab.table,
-        offset: offsetFor(next, knownStart),
-        limit: pageSize,
-        orderBy: sort?.column ?? '',
-        orderDesc: sort?.desc ?? false,
-        filters,
-        ...next,
-      });
+      const p = await api.fetchTablePage(sessionId, { ...pageQuery(), offset: 0, limit });
       if (seq !== loadSeq) return;
-
-      if (p.offset >= 0) knownStart = p.offset;
-      else if (next.before && firstRow !== null) knownStart = Math.max(0, firstRow - p.result.rows.length);
-      else if ((next.before || next.last) && !p.hasPrev) knownStart = 0;
-      else if (next.last) knownStart = count?.exact ? Math.max(0, count.count - p.result.rows.length) : null;
       page = p;
-      cursor = next;
-      firstRow = knownStart;
       edits.discard();
       saveError = '';
+      if (from === 'start') grid?.scrollToTop();
       if (!prev) loadQuickCount();
     } catch (err) {
       if (seq === loadSeq) error = err instanceof Error ? err.message : String(err);
@@ -324,8 +310,26 @@
     }
   }
 
-  function offsetFor(next: typeof cursor, start: number | null): number {
-    return next.after || next.before || next.last ? 0 : (start ?? 0);
+  async function loadMore() {
+    if (!page || loading || loadingMore || !page.hasMore || newRowsPending || atLimit) return;
+    const seq = loadSeq;
+    const base = page;
+    const rows = base.result.rows;
+    loadingMore = true;
+    try {
+      const p = await api.fetchTablePage(sessionId, {
+        ...pageQuery(),
+        offset: base.keyset ? 0 : rows.length,
+        limit: Math.min(pageSize, MAX_ROWS - rows.length),
+        ...(base.keyset && rows.length > 0 ? { after: keyOf(rows[rows.length - 1]) } : {}),
+      });
+      if (seq !== loadSeq || page !== base) return;
+      page = { ...base, hasMore: p.hasMore, result: { ...base.result, rows: [...rows, ...p.result.rows] } };
+    } catch (err) {
+      if (seq === loadSeq) app.notify(err);
+    } finally {
+      if (seq === loadSeq) loadingMore = false;
+    }
   }
 
   async function loadQuickCount() {
@@ -346,7 +350,6 @@
     counting = true;
     try {
       count = await api.countRows(sessionId, countId, countQuery(), true);
-      if (cursor.last && firstRow === null && page) firstRow = Math.max(0, count.count - page.result.rows.length);
     } catch (err) {
       app.notify(err);
     } finally {
@@ -389,7 +392,7 @@
     if (cur?.column !== column) sort = { column, desc: false };
     else if (!cur.desc) sort = { column, desc: true };
     else sort = null;
-    loadPage('first');
+    loadPage('start');
   }
 
   function applyFilters() {
@@ -397,7 +400,7 @@
     filters = filterRows
       .filter(r => r.on && r.column && (noValue(r.op) || r.value.trim() !== ''))
       .map(r => ({ column: r.column, op: r.op, value: r.value.trim() }));
-    loadPage('first');
+    loadPage('start');
     loadQuickCount();
   }
 
@@ -419,11 +422,6 @@
       await tick();
       filterBar?.focus(row.id);
     }
-  }
-
-  function go(nav: Nav) {
-    if (!canLeavePage()) return;
-    loadPage(nav);
   }
 
   function addRow() {
@@ -479,7 +477,7 @@
         edits.failedRow = failed ? rows[res.failedIndex] : null;
         if (failed && edits.failedRow !== null) {
           const verb = { delete: 'Deleting', update: 'Updating', insert: 'Inserting' }[failed.kind];
-          const which = failed.kind === 'insert' ? 'a new row' : firstRow === null ? 'a row' : `row ${firstRow + edits.failedRow + 1}`;
+          const which = failed.kind === 'insert' ? 'a new row' : `row ${edits.failedRow + 1}`;
           saveError = `${verb} ${which} failed — nothing was saved: ${res.error}`;
         } else {
           saveError = res.error;
@@ -518,12 +516,10 @@
   const rangeLabel = $derived.by(() => {
     if (!page) return '';
     const n = page.result.rows.length;
-    if (n === 0) return firstRow === 0 && !page.hasPrev ? 'No rows' : 'No more rows';
-    const range =
-      firstRow !== null ? `Rows ${fmt(firstRow + 1)}–${fmt(firstRow + n)}` : cursor.last ? `Last ${fmt(n)} rows` : `${fmt(n)} rows`;
-    if (count?.known) return `${range} of ${count.exact ? '' : '~'}${fmt(count.count)}`;
-    if (firstRow !== null && !page.hasMore) return `${range} of ${fmt(firstRow + n)}`;
-    return range;
+    if (n === 0) return 'No rows';
+    if (!page.hasMore) return formatCount(n, 'row');
+    if (count?.known) return `${fmt(n)} of ${count.exact ? '' : '~'}${fmt(count.count)} rows loaded`;
+    return `${fmt(n)} rows loaded`;
   });
 </script>
 
@@ -573,7 +569,7 @@
           bind:this={grid}
           columns={page.result.columns}
           rows={displayRows}
-          rowOffset={firstRow}
+          onend={loadMore}
           sort={shownSort}
           {keyColumns}
           {onsort}
@@ -618,12 +614,13 @@
     </div>
   {:else if mode === 'data'}
     <div class="footer">
-      <button class="btn icon sm ghost" title="First page" disabled={!page?.hasPrev || loading} onclick={() => go('first')}><Icon name="chevrons-left" size={13} /></button>
-      <button class="btn icon sm ghost" title="Previous page" disabled={!page?.hasPrev || loading} onclick={() => go('prev')}><Icon name="chevron-left" size={13} /></button>
-      <button class="btn icon sm ghost" title="Next page" disabled={!page?.hasMore || loading} onclick={() => go('next')}><Icon name="chevron-right" size={13} /></button>
-      <button class="btn icon sm ghost" title="Last page" disabled={!page?.hasMore || loading} onclick={() => go('last')}><Icon name="chevrons-right" size={13} /></button>
       <span class="small muted">{rangeLabel}</span>
-      {#if page && !count?.exact && (page.hasMore || page.hasPrev)}
+      {#if loadingMore}
+        <span class="small faint loading-more"><Spinner size={10} />Loading more…</span>
+      {:else if page?.hasMore && atLimit}
+        <span class="small faint" title="Sort or filter to reach other rows">first {fmt(MAX_ROWS)} rows only</span>
+      {/if}
+      {#if page && !count?.exact && page.hasMore}
         <button class="link-btn" onclick={countExactly} disabled={counting} title="Run COUNT(*) — can take a while on big tables">{#if counting}<Spinner size={10} />Counting…{:else}Count{/if}</button>
       {/if}
       {#if filters.length > 0}<span class="filtered">filtered</span>{/if}
@@ -676,6 +673,7 @@
   .toolbar { border-bottom: 1px solid var(--border); }
   .footer { height: 37px; border-top: 1px solid var(--border); gap: 4px; min-width: 0; }
   .content { flex: 1; min-height: 0; position: relative; }
+  .loading-more { display: inline-flex; align-items: center; gap: 6px; }
   .waiting { display: flex; align-items: center; justify-content: center; gap: 8px; height: 100%; font-size: 12.5px; }
   .title { margin-left: 4px; font-size: 12px; }
   .small { font-size: 12px; padding: 0 4px; white-space: nowrap; }

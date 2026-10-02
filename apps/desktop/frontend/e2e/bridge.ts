@@ -40,7 +40,7 @@ export async function installBridge(page: Page) {
     const last = ['Novak', 'Ito', 'Garcia', 'Smirnova', 'Okafor', 'Berg', 'Rossi', 'Kim', 'Haddad', 'Silva'];
     const countries = ['US', 'DE', 'JP', 'BR', 'NL', null, 'FR', 'IN'];
     const plans = ['free', 'team', 'pro', 'free', 'team'];
-    const rows = Array.from({ length: 300 }, (_, i) => {
+    const rows = Array.from({ length: 1200 }, (_, i) => {
       const n = i + 1;
       const name = `${first[i % first.length]} ${last[(i * 7) % last.length]}`;
       const day = String(1 + (i % 28)).padStart(2, '0');
@@ -81,9 +81,12 @@ export async function installBridge(page: Page) {
           Disconnect: () => ok(undefined),
           ListTables: () => ok(tables),
           DescribeTable: () => ok(columns),
-          FetchTablePage: (_: string, q: { limit: number }) =>
-            ok({ result: { ...result(columns.map(c => c.name), rows.slice(0, q.limit)), columns: columns.map(c => ({ name: c.name, type: c.type, kind: c.kind })), pageable: false },
-                 hasMore: true, defaultOrder: ['id'], hasPrev: false, keyset: true, offset: -1 }),
+          FetchTablePage: (_: string, q: { limit: number; after?: unknown[] }) => {
+            const from = q.after ? rows.findIndex(r => r[0] === q.after![0]) + 1 : 0;
+            const chunk = rows.slice(from, from + q.limit);
+            return ok({ result: { ...result(columns.map(c => c.name), chunk), columns: columns.map(c => ({ name: c.name, type: c.type, kind: c.kind })), pageable: false },
+                        hasMore: from + chunk.length < rows.length, defaultOrder: ['id'], hasPrev: from > 0, keyset: true, offset: -1 });
+          },
           CountRows: () => ok({ count: 24813, exact: false, known: true }),
           WriteStatements: (_: string, script: string) => ok(/\b(insert|update|delete|drop|alter)\b/i.test(script) ? [script] : []),
           CheckSyntax: (_: string, script: string) =>
