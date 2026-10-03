@@ -15,7 +15,7 @@
   import Spinner from './Spinner.svelte';
   import Modal from './Modal.svelte';
   import FilterBar, { newFilter, noValue, type FilterRow } from './FilterBar.svelte';
-  import type { Filter, FilterOp } from '../wire';
+  import type { Filter, FilterOp, Relation } from '../wire';
 
   let {
     ws,
@@ -46,6 +46,7 @@
   let saveError = $state('');
   let preview = $state<{ sql: string[]; confirm: boolean } | null>(null);
 
+  let relations = $state<Relation[]>([]);
   let filterRows = $state<FilterRow[]>([]);
   let filters = $state<Filter[]>([]);
   let showFilters = $state(false);
@@ -108,6 +109,37 @@
 
   const boolValue = (on: boolean): CellValue => (features.booleanType ? on : on ? 1 : 0);
 
+  const links = $derived.by(() => {
+    const names = page?.result.columns.map(c => c.name) ?? [];
+    const out = new Set<number>();
+    for (const rel of relations) for (const col of rel.columns) if (names.includes(col)) out.add(names.indexOf(col));
+    return out;
+  });
+
+  function jumpFor(r: number, c: number): { rel: Relation; filters: Filter[] } | null {
+    if (!page || r >= page.result.rows.length) return null;
+    const names = page.result.columns.map(col => col.name);
+    const rel = relations.find(x => x.columns.includes(names[c]));
+    if (!rel) return null;
+    const values = rel.columns.map(col => page!.result.rows[r][names.indexOf(col)]);
+    if (values.some(v => v === null || v === undefined)) return null;
+    return { rel, filters: rel.refColumns.map((col, i) => ({ column: col, op: '=' as FilterOp, value: String(values[i]) })) };
+  }
+
+  function follow(r: number, c: number) {
+    const j = jumpFor(r, c);
+    if (j) ws.openTable({ schema: j.rel.refSchema, name: j.rel.refTable, kind: 'table' }, j.filters);
+  }
+
+  function takeJump(): boolean {
+    const jump = ws.takeJump(tab);
+    if (!jump) return false;
+    filters = jump;
+    filterRows = jump.map(f => newFilter(columns, f.column, f.op, f.value));
+    showFilters = true;
+    return true;
+  }
+
   function cellMenu(r: number, c: number): MenuItem[] {
     const items: MenuItem[] = [];
     const rowsLabel = (n: number) => (n > 1 ? `${n} rows` : 'row');
@@ -127,6 +159,8 @@
           items.push({ id: 'set-default', label: 'Set DEFAULT' });
         }
       }
+      const jump = jumpFor(r, c);
+      if (jump) items.push('sep', { id: 'follow', label: `Go to ${jump.rel.refTable}` });
       if (edits.rowState(r) !== 'new') {
         items.push('sep');
         items.push(
@@ -207,6 +241,9 @@
     }
 
     switch (id) {
+      case 'follow':
+        follow(at.r, at.c);
+        return true;
       case 'filter-value':
         addFilter(name, v === null ? 'null' : '=', v === null ? '' : String(v));
         return true;
@@ -324,7 +361,7 @@
         ...(base.keyset && rows.length > 0 ? { after: keyOf(rows[rows.length - 1]) } : {}),
       });
       if (seq !== loadSeq || page !== base) return;
-      page = { ...base, hasMore: p.hasMore, result: { ...base.result, rows: [...rows, ...p.result.rows] } };
+      page = { ...base, hasMore: p.hasMore, result: { ...base.result, durationMs: p.result.durationMs, rows: [...rows, ...p.result.rows] } };
     } catch (err) {
       if (seq === loadSeq) app.notify(err);
     } finally {
@@ -510,6 +547,29 @@
     return () => offs.forEach(f => f());
   });
 
+  $effect(() => {
+    if (!tab.jump) return;
+    untrack(() => {
+      if (!canLeavePage()) {
+        ws.takeJump(tab);
+        return;
+      }
+      if (takeJump()) {
+        mode = 'data';
+        loadPage('start');
+        loadQuickCount();
+      }
+    });
+  });
+
+  untrack(() => {
+    const { schema, table } = tab;
+    api.relations(sessionId, schema).then(
+      rs => (relations = rs.filter(r => r.table === table)),
+      () => {},
+    );
+  });
+  untrack(takeJump);
   refresh();
 
   const fmt = (n: number) => n.toLocaleString('en-US');
@@ -570,6 +630,8 @@
           columns={page.result.columns}
           rows={displayRows}
           onend={loadMore}
+          {links}
+          onfollow={follow}
           sort={shownSort}
           {keyColumns}
           {onsort}
@@ -624,7 +686,7 @@
         <button class="link-btn" onclick={countExactly} disabled={counting} title="Run COUNT(*) — can take a while on big tables">{#if counting}<Spinner size={10} />Counting…{:else}Count{/if}</button>
       {/if}
       {#if filters.length > 0}<span class="filtered">filtered</span>{/if}
-      {#if page}<span class="small faint">· {formatDuration(page.result.durationMs)}</span>{/if}
+      {#if page}<span class="small faint" title="How long the last fetch took">· {formatDuration(page.result.durationMs)}</span>{/if}
       <span style="flex:1"></span>
       {#if selected}
         <ValueBar value={selected.value} column={selected.column} />

@@ -31,6 +31,16 @@ func Run(t *testing.T, srv Server) {
 	t.Run("TableBusy", func(t *testing.T) { tableBusy(t, srv, c) })
 	t.Run("ColumnKinds", func(t *testing.T) { columnKinds(t, srv, c) })
 	t.Run("SyntaxErrors", func(t *testing.T) { syntaxErrors(t, srv, c) })
+	t.Run("Relations", func(t *testing.T) { relations(t, srv, c) })
+}
+
+func FindRelation(d model.Diagram, table string) (model.Relation, bool) {
+	for _, r := range d.Relations {
+		if r.Table == table {
+			return r, true
+		}
+	}
+	return model.Relation{}, false
 }
 
 func Conn(t *testing.T, env string, driver model.Driver) model.Connection {

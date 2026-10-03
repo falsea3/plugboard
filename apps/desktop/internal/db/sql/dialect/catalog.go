@@ -77,6 +77,47 @@ func QueryTables(ctx context.Context, db *sql.DB, schema, query string, args ...
 	return out, rows.Err()
 }
 
+func QueryRelations(ctx context.Context, db *sql.DB, query string, args ...any) ([]model.Relation, error) {
+	rows, err := db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []model.Relation{}
+	for rows.Next() {
+		var r model.Relation
+		var col, refCol, onDelete, onUpdate string
+		if err := rows.Scan(&r.Name, &r.Table, &col, &r.RefSchema, &r.RefTable, &refCol, &onDelete, &onUpdate); err != nil {
+			return nil, err
+		}
+		if n := len(out); n > 0 && out[n-1].Name == r.Name && out[n-1].Table == r.Table {
+			out[n-1].Columns = append(out[n-1].Columns, col)
+			out[n-1].RefColumns = append(out[n-1].RefColumns, refCol)
+			continue
+		}
+		r.Columns = []string{col}
+		r.RefColumns = []string{refCol}
+		r.OnDelete = RefAction(onDelete)
+		r.OnUpdate = RefAction(onUpdate)
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+func RefAction(raw string) string {
+	switch strings.ToUpper(strings.TrimSpace(raw)) {
+	case "C", "CASCADE":
+		return "CASCADE"
+	case "R", "RESTRICT":
+		return "RESTRICT"
+	case "N", "SET NULL":
+		return "SET NULL"
+	case "D", "SET DEFAULT":
+		return "SET DEFAULT"
+	}
+	return "NO ACTION"
+}
+
 func TableKind(raw string) string {
 	switch raw {
 	case "VIEW", "view", "SYSTEM VIEW", "MATERIALIZED VIEW":

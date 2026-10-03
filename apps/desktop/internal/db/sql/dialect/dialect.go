@@ -18,6 +18,7 @@ type Dialect interface {
 	ListSchemas(ctx context.Context, db *sql.DB) ([]string, error)
 	ListTables(ctx context.Context, db *sql.DB, schema string) ([]model.TableInfo, error)
 	ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error)
+	ListRelations(ctx context.Context, db *sql.DB, schema string) ([]model.Relation, error)
 	EstimateRows(ctx context.Context, db *sql.DB, schema, table string) (n int64, ok bool, err error)
 
 	Syntax() sqltext.Syntax

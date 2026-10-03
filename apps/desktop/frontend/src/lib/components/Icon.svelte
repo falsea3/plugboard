@@ -41,13 +41,21 @@
   import lockOpen from '@phosphor-icons/core/regular/lock-simple-open.svg?raw';
   import tunnel from '@phosphor-icons/core/regular/arrows-left-right.svg?raw';
   import funnel from '@phosphor-icons/core/regular/funnel-simple.svg?raw';
+  import diagram from '@phosphor-icons/core/regular/tree-structure.svg?raw';
+  import zoomIn from '@phosphor-icons/core/regular/magnifying-glass-plus.svg?raw';
+  import zoomOut from '@phosphor-icons/core/regular/magnifying-glass-minus.svg?raw';
+  import fit from '@phosphor-icons/core/regular/corners-out.svg?raw';
+  import follow from '@phosphor-icons/core/regular/arrow-right.svg?raw';
+  import restore from '@phosphor-icons/core/regular/arrow-counter-clockwise.svg?raw';
+  import sortDefault from '@phosphor-icons/core/regular/arrows-down-up.svg?raw';
+  import fitWidth from '@phosphor-icons/core/regular/arrows-out-line-horizontal.svg?raw';
 
   const ICONS = {
     plus, x, search, table, view, refresh, play, stop,
     'chevron-left': chevronLeft, 'chevron-right': chevronRight, 'chevron-down': chevronDown, 'chevrons-left': chevronsLeft, 'chevrons-right': chevronsRight,
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
     arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, link, lock, lockOpen, tunnel, funnel,
-    download, update: arrowCircleUp, 'check-mark': checkMark,
+    download, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, restore, sortDefault, fitWidth,
   } as const;
 
   export type IconName = keyof typeof ICONS;

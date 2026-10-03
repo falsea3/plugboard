@@ -138,6 +138,35 @@ type Column struct {
 	CastType   string     `json:"-"`
 }
 
+type AppError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Detail  string `json:"detail,omitempty"`
+}
+
+type Relation struct {
+	Name       string   `json:"name"`
+	Table      string   `json:"table"`
+	Columns    []string `json:"columns"`
+	RefSchema  string   `json:"refSchema"`
+	RefTable   string   `json:"refTable"`
+	RefColumns []string `json:"refColumns"`
+	OnDelete   string   `json:"onDelete"`
+	OnUpdate   string   `json:"onUpdate"`
+}
+
+type DiagramTable struct {
+	Name    string   `json:"name"`
+	Kind    string   `json:"kind"`
+	Columns []Column `json:"columns"`
+}
+
+type Diagram struct {
+	Schema    string         `json:"schema"`
+	Tables    []DiagramTable `json:"tables"`
+	Relations []Relation     `json:"relations"`
+}
+
 type ResultColumn struct {
 	Name string     `json:"name"`
 	Type string     `json:"type"`

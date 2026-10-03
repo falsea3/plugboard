@@ -8,11 +8,30 @@ function bridge(): GoApp {
   return app;
 }
 
+export class AppError extends Error {
+  constructor(
+    message: string,
+    readonly code = 'error',
+    readonly detail = '',
+  ) {
+    super(message);
+  }
+}
+
+export function toError(err: unknown): Error {
+  if (err instanceof Error) return err;
+  if (err && typeof err === 'object' && 'message' in err) {
+    const e = err as { message: unknown; code?: unknown; detail?: unknown };
+    return new AppError(String(e.message), String(e.code ?? 'error'), String(e.detail ?? ''));
+  }
+  return new Error(String(err));
+}
+
 async function call<T>(fn: (app: GoApp) => Promise<T>): Promise<T> {
   try {
     return await fn(bridge());
   } catch (err) {
-    throw err instanceof Error ? err : new Error(String(err));
+    throw toError(err);
   }
 }
 
@@ -32,6 +51,8 @@ export const api = {
   disconnect: (sessionId: string) => call(a => a.Disconnect(sessionId)),
   listTables: (sessionId: string, schema: string) => call(a => a.ListTables(sessionId, schema)),
   describeTable: (sessionId: string, schema: string, table: string) => call(a => a.DescribeTable(sessionId, schema, table)),
+  diagram: (sessionId: string, schema: string) => call(a => a.Diagram(sessionId, schema)),
+  relations: (sessionId: string, schema: string) => call(a => a.Relations(sessionId, schema)),
   fetchTablePage: (sessionId: string, q: TableQuery) => call(a => a.FetchTablePage(sessionId, q)),
   countRows: (sessionId: string, queryId: string, q: TableQuery, exact: boolean) =>
     call(a => a.CountRows(sessionId, queryId, q, exact)),
@@ -49,6 +70,8 @@ export const api = {
   getSettings: () => call(a => a.GetSettings()),
   saveSettings: (s: Settings) => call(a => a.SaveSettings(s)),
   openDataFolder: () => call(a => a.OpenDataFolder()),
+  openLogs: () => call(a => a.OpenLogs()),
+  lastCrash: () => call(a => a.LastCrash()),
   checkForUpdate: () => call(a => a.CheckForUpdate()),
   installUpdate: () => call(a => a.InstallUpdate()),
   restartApp: () => call(a => a.RestartApp()),

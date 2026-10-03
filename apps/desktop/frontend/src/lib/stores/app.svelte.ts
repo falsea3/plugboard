@@ -1,6 +1,6 @@
 import {
-  api, onTunnelState, DEFAULT_SETTINGS,
-  type Connection, type ConnectSecrets, type HostKeyChange, type SessionInfo, type Settings, type TableInfo, type TunnelState, type UpdateInfo,
+  api, onTunnelState, AppError, DEFAULT_SETTINGS,
+  type Connection, type ConnectSecrets, type Filter, type HostKeyChange, type SessionInfo, type Settings, type TableInfo, type TunnelState, type UpdateInfo,
 } from '../backend';
 import { setThemeMode } from '../theme';
 import { emptyConnection, engine, nameFromFile, sqlite } from '../engines';
@@ -12,6 +12,7 @@ export type TableTab = {
   table: string;
   tableKind: TableInfo['kind'];
   dirty?: boolean;
+  jump?: Filter[];
 };
 
 export type QueryTab = {
@@ -21,9 +22,16 @@ export type QueryTab = {
   sql: string;
 };
 
-export type Tab = TableTab | QueryTab;
+export type DiagramTab = {
+  id: string;
+  kind: 'diagram';
+  title: string;
+  schema: string;
+};
 
-export type Toast = { id: number; kind: 'error' | 'info'; text: string };
+export type Tab = TableTab | QueryTab | DiagramTab;
+
+export type Toast = { id: number; kind: 'error' | 'info'; text: string; detail?: string; action?: { label: string; run: () => void } };
 
 export type SettingsSection = 'general' | 'editor' | 'about';
 
@@ -95,13 +103,32 @@ export class Workspace {
     }
   }
 
-  openTable(t: TableInfo) {
-    const existing = this.tabs.find(tab => tab.kind === 'table' && tab.schema === t.schema && tab.table === t.name);
+  openTable(t: TableInfo, jump?: Filter[]) {
+    const existing = this.tabs.find((tab): tab is TableTab => tab.kind === 'table' && tab.schema === t.schema && tab.table === t.name);
+    if (existing) {
+      if (jump) existing.jump = jump;
+      this.activeTabId = existing.id;
+      return;
+    }
+    const tab: TableTab = { id: nextId('table'), kind: 'table', schema: t.schema, table: t.name, tableKind: t.kind, jump };
+    this.tabs.push(tab);
+    this.activeTabId = tab.id;
+  }
+
+  takeJump(tab: TableTab): Filter[] | undefined {
+    const jump = tab.jump;
+    tab.jump = undefined;
+    return jump;
+  }
+
+  openDiagram(schema = this.schema) {
+    const existing = this.tabs.find(tab => tab.kind === 'diagram' && tab.schema === schema);
     if (existing) {
       this.activeTabId = existing.id;
       return;
     }
-    const tab: TableTab = { id: nextId('table'), kind: 'table', schema: t.schema, table: t.name, tableKind: t.kind };
+    const title = this.session.schemas.length > 1 ? `Diagram (${schema})` : 'Diagram';
+    const tab: DiagramTab = { id: nextId('diagram'), kind: 'diagram', title, schema };
     this.tabs.push(tab);
     this.activeTabId = tab.id;
   }
@@ -159,6 +186,14 @@ class AppState {
     onTunnelState(ev => this.onTunnel(ev));
     await Promise.all([this.loadConnections(), this.loadSettings()]);
     setTimeout(() => this.checkForUpdate(), 3000);
+    const crashLog = await api.lastCrash().catch(() => '');
+    if (crashLog) {
+      this.notify('Plugboard quit unexpectedly last time. The crash log can help find out why.', 'error', {
+        detail: crashLog,
+        action: { label: 'Show log', run: () => api.openLogs().catch(err => this.notify(err)) },
+        sticky: true,
+      });
+    }
   }
 
   async checkForUpdate(): Promise<string> {
@@ -374,11 +409,12 @@ class AppState {
     }
   }
 
-  notify(err: unknown, kind: Toast['kind'] = 'error') {
+  notify(err: unknown, kind: Toast['kind'] = 'error', extra: { detail?: string; action?: Toast['action']; sticky?: boolean } = {}) {
     const text = err instanceof Error ? err.message : String(err);
-    const toast = { id: ++seq, kind, text };
+    const detail = extra.detail ?? (err instanceof AppError ? err.detail : '');
+    const toast: Toast = { id: ++seq, kind, text, detail, action: extra.action };
     this.toasts.push(toast);
-    setTimeout(() => this.dismiss(toast.id), kind === 'error' ? 7000 : 3000);
+    if (!extra.sticky) setTimeout(() => this.dismiss(toast.id), kind === 'error' ? 7000 : 3000);
   }
 
   dismiss(id: number) {

@@ -40,6 +40,17 @@ func (d Dialect) ListTables(ctx context.Context, db *sql.DB, schema string) ([]m
 		ORDER BY name`)
 }
 
+func (d Dialect) ListRelations(ctx context.Context, db *sql.DB, schema string) ([]model.Relation, error) {
+	return dialect.QueryRelations(ctx, db, `
+		SELECT CAST(f.id AS TEXT), m.name, f."from", ?, f."table",
+		       COALESCE(f."to", (SELECT p.name FROM pragma_table_info(f."table", ?) p WHERE p.pk = f.seq + 1), ''),
+		       f.on_delete, f.on_update
+		FROM `+d.QuoteIdent(schema)+`.sqlite_master m
+		JOIN pragma_foreign_key_list(m.name, ?) f
+		WHERE m.type = 'table'
+		ORDER BY m.name, f.id, f.seq`, schema, schema, schema)
+}
+
 func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error) {
 	rows, err := db.QueryContext(ctx, `SELECT name, type, "notnull", dflt_value, pk FROM pragma_table_info(?, ?)`, table, schema)
 	if err != nil {

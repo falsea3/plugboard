@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
+	"github.com/relay-client/plugboard/apps/desktop/internal/crash"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
@@ -38,6 +40,7 @@ type App struct {
 	sessions    map[string]db.Session
 	queries     map[string]context.CancelFunc
 	changedKeys map[string]*sshtunnel.HostKeyChangedError
+	crashLog    string
 }
 
 func NewApp() *App {
@@ -68,13 +71,35 @@ func knownHostsFile() string {
 	return filepath.Join(DataDir(), "known_hosts")
 }
 
-func (a *App) Startup(ctx context.Context) {
-	a.ctx = ctx
+func PrepareDataDir() string {
 	dir := DataDir()
 	if os.Getenv("PLUGBOARD_DATA_DIR") == "" {
 		moveOldDataDir(dir)
 	}
-	moveOldSecrets(dir, a.connections, store.OldSecrets())
+	return dir
+}
+
+func NoteCrash(a *App, path string) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.crashLog = path
+}
+
+func (a *App) Startup(ctx context.Context) {
+	a.ctx = ctx
+	moveOldSecrets(DataDir(), a.connections, store.OldSecrets())
+}
+
+func (a *App) LastCrash() string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	path := a.crashLog
+	a.crashLog = ""
+	return path
+}
+
+func (a *App) OpenLogs() error {
+	return openFolder(crash.Dir(DataDir()))
 }
 
 func moveOldDataDir(dir string) bool {
@@ -176,7 +201,7 @@ func updateError(action string, err error) string {
 	case errors.Is(err, os.ErrPermission):
 		return "Could not " + action + ": Plugboard may not replace itself where it is installed. Download the new version from GitHub instead."
 	}
-	return "Could not " + action + ": " + err.Error()
+	return "Could not " + action + ": " + describe(err).Message
 }
 
 func (a *App) GetSettings() model.Settings {
@@ -193,7 +218,10 @@ func (a *App) SaveSettings(v model.Settings) (model.Settings, error) {
 }
 
 func (a *App) OpenDataFolder() error {
-	dir := DataDir()
+	return openFolder(DataDir())
+}
+
+func openFolder(dir string) error {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
@@ -223,20 +251,20 @@ func (a *App) DeleteConnection(id string) error {
 
 func (a *App) TestConnection(c model.Connection) model.TestResult {
 	if err := a.connections.FillSecrets(&c); err != nil {
-		return model.TestResult{Error: err.Error()}
+		return model.TestResult{Error: describe(err).Message}
 	}
 	if c.Name == "" {
 		c.Name = "test"
 	}
 	if err := store.Validate(c); err != nil {
-		return model.TestResult{Error: err.Error()}
+		return model.TestResult{Error: describe(err).Message}
 	}
 	ctx, cancel := context.WithTimeout(a.context(), connectTimeout)
 	defer cancel()
 	start := time.Now()
 	s, err := engines.Open(ctx, "test", c, a.openOptions(""))
 	if err != nil {
-		return model.TestResult{Error: err.Error()}
+		return model.TestResult{Error: describe(err).Message}
 	}
 	defer s.Close()
 	return model.TestResult{
@@ -360,6 +388,37 @@ func (a *App) DescribeTable(sessionID, schema, table string) ([]model.Column, er
 	return s.Columns(ctx, schema, table)
 }
 
+func (a *App) Diagram(sessionID, schema string) (model.Diagram, error) {
+	r, err := a.relationReader(sessionID)
+	if err != nil {
+		return model.Diagram{}, err
+	}
+	ctx, cancel := context.WithTimeout(a.context(), catalogTimeout)
+	defer cancel()
+	return r.Diagram(ctx, schema)
+}
+
+func (a *App) Relations(sessionID, schema string) ([]model.Relation, error) {
+	r, err := a.relationReader(sessionID)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(a.context(), catalogTimeout)
+	defer cancel()
+	return r.Relations(ctx, schema)
+}
+
+func (a *App) relationReader(id string) (db.RelationReader, error) {
+	s, err := a.session(id)
+	if err != nil {
+		return nil, err
+	}
+	if r, ok := s.(db.RelationReader); ok {
+		return r, nil
+	}
+	return nil, db.ErrNotSupported
+}
+
 func (a *App) FetchTablePage(sessionID string, q model.TableQuery) (model.TablePage, error) {
 	s, err := a.session(sessionID)
 	if err != nil {
@@ -383,17 +442,17 @@ func (a *App) CountRows(sessionID, queryID string, q model.TableQuery, exact boo
 func (a *App) ApplyChanges(sessionID string, cs model.ChangeSet) model.ApplyResult {
 	s, err := a.rowEditor(sessionID)
 	if err != nil {
-		return model.ApplyResult{Error: err.Error(), FailedIndex: -1}
+		return model.ApplyResult{Error: describe(err).Message, FailedIndex: -1}
 	}
 	ctx, cancel := context.WithTimeout(a.context(), catalogTimeout)
 	defer cancel()
 	n, err := s.ApplyChanges(ctx, cs)
 	if err != nil {
-		res := model.ApplyResult{Error: err.Error(), FailedIndex: -1}
+		res := model.ApplyResult{Error: describe(err).Message, FailedIndex: -1}
 		var ae *db.ApplyError
 		if errors.As(err, &ae) {
 			res.FailedIndex = ae.Index
-			res.Error = ae.Err.Error()
+			res.Error = describe(ae.Err).Message
 		}
 		return res
 	}
@@ -403,17 +462,17 @@ func (a *App) ApplyChanges(sessionID string, cs model.ChangeSet) model.ApplyResu
 func (a *App) ApplyStructure(sessionID, queryID string, sc model.StructureChange) model.ApplyResult {
 	s, err := a.structureEditor(sessionID)
 	if err != nil {
-		return model.ApplyResult{Error: err.Error(), FailedIndex: -1}
+		return model.ApplyResult{Error: describe(err).Message, FailedIndex: -1}
 	}
 	ctx, done := a.cancellable(queryID, 0)
 	defer done()
 	n, partial, err := s.ApplyStructure(ctx, sc)
 	if err != nil {
-		res := model.ApplyResult{Applied: n, Partial: partial, Error: err.Error(), FailedIndex: -1, Cancelled: errors.Is(ctx.Err(), context.Canceled)}
+		res := model.ApplyResult{Applied: n, Partial: partial, Error: describe(err).Message, FailedIndex: -1, Cancelled: errors.Is(ctx.Err(), context.Canceled)}
 		var ae *db.ApplyError
 		if errors.As(err, &ae) {
 			res.FailedIndex = ae.Index
-			res.Error = ae.Err.Error()
+			res.Error = describe(ae.Err).Message
 		}
 		return res
 	}
@@ -443,7 +502,7 @@ func (a *App) PreviewChanges(sessionID string, cs model.ChangeSet) ([]string, er
 func (a *App) RunQuery(sessionID, queryID, script string) model.QueryRun {
 	s, err := a.session(sessionID)
 	if err != nil {
-		return model.QueryRun{Results: []model.ResultSet{}, Error: err.Error(), ErrorIndex: -1, ErrorPosition: -1}
+		return model.QueryRun{Results: []model.ResultSet{}, Error: describe(err).Message, ErrorIndex: -1, ErrorPosition: -1}
 	}
 	ctx, done := a.cancellable(queryID, 0)
 	defer done()
@@ -454,7 +513,7 @@ func (a *App) RunQuery(sessionID, queryID, script string) model.QueryRun {
 		run.Results = []model.ResultSet{}
 	}
 	if err != nil {
-		run.Error = err.Error()
+		run.Error = describe(err).Message
 		var se *db.StatementError
 		if errors.As(err, &se) {
 			run.ErrorIndex = se.Index
@@ -560,7 +619,7 @@ func (a *App) openOptions(sessionID string) db.OpenOptions {
 			}
 			ev := model.TunnelState{SessionID: sessionID, State: string(st)}
 			if err != nil {
-				ev.Error = err.Error()
+				ev.Error = describe(err).Message
 			}
 			runtime.EventsEmit(a.ctx, TunnelEvent, ev)
 		},
@@ -605,7 +664,7 @@ func (a *App) structureEditor(id string) (db.StructureEditor, error) {
 	return nil, db.ErrNotSupported
 }
 
-var errConnectionClosed = errors.New("connection is closed")
+var errConnectionClosed = apperr.New("closed", "this connection is closed — connect again")
 
 func (a *App) context() context.Context {
 	if a.ctx != nil {

@@ -2,8 +2,8 @@ package db
 
 import (
 	"context"
-	"errors"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 	"github.com/relay-client/plugboard/apps/desktop/internal/sshtunnel"
 )
@@ -28,6 +28,11 @@ type SyntaxChecker interface {
 	CheckSyntax(ctx context.Context, script string) ([]model.SyntaxProblem, error)
 }
 
+type RelationReader interface {
+	Relations(ctx context.Context, schema string) ([]model.Relation, error)
+	Diagram(ctx context.Context, schema string) (model.Diagram, error)
+}
+
 type RowEditor interface {
 	ApplyChanges(ctx context.Context, cs model.ChangeSet) (int, error)
 	PreviewChanges(ctx context.Context, cs model.ChangeSet) ([]string, error)
@@ -38,7 +43,7 @@ type StructureEditor interface {
 	PreviewStructure(ctx context.Context, sc model.StructureChange) ([]string, error)
 }
 
-var ErrNotSupported = errors.New("this database doesn't support that")
+var ErrNotSupported = apperr.New("not_supported", "this database doesn't support that")
 
 type OpenOptions struct {
 	KnownHostsFile string

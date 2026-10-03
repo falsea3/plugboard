@@ -192,6 +192,11 @@
               <span class="mono" title={info?.dataDir}>{info?.dataDir ?? '—'}</span>
               <button class="btn sm" onclick={openDataFolder}>{folderLabel}</button>
             </dd>
+            <dt>Logs</dt>
+            <dd class="data-dir">
+              <span class="mono faint">Crash logs</span>
+              <button class="btn sm" onclick={() => api.openLogs().catch(err => app.notify(err))}>Open</button>
+            </dd>
           </dl>
           <p class="copyright">{info?.copyright ?? ''} · Part of the Relay family of developer tools.</p>
         </div>

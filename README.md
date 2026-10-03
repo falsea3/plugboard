@@ -61,6 +61,10 @@ You do this once; updates the app installs itself don't ask again.
 - Edit like a spreadsheet: type into a cell, `⌥⌫` for NULL, `⌘I` to add a row, `⌘⌫` to delete. Right-click offers what fits the column — true/false, `now()`, DEFAULT, the values of an enum.
 - Changes wait until `⌘S`; *Preview SQL* shows the statements first.
 - A Structure tab with types, nullability, defaults and keys.
+- Follow a foreign key: the arrow in a key cell opens the row it points at.
+- A schema diagram of tables, columns and foreign keys, laid out for you; click a relation to see what it joins.
+
+![The schema diagram of the sample shop](.github/assets/screenshots/diagram.png)
 
 **SQL editor**
 - Highlighting for each database's dialect and completion of table names.

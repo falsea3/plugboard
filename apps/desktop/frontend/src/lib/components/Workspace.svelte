@@ -3,6 +3,7 @@
   import Sidebar from './Sidebar.svelte';
   import TableView from './TableView.svelte';
   import QueryView from './QueryView.svelte';
+  import DiagramView from './DiagramView.svelte';
   import Icon from './Icon.svelte';
   import { startDrag } from '../drag';
 
@@ -40,7 +41,7 @@
             onclick={() => (ws.activeTabId = tab.id)}
             title={tab.kind === 'table' ? `${tab.schema}.${tab.table}` : tab.title}
           >
-            <Icon name={tab.kind === 'query' ? 'code' : tab.tableKind === 'view' ? 'view' : 'table'} size={12} />
+            <Icon name={tab.kind === 'query' ? 'code' : tab.kind === 'diagram' ? 'diagram' : tab.tableKind === 'view' ? 'view' : 'table'} size={12} />
             <span>{tab.kind === 'table' ? tab.table : tab.title}</span>
             {#if tab.kind === 'table' && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
           </button>
@@ -56,6 +57,8 @@
         <div class="pane" class:hidden={!shown}>
           {#if tab.kind === 'table'}
             <TableView {ws} {tab} active={visible && shown} ondirty={d => (tab.dirty = d)} />
+          {:else if tab.kind === 'diagram'}
+            <DiagramView {ws} {tab} />
           {:else}
             <QueryView {ws} {tab} />
           {/if}

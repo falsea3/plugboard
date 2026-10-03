@@ -1,5 +1,6 @@
 <script lang="ts" module>
   import type { CellValue, ResultColumn } from '../wire';
+  import type { IconName } from './Icon.svelte';
 
   export interface GridEditing {
     canEdit(r: number, c: number): boolean;
@@ -10,7 +11,7 @@
     options?(r: number, c: number): string[] | null;
   }
 
-  export type MenuItem = { id: string; label: string; kbd?: string; danger?: boolean; disabled?: boolean; items?: MenuItem[] } | 'sep';
+  export type MenuItem = { id: string; label: string; icon?: IconName; kbd?: string; danger?: boolean; disabled?: boolean; items?: MenuItem[] } | 'sep';
 
   export type MenuAt = { r: number; c: number; rows: number[] };
 </script>
@@ -22,6 +23,7 @@
   import { startDrag } from '../drag';
   import Select from './Select.svelte';
   import Icon from './Icon.svelte';
+  import { menuIcon } from '../menuIcons';
 
   type Sort = { column: string; desc: boolean } | null;
   type Selection = { row: number; col: number } | { row: number; col: -1 } | null;
@@ -39,6 +41,8 @@
     headerMenu,
     onmenu,
     onend,
+    links,
+    onfollow,
   }: {
     columns: ResultColumn[];
     rows: CellValue[][];
@@ -52,6 +56,8 @@
     headerMenu?: (c: number) => MenuItem[];
     onmenu?: (id: string, at: MenuAt) => boolean | void;
     onend?: () => void;
+    links?: Set<number>;
+    onfollow?: (r: number, c: number) => void;
   } = $props();
 
   const ROW_H = 26;
@@ -532,6 +538,7 @@
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <div
                 class="td {kind} {state}"
+                class:link={!!links?.has(c) && value !== null && rowState !== 'new'}
                 class:num={numeric[c] || kind === 'number'}
                 class:selected={rowSelected && selection?.col === c}
                 class:editing={isEditing}
@@ -570,6 +577,20 @@
                 {:else}
                   {state === 'default' ? 'DEFAULT' : formatCell(value)}
                 {/if}
+                {#if links?.has(c) && value !== null && rowState !== 'new' && !isEditing}
+                  <button
+                    class="follow"
+                    tabindex="-1"
+                    title="Go to the referenced row"
+                    aria-label="Go to the referenced row"
+                    onmousedown={e => e.stopPropagation()}
+                    ondblclick={e => e.stopPropagation()}
+                    onclick={e => {
+                      e.stopPropagation();
+                      onfollow?.(r, c);
+                    }}
+                  ><Icon name="follow" size={11} /></button>
+                {/if}
               </div>
             {/each}
           </div>
@@ -577,6 +598,11 @@
       </div>
     </div>
   </div>
+
+  {#snippet mark(item: Exclude<MenuItem, 'sep'>)}
+    {@const name = item.icon ?? menuIcon(item.id)}
+    <span class="mi">{#if name}<Icon {name} size={14} />{/if}</span>
+  {/snippet}
 
   {#if menu}
     {@const m = menu}
@@ -595,16 +621,17 @@
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <div class="sub-wrap" onmouseenter={() => (submenu = i)} onmouseleave={() => (submenu = null)}>
             <button role="menuitem" aria-haspopup="menu" aria-expanded={submenu === i} class:open={submenu === i} disabled={it.disabled} onclick={() => (submenu = i)}>
-              {it.label}<span class="arrow"><Icon name="chevron-right" size={11} /></span>
+              {@render mark(it)}{it.label}<span class="arrow"><Icon name="chevron-right" size={11} /></span>
             </button>
             {#if submenu === i}
+              {@const childIcons = it.items.some(x => x !== 'sep' && !!(x.icon ?? menuIcon(x.id)))}
               <div class="menu sub" class:flip class:up role="menu">
                 {#each it.items as child, j (j)}
                   {#if child === 'sep'}
                     <div class="sep"></div>
                   {:else}
                     <button role="menuitem" class:danger={child.danger} disabled={child.disabled} onclick={() => pick(child.id, m)}>
-                      {child.label}{#if child.kbd}<span class="kbd">{child.kbd}</span>{/if}
+                      {#if childIcons}{@render mark(child)}{/if}{child.label}{#if child.kbd}<span class="kbd">{child.kbd}</span>{/if}
                     </button>
                   {/if}
                 {/each}
@@ -613,7 +640,7 @@
           </div>
         {:else}
           <button role="menuitem" class:danger={it.danger} disabled={it.disabled} onclick={() => pick(it.id, m)} onmouseenter={() => (submenu = null)}>
-            {it.label}{#if it.kbd}<span class="kbd">{it.kbd}</span>{/if}
+            {@render mark(it)}{it.label}{#if it.kbd}<span class="kbd">{it.kbd}</span>{/if}
           </button>
         {/if}
       {/each}
@@ -720,6 +747,27 @@
     color: var(--text);
   }
   .td.num { text-align: right; }
+  .td.link { position: relative; padding-right: 24px; }
+  .follow {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: var(--elevated);
+    color: var(--text-2);
+    opacity: 0;
+    cursor: pointer;
+  }
+  .tr:hover .follow, .td.selected .follow { opacity: 1; }
+  .follow:hover { background: var(--accent); color: var(--on-accent); }
   .td.number { color: var(--cell-number); }
   .td.bool { color: var(--cell-bool); }
   .td.null { color: var(--cell-null); font-style: italic; }
@@ -794,6 +842,9 @@
     text-align: left;
   }
   .menu button .kbd { margin-left: auto; }
+  .menu .mi { flex: none; display: flex; width: 16px; margin-right: 8px; color: var(--text-2); }
+  .menu button:hover:not(:disabled) .mi, .menu button.danger .mi { color: inherit; }
+  .menu button:disabled .mi { color: var(--text-3); }
   .menu button:hover:not(:disabled) { background: var(--accent); color: var(--on-accent); }
   .menu button:hover:not(:disabled) .kbd { color: inherit; border-color: rgba(255, 255, 255, 0.4); }
   .menu button:disabled { color: var(--text-3); }

@@ -34,6 +34,17 @@ func (Dialect) ListTables(ctx context.Context, db *sql.DB, schema string) ([]mod
 		ORDER BY table_name`, schema)
 }
 
+func (Dialect) ListRelations(ctx context.Context, db *sql.DB, schema string) ([]model.Relation, error) {
+	return dialect.QueryRelations(ctx, db, `
+		SELECT k.constraint_name, k.table_name, k.column_name, k.referenced_table_schema, k.referenced_table_name,
+		       k.referenced_column_name, r.delete_rule, r.update_rule
+		FROM information_schema.key_column_usage k
+		JOIN information_schema.referential_constraints r
+		  ON r.constraint_schema = k.constraint_schema AND r.constraint_name = k.constraint_name AND r.table_name = k.table_name
+		WHERE k.table_schema = ? AND k.referenced_table_name IS NOT NULL
+		ORDER BY k.table_name, k.constraint_name, k.ordinal_position`, schema)
+}
+
 func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error) {
 	rows, err := db.QueryContext(ctx, `
 		SELECT column_name, column_type, data_type, is_nullable = 'YES', column_default, extra, column_key = 'PRI'

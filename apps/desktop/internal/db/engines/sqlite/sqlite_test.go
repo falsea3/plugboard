@@ -170,3 +170,37 @@ func TestCheckSyntax(t *testing.T) {
 		t.Fatalf("problems = %+v", problems)
 	}
 }
+
+func TestDiagramReadsForeignKeys(t *testing.T) {
+	s := openSQLite(t)
+	ctx := context.Background()
+	if _, err := s.Run(ctx, `
+		CREATE TABLE teams (code TEXT, season INTEGER, PRIMARY KEY (code, season));
+		CREATE TABLE players (id INTEGER PRIMARY KEY, user_id INTEGER REFERENCES users ON DELETE SET NULL,
+			team_code TEXT, team_season INTEGER, FOREIGN KEY (team_code, team_season) REFERENCES teams);
+	`); err != nil {
+		t.Fatal(err)
+	}
+	d, err := s.Diagram(ctx, "main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var toUsers, toTeams *model.Relation
+	for i, r := range d.Relations {
+		switch r.RefTable {
+		case "users":
+			toUsers = &d.Relations[i]
+		case "teams":
+			toTeams = &d.Relations[i]
+		}
+	}
+	if toUsers == nil || toUsers.Table != "players" || strings.Join(toUsers.Columns, ",") != "user_id" || strings.Join(toUsers.RefColumns, ",") != "id" || toUsers.OnDelete != "SET NULL" {
+		t.Errorf("players → users = %+v", toUsers)
+	}
+	if toTeams == nil || strings.Join(toTeams.Columns, ",") != "team_code,team_season" || strings.Join(toTeams.RefColumns, ",") != "code,season" || toTeams.OnDelete != "NO ACTION" {
+		t.Errorf("players → teams = %+v", toTeams)
+	}
+	if len(d.Tables) != 4 {
+		t.Errorf("tables = %d, want users, top_users, teams, players", len(d.Tables))
+	}
+}

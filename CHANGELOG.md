@@ -8,6 +8,24 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **A crash log.** If Plugboard ever crashes, the full report is saved to `logs/crash.log` in its data folder, and the next launch says so, with a button to show it. Settings › About has the logs folder too.
+
+- **Jump along a foreign key.** A cell that points at another table gets an arrow (on hover, and always on the selected cell): click it, or right-click → *Go to customers*, and the referenced table opens filtered to exactly that row. If the table is already open, its filter switches to the row, unless it has unsaved edits.
+
+- **Schema diagram.** The diagram button at the bottom of the sidebar draws every table of the schema with its columns and the foreign keys between them, laid out from the tables others point at to the ones pointing at them. Click a relation to see exactly which columns it joins and what happens on delete and update; click a table to light up its relations; double-click to open it. Drag tables around, pan with the trackpad, zoom with pinch or ⌘ and the wheel. Works on PostgreSQL, MySQL, MariaDB and SQLite.
+
+### Changed
+
+- **Errors in plain words.** Connection and network problems say what happened and what to check — "Nothing answers at db:5432. Is the server running, and is the port right?", "Can't find the host…", "The server's certificate isn't signed by an authority this computer trusts", "The SSH server refused the sign-in" — with the original error underneath.
+- **An internal error now ends the app instead of leaving it half-working.** Before, a crash inside one action could leave a spinner turning forever; now Plugboard stops, so nothing is written in an unknown state, and the crash log says where it happened.
+- **Menus have icons, one per kind of action**: every filter shows the same funnel, every change to a value the same pencil, every copy the same copy icon; sorting keeps its up and down arrows.
+
+### Fixed
+
+- **The time in the table footer now belongs to the last load.** It used to keep showing how long the first rows took while more were loaded below.
+
 ## [0.4.0] - 2026-10-02
 
 ### Changed

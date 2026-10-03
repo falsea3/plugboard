@@ -81,10 +81,45 @@ export async function installBridge(page: Page) {
           Disconnect: () => ok(undefined),
           ListTables: () => ok(tables),
           DescribeTable: () => ok(columns),
+          LastCrash: () => ok((window as any).crashed ? '/Users/demo/Library/Application Support/Plugboard/logs/crash.log' : ''),
+          OpenLogs: () => ok(undefined),
+          Diagram: (_: string, schema: string) => {
+            if (schema === 'analytics') {
+              return Promise.reject({ code: 'timeout', message: "db.internal:5432 didn't answer in time.", detail: 'read tcp 10.0.0.2:51234->10.0.0.9:5432: i/o timeout' });
+            }
+            const col = (name: string, type: string, primaryKey = false) =>
+              ({ name, type, nullable: !primaryKey, default: null, primaryKey, enum: null, kind: type === 'text' ? 'text' : 'number' });
+            const rel = (table: string, column: string, refTable: string, onDelete = 'NO ACTION') =>
+              ({ name: `${table}_${column}_fkey`, table, columns: [column], refSchema: schema, refTable, refColumns: ['id'], onDelete, onUpdate: 'NO ACTION' });
+            return ok({
+              schema,
+              tables: [
+                { name: 'customers', kind: 'table', columns },
+                { name: 'invoices', kind: 'table', columns: [col('id', 'bigint', true), col('order_id', 'bigint'), col('amount', 'numeric(12,2)'), col('issued_at', 'timestamp with time zone')] },
+                { name: 'order_items', kind: 'table', columns: [col('id', 'bigint', true), col('order_id', 'bigint'), col('product_id', 'bigint'), col('qty', 'integer')] },
+                { name: 'orders', kind: 'table', columns: [col('id', 'bigint', true), col('customer_id', 'bigint'), col('total', 'numeric(12,2)'), col('status', 'text'), col('created_at', 'timestamp with time zone')] },
+                { name: 'products', kind: 'table', columns: [col('id', 'bigint', true), col('sku', 'text'), col('name', 'text'), col('price', 'numeric(10,2)')] },
+                { name: 'refunds', kind: 'table', columns: [col('id', 'bigint', true), col('invoice_id', 'bigint'), col('reason', 'text')] },
+                { name: 'shipments', kind: 'table', columns: [col('id', 'bigint', true), col('order_id', 'bigint'), col('carrier', 'text'), col('tracking', 'text')] },
+                { name: 'order_summary', kind: 'view', columns: [col('order_id', 'bigint'), col('customer', 'text'), col('total', 'numeric')] },
+              ],
+              relations: [
+                rel('invoices', 'order_id', 'orders'),
+                rel('order_items', 'order_id', 'orders', 'CASCADE'),
+                rel('order_items', 'product_id', 'products'),
+                rel('orders', 'customer_id', 'customers', 'RESTRICT'),
+                rel('refunds', 'invoice_id', 'invoices'),
+                rel('shipments', 'order_id', 'orders', 'CASCADE'),
+              ],
+            });
+          },
+          Relations: (_: string, schema: string) =>
+            ok([{ name: 'customers_country_fkey', table: 'customers', columns: ['country'], refSchema: schema, refTable: 'countries', refColumns: ['code'], onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }]),
           FetchTablePage: (_: string, q: { limit: number; after?: unknown[] }) => {
+            (window as any).lastPage = q;
             const from = q.after ? rows.findIndex(r => r[0] === q.after![0]) + 1 : 0;
             const chunk = rows.slice(from, from + q.limit);
-            return ok({ result: { ...result(columns.map(c => c.name), chunk), columns: columns.map(c => ({ name: c.name, type: c.type, kind: c.kind })), pageable: false },
+            return ok({ result: { ...result(columns.map(c => c.name), chunk, { durationMs: from === 0 ? 14.2 : 9.6 }), columns: columns.map(c => ({ name: c.name, type: c.type, kind: c.kind })), pageable: false },
                         hasMore: from + chunk.length < rows.length, defaultOrder: ['id'], hasPrev: from > 0, keyset: true, offset: -1 });
           },
           CountRows: () => ok({ count: 24813, exact: false, known: true }),

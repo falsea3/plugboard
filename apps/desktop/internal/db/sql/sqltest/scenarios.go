@@ -3,6 +3,7 @@ package sqltest
 import (
 	"context"
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -271,4 +272,42 @@ func syntaxErrors(t *testing.T, srv Server, c model.Connection) {
 	if !errors.As(err, &se) || se.Index != 1 || se.Position < 0 {
 		t.Fatalf("run error = %#v", err)
 	}
+}
+
+func relations(t *testing.T, srv Server, c model.Connection) {
+	s := Open(t, srv.Dialect, c)
+	ctx := context.Background()
+	drop := func() {
+		s.Run(context.Background(), "drop table if exists zz_child")
+		s.Run(context.Background(), "drop table if exists zz_parent")
+	}
+	drop()
+	t.Cleanup(drop)
+	if _, err := s.Run(ctx, "create table zz_parent ("+srv.KeyColumn+"); "+
+		"create table zz_child ("+srv.KeyColumn+", parent_id int, foreign key (parent_id) references zz_parent(id) on delete cascade)"); err != nil {
+		t.Fatal(err)
+	}
+	d, err := s.Diagram(ctx, srv.Schema)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, ok := FindRelation(d, "zz_child")
+	if !ok {
+		t.Fatalf("no relation from zz_child in %+v", d.Relations)
+	}
+	if r.RefTable != "zz_parent" || r.RefSchema != srv.Schema || !slices.Equal(r.Columns, []string{"parent_id"}) || !slices.Equal(r.RefColumns, []string{"id"}) || r.OnDelete != "CASCADE" {
+		t.Errorf("zz_child relation = %+v", r)
+	}
+	if r, ok := FindRelation(d, "orders"); !ok || r.RefTable != "customers" || !slices.Equal(r.Columns, []string{"customer_id"}) {
+		t.Errorf("orders relation = %+v, %v", r, ok)
+	}
+	for _, tb := range d.Tables {
+		if tb.Name == "zz_parent" {
+			if len(tb.Columns) != 1 || !tb.Columns[0].PrimaryKey {
+				t.Errorf("zz_parent columns = %+v", tb.Columns)
+			}
+			return
+		}
+	}
+	t.Errorf("zz_parent missing from %d tables", len(d.Tables))
 }

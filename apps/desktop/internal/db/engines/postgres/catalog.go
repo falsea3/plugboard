@@ -38,6 +38,21 @@ func (Dialect) ListTables(ctx context.Context, db *sql.DB, schema string) ([]mod
 		ORDER BY c.relname`, schema)
 }
 
+func (Dialect) ListRelations(ctx context.Context, db *sql.DB, schema string) ([]model.Relation, error) {
+	return dialect.QueryRelations(ctx, db, `
+		SELECT con.conname, src.relname, a.attname, dn.nspname, dst.relname, fa.attname, con.confdeltype::text, con.confupdtype::text
+		FROM pg_constraint con
+		JOIN pg_class src ON src.oid = con.conrelid
+		JOIN pg_namespace sn ON sn.oid = src.relnamespace
+		JOIN pg_class dst ON dst.oid = con.confrelid
+		JOIN pg_namespace dn ON dn.oid = dst.relnamespace
+		CROSS JOIN LATERAL unnest(con.conkey, con.confkey) WITH ORDINALITY AS k(attnum, refnum, ord)
+		JOIN pg_attribute a ON a.attrelid = con.conrelid AND a.attnum = k.attnum
+		JOIN pg_attribute fa ON fa.attrelid = con.confrelid AND fa.attnum = k.refnum
+		WHERE con.contype = 'f' AND con.conparentid = 0 AND sn.nspname = $1
+		ORDER BY src.relname, con.conname, k.ord`, schema)
+}
+
 func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error) {
 	cols, err := dialect.QueryColumns(ctx, db, `
 		SELECT a.attname,

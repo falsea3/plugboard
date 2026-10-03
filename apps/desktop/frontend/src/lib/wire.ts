@@ -104,6 +104,35 @@ export interface Column {
   kind: ColumnKind;
 }
 
+export interface AppErrorInfo {
+  code: string;
+  message: string;
+  detail?: string;
+}
+
+export interface Relation {
+  name: string;
+  table: string;
+  columns: string[];
+  refSchema: string;
+  refTable: string;
+  refColumns: string[];
+  onDelete: string;
+  onUpdate: string;
+}
+
+export interface DiagramTable {
+  name: string;
+  kind: TableInfo['kind'];
+  columns: Column[];
+}
+
+export interface Diagram {
+  schema: string;
+  tables: DiagramTable[];
+  relations: Relation[];
+}
+
 export interface ResultColumn {
   name: string;
   type: string;
@@ -271,6 +300,8 @@ export interface GoApp {
   Disconnect(sessionId: string): Promise<void>;
   ListTables(sessionId: string, schema: string): Promise<TableInfo[]>;
   DescribeTable(sessionId: string, schema: string, table: string): Promise<Column[]>;
+  Diagram(sessionId: string, schema: string): Promise<Diagram>;
+  Relations(sessionId: string, schema: string): Promise<Relation[]>;
   FetchTablePage(sessionId: string, q: TableQuery): Promise<TablePage>;
   CountRows(sessionId: string, queryId: string, q: TableQuery, exact: boolean): Promise<RowCount>;
   RunQuery(sessionId: string, queryId: string, sql: string): Promise<QueryRun>;
@@ -286,6 +317,8 @@ export interface GoApp {
   GetSettings(): Promise<Settings>;
   SaveSettings(s: Settings): Promise<Settings>;
   OpenDataFolder(): Promise<void>;
+  OpenLogs(): Promise<void>;
+  LastCrash(): Promise<string>;
   CheckForUpdate(): Promise<UpdateCheck>;
   InstallUpdate(): Promise<string>;
   RestartApp(): Promise<void>;

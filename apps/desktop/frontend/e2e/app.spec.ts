@@ -242,8 +242,10 @@ test('loads more rows as the table scrolls, and the paging keys go where they sh
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const grid = page.getByRole('grid');
   await grid.getByText('ann.novak1@example.com').click();
+  await expect(page.getByTitle('How long the last fetch took')).toHaveText('· 14 ms');
   await page.keyboard.press('End');
   await expect(page.getByText('600 of ~24,813 rows loaded')).toBeVisible();
+  await expect(page.getByTitle('How long the last fetch took')).toHaveText('· 10 ms');
   await page.keyboard.press('End');
   await expect(page.getByText('900 of ~24,813 rows loaded')).toBeVisible();
   await page.keyboard.press('End');
@@ -257,4 +259,58 @@ test('loads more rows as the table scrolls, and the paging keys go where they sh
   await expect(grid.getByText('ann.novak1@example.com')).toBeHidden();
   await page.keyboard.press('PageUp');
   await expect(grid.locator('.rn.active')).toHaveText('1');
+});
+
+test('draws the schema and explains a relation when it is clicked', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'Schema diagram' }).click();
+  const canvas = page.locator('.canvas');
+  await expect(canvas.locator('[data-table="orders"]')).toBeVisible();
+  await expect(page.getByText('8 tables · 6 relations')).toBeVisible();
+  await shot(page, 'diagram');
+
+  await page.locator('[data-relation="orders.orders_customer_id_fkey"]').dispatchEvent('click');
+  await expect(page.locator('.detail code')).toHaveText('orders.customer_id → customers.id');
+  await expect(page.locator('.detail')).toContainText('on delete restrict');
+  await expect(canvas.locator('[data-table="products"]')).toHaveClass(/dim/);
+  await expect(canvas.locator('[data-table="customers"] .row.marked')).toHaveText(/id/);
+
+  await canvas.locator('[data-table="customers"] .head').dblclick();
+  await expect(page.getByRole('grid').getByText('ann.novak1@example.com')).toBeVisible();
+});
+
+test('follows a foreign key from a cell to the row it points at', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  const grid = page.getByRole('grid');
+  const cell = grid.locator('.td.link').first();
+  await expect(cell).toHaveText('US');
+  await cell.hover();
+  await cell.getByRole('button', { name: 'Go to the referenced row' }).click();
+  await expect(page.getByRole('tab', { name: 'countries' })).toHaveAttribute('aria-selected', 'true');
+  expect(await page.evaluate(() => (window as any).lastPage.filters)).toEqual([{ column: 'code', op: '=', value: 'US' }]);
+
+  await page.getByRole('tab', { name: 'customers' }).getByRole('button').first().click();
+  await grid.locator('.td.link').nth(1).click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Go to countries' }).click();
+  await expect(page.getByRole('tab', { name: 'countries' })).toHaveAttribute('aria-selected', 'true');
+  await expect.poll(() => page.evaluate(() => (window as any).lastPage.filters)).toEqual([{ column: 'code', op: '=', value: 'DE' }]);
+});
+
+test('shows a mapped error in plain words', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByLabel('Schema', { exact: true }).click();
+  await page.getByRole('option', { name: 'analytics' }).click();
+  await page.getByRole('button', { name: 'Schema diagram' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: "db.internal:5432 didn't answer in time." })).toBeVisible();
+});
+
+test('says when the last run crashed and offers the log', async ({ page }) => {
+  await page.addInitScript(() => ((window as any).crashed = true));
+  await page.reload();
+  const toast = page.getByRole('alert').filter({ hasText: 'Plugboard quit unexpectedly last time' });
+  await expect(toast).toBeVisible();
+  await expect(toast).toContainText('logs/crash.log');
+  await toast.getByRole('button', { name: 'Show log' }).click();
+  await expect(toast).toBeHidden();
 });

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/relay-client/plugboard/apps/desktop/internal/api"
+	"github.com/relay-client/plugboard/apps/desktop/internal/crash"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -27,7 +28,16 @@ func main() {
 		}
 	}
 
+	dir := api.PrepareDataDir()
 	app := api.NewApp()
+	info := app.AppInfo()
+	header := fmt.Sprintf("%s %s (%s, %s)", info.Name, info.Version, info.GoVersion, info.Platform)
+	if path, err := crash.Watch(crash.Dir(dir), header); err != nil {
+		fmt.Fprintln(os.Stderr, "crash log:", err)
+	} else {
+		api.NoteCrash(app, path)
+	}
+
 	err := wails.Run(&options.App{
 		Title:     "Plugboard",
 		Width:     1320,
@@ -53,7 +63,9 @@ func main() {
 			},
 			WebviewIsTransparent: true,
 		},
-		Bind: []any{app},
+		Bind:                 []any{app},
+		ErrorFormatter:       api.FormatError,
+		DisablePanicRecovery: true,
 	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)

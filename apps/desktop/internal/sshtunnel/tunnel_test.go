@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
@@ -209,7 +210,7 @@ func TestWrongPasswordFails(t *testing.T) {
 	srv := startServer(t, host, nil)
 	_, err := Open(context.Background(), model.SSHTunnel{Host: srv.addr, Port: srv.port, User: "relay", Auth: model.SSHAuthPassword, Password: "nope"},
 		"127.0.0.1", 1, Options{KnownHostsFile: filepath.Join(t.TempDir(), "kh")})
-	if err == nil || !strings.Contains(err.Error(), "authentication failed") {
+	if err == nil || !strings.Contains(err.Error(), "sign-in was refused") {
 		t.Fatalf("err = %v", err)
 	}
 }
@@ -328,5 +329,13 @@ func TestTunnelReconnectsAfterDrop(t *testing.T) {
 	defer mu.Unlock()
 	if len(states) < 2 || states[0] != StateLost || states[len(states)-1] != StateReconnected {
 		t.Fatalf("states = %v, want lost … reconnected", states)
+	}
+}
+
+func TestRefusedSignInGetsACode(t *testing.T) {
+	err := cleanAuthError(errors.New("ssh: handshake failed: ssh: unable to authenticate, attempted methods [none publickey], no supported methods remain"))
+	coded, ok := errors.AsType[apperr.Coded](err)
+	if !ok || coded.Code() != "ssh_auth" {
+		t.Errorf("cleanAuthError = %v", err)
 	}
 }

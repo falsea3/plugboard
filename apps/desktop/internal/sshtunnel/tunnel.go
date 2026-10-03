@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -507,7 +508,7 @@ func expandHome(path string) (string, error) {
 
 func cleanAuthError(err error) error {
 	if strings.Contains(err.Error(), "unable to authenticate") {
-		return errors.New("authentication failed — check the SSH user and credentials")
+		return apperr.New("ssh_auth", "sign-in was refused — check the SSH user and the key or password")
 	}
 	return err
 }

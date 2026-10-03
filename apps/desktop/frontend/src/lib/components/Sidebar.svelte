@@ -176,6 +176,7 @@
   <div class="bottom">
     <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="code" size={13} />New query</button>
     <span style="flex:1"></span>
+    <button class="btn icon sm ghost" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={13} /></button>
     <button class="btn icon sm ghost" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables">{#if ws.tablesLoading}<Spinner size={12} label="Loading tables" />{:else}<Icon name="refresh" size={13} />{/if}</button>
   </div>
 </aside>
