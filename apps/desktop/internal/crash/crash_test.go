@@ -4,12 +4,18 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"testing"
 )
 
+func release(t *testing.T) {
+	t.Cleanup(func() { debug.SetCrashOutput(nil, debug.CrashOptions{}) })
+}
+
 func TestWatchTellsWhenTheLastRunCrashed(t *testing.T) {
 	dir := t.TempDir()
+	release(t)
 	if path, err := Watch(dir, "Plugboard test"); err != nil || path != "" {
 		t.Fatalf("first launch = %q, %v; want no crash", path, err)
 	}
@@ -45,6 +51,7 @@ func TestAPanicInAnyGoroutineLandsInTheLog(t *testing.T) {
 		return
 	}
 	dir := t.TempDir()
+	release(t)
 	cmd := exec.Command(os.Args[0], "-test.run=^TestAPanicInAnyGoroutineLandsInTheLog$")
 	cmd.Env = append(os.Environ(), "CRASH_TEST_DIR="+dir)
 	if err := cmd.Run(); err == nil {

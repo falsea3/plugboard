@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"syscall"
 	"unicode"
 	"unicode/utf8"
 
@@ -27,10 +26,10 @@ var transport = []rule{
 	{"host_unknown", as[*net.DNSError], func(err error) string {
 		return fmt.Sprintf("Can't find the host “%s”. Check the name, or the VPN if the host is internal.", find[*net.DNSError](err).Name)
 	}},
-	{"refused", is(syscall.ECONNREFUSED), func(err error) string {
+	{"refused", isAny(refusedErrnos...), func(err error) string {
 		return fmt.Sprintf("Nothing answers at %s. Is the server running, and is the port right?", where(err))
 	}},
-	{"unreachable", either(is(syscall.EHOSTUNREACH), is(syscall.ENETUNREACH)), func(err error) string {
+	{"unreachable", isAny(unreachableErrnos...), func(err error) string {
 		return fmt.Sprintf("Can't reach %s from this computer. Check the network or the VPN.", where(err))
 	}},
 	{"timeout", either(is(context.DeadlineExceeded), is(os.ErrDeadlineExceeded), timedOut), func(err error) string {
@@ -77,6 +76,17 @@ func sentence(s string) string {
 
 func is(target error) func(error) bool {
 	return func(err error) bool { return errors.Is(err, target) }
+}
+
+func isAny(targets ...error) func(error) bool {
+	return func(err error) bool {
+		for _, target := range targets {
+			if errors.Is(err, target) {
+				return true
+			}
+		}
+		return false
+	}
 }
 
 func as[T error](err error) bool {
