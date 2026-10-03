@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-03
+
 ### Added
 
 - **A crash log.** If Plugboard ever crashes, the full report is saved to `logs/crash.log` in its data folder, and the next launch says so, with a button to show it. Settings › About has the logs folder too.
