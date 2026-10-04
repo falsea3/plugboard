@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-04
+
 ### Added
 
 - **A JSON editor.** Double-click a `json`/`jsonb` cell — or right-click any text cell holding JSON → *Edit as JSON* — for a formatted editor with highlighting, folding and live validation; Save stays off until the JSON is valid. Formatting never touches numbers or strings, so a big integer comes back exactly as it went in, and the cell keeps its compact or multi-line style.
