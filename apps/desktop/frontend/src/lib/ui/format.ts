@@ -54,7 +54,7 @@ export function toTSV(columns: string[], rows: CellValue[][]): string {
 
 export function calcColumnWidth(name: string, type: string, rows: CellValue[][], index: number): number {
   const charW = 7.4;
-  let longest = Math.max(name.length + 2, Math.min(type.length, 14));
+  let longest = name.length + 2 + (type ? 1 + Math.min(type.length, 20) * 0.75 : 0);
   const sample = Math.min(rows.length, 200);
   for (let i = 0; i < sample; i++) {
     const len = formatCell(rows[i][index]).length;

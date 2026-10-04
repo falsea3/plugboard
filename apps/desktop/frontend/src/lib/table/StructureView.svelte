@@ -41,11 +41,11 @@
   const COL_KEY = 4;
 
   const gridColumns: ResultColumn[] = [
-    { name: 'column', type: 'text', kind: 'text' },
-    { name: 'type', type: 'text', kind: 'text' },
-    { name: 'nullable', type: 'bool', kind: 'bool' },
-    { name: 'default', type: 'text', kind: 'text' },
-    { name: 'primary key', type: 'bool', kind: 'bool' },
+    { name: 'column', type: '', kind: 'text' },
+    { name: 'type', type: '', kind: 'text' },
+    { name: 'nullable', type: '', kind: 'bool' },
+    { name: 'default', type: '', kind: 'text' },
+    { name: 'primary key', type: '', kind: 'bool' },
   ];
   const rows = $derived(columns.map(c => [c.name, c.type, c.nullable, c.default, c.primaryKey] as CellValue[]));
   const edits = new TableEdits(() => rows, () => gridColumns.length);

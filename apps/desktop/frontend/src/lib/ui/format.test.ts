@@ -50,7 +50,11 @@ describe('formatDuration', () => {
 
 describe('calcColumnWidth', () => {
   it('stays within bounds', () => {
-    expect(calcColumnWidth('id', 'int', [[1]], 0)).toBe(64);
+    expect(calcColumnWidth('id', '', [[1]], 0)).toBe(64);
     expect(calcColumnWidth('body', 'text', [['x'.repeat(1000)]], 0)).toBe(360);
+  });
+
+  it('leaves room for the type next to the name in the header', () => {
+    expect(calcColumnWidth('is_active', 'boolean', [[false]], 0)).toBeGreaterThan(calcColumnWidth('is_active', '', [[false]], 0) + 40);
   });
 });

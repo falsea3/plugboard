@@ -43,8 +43,9 @@
       <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
       <div class="th-label" onclick={() => onsort?.(col.name)} oncontextmenu={e => onmenu(e, i)}>
         {#if keys.has(col.name)}<span class="pk"><Icon name="key" size={11} /></span>{/if}
-        <span class="th-name">{col.name}</span>
         {#if sorted}<Icon name={sort?.desc ? 'arrowDown' : 'arrowUp'} size={11} />{/if}
+        <span class="th-name">{col.name}</span>
+        {#if col.type}<span class="th-type">{col.type}</span>{/if}
       </div>
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div class="resizer" onpointerdown={e => onresize(e, i)} ondblclick={() => onfit(i)}></div>
@@ -93,7 +94,8 @@
   }
   .th.num .th-label { justify-content: flex-end; }
   .th.sortable .th-label:hover { background: var(--hover); }
-  .th-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .th-name, .th-type { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .th-type { flex-shrink: 100; opacity: .5; font-size: 10px; }
   .pk { color: var(--text-3); display: flex; }
   .resizer {
     position: absolute;

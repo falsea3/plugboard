@@ -150,15 +150,13 @@
     height: 26px;
     min-width: 96px;
     max-width: 220px;
-    border: 1px solid transparent;
     border-radius: 6px;
     color: var(--text-2);
   }
   .pill:hover { background: var(--hover); }
   .pill.active {
     flex-shrink: 0;
-    background: var(--bg);
-    border-color: var(--border);
+    background: var(--elevated);
     color: var(--text);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   }
