@@ -98,6 +98,16 @@ input, textarea, [contenteditable] {
 }
 .select { appearance: none; padding-right: 26px; background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%); background-position: calc(100% - 13px) 12px, calc(100% - 9px) 12px; background-size: 4px 4px; background-repeat: no-repeat; }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  align-items: center;
+  gap: 9px 12px;
+}
+.form-grid > label, .form-grid > .label { color: var(--text-2); text-align: right; font-size: 12.5px; }
+.form-row { display: flex; gap: 8px; align-items: center; }
+.form-row .port { width: 86px; flex: none; }
+
 .kbd {
   display: inline-block;
   padding: 0 4px;

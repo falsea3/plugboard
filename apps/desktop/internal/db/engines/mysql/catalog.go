@@ -45,6 +45,15 @@ func (Dialect) ListRelations(ctx context.Context, db *sql.DB, schema string) ([]
 		ORDER BY k.table_name, k.constraint_name, k.ordinal_position`, schema)
 }
 
+func (Dialect) ListIndexes(ctx context.Context, db *sql.DB, schema, table string) ([]model.Index, error) {
+	return dialect.QueryIndexes(ctx, db, `
+		SELECT index_name, non_unique = 0, index_name = 'PRIMARY', LOWER(index_type), NULL, NULL,
+		       CONCAT(COALESCE(column_name, '(expression)'), IF(sub_part IS NULL, '', CONCAT('(', sub_part, ')')))
+		FROM information_schema.statistics
+		WHERE table_schema = ? AND table_name = ?
+		ORDER BY index_name = 'PRIMARY' DESC, index_name, seq_in_index`, schema, table)
+}
+
 func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error) {
 	rows, err := db.QueryContext(ctx, `
 		SELECT column_name, column_type, data_type, is_nullable = 'YES', column_default, extra, column_key = 'PRI'

@@ -111,6 +111,8 @@ func (Dialect) TypeOf(t string) dialect.Type {
 		return dialect.Type{Kind: model.KindDateTime, Zone: strings.HasSuffix(t, "tz")}
 	case w == "blob" || w == "binary" || w == "varbinary":
 		return dialect.Type{Kind: model.KindBinary}
+	case w == "json" || w == "jsonb":
+		return dialect.Type{Kind: model.KindJSON}
 	case has("int"):
 		return dialect.Type{Kind: model.KindNumber}
 	case has("char", "clob", "text", "string"):

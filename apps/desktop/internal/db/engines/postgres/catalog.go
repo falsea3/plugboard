@@ -53,6 +53,21 @@ func (Dialect) ListRelations(ctx context.Context, db *sql.DB, schema string) ([]
 		ORDER BY src.relname, con.conname, k.ord`, schema)
 }
 
+func (Dialect) ListIndexes(ctx context.Context, db *sql.DB, schema, table string) ([]model.Index, error) {
+	return dialect.QueryIndexes(ctx, db, `
+		SELECT i.relname, ix.indisunique, ix.indisprimary, am.amname,
+		       pg_get_expr(ix.indpred, ix.indrelid), pg_get_indexdef(ix.indexrelid),
+		       pg_get_indexdef(ix.indexrelid, k.n::int, true)
+		FROM pg_index ix
+		JOIN pg_class i ON i.oid = ix.indexrelid
+		JOIN pg_class t ON t.oid = ix.indrelid
+		JOIN pg_namespace n ON n.oid = t.relnamespace
+		JOIN pg_am am ON am.oid = i.relam
+		CROSS JOIN LATERAL generate_series(1, ix.indnkeyatts) AS k(n)
+		WHERE n.nspname = $1 AND t.relname = $2
+		ORDER BY ix.indisprimary DESC, i.relname, k.n`, schema, table)
+}
+
 func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error) {
 	cols, err := dialect.QueryColumns(ctx, db, `
 		SELECT a.attname,

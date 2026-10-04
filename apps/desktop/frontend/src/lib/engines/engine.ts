@@ -1,5 +1,5 @@
 import type { SQLDialect } from '@codemirror/lang-sql';
-import type { Driver } from '../wire';
+import type { Driver } from '../api/wire';
 
 export interface Engine {
   driver: Driver;

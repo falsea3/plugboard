@@ -204,3 +204,27 @@ func TestDiagramReadsForeignKeys(t *testing.T) {
 		t.Errorf("tables = %d, want users, top_users, teams, players", len(d.Tables))
 	}
 }
+
+func TestIndexesListKeysAndUniqueIndexes(t *testing.T) {
+	s := openSQLite(t)
+	ctx := context.Background()
+	if _, err := s.Run(ctx, `
+		CREATE TABLE seats (row TEXT, num INTEGER, label TEXT, PRIMARY KEY (row, num));
+		CREATE UNIQUE INDEX seats_label ON seats (label);
+	`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.Indexes(ctx, "main", "seats")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 2 || !got[0].Primary || strings.Join(got[0].Columns, ",") != "row,num" {
+		t.Fatalf("indexes = %+v", got)
+	}
+	if !got[1].Unique || got[1].Name != "seats_label" || !strings.Contains(got[1].Definition, "CREATE UNIQUE INDEX") {
+		t.Errorf("unique index = %+v", got[1])
+	}
+	if ix, _ := s.Indexes(ctx, "main", "users"); len(ix) != 0 {
+		t.Errorf("a rowid primary key shows as an index: %+v", ix)
+	}
+}

@@ -27,7 +27,7 @@ describe('engines', () => {
     const names = ENGINES.map(e => e.driver).join('|');
     const literal = new RegExp(`['"\`](${names})['"\`]`);
     const offenders = Object.entries(sources)
-      .filter(([path]) => !path.startsWith('/src/lib/engines/') && path !== '/src/lib/wire.ts' && !path.endsWith('.test.ts'))
+      .filter(([path]) => !path.startsWith('/src/lib/engines/') && path !== '/src/lib/api/wire.ts' && !path.endsWith('.test.ts'))
       .filter(([, text]) => literal.test(text))
       .map(([path, text]) => `${path}: ${text.split('\n').find(l => literal.test(l))!.trim()}`);
     expect(offenders).toEqual([]);

@@ -35,6 +35,7 @@ export async function installBridge(page: Page) {
       { name: 'plan', type: 'plan', nullable: false, default: "'free'::plan", primaryKey: false, enum: ['free', 'team', 'pro'], kind: '' },
       { name: 'is_active', type: 'boolean', nullable: false, default: 'true', primaryKey: false, enum: null, kind: 'bool' },
       { name: 'created_at', type: 'timestamp with time zone', nullable: false, default: 'now()', primaryKey: false, enum: null, kind: 'datetime' },
+      { name: 'meta', type: 'jsonb', nullable: true, default: null, primaryKey: false, enum: null, kind: 'json' },
     ];
     const first = ['Ann', 'Bob', 'Chen', 'Dana', 'Eli', 'Fatima', 'Goran', 'Hana', 'Ivan', 'Jun', 'Kofi', 'Lena'];
     const last = ['Novak', 'Ito', 'Garcia', 'Smirnova', 'Okafor', 'Berg', 'Rossi', 'Kim', 'Haddad', 'Silva'];
@@ -52,6 +53,7 @@ export async function installBridge(page: Page) {
         plans[(i * 3) % plans.length],
         i % 9 !== 0,
         `2026-0${1 + (i % 9)}-${day} ${String(8 + (i % 12)).padStart(2, '0')}:${String((i * 17) % 60).padStart(2, '0')}:00+00:00`,
+        i % 5 === 4 ? null : `{"source": "${['ads', 'blog', 'direct'][i % 3]}", "visits": ${i * 3}}`,
       ];
     });
 
@@ -113,6 +115,12 @@ export async function installBridge(page: Page) {
               ],
             });
           },
+          Indexes: () =>
+            ok([
+              { name: 'customers_pkey', columns: ['id'], unique: true, primary: true, method: 'btree', where: '', definition: 'CREATE UNIQUE INDEX customers_pkey ON public.customers USING btree (id)' },
+              { name: 'customers_email_key', columns: ['email'], unique: true, primary: false, method: 'btree', where: '', definition: 'CREATE UNIQUE INDEX customers_email_key ON public.customers USING btree (email)' },
+              { name: 'customers_active_country', columns: ['country', 'plan'], unique: false, primary: false, method: 'btree', where: 'is_active', definition: 'CREATE INDEX customers_active_country ON public.customers USING btree (country, plan) WHERE is_active' },
+            ]),
           Relations: (_: string, schema: string) =>
             ok([{ name: 'customers_country_fkey', table: 'customers', columns: ['country'], refSchema: schema, refTable: 'countries', refColumns: ['code'], onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }]),
           FetchTablePage: (_: string, q: { limit: number; after?: unknown[] }) => {

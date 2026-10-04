@@ -8,6 +8,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **A JSON editor.** Double-click a `json`/`jsonb` cell — or right-click any text cell holding JSON → *Edit as JSON* — for a formatted editor with highlighting, folding and live validation; Save stays off until the JSON is valid. Formatting never touches numbers or strings, so a big integer comes back exactly as it went in, and the cell keeps its compact or multi-line style.
+- **Indexes in the Structure tab**: name, columns, primary/unique, method and the condition of a partial index; hover for the full definition.
+- **Pick several rows at once**: ⇧-click (or ⇧↑/↓) for a range, ⌘-click to add or drop a row. Copying, deleting and *Copy/Open N rows as SQL* use all of them, so one INSERT carries every row you picked.
+
+### Fixed
+
+- **The diagram background no longer shimmers when zoomed out**: the dots stay the same size and thin out instead of crowding together.
+- **The JSON editor points at the mistake itself**: the exact spot is underlined and the status line says where and what — "Line 3, column 3: Expected “,” or “}”" — instead of a mark on line 1.
+- **A submenu that opens to the left stays open** while the mouse crosses over to it. Near the right edge of the window *Copy as SQL* and *Open SQL in new query* open their lists on the left, and they used to vanish half the time on the way there.
+- **The loading bar shows while more rows load**, in a table as you scroll and in query results on *Load 1,000 more*, not only on the first load.
+
 ## [0.5.0] - 2026-10-03
 
 ### Added

@@ -32,6 +32,7 @@ func Run(t *testing.T, srv Server) {
 	t.Run("ColumnKinds", func(t *testing.T) { columnKinds(t, srv, c) })
 	t.Run("SyntaxErrors", func(t *testing.T) { syntaxErrors(t, srv, c) })
 	t.Run("Relations", func(t *testing.T) { relations(t, srv, c) })
+	t.Run("Indexes", func(t *testing.T) { indexes(t, srv, c) })
 }
 
 func FindRelation(d model.Diagram, table string) (model.Relation, bool) {

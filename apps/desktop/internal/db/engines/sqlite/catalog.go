@@ -51,6 +51,16 @@ func (d Dialect) ListRelations(ctx context.Context, db *sql.DB, schema string) (
 		ORDER BY m.name, f.id, f.seq`, schema, schema, schema)
 }
 
+func (d Dialect) ListIndexes(ctx context.Context, db *sql.DB, schema, table string) ([]model.Index, error) {
+	return dialect.QueryIndexes(ctx, db, `
+		SELECT il.name, il."unique", il.origin = 'pk', 'btree', NULL,
+		       (SELECT m.sql FROM `+d.QuoteIdent(schema)+`.sqlite_master m WHERE m.type = 'index' AND m.name = il.name),
+		       COALESCE(ii.name, '(expression)')
+		FROM pragma_index_list(?, ?) il
+		JOIN pragma_index_info(il.name, ?) ii
+		ORDER BY il.origin = 'pk' DESC, il.name, ii.seqno`, table, schema, schema)
+}
+
 func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table string) ([]model.Column, error) {
 	rows, err := db.QueryContext(ctx, `SELECT name, type, "notnull", dflt_value, pk FROM pragma_table_info(?, ?)`, table, schema)
 	if err != nil {

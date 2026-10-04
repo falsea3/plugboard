@@ -13,8 +13,9 @@ func TestTypeOf(t *testing.T) {
 		model.KindBool:     {"BOOLEAN", "bool"},
 		model.KindDateTime: {"DATE", "DATETIME", "TIMESTAMP", "TIME"},
 		model.KindText:     {"TEXT", "VARCHAR(20)", "CHARACTER(2)", "CLOB", "STRING"},
+		model.KindJSON:     {"JSON", "jsonb"},
 		model.KindBinary:   {"BLOB", "VARBINARY"},
-		model.KindOther:    {"", "JSON"},
+		model.KindOther:    {""},
 	}
 	for want, types := range kinds {
 		for _, typ := range types {

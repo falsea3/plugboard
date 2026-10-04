@@ -1,17 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { app } from './lib/stores/app.svelte';
-  import { hasBridge, onMenuCommand } from './lib/backend';
-  import { handleShortcut, runCommand } from './lib/commands';
-  import TitleBar from './lib/components/TitleBar.svelte';
-  import ConnectionsHome from './lib/components/ConnectionsHome.svelte';
-  import Workspace from './lib/components/Workspace.svelte';
-  import ConnectionForm from './lib/components/ConnectionForm.svelte';
-  import ConnectionSwitcher from './lib/components/ConnectionSwitcher.svelte';
-  import SettingsModal from './lib/components/SettingsModal.svelte';
-  import Modal from './lib/components/Modal.svelte';
-  import Toasts from './lib/components/Toasts.svelte';
-  import UpdateBanner from './lib/components/UpdateBanner.svelte';
+  import { app } from './lib/app/app.svelte';
+  import { hasBridge, onMenuCommand } from './lib/api/backend';
+  import { handleShortcut, runCommand } from './lib/app/commands';
+  import TitleBar from './lib/app/TitleBar.svelte';
+  import ConnectionsHome from './lib/connections/ConnectionsHome.svelte';
+  import WorkspaceView from './lib/app/WorkspaceView.svelte';
+  import ConnectionForm from './lib/connections/ConnectionForm.svelte';
+  import ConnectionSwitcher from './lib/app/ConnectionSwitcher.svelte';
+  import SettingsModal from './lib/settings/SettingsModal.svelte';
+  import Modal from './lib/ui/Modal.svelte';
+  import Toasts from './lib/app/Toasts.svelte';
+  import UpdateBanner from './lib/app/UpdateBanner.svelte';
 
   let secrets = $state({ password: '', sshPassword: '', sshPassphrase: '' });
 
@@ -27,7 +27,7 @@
   <TitleBar />
   <main>
     {#each app.workspaces as ws (ws.id)}
-      <Workspace {ws} visible={app.active === ws} />
+      <WorkspaceView {ws} visible={app.active === ws} />
     {/each}
     {#if !app.active}
       <div class="home"><ConnectionsHome /></div>

@@ -28,8 +28,9 @@ type SyntaxChecker interface {
 	CheckSyntax(ctx context.Context, script string) ([]model.SyntaxProblem, error)
 }
 
-type RelationReader interface {
+type SchemaReader interface {
 	Relations(ctx context.Context, schema string) ([]model.Relation, error)
+	Indexes(ctx context.Context, schema, table string) ([]model.Index, error)
 	Diagram(ctx context.Context, schema string) (model.Diagram, error)
 }
 

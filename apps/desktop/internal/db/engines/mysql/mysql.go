@@ -279,6 +279,8 @@ func (Dialect) TypeOf(t string) dialect.Type {
 		return dialect.Type{Kind: model.KindBinary}
 	case "char", "varchar", "tinytext", "text", "mediumtext", "longtext":
 		return dialect.Type{Kind: model.KindText}
+	case "json":
+		return dialect.Type{Kind: model.KindJSON}
 	}
 	return dialect.Type{}
 }

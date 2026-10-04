@@ -104,6 +104,31 @@ func QueryRelations(ctx context.Context, db *sql.DB, query string, args ...any) 
 	return out, rows.Err()
 }
 
+func QueryIndexes(ctx context.Context, db *sql.DB, query string, args ...any) ([]model.Index, error) {
+	rows, err := db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []model.Index{}
+	for rows.Next() {
+		var ix model.Index
+		var column string
+		var method, where, definition sql.NullString
+		if err := rows.Scan(&ix.Name, &ix.Unique, &ix.Primary, &method, &where, &definition, &column); err != nil {
+			return nil, err
+		}
+		if n := len(out); n > 0 && out[n-1].Name == ix.Name {
+			out[n-1].Columns = append(out[n-1].Columns, column)
+			continue
+		}
+		ix.Method, ix.Where, ix.Definition = method.String, where.String, definition.String
+		ix.Columns = []string{column}
+		out = append(out, ix)
+	}
+	return out, rows.Err()
+}
+
 func RefAction(raw string) string {
 	switch strings.ToUpper(strings.TrimSpace(raw)) {
 	case "C", "CASCADE":

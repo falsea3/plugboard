@@ -1,4 +1,4 @@
-import type { Connection, Driver } from '../wire';
+import type { Connection, Driver } from '../api/wire';
 import type { Engine } from './engine';
 import { mysql } from './mysql';
 import { postgres } from './postgres';

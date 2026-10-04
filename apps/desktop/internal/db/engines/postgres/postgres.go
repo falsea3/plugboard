@@ -171,6 +171,8 @@ func (Dialect) TypeOf(t string) dialect.Type {
 		return dialect.Type{Kind: model.KindDateTime, Zone: w == "timestamptz" || strings.Contains(t, "with time zone")}
 	case "bytea":
 		return dialect.Type{Kind: model.KindBinary}
+	case "json", "jsonb":
+		return dialect.Type{Kind: model.KindJSON}
 	}
 	if strings.Contains(t, "char") || strings.Contains(t, "text") {
 		return dialect.Type{Kind: model.KindText}

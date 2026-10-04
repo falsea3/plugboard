@@ -14,6 +14,10 @@ func (s *Session) Relations(ctx context.Context, schema string) ([]model.Relatio
 	return retry(ctx, s, func() ([]model.Relation, error) { return s.Dialect.ListRelations(ctx, s.DB, schema) })
 }
 
+func (s *Session) Indexes(ctx context.Context, schema, table string) ([]model.Index, error) {
+	return retry(ctx, s, func() ([]model.Index, error) { return s.Dialect.ListIndexes(ctx, s.DB, schema, table) })
+}
+
 func (s *Session) Diagram(ctx context.Context, schema string) (model.Diagram, error) {
 	tables, err := s.Tables(ctx, schema)
 	if err != nil {
