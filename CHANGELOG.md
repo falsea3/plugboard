@@ -8,6 +8,13 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-10-04
+
+### Changed
+
+- **Column types in the table header.** Each column shows its type next to its name in small grey letters, and the sort arrow now sits before the name. Columns open wide enough for both; when you narrow one, the type gives way before the name does.
+- **A calmer title bar and home screen**: the open connection's tab is a filled pill without a frame, and the home screen's left panel no longer has a divider line.
+
 ## [0.5.1] - 2026-10-04
 
 ### Added
