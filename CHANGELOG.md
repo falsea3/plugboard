@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-10-05
+
 ### Added
 
 - **Create and drop indexes from the sidebar.** An unfolded table lists its indexes under its columns. Right-click a table or a column → *Create index…*: pick the columns in order, make it unique, and review the statement in a query tab. Right-click an index → *Drop index…* to open its `DROP INDEX` statement there too.
