@@ -5,37 +5,58 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"time"
 )
 
+const AfterFlag = "--after"
+
 func Restart(quit func()) error {
-	cmd, err := relaunchCommand(strconv.Itoa(os.Getpid()))
+	cmd, err := relaunchCommand(runtime.GOOS, os.Getpid(), runningBundle(), os.Getenv("APPIMAGE"), os.Executable)
 	if err != nil {
 		return err
 	}
-	detach(cmd)
-	if err := cmd.Start(); err != nil {
-		return err
+	if runtime.GOOS == "darwin" {
+		if err := cmd.Run(); err != nil {
+			return err
+		}
+	} else {
+		detach(cmd)
+		if err := cmd.Start(); err != nil {
+			return err
+		}
 	}
 	quit()
 	return nil
 }
 
-func relaunchCommand(pid string) (*exec.Cmd, error) {
-	if bundle := runningBundle(); runtime.GOOS == "darwin" && bundle != "" {
-		return exec.Command("/bin/sh", "-c", `while kill -0 "$0" 2>/dev/null; do sleep 0.2; done; exec open "$1"`, pid, bundle), nil
+func relaunchCommand(goos string, pid int, bundle, appImage string, executable func() (string, error)) (*exec.Cmd, error) {
+	after := []string{AfterFlag, strconv.Itoa(pid)}
+	if goos == "darwin" && bundle != "" {
+		return exec.Command("/usr/bin/open", append([]string{"-n", bundle, "--args"}, after...)...), nil
 	}
-	exe := os.Getenv("APPIMAGE")
+	exe := appImage
 	if exe == "" {
 		var err error
-		if exe, err = os.Executable(); err != nil {
+		if exe, err = executable(); err != nil {
 			return nil, err
 		}
 	}
-	if runtime.GOOS == "windows" {
-		cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command",
-			"Wait-Process -Id "+pid+" -ErrorAction SilentlyContinue; Start-Process -FilePath $env:PLUGBOARD_RELAUNCH")
-		cmd.Env = append(os.Environ(), "PLUGBOARD_RELAUNCH="+exe)
-		return cmd, nil
+	return exec.Command(exe, after...), nil
+}
+
+func AfterPID(args []string) (int, bool) {
+	for i, a := range args {
+		if a == AfterFlag && i+1 < len(args) {
+			pid, err := strconv.Atoi(args[i+1])
+			return pid, err == nil && pid > 0
+		}
 	}
-	return exec.Command("/bin/sh", "-c", `while kill -0 "$0" 2>/dev/null; do sleep 0.2; done; exec "$1"`, pid, exe), nil
+	return 0, false
+}
+
+func WaitForExit(pid int, limit time.Duration) {
+	deadline := time.Now().Add(limit)
+	for running(pid) && time.Now().Before(deadline) {
+		time.Sleep(100 * time.Millisecond)
+	}
 }

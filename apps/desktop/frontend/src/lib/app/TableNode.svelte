@@ -34,6 +34,11 @@
     if (open && t.kind === 'table' && ws.indexes.get(`${t.schema}.${t.name}`) === undefined) untrack(() => ws.loadIndexes(t));
   });
 
+  function onitemdblclick(e: MouseEvent) {
+    if (e.target instanceof Element && e.target.closest('.twist')) return;
+    toggle();
+  }
+
   function onkeydown(e: KeyboardEvent) {
     if (e.key === 'ArrowRight' && !open) toggle(true);
     else if (e.key === 'ArrowLeft' && open) toggle(false);
@@ -42,7 +47,7 @@
   }
 </script>
 
-<button class="item" class:active class:picked {onclick} {onkeydown} oncontextmenu={e => onmenu(e)} title={t.name} aria-expanded={open}>
+<button class="item" class:active class:picked {onclick} {onkeydown} ondblclick={onitemdblclick} oncontextmenu={e => onmenu(e)} title={t.name} aria-expanded={open}>
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
   <span
     class="twist"

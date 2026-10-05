@@ -8,6 +8,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Double-click a table in the sidebar to expand or collapse its columns and indexes.**
+
+### Fixed
+
+- **Restart now after an update starts the app again on macOS.** It only quit: macOS ends everything an app opened from the Dock or Finder started when the app quits, and that included the helper meant to start it again. The new version is now launched first and waits for the old one to close. This works from the next update on — the version doing the restart has to have the fix.
+
 ## [0.6.1] - 2026-10-05
 
 ### Added

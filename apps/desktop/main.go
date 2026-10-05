@@ -4,9 +4,11 @@ import (
 	"embed"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/relay-client/plugboard/apps/desktop/internal/api"
 	"github.com/relay-client/plugboard/apps/desktop/internal/crash"
+	"github.com/relay-client/plugboard/apps/desktop/internal/update"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -26,6 +28,10 @@ func main() {
 			fmt.Printf("%s %s (%s)\n", info.Name, info.Version, info.GoVersion)
 			os.Exit(0)
 		}
+	}
+
+	if pid, ok := update.AfterPID(os.Args); ok {
+		update.WaitForExit(pid, 30*time.Second)
 	}
 
 	dir := api.PrepareDataDir()

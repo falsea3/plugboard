@@ -6,6 +6,6 @@ import (
 )
 
 func detach(cmd *exec.Cmd) {
-	const createNoWindow = 0x08000000
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: createNoWindow}
+	const createNewProcessGroup, detachedProcess = 0x00000200, 0x00000008
+	cmd.SysProcAttr = &syscall.SysProcAttr{CreationFlags: createNewProcessGroup | detachedProcess}
 }
