@@ -82,7 +82,7 @@ test('opens a long value in its own editor and saves it to the cell', async ({ p
   await dialog.locator('.cm-content').click();
   await page.keyboard.press('End');
   await page.keyboard.insertText('\nsecond line');
-  await page.keyboard.press('Meta+s');
+  await page.keyboard.press('ControlOrMeta+s');
   await expect(dialog).toBeHidden();
   await expect(page.getByText('1 change')).toBeVisible();
   expect(await page.evaluate(() => (window as any).lastChanges ?? null)).toBeNull();
