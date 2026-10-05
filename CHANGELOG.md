@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-10-05
+
 ### Changed
 
 - **Double-click a table in the sidebar to expand or collapse its columns and indexes.**
