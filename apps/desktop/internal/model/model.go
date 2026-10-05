@@ -109,6 +109,7 @@ type EngineFeatures struct {
 	CanUpdateToDefault bool      `json:"canUpdateToDefault"`
 	CanAlterColumns    bool      `json:"canAlterColumns"`
 	TransactionalDDL   bool      `json:"transactionalDDL"`
+	ColumnTypes        []string  `json:"columnTypes"`
 }
 
 type SQLSyntax struct {

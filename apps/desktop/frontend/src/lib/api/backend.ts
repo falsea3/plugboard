@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, NewIndex, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -71,6 +71,8 @@ export const api = {
   applyStructure: (sessionId: string, queryId: string, sc: StructureChange) => call(a => a.ApplyStructure(sessionId, queryId, sc)),
   previewStructure: (sessionId: string, sc: StructureChange) => call(a => a.PreviewStructure(sessionId, sc)),
   renameTableSQL: (sessionId: string, schema: string, from: string, to: string) => call(a => a.RenameTableSQL(sessionId, schema, from, to)),
+  createIndexSQL: (sessionId: string, schema: string, table: string, idx: NewIndex) => call(a => a.CreateIndexSQL(sessionId, schema, table, idx)),
+  dropIndexSQL: (sessionId: string, schema: string, table: string, name: string) => call(a => a.DropIndexSQL(sessionId, schema, table, name)),
   getSettings: () => call(a => a.GetSettings()),
   saveSettings: (s: Settings) => call(a => a.SaveSettings(s)),
   openDataFolder: () => call(a => a.OpenDataFolder()),

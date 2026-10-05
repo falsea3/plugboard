@@ -124,3 +124,20 @@ test('keeps a submenu that opens to the left while the mouse crosses over to it'
   await page.mouse.up();
   await expect(page.locator('.cm-content')).toContainText('DELETE FROM "public"."customers"');
 });
+
+test('reruns a filter as soon as its operator changes', async ({ page }) => {
+  await connect(page);
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  await page.getByRole('grid').getByRole('columnheader', { name: /country/ }).click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Equals…', exact: true }).click();
+  await page.keyboard.type('DE');
+  await page.keyboard.press('Enter');
+  const filters = () => page.evaluate(() => (window as any).lastPage.filters);
+  await expect.poll(filters).toEqual([{ column: 'country', op: '=', value: 'DE' }]);
+  await page.getByRole('button', { name: 'Operator' }).click();
+  await page.getByRole('option', { name: '≠' }).click();
+  await expect.poll(filters).toEqual([{ column: 'country', op: '!=', value: 'DE' }]);
+  await page.getByRole('button', { name: 'Column' }).click();
+  await page.getByRole('option', { name: 'plan' }).click();
+  await expect.poll(filters).toEqual([{ column: 'plan', op: '!=', value: 'DE' }]);
+});

@@ -54,6 +54,15 @@ describe('calcColumnWidth', () => {
     expect(calcColumnWidth('body', 'text', [['x'.repeat(1000)]], 0)).toBe(360);
   });
 
+  it('fits a column to everything loaded, wider or narrower, and stays put when fitted again', () => {
+    const rows = [...Array.from({ length: 300 }, () => ['a']), ['x'.repeat(60)]];
+    const fitted = calcColumnWidth('note', '', rows, 0, true);
+    expect(fitted).toBeGreaterThan(calcColumnWidth('note', '', rows, 0));
+    expect(fitted).toBe(calcColumnWidth('note', '', rows, 0, true));
+    expect(calcColumnWidth('id', '', [['a']], 0, true)).toBe(64);
+    expect(calcColumnWidth('body', '', [['x'.repeat(5000)]], 0, true)).toBe(800);
+  });
+
   it('leaves room for the type next to the name in the header', () => {
     expect(calcColumnWidth('is_active', 'boolean', [[false]], 0)).toBeGreaterThan(calcColumnWidth('is_active', '', [[false]], 0) + 40);
   });

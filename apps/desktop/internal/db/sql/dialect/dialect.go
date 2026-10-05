@@ -51,8 +51,11 @@ type Dialect interface {
 
 	ColumnDDL(ctx context.Context, db *sql.DB, schema, table, alter string, cur model.Column, ch model.ColumnChange) ([]string, error)
 	RenameTable(schema, from, to string) string
+	CreateIndex(schema, table string, idx model.NewIndex) string
+	DropIndex(schema, table, name string) string
 	TransactionalDDL() bool
 	CanAlterColumns() bool
+	ColumnTypes() []string
 	LockWait(seconds int) (set, reset string)
 }
 

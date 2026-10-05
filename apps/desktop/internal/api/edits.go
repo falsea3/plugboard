@@ -3,7 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	"strings"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
@@ -74,4 +76,23 @@ func (a *App) RenameTableSQL(sessionID, schema, from, to string) (string, error)
 		return "", err
 	}
 	return s.RenameTableSQL(schema, from, to) + ";", nil
+}
+
+func (a *App) CreateIndexSQL(sessionID, schema, table string, idx model.NewIndex) (string, error) {
+	s, err := a.structureEditor(sessionID)
+	if err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(idx.Name) == "" || len(idx.Columns) == 0 {
+		return "", apperr.New("bad_index", "an index needs a name and at least one column")
+	}
+	return s.CreateIndexSQL(schema, table, idx) + ";", nil
+}
+
+func (a *App) DropIndexSQL(sessionID, schema, table, name string) (string, error) {
+	s, err := a.structureEditor(sessionID)
+	if err != nil {
+		return "", err
+	}
+	return s.DropIndexSQL(schema, table, name) + ";", nil
 }

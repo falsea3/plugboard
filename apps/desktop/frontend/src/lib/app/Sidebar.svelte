@@ -1,21 +1,14 @@
 <script lang="ts">
   import type { Workspace } from './workspace.svelte';
-  import { app } from './app.svelte';
-  import { api } from '../api/backend';
   import { FILTER_TABLES_EVENT } from './commands';
   import SessionHeader from './SessionHeader.svelte';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import Select from '../ui/Select.svelte';
-  import type { Column, TableInfo } from '../api/wire';
+  import type { TableInfo } from '../api/wire';
   import TableNode from './TableNode.svelte';
-  import GridMenu from '../grid/GridMenu.svelte';
-  import { columnChange, treeMenu, treePrompt, treeSQL, type TreePrompt, type TreeTarget } from './tree';
-  import PromptModal from '../ui/PromptModal.svelte';
-  import { copyToClipboard } from '../ui/clipboard';
+  import TreeMenus from './TreeMenus.svelte';
   import ObjectGroups from '../objects/ObjectGroups.svelte';
-  import { objectMenu } from '../objects/kinds';
-  import type { DBObject } from '../api/wire';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
@@ -83,52 +76,7 @@
     return () => window.removeEventListener(FILTER_TABLES_EVENT, focus);
   });
 
-  let menu = $state<{ x: number; y: number; target: TreeTarget } | null>(null);
-  let objMenu = $state<{ x: number; y: number; object: DBObject } | null>(null);
-
-  function pickObject(id: string, o: DBObject) {
-    objMenu = null;
-    if (id === 'obj-ddl') ws.openDDL(o);
-    else if (id === 'obj-copy-name') copyToClipboard(o.name);
-    else if (id === 'obj-query') api.objectDDL(ws.session.sessionId, o).then(sql => ws.newQuery(sql), err => app.notify(err));
-  }
-
-  function openMenu(e: MouseEvent, table: TableInfo, column?: Column) {
-    e.preventDefault();
-    menu = { x: e.clientX, y: e.clientY, target: { table, column } };
-  }
-
-  function pick(id: string, target: TreeTarget) {
-    menu = null;
-    const { table, column } = target;
-    const sql = treeSQL(id, ws.session.engine, target);
-    const known = ws.columns.get(`${table.schema}.${table.name}`);
-    const ask = treePrompt(id, target, Array.isArray(known) ? known : []);
-    if (ask) prompt = { ...ask, id, target };
-    else if (id === 'tree-open') ws.openTable(table);
-    else if (id === 'tree-structure') ws.openTable(table, undefined, 'structure');
-    else if (id === 'tree-ddl') ws.openTable(table, undefined, 'ddl');
-    else if (id === 'tree-diagram') ws.openDiagram();
-    else if (id === 'tree-copy-name') copyToClipboard(column?.name ?? table.name);
-    else if (id === 'tree-copy-select' && sql) copyToClipboard(sql);
-    else if (sql) ws.newQuery(sql);
-  }
-
-  let prompt = $state<(TreePrompt & { id: string; target: TreeTarget }) | null>(null);
-
-  async function answer(p: TreePrompt & { id: string; target: TreeTarget }, value: string) {
-    prompt = null;
-    const { table } = p.target;
-    try {
-      const change = columnChange(p.id, p.target, value);
-      const sql = change
-        ? (await api.previewStructure(ws.session.sessionId, change)).map(s => s + ';').join('\n')
-        : await api.renameTableSQL(ws.session.sessionId, table.schema, table.name, value);
-      ws.newQuery(sql);
-    } catch (err) {
-      app.notify(err);
-    }
-  }
+  let menus = $state<TreeMenus>();
 
   function onFilterKey(e: KeyboardEvent) {
     if (e.key === 'Enter' && visible.length > 0) ws.openTable(visible[0]);
@@ -170,12 +118,12 @@
               active={activeTable?.table === t.name && activeTable?.schema === t.schema}
               picked={picked.includes(keyOf(t))}
               onclick={e => onItemClick(e, t)}
-              onmenu={(e, column) => openMenu(e, t, column)}
+              onmenu={(e, column, index) => menus?.openTree(e, { table: t, column, index })}
             />
           {/each}
         {/if}
       {/each}
-      <ObjectGroups {ws} {filter} onmenu={(e, o) => (e.preventDefault(), (objMenu = { x: e.clientX, y: e.clientY, object: o }))} />
+      <ObjectGroups {ws} {filter} onmenu={(e, o) => menus?.openObject(e, o)} />
       {#if visible.length === 0 && filter && !ws.objects.some(o => o.name.toLowerCase().includes(filter.trim().toLowerCase()))}
         <div class="note faint">Nothing matches “{filter}”.</div>
       {/if}
@@ -191,20 +139,7 @@
     </div>
   {/if}
 
-  {#if menu}
-    {@const m = menu}
-    <GridMenu items={treeMenu(m.target, ws.readOnly, ws.session.engine.canAlterColumns)} x={m.x} y={m.y} onpick={id => pick(id, m.target)} onclose={() => (menu = null)} />
-  {/if}
-
-  {#if prompt}
-    {@const p = prompt}
-    <PromptModal title={p.title} label={p.label} value={p.value} suggestions={p.suggestions} action="Open SQL" onsubmit={v => answer(p, v)} onclose={() => (prompt = null)} />
-  {/if}
-
-  {#if objMenu}
-    {@const m = objMenu}
-    <GridMenu items={objectMenu()} x={m.x} y={m.y} onpick={id => pickObject(id, m.object)} onclose={() => (objMenu = null)} />
-  {/if}
+  <TreeMenus bind:this={menus} {ws} />
 
   <div class="bottom">
     <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="code" size={13} />New query</button>

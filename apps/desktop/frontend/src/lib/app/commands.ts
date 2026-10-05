@@ -91,7 +91,7 @@ function overlayOpen() {
 }
 
 export function handleShortcut(e: KeyboardEvent) {
-  if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+  if (!(e.metaKey || e.ctrlKey) || e.altKey || e.defaultPrevented) return;
   const key = e.key.toLowerCase();
 
   if (!e.shiftKey && /^[1-9]$/.test(key)) {

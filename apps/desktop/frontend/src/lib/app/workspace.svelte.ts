@@ -1,5 +1,5 @@
 import { SvelteMap } from 'svelte/reactivity';
-import { api, type Column, type DBObject, type Filter, type SessionInfo, type TableInfo } from '../api/backend';
+import { api, type Column, type DBObject, type Filter, type Index, type SessionInfo, type TableInfo } from '../api/backend';
 
 export type TableTab = {
   id: string;
@@ -52,6 +52,7 @@ export class Workspace {
   objects = $state<DBObject[]>([]);
   objectsError = $state('');
   columns = new SvelteMap<string, Column[] | 'loading' | Error>();
+  indexes = new SvelteMap<string, Index[] | 'loading' | Error>();
   activeTab = $derived(this.tabs.find(t => t.id === this.activeTabId) ?? null);
 
   constructor(
@@ -93,18 +94,16 @@ export class Workspace {
   }
 
   loadColumns(t: TableInfo) {
-    const key = `${t.schema}.${t.name}`;
-    const known = this.columns.get(key);
-    if (known && !(known instanceof Error)) return;
-    this.columns.set(key, 'loading');
-    api.describeTable(this.session.sessionId, t.schema, t.name).then(
-      cols => this.columns.set(key, cols),
-      err => this.columns.set(key, err instanceof Error ? err : new Error(String(err))),
-    );
+    load(this.columns, t, () => api.describeTable(this.session.sessionId, t.schema, t.name));
+  }
+
+  loadIndexes(t: TableInfo) {
+    load(this.indexes, t, () => api.indexes(this.session.sessionId, t.schema, t.name));
   }
 
   async loadTables() {
     this.columns.clear();
+    this.indexes.clear();
     this.tablesLoading = true;
     this.tablesError = '';
     this.objectsError = '';
@@ -201,4 +200,15 @@ export class Workspace {
     const i = this.tabs.findIndex(t => t.id === this.activeTabId);
     this.activeTabId = this.tabs[(i + delta + this.tabs.length) % this.tabs.length].id;
   }
+}
+
+function load<T>(cache: SvelteMap<string, T[] | 'loading' | Error>, t: TableInfo, read: () => Promise<T[]>) {
+  const key = `${t.schema}.${t.name}`;
+  const known = cache.get(key);
+  if (known && !(known instanceof Error)) return;
+  cache.set(key, 'loading');
+  read().then(
+    rows => cache.set(key, rows),
+    err => cache.set(key, err instanceof Error ? err : new Error(String(err))),
+  );
 }

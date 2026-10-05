@@ -56,13 +56,14 @@ export type KeyAction =
   | { kind: 'move'; row: number; col: number; extend: boolean }
   | { kind: 'page'; row: number | null; scroll: number | 'top' | 'bottom' }
   | { kind: 'edit'; text?: string }
-  | { kind: 'menu'; id: 'null' | 'toggle' | 'delete-rows' }
+  | { kind: 'menu'; id: 'null' | 'toggle' | 'delete-rows' | 'value' }
   | { kind: 'copy'; whole: 'cell' | 'rows' | 'all' };
 
 const MOVES: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
 
 export function keyAction(k: KeyPress, ctx: KeyContext): KeyAction | null {
   const { cursor } = ctx;
+  if (cursor && cursor.col >= 0 && k.shift && !k.mod && k.key === 'Enter') return { kind: 'menu', id: 'value' };
   if (ctx.editable && cursor) {
     if (k.mod && k.key === 'Backspace') return { kind: 'menu', id: 'delete-rows' };
     if (cursor.col >= 0 && !k.mod) {

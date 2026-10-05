@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import type { Column, TableInfo } from '../api/wire';
+  import type { Column, Index, TableInfo } from '../api/wire';
   import type { Workspace } from './workspace.svelte';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -18,11 +18,12 @@
     active: boolean;
     picked: boolean;
     onclick: (e: MouseEvent) => void;
-    onmenu: (e: MouseEvent, column?: Column) => void;
+    onmenu: (e: MouseEvent, column?: Column, index?: Index) => void;
   } = $props();
 
   let open = $state(false);
   const columns = $derived(open ? ws.columns.get(`${t.schema}.${t.name}`) : undefined);
+  const indexes = $derived(open ? ws.indexes.get(`${t.schema}.${t.name}`) : undefined);
 
   function toggle(on = !open) {
     open = on;
@@ -30,6 +31,7 @@
 
   $effect(() => {
     if (open && ws.columns.get(`${t.schema}.${t.name}`) === undefined) untrack(() => ws.loadColumns(t));
+    if (open && t.kind === 'table' && ws.indexes.get(`${t.schema}.${t.name}`) === undefined) untrack(() => ws.loadIndexes(t));
   });
 
   function onkeydown(e: KeyboardEvent) {
@@ -70,6 +72,17 @@
         </div>
       {/each}
     {/if}
+    {#if Array.isArray(indexes) && indexes.length > 0}
+      <div class="sub">Indexes</div>
+      {#each indexes as ix (ix.name)}
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div class="col" oncontextmenu={e => onmenu(e, undefined, ix)} title={ix.definition ?? ix.name}>
+          <span class="key">{#if ix.primary}<Icon name="key" size={10} />{/if}</span>
+          <span class="name">{ix.name}</span>
+          <span class="type">{ix.unique && !ix.primary ? 'unique · ' : ''}{ix.columns.join(', ')}</span>
+        </div>
+      {/each}
+    {/if}
   </div>
 {/if}
 
@@ -97,6 +110,7 @@
   .twist.open { transform: rotate(90deg); }
   .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
   .columns { padding: 1px 0 4px; }
+  .sub { padding: 6px 8px 2px 24px; color: var(--text-3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
   .col {
     display: flex;
     align-items: center;

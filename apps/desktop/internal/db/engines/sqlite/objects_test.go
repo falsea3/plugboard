@@ -51,3 +51,15 @@ func TestRenameTable(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestIndexSQL(t *testing.T) {
+	s := openSQLite(t)
+	ctx := context.Background()
+	create := s.CreateIndexSQL("main", "users", model.NewIndex{Name: "users_name", Columns: []string{"name"}, Unique: true})
+	if _, err := s.Run(ctx, create); err != nil {
+		t.Fatalf("%s: %v", create, err)
+	}
+	if _, err := s.Run(ctx, s.DropIndexSQL("main", "users", "users_name")); err != nil {
+		t.Fatal(err)
+	}
+}

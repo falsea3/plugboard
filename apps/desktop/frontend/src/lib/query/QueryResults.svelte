@@ -4,6 +4,8 @@
   import { formatCount, formatDuration } from '../ui/format';
   import DataGrid from '../grid/DataGrid.svelte';
   import ValueBar from '../grid/ValueBar.svelte';
+  import ValueEditor, { type ValueEdit } from '../table/ValueEditor.svelte';
+  import { looksLikeJSON } from '../json/text';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import LoadBar from '../ui/LoadBar.svelte';
@@ -18,6 +20,15 @@
   }: { sessionId: string; tabId: string; run: QueryRun | null; running: boolean; elapsed: number; resultIndex?: number } = $props();
 
   let selected = $state<{ value: CellValue; column: ResultColumn } | null>(null);
+  let grid = $state<DataGrid>();
+  let viewing = $state<ValueEdit | null>(null);
+
+  function view(r: number, c: number) {
+    const rs = current;
+    if (!rs || c < 0 || rs.columns[c]?.kind === 'binary') return;
+    const value = rs.rows[r]?.[c] ?? null;
+    viewing = { r, c, title: rs.columns[c].name, value, json: rs.columns[c].kind === 'json' || looksLikeJSON(value), readOnly: true };
+  }
   const current = $derived(run?.results[resultIndex] ?? null);
 
   let loadingMore = $state(false);
@@ -91,6 +102,9 @@
         <div class="grid-wrap">
           {#if current.hasRows}
             <DataGrid
+              bind:this={grid}
+              cellMenu={(r, c) => (c >= 0 ? [{ id: 'value', label: 'View in editor', kbd: '⇧↵' }] : [])}
+              onmenu={(id, at) => (id === 'value' ? (view(at.r, at.c), true) : false)}
               columns={current.columns}
               rows={current.rows}
               onselect={(value, column) => (selected = column && value !== undefined ? { value, column } : null)}
@@ -117,9 +131,13 @@
     {/if}
     <span style="flex:1"></span>
     {#if selected && current?.hasRows}
-      <ValueBar value={selected.value} column={selected.column} />
+      <ValueBar value={selected.value} column={selected.column} onopen={() => { const at = grid?.cursor(); if (at) view(at.row, at.col); }} />
     {/if}
   </div>
+
+{#if viewing}
+  <ValueEditor edit={viewing} onsave={() => (viewing = null)} onclose={() => (viewing = null)} />
+{/if}
 
 <style>
   .footer {

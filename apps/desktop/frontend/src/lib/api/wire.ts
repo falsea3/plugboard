@@ -76,6 +76,7 @@ export interface EngineFeatures {
   canUpdateToDefault: boolean;
   canAlterColumns: boolean;
   transactionalDDL: boolean;
+  columnTypes: string[];
 }
 
 export interface SqlSyntax {

@@ -51,3 +51,44 @@ test('keeps a dialog open when a drag inside it ends outside', async ({ page }) 
   await page.mouse.click(5, 300);
   await expect(dialog).toBeHidden();
 });
+
+test('flips a settings switch on every click, even while saving is slow', async ({ page }) => {
+  await page.addInitScript(() => {
+    const app = (window as any).go.api.App;
+    const save = app.SaveSettings;
+    app.SaveSettings = (s: unknown) => new Promise(resolve => setTimeout(() => resolve(save(s)), 400));
+  });
+  await page.reload();
+  await page.getByRole('button', { name: 'Settings' }).click();
+  const box = page.getByRole('checkbox', { name: 'Install updates automatically' });
+  const sw = (await box.locator('..').boundingBox())!;
+  const spots = [
+    { x: sw.width - 3, y: sw.height / 2 },
+    { x: 3, y: 3 },
+    { x: sw.width / 2, y: sw.height - 2 },
+  ];
+  for (const [i, want] of [true, false, true].entries()) {
+    await box.locator('..').click({ position: spots[i] });
+    await expect(box).toBeChecked({ checked: want });
+    await page.waitForTimeout(120);
+  }
+  await page.waitForTimeout(1500);
+  await expect(box).toBeChecked();
+
+});
+
+test('opens What’s new from the update banner every time', async ({ page }) => {
+  await page.addInitScript(() => {
+    const app = (window as any).go.api.App;
+    app.CheckForUpdate = () => Promise.resolve({ available: { version: '9.9.9', notes: '### Added\n\n- **Thing.** It works.', publishedAt: '', releaseUrl: 'https://example.com' } });
+  });
+  await page.reload();
+  const banner = page.getByRole('status').filter({ hasText: 'is available' });
+  await expect(banner).toBeVisible({ timeout: 8000 });
+  for (let i = 0; i < 5; i++) {
+    await banner.getByRole('button', { name: 'What’s new' }).click();
+    await expect(page.getByRole('dialog', { name: 'What’s new in 9.9.9' })).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  }
+});

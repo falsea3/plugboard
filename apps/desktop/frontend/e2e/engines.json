@@ -12,7 +12,31 @@
     "booleanType": false,
     "canUpdateToDefault": true,
     "canAlterColumns": true,
-    "transactionalDDL": false
+    "transactionalDDL": false,
+    "columnTypes": [
+      "int",
+      "bigint",
+      "smallint",
+      "tinyint",
+      "tinyint(1)",
+      "decimal(12,2)",
+      "float",
+      "double",
+      "varchar(255)",
+      "char(10)",
+      "text",
+      "mediumtext",
+      "longtext",
+      "date",
+      "time",
+      "datetime",
+      "timestamp",
+      "year",
+      "json",
+      "blob",
+      "longblob",
+      "binary(16)"
+    ]
   },
   "postgres": {
     "syntax": {
@@ -27,7 +51,33 @@
     "booleanType": true,
     "canUpdateToDefault": true,
     "canAlterColumns": true,
-    "transactionalDDL": true
+    "transactionalDDL": true,
+    "columnTypes": [
+      "integer",
+      "bigint",
+      "smallint",
+      "serial",
+      "bigserial",
+      "numeric(12,2)",
+      "real",
+      "double precision",
+      "boolean",
+      "text",
+      "varchar(255)",
+      "char(10)",
+      "uuid",
+      "date",
+      "time",
+      "timestamp",
+      "timestamptz",
+      "interval",
+      "json",
+      "jsonb",
+      "bytea",
+      "inet",
+      "text[]",
+      "integer[]"
+    ]
   },
   "sqlite": {
     "syntax": {
@@ -42,6 +92,13 @@
     "booleanType": false,
     "canUpdateToDefault": false,
     "canAlterColumns": false,
-    "transactionalDDL": true
+    "transactionalDDL": true,
+    "columnTypes": [
+      "INTEGER",
+      "REAL",
+      "NUMERIC",
+      "TEXT",
+      "BLOB"
+    ]
   }
 }

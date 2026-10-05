@@ -218,3 +218,26 @@ test('keeps unfolded tables showing their columns after a schema change in the e
   await expect(cols.getByText('Loading columns…')).toHaveCount(0);
   await expect(cols.getByText('email', { exact: true })).toBeVisible();
 });
+
+test('creates and drops an index from the sidebar tree', async ({ page }) => {
+  await connect(page);
+  const side = page.getByRole('complementary');
+  const node = side.getByRole('button', { name: 'customers', exact: true });
+  await node.locator('.twist').click();
+  const cols = side.getByRole('group', { name: 'Columns of customers' });
+  await expect(cols.getByText('Indexes')).toBeVisible();
+
+  await cols.getByText('email', { exact: true }).click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Create index on column…' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Create an index on customers' });
+  await dialog.getByRole('group', { name: 'Index columns' }).getByText('country', { exact: true }).click();
+  await dialog.getByText(/^Unique/).click();
+  await expect(dialog.getByLabel('Name', { exact: true })).toHaveValue('customers_email_country_key');
+  await dialog.getByRole('button', { name: 'Open SQL' }).click();
+  await expect(page.locator('.cm-content').last()).toContainText('CREATE UNIQUE INDEX "customers_email_country_key" ON "public"."customers" ("email", "country");');
+
+  const pk = cols.locator('.col').filter({ hasText: 'customers_pkey' });
+  await pk.click({ button: 'right' });
+  await expect(page.getByRole('menuitem', { name: 'Drop index…' })).toBeDisabled();
+  await page.keyboard.press('Escape');
+});

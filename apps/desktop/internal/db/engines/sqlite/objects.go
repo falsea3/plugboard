@@ -48,3 +48,7 @@ func (d Dialect) ObjectDDL(ctx context.Context, db *sql.DB, obj model.DBObject) 
 	}
 	return out, nil
 }
+
+func (d Dialect) CreateIndex(schema, table string, idx model.NewIndex) string {
+	return dialect.CreateIndex(d.QuoteIdent, d.QuoteIdent(schema)+"."+d.QuoteIdent(idx.Name), d.QuoteIdent(table), idx)
+}

@@ -58,6 +58,8 @@
     (target as HTMLElement | undefined)?.focus();
   }
 
+  const ready = (row: FilterRow) => row.on && (noValue(row.op) || row.value.trim() !== '');
+
   function add() {
     const last = rows[rows.length - 1];
     const row = newFilter(columns, last?.column);
@@ -88,8 +90,8 @@
     <div class="row" data-row={row.id} class:off={!row.on}>
       <span class="join">{i === 0 ? 'Where' : 'and'}</span>
       <input type="checkbox" bind:checked={row.on} onchange={onapply} title={row.on ? 'Turn this condition off' : 'Turn this condition on'} />
-      <div class="col"><Select bind:value={row.column} options={columns.map(c => ({ value: c.name, label: c.name }))} aria-label="Column" /></div>
-      <div class="op"><Select bind:value={row.op} options={OPS} onchange={op => noValue(op) && onapply()} aria-label="Operator" /></div>
+      <div class="col"><Select bind:value={row.column} options={columns.map(c => ({ value: c.name, label: c.name }))} onchange={() => ready(row) && onapply()} aria-label="Column" /></div>
+      <div class="op"><Select bind:value={row.op} options={OPS} onchange={() => ready(row) && onapply()} aria-label="Operator" /></div>
       {#if noValue(row.op)}
         <span class="no-value" data-focus tabindex="-1"></span>
       {:else}

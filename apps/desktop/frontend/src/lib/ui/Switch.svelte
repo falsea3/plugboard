@@ -8,14 +8,22 @@
 </script>
 
 <span class="switch" class:small>
-  <input type="checkbox" bind:checked aria-label={label} onchange={() => onchange?.(checked)} />
+  <input
+    type="checkbox"
+    {checked}
+    aria-label={label}
+    onchange={e => {
+      checked = e.currentTarget.checked;
+      onchange?.(checked);
+    }}
+  />
   <span class="track"></span>
 </span>
 
 <style>
   .switch { position: relative; flex: none; width: 34px; height: 20px; }
   .switch.small { width: 30px; height: 18px; margin-top: 1px; }
-  .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; }
+  .switch input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; opacity: 0; -webkit-appearance: none; appearance: none; cursor: pointer; }
   .track { position: absolute; inset: 0; border-radius: 999px; background: var(--active); transition: background 0.15s; pointer-events: none; }
   .track::after {
     content: '';

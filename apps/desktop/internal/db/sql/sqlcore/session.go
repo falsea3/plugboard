@@ -108,6 +108,7 @@ func Features(d dialect.Dialect) model.EngineFeatures {
 		CanUpdateToDefault: d.CanUpdateToDefault(),
 		CanAlterColumns:    d.CanAlterColumns(),
 		TransactionalDDL:   d.TransactionalDDL(),
+		ColumnTypes:        d.ColumnTypes(),
 	}
 }
 

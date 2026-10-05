@@ -45,6 +45,8 @@ type StructureEditor interface {
 	ApplyStructure(ctx context.Context, sc model.StructureChange) (applied int, partial bool, err error)
 	PreviewStructure(ctx context.Context, sc model.StructureChange) ([]string, error)
 	RenameTableSQL(schema, from, to string) string
+	CreateIndexSQL(schema, table string, idx model.NewIndex) string
+	DropIndexSQL(schema, table, name string) string
 }
 
 var ErrNotSupported = apperr.New("not_supported", "this database doesn't support that")

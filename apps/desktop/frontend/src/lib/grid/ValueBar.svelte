@@ -4,7 +4,7 @@
   import { copyToClipboard } from '../ui/clipboard';
   import Icon from '../ui/Icon.svelte';
 
-  let { value, column }: { value: CellValue; column: ResultColumn } = $props();
+  let { value, column, onopen }: { value: CellValue; column: ResultColumn; onopen?: () => void } = $props();
 
   const text = $derived(value === null ? 'NULL' : String(value));
 </script>
@@ -12,6 +12,7 @@
 <div class="value-bar">
   <span class="col faint">{column.name}{column.type ? ` · ${column.type}` : ''}</span>
   <span class="val mono" class:null={value === null} title={text}>{text}</span>
+  {#if onopen && column.kind !== 'binary'}<button class="btn icon sm ghost" title="Open in editor (⇧↵)" aria-label="Open in editor" onclick={onopen}><Icon name="fit" size={12} /></button>{/if}
   <button class="btn icon sm ghost" title="Copy value (⌘C)" onclick={() => copyToClipboard(copyText(value))}><Icon name="copy" size={12} /></button>
 </div>
 

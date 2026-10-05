@@ -115,12 +115,16 @@ class AppState {
     this.applySettings();
   }
 
+  private settingsSaves = 0;
+
   async updateSettings(patch: Partial<Settings>) {
     const next = { ...this.settings, ...patch };
+    const save = ++this.settingsSaves;
     this.settings = next;
     this.applySettings();
     try {
-      this.settings = await api.saveSettings(next);
+      const saved = await api.saveSettings(next);
+      if (save === this.settingsSaves) this.settings = saved;
     } catch (err) {
       this.notify(err);
     }

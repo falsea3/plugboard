@@ -55,3 +55,11 @@ var missing = []uint16{1146, 1305, 1360, 1539}
 func (d Dialect) RenameTable(schema, from, to string) string {
 	return "RENAME TABLE " + d.QuoteIdent(schema) + "." + d.QuoteIdent(from) + " TO " + d.QuoteIdent(schema) + "." + d.QuoteIdent(to)
 }
+
+func (d Dialect) CreateIndex(schema, table string, idx model.NewIndex) string {
+	return dialect.CreateIndex(d.QuoteIdent, d.QuoteIdent(idx.Name), d.QuoteIdent(schema)+"."+d.QuoteIdent(table), idx)
+}
+
+func (d Dialect) DropIndex(schema, table, name string) string {
+	return "DROP INDEX " + d.QuoteIdent(name) + " ON " + d.QuoteIdent(schema) + "." + d.QuoteIdent(table)
+}

@@ -33,6 +33,12 @@ export interface Relation {
   onUpdate: string;
 }
 
+export interface NewIndex {
+  name: string;
+  columns: string[];
+  unique: boolean;
+}
+
 export interface Index {
   name: string;
   columns: string[];

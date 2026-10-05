@@ -8,6 +8,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Create and drop indexes from the sidebar.** An unfolded table lists its indexes under its columns. Right-click a table or a column → *Create index…*: pick the columns in order, make it unique, and review the statement in a query tab. Right-click an index → *Drop index…* to open its `DROP INDEX` statement there too.
+- **An editor for long values.** ⇧↵, *Open in editor* in a cell's menu or the button next to the value at the bottom opens the value in its own window — wrapped lines, a character and line count, ⌘S to save it to the cell. In query results it opens read-only.
+- **Type suggestions from your database.** *Change type…* suggests the types your database has, its own enums and domains, and the types the table already uses.
+
+### Fixed
+
+- **Switches react to every click.** Only a small spot on the left of a switch took clicks; the whole switch does now. Clicking faster than the setting saved could also flip it back.
+- **⌘S in the JSON or value editor no longer commits the table.** It saved the value and then committed every pending change of the table to the database straight away.
+- **Changing a filter's operator or column applies it at once** when the condition already has a value — no need to press Apply.
+- **Fit width fits.** It sized a column to the longest of all its loaded values instead of always making it wider.
+
 ## [0.6.0] - 2026-10-05
 
 ### Added

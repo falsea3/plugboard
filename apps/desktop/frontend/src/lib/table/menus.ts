@@ -35,6 +35,7 @@ export function cellMenu(m: CellMenu): MenuItem[] {
       if (cell.canSetDefault) items.push({ id: 'set-default', label: 'Set DEFAULT' });
     }
     if (cell.json) items.push({ id: 'json', label: cell.editable ? 'Edit as JSON' : 'View as JSON', kbd: col?.kind === 'json' ? '↵' : undefined });
+    if (col && !['json', 'binary', 'bool'].includes(col.kind)) items.push({ id: 'value', label: cell.editable ? 'Open in editor' : 'View in editor', kbd: '⇧↵' });
     if (cell.followTo) items.push('sep', { id: 'follow', label: `Go to ${cell.followTo}` });
     if (!cell.isNew) {
       items.push(

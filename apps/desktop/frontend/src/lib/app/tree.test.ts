@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import features from '../../../e2e/engines.json';
 import type { Column, EngineFeatures, TableInfo } from '../api/wire';
-import { columnChange, treeMenu, treePrompt, treeSQL } from './tree';
+import { columnChange, indexName, treeMenu, treePrompt, treeSQL, typeSuggestions } from './tree';
 
 const pg = (features as Record<string, EngineFeatures>).postgres;
 const my = (features as Record<string, EngineFeatures>).mysql;
@@ -23,15 +23,16 @@ describe('sidebar tree', () => {
       expect.arrayContaining(['tree-open', 'tree-drop']),
     );
     expect(ids(treeMenu({ table: { ...albums, kind: 'view' } }, false, true))).not.toContain('tree-rename');
-    expect(ids(treeMenu({ table: albums, column }, false, true))).toEqual(['tree-copy-name', 'tree-query', 'tree-structure', 'tree-rename', 'tree-type', 'tree-drop']);
+    expect(ids(treeMenu({ table: albums, column }, false, true))).toEqual(['tree-copy-name', 'tree-query', 'tree-structure', 'tree-rename', 'tree-type', 'tree-index', 'tree-drop']);
     expect(ids(treeMenu({ table: albums, column }, false, false))).not.toContain('tree-type');
   });
 
   it('asks for a new name or type and turns it into a structure change', () => {
-    expect(treePrompt('tree-type', { table: albums, column }, [{ name: 'year', type: 'integer' } as Column])).toMatchObject({
-      value: 'text',
-      suggestions: expect.arrayContaining(['integer', 'varchar(255)']),
-    });
+    const types = typeSuggestions([{ name: 'year', type: 'integer' } as Column], [{ schema: 'public', name: 'mood', kind: 'enum' }], pg.columnTypes);
+    expect(types.slice(0, 2)).toEqual(['integer', 'mood']);
+    expect(types).toContain('jsonb');
+    expect(new Set(types).size).toBe(types.length);
+    expect(treePrompt('tree-type', { table: albums, column }, types)).toMatchObject({ value: 'text', suggestions: types });
     expect(treePrompt('tree-rename', { table: albums })).toMatchObject({ value: 'albums' });
     expect(columnChange('tree-type', { table: albums, column }, ' varchar(80) ')).toEqual({
       schema: 'public',
@@ -40,5 +41,13 @@ describe('sidebar tree', () => {
     });
     expect(columnChange('tree-rename', { table: albums, column }, 'name')?.changes[0]).toMatchObject({ name: 'name' });
     expect(columnChange('tree-rename', { table: albums }, 'x')).toBeNull();
+  });
+
+  it('names a new index after its table and columns and keeps primary keys out of reach', () => {
+    expect(indexName('orders', ['customer_id', 'placed at'], false)).toBe('orders_customer_id_placed_at_idx');
+    expect(indexName('orders', ['code'], true)).toBe('orders_code_key');
+    const pk = { name: 'albums_pkey', columns: ['id'], unique: true, primary: true } as never;
+    const items = treeMenu({ table: albums, index: pk }, false, true);
+    expect(items.find(i => i !== 'sep' && i.id === 'tree-drop-index')).toMatchObject({ disabled: true });
   });
 });

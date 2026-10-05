@@ -9,10 +9,12 @@
     rows,
     filtered,
     selected,
+    onopen,
   }: {
     rows: TableRows;
     filtered: boolean;
     selected: { value: CellValue; column: ResultColumn } | null;
+    onopen: () => void;
   } = $props();
 
   const fmt = (n: number) => n.toLocaleString('en-US');
@@ -42,7 +44,7 @@
   {#if page}<span class="small faint" title="How long the last fetch took">· {formatDuration(page.result.durationMs)}</span>{/if}
   <span style="flex:1"></span>
   {#if selected}
-    <ValueBar value={selected.value} column={selected.column} />
+    <ValueBar value={selected.value} column={selected.column} {onopen} />
   {/if}
 </div>
 

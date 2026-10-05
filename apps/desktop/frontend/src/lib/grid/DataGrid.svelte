@@ -103,6 +103,8 @@
     focusGrid();
   }
 
+  export const cursor = () => sel.cursor;
+
   export function selectedRowsFor(r: number): number[] {
     return sel.rowsFor(r);
   }
@@ -196,7 +198,7 @@
 
   function autoFit(i: number) {
     const c = columns[i];
-    view.widths[i] = Math.min(calcColumnWidth(c.name, c.type, rows, i) * 2, 900);
+    view.widths[i] = calcColumnWidth(c.name, c.type, rows, i, true);
   }
 </script>
 

@@ -23,6 +23,30 @@ func (s Standard) RenameTable(schema, from, to string) string {
 	return "ALTER TABLE " + s.QuoteIdent(schema) + "." + s.QuoteIdent(from) + " RENAME TO " + s.QuoteIdent(to)
 }
 
+func (s Standard) CreateIndex(schema, table string, idx model.NewIndex) string {
+	return createIndex(s.QuoteIdent, s.QuoteIdent(idx.Name), s.QuoteIdent(schema)+"."+s.QuoteIdent(table), idx)
+}
+
+func (s Standard) DropIndex(schema, _, name string) string {
+	return "DROP INDEX " + s.QuoteIdent(schema) + "." + s.QuoteIdent(name)
+}
+
+func CreateIndex(quote func(string) string, name, table string, idx model.NewIndex) string {
+	return createIndex(quote, name, table, idx)
+}
+
+func createIndex(quote func(string) string, name, table string, idx model.NewIndex) string {
+	cols := make([]string, len(idx.Columns))
+	for i, c := range idx.Columns {
+		cols[i] = quote(c)
+	}
+	unique := ""
+	if idx.Unique {
+		unique = "UNIQUE "
+	}
+	return "CREATE " + unique + "INDEX " + name + " ON " + table + " (" + strings.Join(cols, ", ") + ")"
+}
+
 func (Standard) Placeholder(int) string { return "?" }
 
 func (Standard) Param(int, model.Column) string { return "?" }

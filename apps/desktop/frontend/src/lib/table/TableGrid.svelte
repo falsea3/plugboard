@@ -11,13 +11,13 @@
   import { cellMenu as buildCellMenu, filterPick, headerMenu as buildHeaderMenu, type FilterPick } from './menus';
   import { jumpTarget, linkedColumns } from './follow';
   import type { GridEditing, MenuAt, MenuItem } from '../grid/grid';
-  import { jsonToSave, looksLikeJSON } from '../json/text';
+  import { looksLikeJSON } from '../json/text';
   import type { Relation } from '../api/wire';
   import DataGrid from '../grid/DataGrid.svelte';
   import TableStatus from './TableStatus.svelte';
   import PendingBar from './PendingBar.svelte';
   import SqlPreview from './SqlPreview.svelte';
-  import JsonEditor from '../json/JsonEditor.svelte';
+  import ValueEditor, { type ValueEdit } from './ValueEditor.svelte';
 
   type Sort = { column: string; desc: boolean } | null;
 
@@ -63,7 +63,7 @@
   let saving = $state(false);
   let saveError = $state('');
   let preview = $state<{ sql: string[]; confirm: boolean } | null>(null);
-  let jsonEdit = $state<{ r: number; c: number; column: string; text: string; readOnly: boolean } | null>(null);
+  let valueEdit = $state<ValueEdit | null>(null);
 
   const page = $derived(rows.page!);
   const names = $derived(page.result.columns.map(c => c.name));
@@ -84,7 +84,7 @@
     isFailed: r => edits.isFailed(r),
     commit: (r, c, v) => edits.set(r, c, v),
     options: (r, c) => colAt(c)?.enum ?? null,
-    open: (r, c) => colAt(c)?.kind === 'json' && (openJSON(r, c), true),
+    open: (r, c) => colAt(c)?.kind === 'json' && (openValue(r, c, true), true),
   };
 
   const jumpFor = (r: number, c: number) => (r < page.result.rows.length ? jumpTarget(relations, names, page.result.rows[r], c) : null);
@@ -94,17 +94,21 @@
     if (j) ws.openTable({ schema: j.rel.refSchema, name: j.rel.refTable, kind: 'table' }, j.filters);
   }
 
-  function openJSON(r: number, c: number) {
-    const v = displayRows[r]?.[c] ?? null;
-    jsonEdit = { r, c, column: names[c], text: v === null ? '' : String(v), readOnly: !cellEditable(r, c) };
+  function openValue(r: number, c: number, json: boolean) {
+    if (c < 0 || binary.has(names[c])) return;
+    valueEdit = { r, c, title: `${tab.table}.${names[c]}`, value: displayRows[r]?.[c] ?? null, json, readOnly: !cellEditable(r, c) };
   }
 
-  function saveJSON(text: string) {
-    const e = jsonEdit;
-    jsonEdit = null;
+  function showValue() {
+    const at = grid?.cursor();
+    if (at) openValue(at.row, at.col, colAt(at.col)?.kind === 'json');
+  }
+
+  function saveValue(value: string) {
+    const e = valueEdit;
+    valueEdit = null;
     if (!e) return;
-    const value = jsonToSave(e.text, text);
-    if (value !== null) edits.set(e.r, e.c, value);
+    edits.set(e.r, e.c, value);
     grid?.showRow(e.r, e.c, false);
   }
 
@@ -146,7 +150,8 @@
     else if (id === 'sort-default') onsortby(null);
     else if (pick) onfilter(name, pick);
     else if (id === 'follow') follow(at.r, at.c);
-    else if (id === 'json') openJSON(at.r, at.c);
+    else if (id === 'json') openValue(at.r, at.c, true);
+    else if (id === 'value') openValue(at.r, at.c, colAt(at.c)?.kind === 'json');
     else if (id.startsWith('sql-copy:') || id.startsWith('sql-open:')) {
       const [to, kind] = id.split(':');
       const picked = (at.rows.length ? at.rows : [at.r]).filter(r => edits.rowState(r) !== 'new');
@@ -267,12 +272,11 @@
 {#if edits.dirty}
   <PendingBar count={edits.count} error={saveError} {saving} ondiscard={discard} onpreview={() => showPreview(false)} oncommit={commit} />
 {:else}
-  <TableStatus {rows} {filtered} {selected} />
+  <TableStatus {rows} {filtered} {selected} onopen={showValue} />
 {/if}
 
-{#if jsonEdit}
-  {@const j = jsonEdit}
-  <JsonEditor title="{tab.table}.{j.column}" value={j.text} readOnly={j.readOnly} onsave={saveJSON} onclose={() => (jsonEdit = null)} />
+{#if valueEdit}
+  <ValueEditor edit={valueEdit} onsave={saveValue} onclose={() => (valueEdit = null)} />
 {/if}
 
 {#if preview}

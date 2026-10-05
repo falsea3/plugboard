@@ -25,6 +25,11 @@ describe('grid keys', () => {
     expect(keyAction(press('Home'), ctx({ cursor: null }))).toEqual({ kind: 'page', row: null, scroll: 'top' });
   });
 
+  it('opens a cell in the value editor with shift-enter, even read-only', () => {
+    expect(keyAction(press('Enter', { shift: true }), ctx({ editable: false }))).toEqual({ kind: 'menu', id: 'value' });
+    expect(keyAction(press('Enter', { shift: true }), ctx({ cursor: { row: 1, col: -1 } }))).not.toEqual({ kind: 'menu', id: 'value' });
+  });
+
   it('starts editing only where editing is possible', () => {
     expect(keyAction(press('x'), ctx())).toEqual({ kind: 'edit', text: 'x' });
     expect(keyAction(press('Enter'), ctx())).toEqual({ kind: 'edit' });

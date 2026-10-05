@@ -1,5 +1,5 @@
 import type { Connection, ConnectSecrets, ConnectResult, TestResult, SessionInfo } from './wire';
-import type { TableInfo, Column, Relation, Index, Diagram, DBObject } from './wireSchema';
+import type { TableInfo, Column, Relation, Index, Diagram, DBObject, NewIndex } from './wireSchema';
 import type { ResultSet, TableQuery, RowCount, TablePage, QueryRun, SyntaxProblem, ChangeSet, ApplyResult, StructureChange } from './wireQuery';
 
 export interface AppInfo {
@@ -72,6 +72,8 @@ export interface GoApp {
   ApplyStructure(sessionId: string, queryId: string, sc: StructureChange): Promise<ApplyResult>;
   PreviewStructure(sessionId: string, sc: StructureChange): Promise<string[]>;
   RenameTableSQL(sessionId: string, schema: string, from: string, to: string): Promise<string>;
+  CreateIndexSQL(sessionId: string, schema: string, table: string, idx: NewIndex): Promise<string>;
+  DropIndexSQL(sessionId: string, schema: string, table: string, name: string): Promise<string>;
   GetSettings(): Promise<Settings>;
   SaveSettings(s: Settings): Promise<Settings>;
   OpenDataFolder(): Promise<void>;

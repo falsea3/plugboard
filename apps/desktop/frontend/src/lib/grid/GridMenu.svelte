@@ -95,13 +95,13 @@
   }
   .menu button .kbd { margin-left: auto; }
   .menu .mi { flex: none; display: flex; width: 16px; margin-right: 8px; color: var(--text-2); }
+  .menu button.danger { color: var(--danger); }
+  .menu button.danger:hover:not(:disabled) { color: var(--on-accent); background: var(--danger); }
   .menu button:hover:not(:disabled) .mi, .menu button.danger .mi { color: inherit; }
   .menu button:disabled .mi { color: var(--text-3); }
   .menu button:hover:not(:disabled) { background: var(--accent); color: var(--on-accent); }
   .menu button:hover:not(:disabled) .kbd { color: inherit; border-color: rgba(255, 255, 255, 0.4); }
   .menu button:disabled { color: var(--text-3); }
-  .menu button.danger { color: var(--danger); }
-  .menu button.danger:hover { color: var(--on-accent); background: var(--danger); }
   .menu .sep { height: 1px; margin: 4px 6px; background: var(--border-subtle); }
   .sub-wrap { position: relative; }
   .menu button .arrow { display: flex; margin-left: auto; color: var(--text-3); }

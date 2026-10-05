@@ -1,12 +1,20 @@
-import type { Column, EngineFeatures, StructureChange, TableInfo } from '../api/wire';
+import type { Column, DBObject, EngineFeatures, Index, StructureChange, TableInfo } from '../api/wire';
 import type { MenuItem } from '../grid/grid';
 import { quoteIdent } from '../sql/generate';
 
-export type TreeTarget = { table: TableInfo; column?: Column };
+export type TreeTarget = { table: TableInfo; column?: Column; index?: Index };
 
-export function treeMenu({ table, column }: TreeTarget, readOnly: boolean, canAlter: boolean): MenuItem[] {
+export function treeMenu({ table, column, index }: TreeTarget, readOnly: boolean, canAlter: boolean): MenuItem[] {
   const view = table.kind === 'view';
   const off = readOnly;
+  if (index) {
+    return [
+      { id: 'tree-copy-name', label: 'Copy index name' },
+      { id: 'tree-structure', label: 'Open structure' },
+      'sep',
+      { id: 'tree-drop-index', label: 'Drop index…', danger: true, disabled: off || index.primary },
+    ];
+  }
   if (column) {
     return [
       { id: 'tree-copy-name', label: 'Copy column name' },
@@ -15,6 +23,7 @@ export function treeMenu({ table, column }: TreeTarget, readOnly: boolean, canAl
       'sep',
       { id: 'tree-rename', label: 'Rename column…', disabled: off || view },
       { id: 'tree-type', label: 'Change type…', disabled: off || view || !canAlter },
+      { id: 'tree-index', label: 'Create index on column…', disabled: off || view },
       { id: 'tree-drop', label: 'Drop column…', danger: true, disabled: off || view },
     ];
   }
@@ -28,8 +37,9 @@ export function treeMenu({ table, column }: TreeTarget, readOnly: boolean, canAl
     { id: 'tree-copy-name', label: `Copy ${view ? 'view' : 'table'} name` },
     { id: 'tree-copy-select', label: 'Copy SELECT *' },
     'sep',
+    { id: 'tree-index', label: 'Create index…', disabled: off || view },
     { id: 'tree-rename', label: 'Rename table…', disabled: off || view },
-    { id: 'tree-truncate', label: 'Delete all rows…', disabled: off || view },
+    { id: 'tree-truncate', label: 'Delete all rows…', danger: true, disabled: off || view },
     { id: 'tree-drop', label: view ? 'Drop view…' : 'Drop table…', danger: true, disabled: off },
   ];
 }
@@ -56,14 +66,16 @@ export interface TreePrompt {
   suggestions: string[];
 }
 
-const COMMON_TYPES = ['integer', 'bigint', 'smallint', 'numeric(12,2)', 'real', 'varchar(255)', 'text', 'boolean', 'date', 'timestamp'];
+export function typeSuggestions(table: Column[], objects: DBObject[], engine: string[]): string[] {
+  const own = objects.filter(o => o.kind === 'enum' || o.kind === 'domain').map(o => o.name);
+  return [...new Set([...table.map(c => c.type), ...own, ...engine])];
+}
 
-export function treePrompt(id: string, { table, column }: TreeTarget, known: Column[] = []): TreePrompt | null {
+export function treePrompt(id: string, { table, column }: TreeTarget, types: string[] = []): TreePrompt | null {
   if (id === 'tree-rename' && column) return { title: `Rename ${table.name}.${column.name}`, label: 'New name', value: column.name, suggestions: [] };
   if (id === 'tree-rename') return { title: `Rename ${table.name}`, label: 'New name', value: table.name, suggestions: [] };
   if (id === 'tree-type' && column) {
-    const used = known.map(c => c.type);
-    return { title: `Change the type of ${table.name}.${column.name}`, label: 'New type', value: column.type, suggestions: [...new Set([...used, ...COMMON_TYPES])] };
+    return { title: `Change the type of ${table.name}.${column.name}`, label: 'New type', value: column.type, suggestions: types };
   }
   return null;
 }
@@ -76,4 +88,8 @@ export function columnChange(id: string, { table, column }: TreeTarget, value: s
     table: table.name,
     changes: [id === 'tree-rename' ? { ...change, name: value.trim() } : { ...change, type: value.trim() }],
   };
+}
+
+export function indexName(table: string, columns: string[], unique: boolean): string {
+  return [table, ...columns, unique ? 'key' : 'idx'].join('_').replace(/[^A-Za-z0-9_]+/g, '_').slice(0, 63);
 }

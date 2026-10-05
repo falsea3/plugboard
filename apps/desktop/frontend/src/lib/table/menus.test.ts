@@ -18,7 +18,7 @@ describe('cell menu', () => {
     const m = cellMenu({ cell: cell({ col: column({ kind: 'bool' }), value: true }), sqlRows: 0, canFindRows: true, editRows: null });
     expect(ids(m)).toEqual(['set-false', 'null', '—', 'filter-value', 'exclude-value']);
     expect(ids(cellMenu({ cell: cell({ col: column({ kind: 'datetime', nullable: false }), canSetDefault: true }), sqlRows: 0, canFindRows: true, editRows: null })))
-      .toEqual(['set-now', 'set-default', '—', 'filter-value', 'exclude-value']);
+      .toEqual(['set-now', 'set-default', 'value', '—', 'filter-value', 'exclude-value']);
   });
 
   it('leaves editing out of a cell that can’t change', () => {
@@ -38,7 +38,7 @@ describe('cell menu', () => {
 
   it('has no value filters for a new row', () => {
     expect(ids(cellMenu({ cell: cell({ isNew: true }), sqlRows: 0, canFindRows: true, editRows: { count: 1, allDeleted: true } })))
-      .toEqual(['null', '—', 'restore']);
+      .toEqual(['null', 'value', '—', 'restore']);
   });
 });
 

@@ -69,3 +69,9 @@ type DBObject struct {
 	Detail string   `json:"detail,omitempty"`
 	Values []string `json:"values,omitempty"`
 }
+
+type NewIndex struct {
+	Name    string   `json:"name"`
+	Columns []string `json:"columns"`
+	Unique  bool     `json:"unique"`
+}

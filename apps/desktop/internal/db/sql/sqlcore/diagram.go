@@ -57,3 +57,11 @@ func (s *Session) DDL(ctx context.Context, obj model.DBObject) (string, error) {
 func (s *Session) RenameTableSQL(schema, from, to string) string {
 	return s.Dialect.RenameTable(schema, from, to)
 }
+
+func (s *Session) CreateIndexSQL(schema, table string, idx model.NewIndex) string {
+	return s.Dialect.CreateIndex(schema, table, idx)
+}
+
+func (s *Session) DropIndexSQL(schema, table, name string) string {
+	return s.Dialect.DropIndex(schema, table, name)
+}
