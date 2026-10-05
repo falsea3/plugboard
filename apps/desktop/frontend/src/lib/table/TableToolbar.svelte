@@ -12,8 +12,10 @@
     onfilter,
     onadd,
     onrefresh,
+    oncopy,
+    onquery,
   }: {
-    mode: 'data' | 'structure';
+    mode: 'data' | 'structure' | 'ddl';
     schema: string;
     table: string;
     filterCount: number;
@@ -23,6 +25,8 @@
     onfilter: () => void;
     onadd: () => void;
     onrefresh: () => void;
+    oncopy: () => void;
+    onquery: () => void;
   } = $props();
 </script>
 
@@ -30,9 +34,14 @@
   <div class="segmented" role="tablist">
     <button role="tab" aria-selected={mode === 'data'} class:on={mode === 'data'} onclick={() => (mode = 'data')}><Icon name="rows" size={13} />Data</button>
     <button role="tab" aria-selected={mode === 'structure'} class:on={mode === 'structure'} onclick={() => (mode = 'structure')}><Icon name="columns" size={13} />Structure</button>
+    <button role="tab" aria-selected={mode === 'ddl'} class:on={mode === 'ddl'} onclick={() => (mode = 'ddl')}><Icon name="ddl" size={13} />DDL</button>
   </div>
   <span class="title mono faint">{schema}.<span class="muted">{table}</span></span>
   <span style="flex:1"></span>
+  {#if mode === 'ddl'}
+  <button class="btn sm ghost" onclick={oncopy}><Icon name="copy" size={13} />Copy</button>
+  <button class="btn sm ghost" onclick={onquery}><Icon name="code" size={13} />Open in query</button>
+  {:else}
   <button class="btn sm ghost filter-btn" class:on={filtersOpen || filterCount > 0} onclick={onfilter} title="Filter rows (⌘F)">
     <Icon name="funnel" size={13} />Filter{#if filterCount > 0}<span class="count">{filterCount}</span>{/if}
   </button>
@@ -42,6 +51,7 @@
     <button class="btn sm ghost" onclick={onadd} title="Add column (⌘I)"><Icon name="plus" size={13} />Column</button>
   {:else}
     <button class="btn sm ghost" onclick={onadd} disabled={!canAdd} title="Add row (⌘I)"><Icon name="plus" size={13} />Row</button>
+  {/if}
   {/if}
   <button class="btn icon sm ghost" title="Refresh (⌘R)" onclick={onrefresh}><Icon name="refresh" size={13} /></button>
 </div>

@@ -115,6 +115,16 @@ export async function installBridge(page: Page) {
               ],
             });
           },
+          ListObjects: (_: string, schema: string) =>
+            ok([
+              { schema, name: 'add_tax', kind: 'function', detail: 'amount numeric' },
+              { schema, name: 'plan', kind: 'enum', values: ['free', 'team', 'pro'] },
+              { schema, name: 'order_seq', kind: 'sequence' },
+              { schema, name: 'orders_touch', kind: 'trigger', detail: 'orders' },
+              { schema: 'public', name: 'pgcrypto', kind: 'extension', detail: '1.3' },
+            ]),
+          ObjectDDL: (_: string, o: { schema: string; name: string; kind: string }) =>
+            ok(o.kind === 'table' ? `CREATE TABLE "${o.schema}"."${o.name}" (\n  "id" serial,\n  CONSTRAINT ${o.name}_pkey PRIMARY KEY (id)\n);` : `CREATE OR REPLACE FUNCTION ${o.schema}.${o.name}(amount numeric)\n RETURNS numeric\n LANGUAGE sql\nAS $function$ select amount * 1.2 $function$;`),
           Indexes: () =>
             ok([
               { name: 'customers_pkey', columns: ['id'], unique: true, primary: true, method: 'btree', where: '', definition: 'CREATE UNIQUE INDEX customers_pkey ON public.customers USING btree (id)' },
@@ -149,7 +159,8 @@ export async function installBridge(page: Page) {
           PreviewChanges: () => ok([]),
           ApplyStructure: () => ok({ applied: 1, failedIndex: -1, partial: false, cancelled: false }),
           PreviewStructure: (_: string, sc: { table: string; changes: { kind: string; name?: string; type?: string }[] }) =>
-            ok(sc.changes.map(c => `ALTER TABLE "public"."${sc.table}" ${c.kind === 'insert' ? `ADD COLUMN "${c.name}" ${c.type}` : '…'}`)),
+            ok(sc.changes.map(c => `ALTER TABLE "public"."${sc.table}" ${c.kind === 'insert' ? `ADD COLUMN "${c.name}" ${c.type}` : c.type ? `ALTER COLUMN "${(c as any).column}" TYPE ${c.type}` : '…'}`)),
+          RenameTableSQL: (_: string, schema: string, from: string, to: string) => ok(`ALTER TABLE "${schema}"."${from}" RENAME TO "${to}";`),
           ChooseSQLiteFile: () => ok(''),
           ChooseSSHKeyFile: () => ok(''),
           TrustHostKey: () => ok(undefined),

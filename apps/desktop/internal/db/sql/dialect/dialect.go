@@ -21,6 +21,8 @@ type Dialect interface {
 	ListRelations(ctx context.Context, db *sql.DB, schema string) ([]model.Relation, error)
 	ListIndexes(ctx context.Context, db *sql.DB, schema, table string) ([]model.Index, error)
 	EstimateRows(ctx context.Context, db *sql.DB, schema, table string) (n int64, ok bool, err error)
+	ListObjects(ctx context.Context, db *sql.DB, schema string) ([]model.DBObject, error)
+	ObjectDDL(ctx context.Context, db *sql.DB, obj model.DBObject) (string, error)
 
 	Syntax() sqltext.Syntax
 	QuoteIdent(name string) string
@@ -48,6 +50,7 @@ type Dialect interface {
 	TypeOf(dbType string) Type
 
 	ColumnDDL(ctx context.Context, db *sql.DB, schema, table, alter string, cur model.Column, ch model.ColumnChange) ([]string, error)
+	RenameTable(schema, from, to string) string
 	TransactionalDDL() bool
 	CanAlterColumns() bool
 	LockWait(seconds int) (set, reset string)

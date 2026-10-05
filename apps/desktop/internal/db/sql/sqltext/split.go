@@ -9,14 +9,29 @@ func Split(script string, syn Syntax) []string {
 	var out []string
 	start := 0
 	n := len(script)
+	delim := ";"
+	var b blocks
 	flush := func(end int) {
 		stmt := strings.TrimSpace(script[start:end])
 		if stmt != "" && FirstKeyword(stmt) != "" {
 			out = append(out, stmt)
 		}
+		b = blocks{}
 	}
 	for i := 0; i < n; i++ {
 		switch c := script[i]; {
+		case b.words == 0 && (c == 'D' || c == 'd') && strings.TrimSpace(script[start:i]) == "":
+			if d, next, ok := delimiterAt(script, i); ok {
+				delim, start, i = d, next, next
+				continue
+			}
+			i = wordEnd(script, i, &b)
+		case delim != ";" && strings.HasPrefix(script[i:], delim):
+			flush(i)
+			i += len(delim) - 1
+			start = i + 1
+		case isWordByte(c) && (i == 0 || !isWordByte(script[i-1])):
+			i = wordEnd(script, i, &b)
 		case c == '\'' || c == '"' || c == '`':
 			i = skipQuoted(script, i, c, escapesBackslash(script, i, syn))
 		case lineCommentAt(script, i, syn):
@@ -27,13 +42,22 @@ func Split(script string, syn Syntax) []string {
 			if end, ok := skipDollarQuoted(script, i); ok {
 				i = end
 			}
-		case c == ';':
+		case c == ';' && delim == ";" && !b.open():
 			flush(i)
 			start = i + 1
 		}
 	}
 	flush(n)
 	return out
+}
+
+func wordEnd(s string, i int, b *blocks) int {
+	j := i
+	for j < len(s) && isWordByte(s[j]) {
+		j++
+	}
+	b.word(s[i:j])
+	return j - 1
 }
 
 func skipQuoted(s string, i int, q byte, backslashEscapes bool) int {

@@ -76,3 +76,23 @@ func (a *App) Indexes(sessionID, schema, table string) ([]model.Index, error) {
 	defer cancel()
 	return r.Indexes(ctx, schema, table)
 }
+
+func (a *App) ListObjects(sessionID, schema string) ([]model.DBObject, error) {
+	r, err := a.schemaReader(sessionID)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(a.context(), catalogTimeout)
+	defer cancel()
+	return r.Objects(ctx, schema)
+}
+
+func (a *App) ObjectDDL(sessionID string, obj model.DBObject) (string, error) {
+	r, err := a.schemaReader(sessionID)
+	if err != nil {
+		return "", err
+	}
+	ctx, cancel := context.WithTimeout(a.context(), catalogTimeout)
+	defer cancel()
+	return r.DDL(ctx, obj)
+}

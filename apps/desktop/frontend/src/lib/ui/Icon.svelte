@@ -50,6 +50,15 @@
   import restore from '@phosphor-icons/core/regular/arrow-counter-clockwise.svg?raw';
   import sortDefault from '@phosphor-icons/core/regular/arrows-down-up.svg?raw';
   import fitWidth from '@phosphor-icons/core/regular/arrows-out-line-horizontal.svg?raw';
+  import fn from '@phosphor-icons/core/regular/function.svg?raw';
+  import procedure from '@phosphor-icons/core/regular/gear-fine.svg?raw';
+  import sequence from '@phosphor-icons/core/regular/list-numbers.svg?raw';
+  import enumType from '@phosphor-icons/core/regular/list-bullets.svg?raw';
+  import domain from '@phosphor-icons/core/regular/tag-simple.svg?raw';
+  import trigger from '@phosphor-icons/core/regular/lightning.svg?raw';
+  import extension from '@phosphor-icons/core/regular/puzzle-piece.svg?raw';
+  import event from '@phosphor-icons/core/regular/clock.svg?raw';
+  import ddl from '@phosphor-icons/core/regular/brackets-angle.svg?raw';
 
   const ICONS = {
     plus, x, search, table, view, refresh, play, stop,
@@ -57,6 +66,7 @@
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
     arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, link, lock, lockOpen, tunnel, funnel,
     download, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, json, restore, sortDefault, fitWidth,
+    function: fn, procedure, sequence, enum: enumType, domain, trigger, extension, event, ddl,
   } as const;
 
   export type IconName = keyof typeof ICONS;

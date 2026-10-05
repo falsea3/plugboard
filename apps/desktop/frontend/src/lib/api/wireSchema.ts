@@ -14,6 +14,14 @@ export interface Column {
   kind: ColumnKind;
 }
 
+export interface DBObject {
+  schema: string;
+  name: string;
+  kind: 'function' | 'procedure' | 'sequence' | 'enum' | 'domain' | 'trigger' | 'event' | 'extension' | 'table' | 'view';
+  detail?: string;
+  values?: string[];
+}
+
 export interface Relation {
   name: string;
   table: string;

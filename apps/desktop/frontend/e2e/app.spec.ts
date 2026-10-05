@@ -36,3 +36,18 @@ test('says when the last run crashed and offers the log', async ({ page }) => {
   await toast.getByRole('button', { name: 'Show log' }).click();
   await expect(toast).toBeHidden();
 });
+
+test('keeps a dialog open when a drag inside it ends outside', async ({ page }) => {
+  await page.getByRole('button', { name: /New connection/ }).first().click();
+  const dialog = page.getByRole('dialog', { name: 'New connection' });
+  const name = dialog.getByLabel('Name');
+  await name.fill('a long connection name');
+  const box = (await name.boundingBox())!;
+  await page.mouse.move(box.x + box.width - 4, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(5, 300, { steps: 6 });
+  await page.mouse.up();
+  await expect(dialog).toBeVisible();
+  await page.mouse.click(5, 300);
+  await expect(dialog).toBeHidden();
+});

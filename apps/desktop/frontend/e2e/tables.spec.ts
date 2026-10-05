@@ -149,3 +149,72 @@ test('shows that a table and a query are still loading', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Stop' })).toBeVisible();
   await expect(page.getByRole('grid').getByText('1284390.50')).toBeVisible();
 });
+
+test('opens a table in the sidebar tree and acts on it from the menu', async ({ page }) => {
+  await connect(page);
+  const side = page.getByRole('complementary');
+  const node = side.getByRole('button', { name: 'customers', exact: true });
+  await node.locator('.twist').click();
+  const cols = side.getByRole('group', { name: 'Columns of customers' });
+  await expect(cols.getByText('email', { exact: true })).toBeVisible();
+  await expect(cols.locator('.col').first()).toContainText('id');
+
+  await node.click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'New query: SELECT *' }).click();
+  await expect(page.locator('.cm-content')).toContainText('SELECT *FROM "public"."customers"LIMIT 100;');
+
+  await cols.getByText('email', { exact: true }).click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Drop column…' }).click();
+  await expect(page.locator('.cm-content').last()).toContainText('ALTER TABLE "public"."customers"  DROP COLUMN "email";');
+
+  await cols.getByText('email', { exact: true }).click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Change type…' }).click();
+  const ask = page.getByRole('dialog', { name: 'Change the type of customers.email' });
+  await ask.getByLabel('New type').fill('varchar(80)');
+  await ask.getByRole('button', { name: 'Open SQL' }).click();
+  await expect(page.locator('.cm-content').last()).toContainText('ALTER TABLE "public"."customers" ALTER COLUMN "email" TYPE varchar(80);');
+
+  await node.click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Rename table…' }).click();
+  await page.getByRole('dialog', { name: 'Rename customers' }).getByLabel('New name').fill('clients');
+  await page.getByRole('button', { name: 'Open SQL' }).click();
+  await expect(page.locator('.cm-content').last()).toContainText('ALTER TABLE "public"."customers" RENAME TO "clients";');
+
+  await node.click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Open structure' }).click();
+  await expect(page.getByRole('tab', { name: 'Structure' })).toHaveAttribute('aria-selected', 'true');
+});
+
+test('lists functions, types and triggers and shows their DDL', async ({ page }) => {
+  await connect(page);
+  const side = page.getByRole('complementary');
+  await side.getByRole('button', { name: /^Types/ }).click();
+  const plan = side.getByRole('button', { name: /^plan/ });
+  await plan.locator('.twist').click();
+  await expect(side.getByText('team', { exact: true })).toBeVisible();
+
+  await side.getByRole('button', { name: /^Functions/ }).click();
+  await side.getByRole('button', { name: /^add_tax/ }).click();
+  await expect(page.getByRole('tab', { name: 'add_tax' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('.sql-view')).toContainText('CREATE OR REPLACE FUNCTION public.add_tax(amount numeric)');
+  await page.getByRole('button', { name: 'Open in query' }).click();
+  await expect(page.locator('.cm-content').last()).toContainText('RETURNS numeric');
+
+  await side.getByRole('button', { name: 'customers', exact: true }).click();
+  await page.getByRole('tab', { name: 'DDL' }).click();
+  await expect(page.locator('.sql-view').last()).toContainText('CONSTRAINT customers_pkey PRIMARY KEY (id)');
+});
+
+test('keeps unfolded tables showing their columns after a schema change in the editor', async ({ page }) => {
+  await connect(page);
+  const side = page.getByRole('complementary');
+  await side.getByRole('button', { name: 'customers', exact: true }).locator('.twist').click();
+  const cols = side.getByRole('group', { name: 'Columns of customers' });
+  await expect(cols.getByText('email', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await page.locator('.cm-content').click();
+  await page.keyboard.insertText('alter table customers add column nickname text');
+  await page.getByRole('button', { name: 'Run', exact: true }).click();
+  await expect(cols.getByText('Loading columns…')).toHaveCount(0);
+  await expect(cols.getByText('email', { exact: true })).toBeVisible();
+});

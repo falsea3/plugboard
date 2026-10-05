@@ -45,3 +45,15 @@ func (s *Session) Diagram(ctx context.Context, schema string) (model.Diagram, er
 	wg.Wait()
 	return out, errors.Join(errs...)
 }
+
+func (s *Session) Objects(ctx context.Context, schema string) ([]model.DBObject, error) {
+	return retry(ctx, s, func() ([]model.DBObject, error) { return s.Dialect.ListObjects(ctx, s.DB, schema) })
+}
+
+func (s *Session) DDL(ctx context.Context, obj model.DBObject) (string, error) {
+	return retry(ctx, s, func() (string, error) { return s.Dialect.ObjectDDL(ctx, s.DB, obj) })
+}
+
+func (s *Session) RenameTableSQL(schema, from, to string) string {
+	return s.Dialect.RenameTable(schema, from, to)
+}

@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, GoApp, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -54,6 +54,8 @@ export const api = {
   diagram: (sessionId: string, schema: string) => call(a => a.Diagram(sessionId, schema)),
   relations: (sessionId: string, schema: string) => call(a => a.Relations(sessionId, schema)),
   indexes: (sessionId: string, schema: string, table: string) => call(a => a.Indexes(sessionId, schema, table)),
+  listObjects: (sessionId: string, schema: string) => call(a => a.ListObjects(sessionId, schema)),
+  objectDDL: (sessionId: string, obj: DBObject) => call(a => a.ObjectDDL(sessionId, obj)),
   fetchTablePage: (sessionId: string, q: TableQuery) => call(a => a.FetchTablePage(sessionId, q)),
   countRows: (sessionId: string, queryId: string, q: TableQuery, exact: boolean) =>
     call(a => a.CountRows(sessionId, queryId, q, exact)),
@@ -68,6 +70,7 @@ export const api = {
   previewChanges: (sessionId: string, cs: ChangeSet) => call(a => a.PreviewChanges(sessionId, cs)),
   applyStructure: (sessionId: string, queryId: string, sc: StructureChange) => call(a => a.ApplyStructure(sessionId, queryId, sc)),
   previewStructure: (sessionId: string, sc: StructureChange) => call(a => a.PreviewStructure(sessionId, sc)),
+  renameTableSQL: (sessionId: string, schema: string, from: string, to: string) => call(a => a.RenameTableSQL(sessionId, schema, from, to)),
   getSettings: () => call(a => a.GetSettings()),
   saveSettings: (s: Settings) => call(a => a.SaveSettings(s)),
   openDataFolder: () => call(a => a.OpenDataFolder()),

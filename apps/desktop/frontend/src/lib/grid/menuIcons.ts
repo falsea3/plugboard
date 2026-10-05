@@ -24,6 +24,20 @@ const BY_ID: Record<string, IconName> = {
   'sort-desc': 'arrowDown',
   'sort-default': 'sortDefault',
   fit: 'fitWidth',
+  'tree-open': 'table',
+  'tree-structure': 'columns',
+  'tree-query': 'code',
+  'tree-diagram': 'diagram',
+  'tree-copy-name': 'copy',
+  'tree-copy-select': 'copy',
+  'tree-rename': 'pencil',
+  'tree-truncate': 'trash',
+  'tree-drop': 'trash',
+  'tree-ddl': 'ddl',
+  'tree-type': 'pencil',
+  'obj-ddl': 'ddl',
+  'obj-query': 'code',
+  'obj-copy-name': 'copy',
 };
 
 export function menuIcon(id: string): IconName | undefined {

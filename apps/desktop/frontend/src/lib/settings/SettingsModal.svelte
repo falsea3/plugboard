@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dismiss } from '../ui/dismiss';
   import { api, type AppInfo } from '../api/backend';
   import { app, type SettingsSection } from '../app/app.svelte';
   import Icon, { type IconName } from '../ui/Icon.svelte';
@@ -31,8 +32,7 @@
 
 <svelte:window {onkeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div class="backdrop" onclick={e => e.target === e.currentTarget && close()}>
+<div class="backdrop" use:dismiss={close}>
   <div class="window" role="dialog" aria-modal="true" aria-label="Settings">
     <nav>
       <div class="nav-title">Settings</div>

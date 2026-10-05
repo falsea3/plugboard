@@ -19,6 +19,10 @@ func (Standard) QuoteString(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", "''") + "'"
 }
 
+func (s Standard) RenameTable(schema, from, to string) string {
+	return "ALTER TABLE " + s.QuoteIdent(schema) + "." + s.QuoteIdent(from) + " RENAME TO " + s.QuoteIdent(to)
+}
+
 func (Standard) Placeholder(int) string { return "?" }
 
 func (Standard) Param(int, model.Column) string { return "?" }

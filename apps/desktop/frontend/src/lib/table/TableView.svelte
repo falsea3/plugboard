@@ -11,6 +11,7 @@
   import TableGrid from './TableGrid.svelte';
   import StructureView from './StructureView.svelte';
   import TableToolbar from './TableToolbar.svelte';
+  import DdlView from '../objects/DdlView.svelte';
   import Icon from '../ui/Icon.svelte';
   import LoadBar from '../ui/LoadBar.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -21,7 +22,7 @@
   const sessionId = untrack(() => ws.session.sessionId);
   const pageSize = app.settings.pageSize;
 
-  let mode = $state<'data' | 'structure'>('data');
+  let mode = $state<'data' | 'structure' | 'ddl'>('data');
   let columns = $state<Column[]>([]);
   let columnsLoading = $state(false);
   let sort = $state<{ column: string; desc: boolean } | null>(null);
@@ -32,6 +33,7 @@
   let filterBar = $state<FilterBar>();
   let grid = $state<TableGrid>();
   let structure = $state<StructureView>();
+  let ddl = $state<DdlView>();
   let structureDirty = $state(false);
 
   const rows = new TableRows({
@@ -164,6 +166,14 @@
   });
 
   $effect(() => {
+    if (!tab.view) return;
+    untrack(() => {
+      const view = ws.takeView(tab);
+      if (view) mode = view;
+    });
+  });
+
+  $effect(() => {
     if (!tab.jump) return;
     untrack(() => {
       if (!canLeavePage()) {
@@ -200,7 +210,9 @@
     canAdd={canEdit}
     onfilter={() => (showFilters ? (showFilters = false) : openFilters())}
     onadd={addRow}
-    onrefresh={refresh}
+    onrefresh={() => (mode === 'ddl' ? ddl?.load() : refresh())}
+    oncopy={() => ddl?.copy()}
+    onquery={() => ddl?.openInQuery()}
   />
 
   {#if showFilters && mode === 'data' && columns.length > 0}
@@ -209,7 +221,9 @@
 
   <div class="content">
     {#if rows.loading || rows.loadingMore || columnsLoading}<LoadBar label="Loading {tab.table}" />{/if}
-    {#if rows.error}
+    {#if mode === 'ddl'}
+      <DdlView bind:this={ddl} {ws} object={{ schema: tab.schema, name: tab.table, kind: tab.tableKind === 'view' ? 'view' : 'table' }} toolbar={false} />
+    {:else if rows.error}
       <div class="error" role="alert"><Icon name="alert" /><span class="message">{rows.error}</span></div>
     {:else if mode === 'data'}
       {#if page}

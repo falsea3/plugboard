@@ -8,6 +8,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-05
+
+### Added
+
+- **Functions, procedures, sequences, types, triggers, events and extensions in the sidebar**, each kind in its own group, with what matters at a glance — a function's arguments, a trigger's table, an enum's values (unfold it to see them), an extension's version. Click one to see its DDL.
+- **DDL for everything.** Tables get a DDL tab next to Data and Structure — the full `CREATE TABLE` with keys, foreign keys, defaults, indexes, triggers and comments on PostgreSQL, the server's own `SHOW CREATE` on MySQL and MariaDB, the stored SQL on SQLite. Copy it or open it in a query tab.
+- **A table tree in the sidebar.** Expand a table or view to see its columns, with the primary key marked and each column's type. Right-click a table to open its data or structure, start a `SELECT *` query, show it in the diagram, copy its name or a `SELECT`, or rename, empty or drop it; right-click a column to copy its name, query it, rename it, change its type or drop it. Renaming and changing a type ask for the new name or type and write the statement the way your database needs it — MySQL's `CHANGE COLUMN` keeps the column's default, `NOT NULL` and collation, and a renamed MySQL table stays in its own database. Changes open as SQL in a new query tab, so you see the statement and run it yourself — read-only sessions and the Production check still apply. ←/→ fold and unfold the selected table.
+
+### Fixed
+
+- **Triggers, procedures and functions with a `BEGIN … END` body run from the SQL editor.** The editor used to cut them at the first `;` inside the body. Scripts with `DELIMITER` lines, as MySQL dumps have them, run too.
+- **Dialogs no longer close when you select text inside them and let go outside.** A dialog closes on a click outside only when the click both starts and ends outside it.
+
 ## [0.5.2] - 2026-10-04
 
 ### Changed

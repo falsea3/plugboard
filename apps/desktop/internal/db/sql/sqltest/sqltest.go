@@ -33,6 +33,8 @@ func Run(t *testing.T, srv Server) {
 	t.Run("SyntaxErrors", func(t *testing.T) { syntaxErrors(t, srv, c) })
 	t.Run("Relations", func(t *testing.T) { relations(t, srv, c) })
 	t.Run("Indexes", func(t *testing.T) { indexes(t, srv, c) })
+	t.Run("Objects", func(t *testing.T) { objects(t, srv, c) })
+	t.Run("RenameTable", func(t *testing.T) { renameTable(t, srv, c) })
 }
 
 func FindRelation(d model.Diagram, table string) (model.Relation, bool) {

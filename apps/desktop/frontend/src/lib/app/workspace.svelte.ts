@@ -1,4 +1,5 @@
-import { api, type Filter, type SessionInfo, type TableInfo } from '../api/backend';
+import { SvelteMap } from 'svelte/reactivity';
+import { api, type Column, type DBObject, type Filter, type SessionInfo, type TableInfo } from '../api/backend';
 
 export type TableTab = {
   id: string;
@@ -8,6 +9,7 @@ export type TableTab = {
   tableKind: TableInfo['kind'];
   dirty?: boolean;
   jump?: Filter[];
+  view?: 'structure' | 'ddl';
 };
 
 export type QueryTab = {
@@ -24,7 +26,14 @@ export type DiagramTab = {
   schema: string;
 };
 
-export type Tab = TableTab | QueryTab | DiagramTab;
+export type DDLTab = {
+  id: string;
+  kind: 'ddl';
+  title: string;
+  object: DBObject;
+};
+
+export type Tab = TableTab | QueryTab | DiagramTab | DDLTab;
 
 let seq = 0;
 const nextId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(++seq).toString(36)}`;
@@ -40,6 +49,9 @@ export class Workspace {
   tablesError = $state('');
   tabs = $state<Tab[]>([]);
   activeTabId = $state('');
+  objects = $state<DBObject[]>([]);
+  objectsError = $state('');
+  columns = new SvelteMap<string, Column[] | 'loading' | Error>();
   activeTab = $derived(this.tabs.find(t => t.id === this.activeTabId) ?? null);
 
   constructor(
@@ -80,11 +92,32 @@ export class Workspace {
     await this.loadTables();
   }
 
+  loadColumns(t: TableInfo) {
+    const key = `${t.schema}.${t.name}`;
+    const known = this.columns.get(key);
+    if (known && !(known instanceof Error)) return;
+    this.columns.set(key, 'loading');
+    api.describeTable(this.session.sessionId, t.schema, t.name).then(
+      cols => this.columns.set(key, cols),
+      err => this.columns.set(key, err instanceof Error ? err : new Error(String(err))),
+    );
+  }
+
   async loadTables() {
+    this.columns.clear();
     this.tablesLoading = true;
     this.tablesError = '';
+    this.objectsError = '';
     try {
-      this.tables = await api.listTables(this.session.sessionId, this.schema);
+      const [tables, objects] = await Promise.all([
+        api.listTables(this.session.sessionId, this.schema),
+        api.listObjects(this.session.sessionId, this.schema).catch(err => {
+          this.objectsError = err instanceof Error ? err.message : String(err);
+          return [];
+        }),
+      ]);
+      this.tables = tables;
+      this.objects = objects;
     } catch (err) {
       this.tablesError = err instanceof Error ? err.message : String(err);
       this.tables = [];
@@ -93,16 +126,23 @@ export class Workspace {
     }
   }
 
-  openTable(t: TableInfo, jump?: Filter[]) {
+  openTable(t: TableInfo, jump?: Filter[], view?: TableTab['view']) {
     const existing = this.tabs.find((tab): tab is TableTab => tab.kind === 'table' && tab.schema === t.schema && tab.table === t.name);
     if (existing) {
       if (jump) existing.jump = jump;
+      if (view) existing.view = view;
       this.activeTabId = existing.id;
       return;
     }
-    const tab: TableTab = { id: nextId('table'), kind: 'table', schema: t.schema, table: t.name, tableKind: t.kind, jump };
+    const tab: TableTab = { id: nextId('table'), kind: 'table', schema: t.schema, table: t.name, tableKind: t.kind, jump, view };
     this.tabs.push(tab);
     this.activeTabId = tab.id;
+  }
+
+  takeView(tab: TableTab): TableTab['view'] {
+    const view = tab.view;
+    tab.view = undefined;
+    return view;
   }
 
   takeJump(tab: TableTab): Filter[] | undefined {
@@ -119,6 +159,18 @@ export class Workspace {
     }
     const title = this.session.schemas.length > 1 ? `Diagram (${schema})` : 'Diagram';
     const tab: DiagramTab = { id: nextId('diagram'), kind: 'diagram', title, schema };
+    this.tabs.push(tab);
+    this.activeTabId = tab.id;
+  }
+
+  openDDL(object: DBObject) {
+    const same = (o: DBObject) => o.schema === object.schema && o.name === object.name && o.kind === object.kind && o.detail === object.detail;
+    const existing = this.tabs.find((tab): tab is DDLTab => tab.kind === 'ddl' && same(tab.object));
+    if (existing) {
+      this.activeTabId = existing.id;
+      return;
+    }
+    const tab: DDLTab = { id: nextId('ddl'), kind: 'ddl', title: object.name, object };
     this.tabs.push(tab);
     this.activeTabId = tab.id;
   }

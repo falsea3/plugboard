@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dismiss } from './dismiss';
   import type { Snippet } from 'svelte';
 
   let {
@@ -25,8 +26,7 @@
 
 <svelte:window {onkeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div class="backdrop" onclick={e => e.target === e.currentTarget && onclose()}>
+<div class="backdrop" use:dismiss={onclose}>
   <div class="modal" role="dialog" aria-modal="true" aria-label={title} style:width="{width}px">
     <header>{title}</header>
     <div class="body">{@render children()}</div>

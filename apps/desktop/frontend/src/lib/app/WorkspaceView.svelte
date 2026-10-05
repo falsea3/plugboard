@@ -7,6 +7,8 @@
   import DiagramView from '../diagram/DiagramView.svelte';
   import Icon from '../ui/Icon.svelte';
   import { startDrag } from '../ui/drag';
+  import DdlView from '../objects/DdlView.svelte';
+  import { iconOf } from '../objects/kinds';
 
   let { ws, visible }: { ws: Workspace; visible: boolean } = $props();
 
@@ -42,7 +44,7 @@
             onclick={() => (ws.activeTabId = tab.id)}
             title={tab.kind === 'table' ? `${tab.schema}.${tab.table}` : tab.title}
           >
-            <Icon name={tab.kind === 'query' ? 'code' : tab.kind === 'diagram' ? 'diagram' : tab.tableKind === 'view' ? 'view' : 'table'} size={12} />
+            <Icon name={tab.kind === 'query' ? 'code' : tab.kind === 'diagram' ? 'diagram' : tab.kind === 'ddl' ? iconOf(tab.object) : tab.tableKind === 'view' ? 'view' : 'table'} size={12} />
             <span>{tab.kind === 'table' ? tab.table : tab.title}</span>
             {#if tab.kind === 'table' && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
           </button>
@@ -60,6 +62,8 @@
             <TableView {ws} {tab} active={visible && shown} ondirty={d => (tab.dirty = d)} />
           {:else if tab.kind === 'diagram'}
             <DiagramView {ws} {tab} />
+          {:else if tab.kind === 'ddl'}
+            <DdlView {ws} object={tab.object} />
           {:else}
             <QueryView {ws} {tab} />
           {/if}

@@ -67,3 +67,11 @@ func (a *App) PreviewChanges(sessionID string, cs model.ChangeSet) ([]string, er
 	defer cancel()
 	return s.PreviewChanges(ctx, cs)
 }
+
+func (a *App) RenameTableSQL(sessionID, schema, from, to string) (string, error) {
+	s, err := a.structureEditor(sessionID)
+	if err != nil {
+		return "", err
+	}
+	return s.RenameTableSQL(schema, from, to) + ";", nil
+}

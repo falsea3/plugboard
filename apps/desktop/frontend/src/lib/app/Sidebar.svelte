@@ -1,11 +1,21 @@
 <script lang="ts">
   import type { Workspace } from './workspace.svelte';
+  import { app } from './app.svelte';
+  import { api } from '../api/backend';
   import { FILTER_TABLES_EVENT } from './commands';
   import SessionHeader from './SessionHeader.svelte';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import Select from '../ui/Select.svelte';
-  import type { TableInfo } from '../api/wire';
+  import type { Column, TableInfo } from '../api/wire';
+  import TableNode from './TableNode.svelte';
+  import GridMenu from '../grid/GridMenu.svelte';
+  import { columnChange, treeMenu, treePrompt, treeSQL, type TreePrompt, type TreeTarget } from './tree';
+  import PromptModal from '../ui/PromptModal.svelte';
+  import { copyToClipboard } from '../ui/clipboard';
+  import ObjectGroups from '../objects/ObjectGroups.svelte';
+  import { objectMenu } from '../objects/kinds';
+  import type { DBObject } from '../api/wire';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
@@ -73,6 +83,53 @@
     return () => window.removeEventListener(FILTER_TABLES_EVENT, focus);
   });
 
+  let menu = $state<{ x: number; y: number; target: TreeTarget } | null>(null);
+  let objMenu = $state<{ x: number; y: number; object: DBObject } | null>(null);
+
+  function pickObject(id: string, o: DBObject) {
+    objMenu = null;
+    if (id === 'obj-ddl') ws.openDDL(o);
+    else if (id === 'obj-copy-name') copyToClipboard(o.name);
+    else if (id === 'obj-query') api.objectDDL(ws.session.sessionId, o).then(sql => ws.newQuery(sql), err => app.notify(err));
+  }
+
+  function openMenu(e: MouseEvent, table: TableInfo, column?: Column) {
+    e.preventDefault();
+    menu = { x: e.clientX, y: e.clientY, target: { table, column } };
+  }
+
+  function pick(id: string, target: TreeTarget) {
+    menu = null;
+    const { table, column } = target;
+    const sql = treeSQL(id, ws.session.engine, target);
+    const known = ws.columns.get(`${table.schema}.${table.name}`);
+    const ask = treePrompt(id, target, Array.isArray(known) ? known : []);
+    if (ask) prompt = { ...ask, id, target };
+    else if (id === 'tree-open') ws.openTable(table);
+    else if (id === 'tree-structure') ws.openTable(table, undefined, 'structure');
+    else if (id === 'tree-ddl') ws.openTable(table, undefined, 'ddl');
+    else if (id === 'tree-diagram') ws.openDiagram();
+    else if (id === 'tree-copy-name') copyToClipboard(column?.name ?? table.name);
+    else if (id === 'tree-copy-select' && sql) copyToClipboard(sql);
+    else if (sql) ws.newQuery(sql);
+  }
+
+  let prompt = $state<(TreePrompt & { id: string; target: TreeTarget }) | null>(null);
+
+  async function answer(p: TreePrompt & { id: string; target: TreeTarget }, value: string) {
+    prompt = null;
+    const { table } = p.target;
+    try {
+      const change = columnChange(p.id, p.target, value);
+      const sql = change
+        ? (await api.previewStructure(ws.session.sessionId, change)).map(s => s + ';').join('\n')
+        : await api.renameTableSQL(ws.session.sessionId, table.schema, table.name, value);
+      ws.newQuery(sql);
+    } catch (err) {
+      app.notify(err);
+    }
+  }
+
   function onFilterKey(e: KeyboardEvent) {
     if (e.key === 'Enter' && visible.length > 0) ws.openTable(visible[0]);
     if (e.key === 'Escape') filter = '';
@@ -107,20 +164,19 @@
             <span class="count">{group.items.length}</span>
           </div>
           {#each group.items as t (t.name)}
-            <button
-              class="item"
-              class:active={activeTable?.table === t.name && activeTable?.schema === t.schema}
-              class:picked={picked.includes(keyOf(t))}
+            <TableNode
+              {ws}
+              {t}
+              active={activeTable?.table === t.name && activeTable?.schema === t.schema}
+              picked={picked.includes(keyOf(t))}
               onclick={e => onItemClick(e, t)}
-              title={t.name}
-            >
-              <Icon name={group.icon} size={13} />
-              <span class="label">{t.name}</span>
-            </button>
+              onmenu={(e, column) => openMenu(e, t, column)}
+            />
           {/each}
         {/if}
       {/each}
-      {#if visible.length === 0 && filter}
+      <ObjectGroups {ws} {filter} onmenu={(e, o) => (e.preventDefault(), (objMenu = { x: e.clientX, y: e.clientY, object: o }))} />
+      {#if visible.length === 0 && filter && !ws.objects.some(o => o.name.toLowerCase().includes(filter.trim().toLowerCase()))}
         <div class="note faint">Nothing matches “{filter}”.</div>
       {/if}
     {/if}
@@ -133,6 +189,21 @@
       <button class="btn sm ghost" onclick={() => (picked = [])}>Clear</button>
       <button class="btn sm primary" onclick={openPicked}>Open {pickedShown.length}</button>
     </div>
+  {/if}
+
+  {#if menu}
+    {@const m = menu}
+    <GridMenu items={treeMenu(m.target, ws.readOnly, ws.session.engine.canAlterColumns)} x={m.x} y={m.y} onpick={id => pick(id, m.target)} onclose={() => (menu = null)} />
+  {/if}
+
+  {#if prompt}
+    {@const p = prompt}
+    <PromptModal title={p.title} label={p.label} value={p.value} suggestions={p.suggestions} action="Open SQL" onsubmit={v => answer(p, v)} onclose={() => (prompt = null)} />
+  {/if}
+
+  {#if objMenu}
+    {@const m = objMenu}
+    <GridMenu items={objectMenu()} x={m.x} y={m.y} onpick={id => pickObject(id, m.object)} onclose={() => (objMenu = null)} />
   {/if}
 
   <div class="bottom">
@@ -169,26 +240,7 @@
     text-transform: uppercase;
   }
   .count { font-weight: 500; }
-  .item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    height: 26px;
-    padding: 0 8px;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-2);
-    text-align: left;
-  }
-  .item:hover { background: var(--hover); color: var(--text); }
-  .item.active { background: var(--accent-dim); color: var(--text); }
-  .item :global(.icon) { color: var(--text-3); }
-  .item.active :global(.icon) { color: var(--accent); }
-  .item.picked { background: var(--grid-selected); color: var(--text); }
   .picked-bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-top: 1px solid var(--border-subtle); color: var(--text-2); }
-  .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
   .note { padding: 12px 8px; font-size: 12px; }
   .note.loading { display: flex; align-items: center; gap: 7px; }
   .note.error { color: var(--danger); user-select: text; -webkit-user-select: text; }

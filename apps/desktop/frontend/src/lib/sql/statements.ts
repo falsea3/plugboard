@@ -1,4 +1,5 @@
 import type { SqlSyntax } from '../api/wire';
+import { Blocks, delimiterAt, isWordChar } from './blocks';
 
 export interface StatementRange {
   from: number;
@@ -10,17 +11,37 @@ export function statementRanges(script: string, syntax: SqlSyntax): StatementRan
   const out: StatementRange[] = [];
   const n = script.length;
   let start = 0;
+  let delim = ';';
+  let blocks = new Blocks();
 
   const flush = (end: number) => {
     const raw = script.slice(start, end);
     const lead = raw.length - raw.trimStart().length;
     const text = raw.trim();
     if (text && hasCode(text, syntax)) out.push({ from: start + lead, to: start + lead + text.length, text });
+    blocks = new Blocks();
+  };
+  const word = (i: number) => {
+    let j = i;
+    while (isWordChar(script[j])) j++;
+    blocks.word(script.slice(i, j));
+    return j - 1;
   };
 
   for (let i = 0; i < n; i++) {
     const c = script[i];
-    if (c === "'" || c === '"' || c === '`') {
+    const d = blocks.words === 0 && (c === 'D' || c === 'd') && script.slice(start, i).trim() === '' ? delimiterAt(script, i) : null;
+    if (d) {
+      delim = d.delim;
+      start = d.next;
+      i = d.next;
+    } else if (delim !== ';' && script.startsWith(delim, i)) {
+      flush(i);
+      i += delim.length - 1;
+      start = i + 1;
+    } else if (isWordChar(c) && !isWordChar(script[i - 1])) {
+      i = word(i);
+    } else if (c === "'" || c === '"' || c === '`') {
       i = skipQuoted(script, i, c, escapesBackslash(script, i, syntax));
     } else if (lineCommentAt(script, i, syntax)) {
       i = skipLine(script, i);
@@ -33,7 +54,7 @@ export function statementRanges(script: string, syntax: SqlSyntax): StatementRan
         const end = script.indexOf(tag, i + tag.length);
         i = end < 0 ? n - 1 : end + tag.length - 1;
       }
-    } else if (c === ';') {
+    } else if (c === ';' && delim === ';' && !blocks.open) {
       flush(i);
       start = i + 1;
     }

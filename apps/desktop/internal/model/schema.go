@@ -61,3 +61,11 @@ const (
 	KindJSON     ColumnKind = "json"
 	KindBinary   ColumnKind = "binary"
 )
+
+type DBObject struct {
+	Schema string   `json:"schema"`
+	Name   string   `json:"name"`
+	Kind   string   `json:"kind"`
+	Detail string   `json:"detail,omitempty"`
+	Values []string `json:"values,omitempty"`
+}

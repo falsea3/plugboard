@@ -1,5 +1,5 @@
 import type { Connection, ConnectSecrets, ConnectResult, TestResult, SessionInfo } from './wire';
-import type { TableInfo, Column, Relation, Index, Diagram } from './wireSchema';
+import type { TableInfo, Column, Relation, Index, Diagram, DBObject } from './wireSchema';
 import type { ResultSet, TableQuery, RowCount, TablePage, QueryRun, SyntaxProblem, ChangeSet, ApplyResult, StructureChange } from './wireQuery';
 
 export interface AppInfo {
@@ -57,6 +57,8 @@ export interface GoApp {
   Diagram(sessionId: string, schema: string): Promise<Diagram>;
   Relations(sessionId: string, schema: string): Promise<Relation[]>;
   Indexes(sessionId: string, schema: string, table: string): Promise<Index[]>;
+  ListObjects(sessionId: string, schema: string): Promise<DBObject[]>;
+  ObjectDDL(sessionId: string, obj: DBObject): Promise<string>;
   FetchTablePage(sessionId: string, q: TableQuery): Promise<TablePage>;
   CountRows(sessionId: string, queryId: string, q: TableQuery, exact: boolean): Promise<RowCount>;
   RunQuery(sessionId: string, queryId: string, sql: string): Promise<QueryRun>;
@@ -69,6 +71,7 @@ export interface GoApp {
   PreviewChanges(sessionId: string, cs: ChangeSet): Promise<string[]>;
   ApplyStructure(sessionId: string, queryId: string, sc: StructureChange): Promise<ApplyResult>;
   PreviewStructure(sessionId: string, sc: StructureChange): Promise<string[]>;
+  RenameTableSQL(sessionId: string, schema: string, from: string, to: string): Promise<string>;
   GetSettings(): Promise<Settings>;
   SaveSettings(s: Settings): Promise<Settings>;
   OpenDataFolder(): Promise<void>;
