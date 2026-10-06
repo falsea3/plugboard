@@ -64,12 +64,13 @@ export async function installBridge(page: Page) {
 
     const settings = { theme: 'dark', pageSize: 300, editorFontSize: 13, confirmProdWrites: true, autoUpdate: false };
     const ok = <T>(v: T) => Promise.resolve(v);
+    const fail = (e: { code: string; message: string; detail?: string }) => Promise.reject(new Error(JSON.stringify({ detail: '', ...e })));
     const saved = JSON.parse(localStorage.getItem('bridge-scripts') ?? 'null');
     const files: Record<string, Record<string, string>> = saved?.files ?? { shop: { 'monthly revenue': 'SELECT date_trunc(\'month\', created_at), sum(total)\nFROM orders\nGROUP BY 1;' } };
     const queryTabs: Record<string, { script?: string; saved: string }[]> = saved?.tabs ?? {};
     const keep = () => localStorage.setItem('bridge-scripts', JSON.stringify({ files, tabs: queryTabs }));
     const scripts = (id: string) => (files[id] ??= {});
-    const exists = () => Promise.reject({ code: 'script_exists', message: 'a script with this name already exists' });
+    const exists = () => fail({ code: 'script_exists', message: 'a script with this name already exists' });
 
     (window as any).go = {
       api: {
@@ -85,7 +86,7 @@ export async function installBridge(page: Page) {
             const c = connections.find(x => x.id === id)!;
             return ok({ session: { sessionId: `s-${id}`, connection: c, serverVersion: 'PostgreSQL 17.2', schemas: ['analytics', 'public'], defaultSchema: 'public', engine: engines[c.driver] } });
           },
-          SetReadOnly: () => Promise.reject('not in the demo'),
+          SetReadOnly: () => Promise.reject(new Error('not in the demo')),
           Disconnect: () => ok(undefined),
           ListTables: () => ok(tables),
           DescribeTable: () => ok(columns),
@@ -93,7 +94,7 @@ export async function installBridge(page: Page) {
           OpenLogs: () => ok(undefined),
           Diagram: (_: string, schema: string) => {
             if (schema === 'analytics') {
-              return Promise.reject({ code: 'timeout', message: "db.internal:5432 didn't answer in time.", detail: 'read tcp 10.0.0.2:51234->10.0.0.9:5432: i/o timeout' });
+              return fail({ code: 'timeout', message: "db.internal:5432 didn't answer in time.", detail: 'read tcp 10.0.0.2:51234->10.0.0.9:5432: i/o timeout' });
             }
             const col = (name: string, type: string, primaryKey = false) =>
               ({ name, type, nullable: !primaryKey, default: null, primaryKey, enum: null, kind: type === 'text' ? 'text' : 'number' });

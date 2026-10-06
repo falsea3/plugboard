@@ -10,6 +10,21 @@ describe('errors from the Go side', () => {
     expect((err as AppError).detail).toContain('connection refused');
   });
 
+  it('reads the JSON text the Wails runtime wraps in an Error', () => {
+    const wire = new Error(JSON.stringify({ code: 'refused', message: 'Nothing answers at db:5432.', detail: 'connection refused' }));
+    const err = toError(wire);
+    expect(err).toBeInstanceOf(AppError);
+    expect(err.message).toBe('Nothing answers at db:5432.');
+    expect((err as AppError).code).toBe('refused');
+    expect((err as AppError).detail).toBe('connection refused');
+    expect(toError('{"code":"x","message":"y"}').message).toBe('y');
+  });
+
+  it('leaves text that only looks like JSON alone', () => {
+    expect(toError(new Error('{not json')).message).toBe('{not json');
+    expect(toError(new Error('{"a":1}')).message).toBe('{"a":1}');
+  });
+
   it('keeps plain strings and errors as they are', () => {
     expect(toError('boom').message).toBe('boom');
     const e = new Error('x');

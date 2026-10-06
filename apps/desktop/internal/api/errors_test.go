@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db"
+	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func TestErrorsGetACodeAndAPlainMessage(t *testing.T) {
@@ -51,5 +53,16 @@ func TestAnyCodedErrorKeepsItsCode(t *testing.T) {
 	got := describe(err)
 	if got.Code != "disk_full" || got.Message != "Export: there's no space left for the export" {
 		t.Errorf("describe = %+v", got)
+	}
+}
+
+func TestFormatErrorIsJSONText(t *testing.T) {
+	out, ok := FormatError(apperr.New("conn_lost", "lost")).(string)
+	if !ok {
+		t.Fatalf("FormatError gave %T: the runtime wraps anything but a string as [object Object]", out)
+	}
+	var got model.AppError
+	if err := json.Unmarshal([]byte(out), &got); err != nil || got.Code != "conn_lost" || got.Message != "Lost" {
+		t.Fatalf("FormatError = %s (%v)", out, err)
 	}
 }

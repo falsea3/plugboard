@@ -18,12 +18,30 @@ export class AppError extends Error {
   }
 }
 
-export function toError(err: unknown): Error {
-  if (err instanceof Error) return err;
-  if (err && typeof err === 'object' && 'message' in err) {
-    const e = err as { message: unknown; code?: unknown; detail?: unknown };
-    return new AppError(String(e.message), String(e.code ?? 'error'), String(e.detail ?? ''));
+type Coded = { message: unknown; code?: unknown; detail?: unknown };
+
+function codedText(text: string): Coded | null {
+  if (!text.startsWith('{')) return null;
+  try {
+    const v: unknown = JSON.parse(text);
+    return v && typeof v === 'object' && 'message' in v && 'code' in v ? (v as Coded) : null;
+  } catch {
+    return null;
   }
+}
+
+function coded(err: unknown): Coded | null {
+  if (err instanceof AppError) return null;
+  if (err instanceof Error) return codedText(err.message);
+  if (typeof err === 'string') return codedText(err);
+  if (err && typeof err === 'object' && 'message' in err) return err as Coded;
+  return null;
+}
+
+export function toError(err: unknown): Error {
+  const c = coded(err);
+  if (c) return new AppError(String(c.message), String(c.code ?? 'error'), String(c.detail ?? ''));
+  if (err instanceof Error) return err;
   return new Error(String(err));
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -43,7 +44,13 @@ var transport = []rule{
 	{"tls_unsupported", as[tls.RecordHeaderError], say("The server didn't answer in TLS. Turn SSL off for this connection, or check the port.")},
 }
 
-func FormatError(err error) any { return describe(err) }
+func FormatError(err error) any {
+	data, merr := json.Marshal(describe(err))
+	if merr != nil {
+		return err.Error()
+	}
+	return string(data)
+}
 
 func describe(err error) model.AppError {
 	raw := err.Error()

@@ -8,6 +8,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Errors say what went wrong again.** A failed connection, and every other error, showed only “[object Object]”. You now see the message, for example “Nothing answers at 127.0.0.1:55432”, with the server's own text under it.
+
 ## [0.6.3] - 2026-10-06
 
 ### Added
