@@ -24,7 +24,10 @@ func (a *App) SaveConnection(c model.Connection) (model.Connection, error) {
 }
 
 func (a *App) DeleteConnection(id string) error {
-	return a.connections.Delete(id)
+	if err := a.connections.Delete(id); err != nil {
+		return err
+	}
+	return a.scripts.ForgetTabs(id)
 }
 
 func (a *App) TestConnection(c model.Connection) model.TestResult {

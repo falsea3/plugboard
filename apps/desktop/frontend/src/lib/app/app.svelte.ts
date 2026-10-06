@@ -185,7 +185,7 @@ class AppState {
       const ws = new Workspace(session, err => this.notify(err));
       this.workspaces.push(ws);
       this.activate(ws);
-      await ws.loadTables();
+      await Promise.all([ws.scripts.restore(), ws.loadTables()]);
       return true;
     } catch (err) {
       this.notify(err);
@@ -226,7 +226,8 @@ class AppState {
       this.pendingClose = { ws, tabId, tables: [tab.table] };
       return;
     }
-    ws.closeTab(tabId);
+    if (tab?.kind === 'query') ws.scripts.requestClose(tab);
+    else ws.closeTab(tabId);
   }
 
   requestClose(ws: Workspace) {

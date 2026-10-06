@@ -32,6 +32,8 @@
   let resultIndex = $state(0);
   let editorHeight = $state(260);
 
+  $effect(() => untrack(() => ws.scripts.track(tab.id, () => editor?.state.doc.toString() ?? tab.sql)));
+
   const tableNames = $derived(ws.tables.map(t => t.name));
 
   $effect(() => {

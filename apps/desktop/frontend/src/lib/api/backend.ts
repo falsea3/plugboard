@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, NewIndex, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, NewIndex, QueryTabState, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -73,6 +73,14 @@ export const api = {
   renameTableSQL: (sessionId: string, schema: string, from: string, to: string) => call(a => a.RenameTableSQL(sessionId, schema, from, to)),
   createIndexSQL: (sessionId: string, schema: string, table: string, idx: NewIndex) => call(a => a.CreateIndexSQL(sessionId, schema, table, idx)),
   dropIndexSQL: (sessionId: string, schema: string, table: string, name: string) => call(a => a.DropIndexSQL(sessionId, schema, table, name)),
+  listScripts: (connId: string) => call(a => a.ListScripts(connId)),
+  readScript: (connId: string, name: string) => call(a => a.ReadScript(connId, name)),
+  createScript: (connId: string, name: string, sql: string) => call(a => a.CreateScript(connId, name, sql)),
+  writeScript: (connId: string, name: string, sql: string) => call(a => a.WriteScript(connId, name, sql)),
+  renameScript: (connId: string, from: string, to: string) => call(a => a.RenameScript(connId, from, to)),
+  deleteScript: (connId: string, name: string) => call(a => a.DeleteScript(connId, name)),
+  queryTabs: (connId: string) => call(a => a.QueryTabs(connId)),
+  saveQueryTabs: (connId: string, tabs: QueryTabState[]) => call(a => a.SaveQueryTabs(connId, tabs)),
   getSettings: () => call(a => a.GetSettings()),
   saveSettings: (s: Settings) => call(a => a.SaveSettings(s)),
   openDataFolder: () => call(a => a.OpenDataFolder()),

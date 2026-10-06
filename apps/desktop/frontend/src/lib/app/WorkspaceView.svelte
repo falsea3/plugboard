@@ -9,6 +9,8 @@
   import { startDrag } from '../ui/drag';
   import DdlView from '../objects/DdlView.svelte';
   import { iconOf } from '../objects/kinds';
+  import ScriptDialogs from '../scripts/Dialogs.svelte';
+  import { isDirty } from '../scripts/names';
 
   let { ws, visible }: { ws: Workspace; visible: boolean } = $props();
 
@@ -47,6 +49,7 @@
             <Icon name={tab.kind === 'query' ? 'code' : tab.kind === 'diagram' ? 'diagram' : tab.kind === 'ddl' ? iconOf(tab.object) : tab.tableKind === 'view' ? 'view' : 'table'} size={12} />
             <span>{tab.kind === 'table' ? tab.table : tab.title}</span>
             {#if tab.kind === 'table' && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
+            {#if tab.kind === 'query' && isDirty(tab)}<span class="dirty-dot" title="Unsaved changes"></span>{/if}
           </button>
           <button class="tab-close" onclick={() => app.requestCloseTab(ws, tab.id)} title="Close (⌘W or middle-click)" aria-label="Close tab"><Icon name="x" size={12} /></button>
         </div>
@@ -83,6 +86,8 @@
     </div>
   </section>
 </div>
+
+{#if visible}<ScriptDialogs {ws} />{/if}
 
 <style>
   .workspace { position: absolute; inset: 0; display: flex; }

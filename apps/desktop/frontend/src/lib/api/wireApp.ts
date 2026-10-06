@@ -41,6 +41,14 @@ export interface UpdateCheck {
   error?: string;
 }
 
+export interface QueryTabState {
+  title: string;
+  sql: string;
+  script?: string;
+  saved: string;
+  active?: boolean;
+}
+
 export interface GoApp {
   AppInfo(): Promise<AppInfo>;
   ListConnections(): Promise<Connection[]>;
@@ -74,6 +82,14 @@ export interface GoApp {
   RenameTableSQL(sessionId: string, schema: string, from: string, to: string): Promise<string>;
   CreateIndexSQL(sessionId: string, schema: string, table: string, idx: NewIndex): Promise<string>;
   DropIndexSQL(sessionId: string, schema: string, table: string, name: string): Promise<string>;
+  ListScripts(connId: string): Promise<string[]>;
+  ReadScript(connId: string, name: string): Promise<string>;
+  CreateScript(connId: string, name: string, sql: string): Promise<void>;
+  WriteScript(connId: string, name: string, sql: string): Promise<void>;
+  RenameScript(connId: string, from: string, to: string): Promise<void>;
+  DeleteScript(connId: string, name: string): Promise<void>;
+  QueryTabs(connId: string): Promise<QueryTabState[]>;
+  SaveQueryTabs(connId: string, tabs: QueryTabState[]): Promise<void>;
   GetSettings(): Promise<Settings>;
   SaveSettings(s: Settings): Promise<Settings>;
   OpenDataFolder(): Promise<void>;

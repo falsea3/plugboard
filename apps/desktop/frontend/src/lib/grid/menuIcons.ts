@@ -41,6 +41,10 @@ const BY_ID: Record<string, IconName> = {
   'obj-ddl': 'ddl',
   'obj-query': 'code',
   'obj-copy-name': 'copy',
+  'script-open': 'code',
+  'script-rename': 'pencil',
+  'script-copy-name': 'copy',
+  'script-delete': 'trash',
 };
 
 export function menuIcon(id: string): IconName | undefined {

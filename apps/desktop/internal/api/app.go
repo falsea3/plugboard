@@ -23,6 +23,7 @@ type App struct {
 	ctx         context.Context
 	connections *store.Connections
 	settings    *store.Settings
+	scripts     *store.Scripts
 	menu        *appMenu
 
 	mu          sync.Mutex
@@ -37,6 +38,7 @@ func NewApp() *App {
 	return &App{
 		connections: store.NewConnections(dir, store.NewSecrets(dir)),
 		settings:    store.NewSettings(dir),
+		scripts:     store.NewScripts(dir),
 		sessions:    map[string]db.Session{},
 		queries:     map[string]context.CancelFunc{},
 		changedKeys: map[string]*sshtunnel.HostKeyChangedError{},

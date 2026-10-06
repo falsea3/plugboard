@@ -40,3 +40,11 @@ type Settings struct {
 func DefaultSettings() Settings {
 	return Settings{Theme: ThemeSystem, PageSize: 300, EditorFontSize: 13, ConfirmProdWrites: true}
 }
+
+type QueryTab struct {
+	Title  string `json:"title"`
+	SQL    string `json:"sql"`
+	Script string `json:"script,omitempty"`
+	Saved  string `json:"saved"`
+	Active bool   `json:"active,omitempty"`
+}

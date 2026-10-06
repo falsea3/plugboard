@@ -1,5 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { api, type Column, type DBObject, type Filter, type Index, type SessionInfo, type TableInfo } from '../api/backend';
+import { Scripts } from '../scripts/store.svelte';
+import { untitled, type ScriptTab } from '../scripts/names';
 
 export type TableTab = {
   id: string;
@@ -12,11 +14,9 @@ export type TableTab = {
   view?: 'structure' | 'ddl';
 };
 
-export type QueryTab = {
+export type QueryTab = ScriptTab & {
   id: string;
   kind: 'query';
-  title: string;
-  sql: string;
 };
 
 export type DiagramTab = {
@@ -53,6 +53,7 @@ export class Workspace {
   objectsError = $state('');
   columns = new SvelteMap<string, Column[] | 'loading' | Error>();
   indexes = new SvelteMap<string, Index[] | 'loading' | Error>();
+  scripts: Scripts;
   activeTab = $derived(this.tabs.find(t => t.id === this.activeTabId) ?? null);
 
   constructor(
@@ -61,6 +62,7 @@ export class Workspace {
   ) {
     this.session = session;
     this.schema = session.defaultSchema;
+    this.scripts = new Scripts(this, notify);
   }
 
   get connection() {
@@ -175,24 +177,33 @@ export class Workspace {
   }
 
   newQuery(sql = '') {
-    const n = this.tabs.filter(t => t.kind === 'query').length + 1;
-    const tab: QueryTab = { id: nextId('query'), kind: 'query', title: `Query ${n}`, sql };
-    this.tabs.push(tab);
-    this.activeTabId = tab.id;
+    const title = untitled(this.tabs.flatMap(t => (t.kind === 'query' ? [t.title] : [])));
+    this.addQuery({ title, sql, saved: sql }, true);
+  }
+
+  addQuery(fields: ScriptTab, show: boolean): QueryTab {
+    this.tabs.push({ id: nextId('query'), kind: 'query', ...fields });
+    const tab = this.tabs[this.tabs.length - 1] as QueryTab;
+    if (show) this.activeTabId = tab.id;
+    this.scripts.persist();
+    return tab;
   }
 
   saveQuery(id: string, sql: string) {
     const tab = this.tabs.find(t => t.id === id);
-    if (tab?.kind === 'query') tab.sql = sql;
+    if (tab?.kind !== 'query' || tab.sql === sql) return;
+    tab.sql = sql;
+    this.scripts.persist();
   }
 
   closeTab(id: string) {
     const i = this.tabs.findIndex(t => t.id === id);
     if (i < 0) return;
-    this.tabs.splice(i, 1);
+    const [tab] = this.tabs.splice(i, 1);
     if (this.activeTabId === id) {
       this.activeTabId = this.tabs[Math.min(i, this.tabs.length - 1)]?.id ?? '';
     }
+    if (tab.kind === 'query') this.scripts.persist();
   }
 
   selectTabByOffset(delta: number) {

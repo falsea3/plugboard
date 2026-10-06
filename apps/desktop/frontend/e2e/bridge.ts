@@ -64,6 +64,12 @@ export async function installBridge(page: Page) {
 
     const settings = { theme: 'dark', pageSize: 300, editorFontSize: 13, confirmProdWrites: true, autoUpdate: false };
     const ok = <T>(v: T) => Promise.resolve(v);
+    const saved = JSON.parse(localStorage.getItem('bridge-scripts') ?? 'null');
+    const files: Record<string, Record<string, string>> = saved?.files ?? { shop: { 'monthly revenue': 'SELECT date_trunc(\'month\', created_at), sum(total)\nFROM orders\nGROUP BY 1;' } };
+    const queryTabs: Record<string, { script?: string; saved: string }[]> = saved?.tabs ?? {};
+    const keep = () => localStorage.setItem('bridge-scripts', JSON.stringify({ files, tabs: queryTabs }));
+    const scripts = (id: string) => (files[id] ??= {});
+    const exists = () => Promise.reject({ code: 'script_exists', message: 'a script with this name already exists' });
 
     (window as any).go = {
       api: {
@@ -167,6 +173,20 @@ export async function installBridge(page: Page) {
             ok(`CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX "${idx.name}" ON "${schema}"."${table}" (${idx.columns.map(c => `"${c}"`).join(', ')});`),
           DropIndexSQL: (_: string, schema: string, _t: string, name: string) => ok(`DROP INDEX "${schema}"."${name}";`),
           RenameTableSQL: (_: string, schema: string, from: string, to: string) => ok(`ALTER TABLE "${schema}"."${from}" RENAME TO "${to}";`),
+          ListScripts: (id: string) => ok(Object.keys(scripts(id)).sort((a, b) => a.localeCompare(b))),
+          ReadScript: (id: string, name: string) => ok(scripts(id)[name]),
+          CreateScript: (id: string, name: string, sql: string) => (name in scripts(id) ? exists() : ok(void ((scripts(id)[name] = sql), keep()))),
+          WriteScript: (id: string, name: string, sql: string) => ok(void ((scripts(id)[name] = sql), keep())),
+          RenameScript: (id: string, from: string, to: string) => {
+            if (to in scripts(id)) return exists();
+            scripts(id)[to] = scripts(id)[from];
+            delete scripts(id)[from];
+            return ok(void keep());
+          },
+          DeleteScript: (id: string, name: string) => ok(void (delete scripts(id)[name], keep())),
+          QueryTabs: (id: string) =>
+            ok((queryTabs[id] ?? []).map(t => (t.script ? (t.script in scripts(id) ? { ...t, saved: scripts(id)[t.script] } : { ...t, script: '', saved: '' }) : t))),
+          SaveQueryTabs: (id: string, tabs: { script?: string; saved: string }[]) => ok(void ((queryTabs[id] = tabs), keep())),
           ChooseSQLiteFile: () => ok(''),
           ChooseSSHKeyFile: () => ok(''),
           TrustHostKey: () => ok(undefined),

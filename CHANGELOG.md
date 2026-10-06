@@ -8,6 +8,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Saved scripts.** Save a query as a script with ⌘S. Scripts belong to their connection and are listed under *Scripts* in the sidebar, where you can open, rename or delete them.
+- **Closing an edited query asks first.** You can *Save* (or *Save as…* for a new query), choose *Don’t save*, or cancel. A dot on the tab marks unsaved changes.
+- **Query tabs survive a restart.** Open SQL editor tabs and their text are kept per connection. They come back the next time you connect, including after quitting the app.
+
 ## [0.6.2] - 2026-10-05
 
 ### Changed

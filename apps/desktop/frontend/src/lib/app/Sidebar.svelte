@@ -9,6 +9,7 @@
   import TableNode from './TableNode.svelte';
   import TreeMenus from './TreeMenus.svelte';
   import ObjectGroups from '../objects/ObjectGroups.svelte';
+  import ScriptList from '../scripts/ScriptList.svelte';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
@@ -124,7 +125,8 @@
         {/if}
       {/each}
       <ObjectGroups {ws} {filter} onmenu={(e, o) => menus?.openObject(e, o)} />
-      {#if visible.length === 0 && filter && !ws.objects.some(o => o.name.toLowerCase().includes(filter.trim().toLowerCase()))}
+      <ScriptList {ws} {filter} />
+      {#if visible.length === 0 && filter && !ws.objects.some(o => o.name.toLowerCase().includes(filter.trim().toLowerCase())) && !ws.scripts.names.some(n => n.toLowerCase().includes(filter.trim().toLowerCase()))}
         <div class="note faint">Nothing matches “{filter}”.</div>
       {/if}
     {/if}

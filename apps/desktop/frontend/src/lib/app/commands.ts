@@ -43,7 +43,8 @@ export function runCommand(command: string) {
       if (ws) app.requestClose(ws);
       break;
     case 'commit':
-      window.dispatchEvent(new CustomEvent(COMMIT_EVENT));
+      if (ws?.activeTab?.kind === 'query') ws.scripts.save(ws.activeTab);
+      else window.dispatchEvent(new CustomEvent(COMMIT_EVENT));
       break;
     case 'add-row':
       window.dispatchEvent(new CustomEvent(ADD_ROW_EVENT));
@@ -87,7 +88,7 @@ const SHORTCUTS: Record<string, string> = {
 };
 
 function overlayOpen() {
-  return app.editing !== undefined || app.passwordFor !== null || app.switcherOpen || app.settingsOpen !== null || app.pendingClose !== null;
+  return app.editing !== undefined || app.passwordFor !== null || app.switcherOpen || app.settingsOpen !== null || app.pendingClose !== null || !!app.active?.scripts.busy;
 }
 
 export function handleShortcut(e: KeyboardEvent) {
