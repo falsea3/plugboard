@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-10-06
+
 ### Added
 
 - **Saved scripts.** Save a query as a script with ⌘S. Scripts belong to their connection and are listed under *Scripts* in the sidebar, where you can open, rename or delete them.
