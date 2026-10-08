@@ -36,8 +36,7 @@
     <button role="tab" aria-selected={mode === 'structure'} class:on={mode === 'structure'} onclick={() => (mode = 'structure')}><Icon name="columns" size={13} />Structure</button>
     <button role="tab" aria-selected={mode === 'ddl'} class:on={mode === 'ddl'} onclick={() => (mode = 'ddl')}><Icon name="ddl" size={13} />DDL</button>
   </div>
-  <span class="title mono faint">{schema}.<span class="muted">{table}</span></span>
-  <span style="flex:1"></span>
+  <span class="title mono faint" title={`${schema}.${table}`}>{schema}.<span class="muted">{table}</span></span>
   {#if mode === 'ddl'}
   <button class="btn sm ghost" onclick={oncopy}><Icon name="copy" size={13} />Copy</button>
   <button class="btn sm ghost" onclick={onquery}><Icon name="code" size={13} />Open in query</button>
@@ -61,13 +60,15 @@
     flex: none;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     height: 36px;
-    padding: 0 10px;
+    min-width: 0;
+    padding: 0 8px;
+    overflow: hidden;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
   }
-  .title { margin-left: 4px; font-size: 12px; }
+  .title { flex: 1 1 auto; min-width: 0; margin-left: 2px; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
   .filter-btn.on { color: var(--accent); background: var(--accent-dim); }
   .count {
     min-width: 16px;
@@ -84,9 +85,14 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    flex: 0 1 auto;
+    min-width: 12px;
+    max-width: 150px;
+    overflow: hidden;
     font-size: 11.5px;
     color: var(--text-3);
     white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .segmented {
     display: flex;
@@ -100,7 +106,7 @@
     align-items: center;
     gap: 5px;
     height: 22px;
-    padding: 0 10px;
+    padding: 0 8px;
     border: 0;
     border-radius: 5px;
     background: transparent;
@@ -109,4 +115,10 @@
     font-weight: 500;
   }
   .segmented button.on { background: var(--bg); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+
+  @container (max-width: 500px) {
+    .toolbar { gap: 4px; padding-inline: 6px; }
+    .segmented button { gap: 4px; padding-inline: 5px; }
+    .ro-reason { max-width: 18px; font-size: 0; }
+  }
 </style>

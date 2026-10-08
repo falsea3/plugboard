@@ -37,6 +37,7 @@
     onsort,
     onsortby,
     onfilter,
+    onselect,
   }: {
     ws: Workspace;
     tab: TableTab;
@@ -53,6 +54,7 @@
     onsort: (column: string) => void;
     onsortby: (sort: Sort) => void;
     onfilter: (column: string, pick: FilterPick) => void;
+    onselect?: (selected: { value: CellValue; column: ResultColumn } | null) => void;
   } = $props();
 
   const sessionId = untrack(() => ws.session.sessionId);
@@ -266,7 +268,11 @@
     {cellMenu}
     {headerMenu}
     {onmenu}
-    onselect={(value, column) => (selected = column && value !== undefined ? { value, column } : null)}
+    onselect={(value, column) => {
+      const next = column && value !== undefined ? { value, column } : null;
+      selected = next;
+      onselect?.(next);
+    }}
   />
 </div>
 {#if edits.dirty}

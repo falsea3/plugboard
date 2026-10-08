@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, tick, untrack } from 'svelte';
-  import { api, type Column } from '../api/backend';
+  import { api, type CellValue, type Column, type ResultColumn } from '../api/backend';
   import { app } from '../app/app.svelte';
   import type { TableTab, Workspace } from '../app/workspace.svelte';
   import { TableEdits } from './edits.svelte';
@@ -17,7 +17,13 @@
   import Spinner from '../ui/Spinner.svelte';
   import FilterBar, { newFilter, noValue, type FilterRow } from './FilterBar.svelte';
 
-  let { ws, tab, active, ondirty }: { ws: Workspace; tab: TableTab; active: boolean; ondirty: (dirty: boolean) => void } = $props();
+  let { ws, tab, active, ondirty, onselect }: {
+    ws: Workspace;
+    tab: TableTab;
+    active: boolean;
+    ondirty: (dirty: boolean) => void;
+    onselect: (selected: { value: CellValue; column: ResultColumn } | null) => void;
+  } = $props();
 
   const sessionId = untrack(() => ws.session.sessionId);
   const pageSize = app.settings.pageSize;
@@ -67,6 +73,10 @@
 
   $effect(() => {
     ondirty(edits.dirty || structureDirty);
+  });
+
+  $effect(() => {
+    if (mode !== 'data') onselect(null);
   });
 
   async function loadColumns() {
@@ -244,6 +254,7 @@
           {onsort}
           onsortby={sortBy}
           onfilter={addFilter}
+          {onselect}
         />
       {:else if rows.loading}
         <div class="waiting faint"><Spinner />Loading rows…</div>

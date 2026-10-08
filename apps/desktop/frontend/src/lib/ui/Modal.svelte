@@ -1,6 +1,14 @@
 <script lang="ts">
+  import { onDestroy, tick } from 'svelte';
   import { dismiss } from './dismiss';
   import type { Snippet } from 'svelte';
+
+  const returnFocus =
+    typeof document !== 'undefined' &&
+    document.activeElement instanceof HTMLElement &&
+    document.activeElement !== document.body
+      ? document.activeElement
+      : null;
 
   let {
     title,
@@ -22,6 +30,16 @@
       onclose();
     }
   }
+
+  onDestroy(() => {
+    if (typeof document === 'undefined') return;
+    tick().then(() => {
+      const active = document.activeElement;
+      if (returnFocus?.isConnected && (active === document.body || !active?.isConnected)) {
+        returnFocus.focus({ preventScroll: true });
+      }
+    });
+  });
 </script>
 
 <svelte:window {onkeydown} />
