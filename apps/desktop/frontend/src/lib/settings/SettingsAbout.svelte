@@ -80,9 +80,9 @@
   .about { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 8px; }
   .about img { border-radius: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); }
   .about h2 { margin: 14px 0 2px; font-size: 20px; }
-  .update-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 6px 0 2px; font-size: 12px; color: var(--text-2); min-height: 24px; }
+  .update-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin: 6px 0 2px; font-size: 12px; color: var(--text-2); min-height: 24px; }
   .up-to-date { display: inline-flex; align-items: center; gap: 6px; color: var(--ok); }
-  .update-error { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--danger); }
+  .update-error { max-width: 320px; color: var(--danger); }
   .version { margin: 0; font-size: 12.5px; color: var(--text-3); }
   .blurb { max-width: 430px; margin: 16px 0 18px; color: var(--text-2); line-height: 1.55; }
   .details {

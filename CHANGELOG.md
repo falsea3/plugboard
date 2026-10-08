@@ -8,6 +8,16 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **A Value panel for table cells.** Select a cell to inspect its full value beside the table. Resize the panel or hide it with the Value button.
+- **Reorder tabs by dragging.** Move open table tabs and connection tabs where you want them in their respective tab bars.
+
+### Fixed
+
+- **Grid keyboard focus after closing the value editor.** Closing it with Esc returns focus to the selected cell, so keyboard navigation works immediately.
+- **Update check errors stay readable.** Long error messages wrap instead of being cut off.
+
 ## [0.6.4] - 2026-10-06
 
 ### Fixed
