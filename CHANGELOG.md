@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-10-10
+
 ### Fixed
 
 - **Sidebar menus speak each database's language.** *Delete all rows…* is `TRUNCATE` on ClickHouse and Cassandra (a bare `DELETE` fails there), and dropping a Cassandra column writes valid CQL. Cassandra's sidebar can create and drop indexes and rename key columns, and *Rename table…* is gone where the database can't rename tables.
