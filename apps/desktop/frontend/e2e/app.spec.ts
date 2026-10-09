@@ -92,3 +92,36 @@ test('opens What’s new from the update banner every time', async ({ page }) =>
     await expect(page.getByRole('dialog')).toHaveCount(0);
   }
 });
+
+test('shows the selected cell in the Value panel of a table tab only', async ({ page }) => {
+  await connect(page);
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  const panel = page.getByRole('region', { name: 'Selected cell value' });
+  await expect(panel).toContainText('Select a cell to view its value');
+  await page.getByRole('grid').getByText('ann.novak1@example.com').click();
+  await expect(panel.locator('pre')).toHaveText('ann.novak1@example.com');
+  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await expect(panel).toBeHidden();
+  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await expect(panel.locator('pre')).toHaveText('ann.novak1@example.com');
+  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await expect(panel).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Value', exact: true })).toHaveCount(0);
+});
+
+test('reorders tabs by dragging and keeps a click a click', async ({ page }) => {
+  await connect(page);
+  const tabs = page.getByRole('navigation', { name: 'Open tabs' });
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await expect(tabs.getByRole('tab')).toHaveText(['Query 1', 'Query 2', 'Query 3']);
+  const from = (await tabs.getByRole('tab', { name: 'Query 1' }).boundingBox())!;
+  const to = (await tabs.getByRole('tab', { name: 'Query 3' }).boundingBox())!;
+  await page.mouse.move(from.x + 30, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width - 10, to.y + to.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await expect(tabs.getByRole('tab')).toHaveText(['Query 2', 'Query 3', 'Query 1']);
+  await expect(tabs.getByRole('tab', { name: 'Query 3' })).toHaveAttribute('aria-selected', 'true');
+  await tabs.getByRole('tab', { name: 'Query 2' }).getByRole('button').first().click();
+  await expect(tabs.getByRole('tab', { name: 'Query 2' })).toHaveAttribute('aria-selected', 'true');
+});

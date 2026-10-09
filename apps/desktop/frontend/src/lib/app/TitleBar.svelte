@@ -1,24 +1,23 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { app } from './app.svelte';
-  import type { Workspace } from './workspace.svelte';
   import { connectionTarget } from '../ui/format';
   import Icon from '../ui/Icon.svelte';
-  import { createDragGhost, type DragGhost } from '../ui/dragGhost';
+  import { DragOrder } from '../ui/dragOrder.svelte';
+  import { moveItem } from '../ui/reorder';
 
   const envColor = $derived(app.active?.connection.env ? `var(--env-${app.active.connection.env})` : 'transparent');
 
   let sessions = $state<HTMLElement>();
   let moreLeft = $state(false);
   let moreRight = $state(false);
-  let draggingId = $state('');
-  let dropTarget = $state<{ id: string; position: 'before' | 'after'; x: number; top: number; height: number } | null>(null);
-  let pointerDrag: { id: string; pointerId: number; x: number; y: number } | null = null;
-  let dragGhost: DragGhost | null = null;
-  let suppressClickId = '';
-  let suppressClickTimer: ReturnType<typeof setTimeout> | undefined;
-
-  let workspaces = $derived(app.workspaces);
+  const order = new DragOrder({
+    list: () => sessions,
+    attr: 'ws',
+    ids: () => app.workspaces.map(ws => ws.id),
+    move: (id, drop) => moveItem(app.workspaces, id, drop),
+    edgeScroll: true,
+  });
 
   function measure() {
     if (!sessions) return;
@@ -50,120 +49,10 @@
     sessions.scrollLeft += e.deltaY;
     e.preventDefault();
   }
-
-  function dropTargetAt(x: number) {
-    if (!sessions) return null;
-    const items = app.workspaces.filter(ws => ws.id !== draggingId);
-    if (items.length === 0) return null;
-    const bounds = sessions.getBoundingClientRect();
-
-    if (x <= bounds.left) {
-      sessions.scrollLeft = 0;
-      return { id: items[0].id, position: 'before' as const, x: bounds.left, top: bounds.top + 2, height: bounds.height - 4 };
-    }
-    if (x >= bounds.right) {
-      sessions.scrollLeft = sessions.scrollWidth;
-      return { id: items[items.length - 1].id, position: 'after' as const, x: bounds.right - 2, top: bounds.top + 2, height: bounds.height - 4 };
-    }
-
-    const nodes = new Map<string, HTMLElement>();
-    for (const node of sessions.querySelectorAll<HTMLElement>('[data-ws]')) {
-      if (node.dataset.ws) nodes.set(node.dataset.ws, node);
-    }
-    let lastVisible: Workspace | undefined;
-    for (const ws of items) {
-      const node = nodes.get(ws.id);
-      if (!node) continue;
-      const rect = node.getBoundingClientRect();
-      if (rect.right <= bounds.left || rect.left >= bounds.right) continue;
-      if (x < rect.left + rect.width / 2) {
-        return { id: ws.id, position: 'before' as const, x: Math.max(bounds.left, rect.left - 3), top: bounds.top + 2, height: bounds.height - 4 };
-      }
-      lastVisible = ws;
-    }
-    if (!lastVisible) return null;
-    const rect = nodes.get(lastVisible.id)?.getBoundingClientRect();
-    return rect ? { id: lastVisible.id, position: 'after' as const, x: Math.min(bounds.right - 2, rect.right + 1), top: bounds.top + 2, height: bounds.height - 4 } : null;
-  }
-
-  function reorderWorkspace(id: string, target: NonNullable<typeof dropTarget>) {
-    const from = app.workspaces.findIndex(ws => ws.id === id);
-    if (from < 0) return;
-    const [dragged] = app.workspaces.splice(from, 1);
-    if (!dragged) return;
-    let to = app.workspaces.findIndex(ws => ws.id === target.id);
-    if (to < 0) {
-      app.workspaces.splice(Math.min(from, app.workspaces.length), 0, dragged);
-      return;
-    }
-    if (target.position === 'after') to++;
-    app.workspaces.splice(to, 0, dragged);
-  }
-
-  function onWorkspacePointerDown(e: PointerEvent, id: string) {
-    if (!e.isPrimary || e.button !== 0) return;
-    if (suppressClickTimer) clearTimeout(suppressClickTimer);
-    suppressClickTimer = undefined;
-    suppressClickId = '';
-    pointerDrag = { id, pointerId: e.pointerId, x: e.clientX, y: e.clientY };
-  }
-
-  function onWorkspacePointerMove(e: PointerEvent) {
-    const drag = pointerDrag;
-    if (!drag || drag.pointerId !== e.pointerId) return;
-    if (!draggingId && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 5) return;
-    if (!draggingId) {
-      const source = sessions?.querySelector<HTMLElement>(`[data-ws="${drag.id}"]`);
-      if (source) dragGhost = createDragGhost(source, drag.x, drag.y);
-    }
-    draggingId = drag.id;
-    dragGhost?.move(e.clientX, e.clientY);
-    dropTarget = dropTargetAt(e.clientX);
-  }
-
-  function onWorkspacePointerUp(e: PointerEvent) {
-    const drag = pointerDrag;
-    if (!drag || drag.pointerId !== e.pointerId) return;
-    if (draggingId === drag.id) {
-      const target = dropTargetAt(e.clientX);
-      if (target) reorderWorkspace(drag.id, target);
-      suppressClickId = drag.id;
-      suppressClickTimer = setTimeout(() => {
-        suppressClickId = '';
-        suppressClickTimer = undefined;
-      });
-    }
-    dragGhost?.destroy();
-    dragGhost = null;
-    pointerDrag = null;
-    draggingId = '';
-    dropTarget = null;
-  }
-
-  function onWorkspacePointerCancel(e: PointerEvent) {
-    if (pointerDrag?.pointerId !== e.pointerId) return;
-    dragGhost?.destroy();
-    dragGhost = null;
-    pointerDrag = null;
-    draggingId = '';
-    dropTarget = null;
-  }
-
-  function onWorkspaceClick(e: MouseEvent, ws: Workspace) {
-    if (suppressClickId === ws.id) {
-      e.preventDefault();
-      suppressClickId = '';
-      if (suppressClickTimer) clearTimeout(suppressClickTimer);
-      suppressClickTimer = undefined;
-      return;
-    }
-    app.activate(ws);
-  }
 </script>
 
-<svelte:window onpointermove={onWorkspacePointerMove} onpointerup={onWorkspacePointerUp} onpointercancel={onWorkspacePointerCancel} />
+<svelte:window onpointermove={order.pointermove} onpointerup={order.pointerup} onpointercancel={order.pointercancel} />
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <header class="titlebar drag" style:--stripe={envColor}>
   <div class="traffic-space"></div>
 
@@ -178,18 +67,18 @@
   </button>
 
   <nav class="sessions no-drag" class:more-left={moreLeft} class:more-right={moreRight} aria-label="Open connections" bind:this={sessions} {onwheel} onscroll={measure}>
-    {#each workspaces as ws (ws.id)}
+    {#each app.workspaces as ws (ws.id)}
       {@const c = ws.connection}
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
         class="pill env-{c.env || 'none'}"
         class:active={app.active === ws}
-        class:dragging={draggingId === ws.id}
+        class:dragging={order.dragging === ws.id}
         data-ws={ws.id}
         onmousedown={e => e.button === 1 && e.preventDefault()}
         onauxclick={e => e.button === 1 && app.requestClose(ws)}
       >
-        <button class="pill-main" onpointerdown={e => onWorkspacePointerDown(e, ws.id)} ondragstart={e => e.preventDefault()} onclick={e => onWorkspaceClick(e, ws)} title="{c.name} — {connectionTarget(c)}">
+        <button class="pill-main" onpointerdown={e => order.down(e, ws.id)} ondragstart={e => e.preventDefault()} onclick={e => order.clicked(e, ws.id) && app.activate(ws)} title="{c.name} — {connectionTarget(c)}">
           <span class="dot" class:tunnel-down={ws.tunnel !== 'ok'} title={ws.tunnel !== 'ok' ? 'SSH connection lost — reconnecting' : undefined}></span>
           <span class="name">{c.name}</span>
           {#if ws.tabs.length > 0}<span class="count" title="{ws.tabs.length} open {ws.tabs.length === 1 ? 'tab' : 'tabs'}">{ws.tabs.length}</span>{/if}
@@ -201,8 +90,9 @@
       </div>
     {/each}
   </nav>
-  {#if dropTarget}
-    <span class="drop-indicator" style:left="{dropTarget.x}px" style:top="{dropTarget.top}px" style:height="{dropTarget.height}px" aria-hidden="true"></span>
+  {#if order.indicator}
+    {@const d = order.indicator}
+    <span class="drop-indicator" style:left="{d.x}px" style:top="{d.top}px" style:height="{d.height}px" aria-hidden="true"></span>
   {/if}
   <button class="add no-drag" onclick={() => (app.switcherOpen = true)} title="Switch connection (⌘K)" aria-label="Switch connection">
     <Icon name="plus" size={13} />

@@ -114,7 +114,8 @@ test('keeps a submenu that opens to the left while the mouse crosses over to it'
   await connect(page);
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   await expect(page.getByRole('grid').getByText('ann.novak1@example.com')).toBeVisible();
-  await page.mouse.click(1230, 220, { button: 'right' });
+  const box = (await page.getByRole('grid').boundingBox())!;
+  await page.mouse.click(box.x + box.width - 40, box.y + 60, { button: 'right' });
   const parent = page.getByRole('menuitem', { name: 'Open SQL in new query' });
   await parent.hover();
   await expect(page.locator('.menu.sub')).toHaveClass(/flip/);

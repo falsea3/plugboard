@@ -10,8 +10,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **A Value panel for table cells.** Select a cell to inspect its full value beside the table. Resize the panel or hide it with the Value button.
-- **Reorder tabs by dragging.** Move open table tabs and connection tabs where you want them in their respective tab bars.
+- **A Value panel for table cells.** In a table tab, select a cell to see its full value beside the table. Resize the panel or hide it with the Value button.
+- **Reorder tabs by dragging.** Drag a tab, or a connection in the title bar, to a new place. The new order of query tabs is kept with the connection.
 
 ### Fixed
 

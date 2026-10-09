@@ -1,5 +1,5 @@
 import { SvelteMap } from 'svelte/reactivity';
-import { api, type Column, type DBObject, type Filter, type Index, type SessionInfo, type TableInfo } from '../api/backend';
+import { api, type CellValue, type Column, type DBObject, type Filter, type Index, type ResultColumn, type SessionInfo, type TableInfo } from '../api/backend';
 import { Scripts } from '../scripts/store.svelte';
 import { untitled, type ScriptTab } from '../scripts/names';
 
@@ -12,6 +12,7 @@ export type TableTab = {
   dirty?: boolean;
   jump?: Filter[];
   view?: 'structure' | 'ddl';
+  selected?: { value: CellValue; column: ResultColumn } | null;
 };
 
 export type QueryTab = ScriptTab & {
@@ -144,6 +145,10 @@ export class Workspace {
     const view = tab.view;
     tab.view = undefined;
     return view;
+  }
+
+  selectCell(tab: TableTab, selected: TableTab['selected']) {
+    tab.selected = selected;
   }
 
   takeJump(tab: TableTab): Filter[] | undefined {

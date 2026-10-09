@@ -37,7 +37,6 @@
     onsort,
     onsortby,
     onfilter,
-    onselect,
   }: {
     ws: Workspace;
     tab: TableTab;
@@ -54,14 +53,12 @@
     onsort: (column: string) => void;
     onsortby: (sort: Sort) => void;
     onfilter: (column: string, pick: FilterPick) => void;
-    onselect?: (selected: { value: CellValue; column: ResultColumn } | null) => void;
   } = $props();
 
   const sessionId = untrack(() => ws.session.sessionId);
   const features = untrack(() => ws.session.engine);
 
   let grid = $state<DataGrid>();
-  let selected = $state<{ value: CellValue; column: ResultColumn } | null>(null);
   let saving = $state(false);
   let saveError = $state('');
   let preview = $state<{ sql: string[]; confirm: boolean } | null>(null);
@@ -268,17 +265,13 @@
     {cellMenu}
     {headerMenu}
     {onmenu}
-    onselect={(value, column) => {
-      const next = column && value !== undefined ? { value, column } : null;
-      selected = next;
-      onselect?.(next);
-    }}
+    onselect={(value, column) => ws.selectCell(tab, column && value !== undefined ? { value, column } : null)}
   />
 </div>
 {#if edits.dirty}
   <PendingBar count={edits.count} error={saveError} {saving} ondiscard={discard} onpreview={() => showPreview(false)} oncommit={commit} />
 {:else}
-  <TableStatus {rows} {filtered} {selected} onopen={showValue} />
+  <TableStatus {rows} {filtered} selected={tab.selected ?? null} onopen={showValue} />
 {/if}
 
 {#if valueEdit}
