@@ -27,14 +27,14 @@
     "@phosphor-icons/core": "^2.1.1",
     "@sveltejs/vite-plugin-svelte": "^5.1.1",
     "codemirror": "^6.0.2",
-    "simple-icons": "^16.33.0",
+    "simple-icons": "^16.34.0",
     "svelte": "^5.57.1",
     "vite": "^6.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/node": "^22.20.4",
+    "@types/node": "^22.20.5",
     "svelte-check": "^4.7.6",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"
