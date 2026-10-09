@@ -129,6 +129,35 @@ func versionOf(info string) string {
 	return strings.TrimSpace(name + " " + version)
 }
 
+func (s *Session) KeyCounts(ctx context.Context) (map[string]int64, error) {
+	c, err := s.client(0, true)
+	if err != nil {
+		return nil, err
+	}
+	info, err := c.Info(ctx, "keyspace").Result()
+	if err != nil {
+		return nil, classify(err)
+	}
+	return keyCounts(info), nil
+}
+
+func keyCounts(info string) map[string]int64 {
+	out := map[string]int64{}
+	for line := range strings.Lines(info) {
+		name, stats, ok := strings.Cut(strings.TrimSpace(line), ":")
+		n, isDB := strings.CutPrefix(name, "db")
+		if !ok || !isDB {
+			continue
+		}
+		for _, kv := range strings.Split(stats, ",") {
+			if v, ok := strings.CutPrefix(kv, "keys="); ok {
+				out[n], _ = strconv.ParseInt(v, 10, 64)
+			}
+		}
+	}
+	return out
+}
+
 func databasesOf(ctx context.Context, c *goredis.Client, info string) int {
 	if v, err := c.ConfigGet(ctx, "databases").Result(); err == nil {
 		if n, err := strconv.Atoi(v["databases"]); err == nil && n > 0 {

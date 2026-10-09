@@ -1,5 +1,5 @@
 <script lang="ts" module>
-  export type SelectOption<T> = { value: T; label: string; hint?: string; disabled?: boolean };
+  export type SelectOption<T> = { value: T; label: string; hint?: string; disabled?: boolean; muted?: boolean };
 </script>
 
 <script lang="ts" generics="T extends string | number">

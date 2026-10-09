@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { keyRows, scanPattern } from './folders';
+import { databaseOptions, keyRows, scanPattern } from './folders';
 
 const k = (name: string, type = 'string') => ({ name, key: name, type });
 const keys = [k('shop:customer:1', 'hash'), k('shop:customer:2', 'hash'), k('shop:config:currency'), k('stats'), k('shop:events', 'stream')];
@@ -38,5 +38,19 @@ describe('scanPattern', () => {
     expect(scanPattern(' user ')).toBe('*user*');
     expect(scanPattern('user:*')).toBe('user:*');
     expect(scanPattern('a\\b')).toBe('*a\\\\b*');
+  });
+});
+
+describe('databaseOptions', () => {
+  it('puts databases with keys first and dims the empty ones', () => {
+    const opts = databaseOptions(['0', '1', '2', '9', '10'], { '9': 7, '0': 1200 });
+    expect(opts.map(o => `${o.label}|${o.hint}|${o.muted}`)).toEqual([
+      'Database 0|1,200 keys|false',
+      'Database 9|7 keys|false',
+      'Database 1|empty|true',
+      'Database 2|empty|true',
+      'Database 10|empty|true',
+    ]);
+    expect(databaseOptions(['3'], { '3': 1 })[0].hint).toBe('1 key');
   });
 });

@@ -17,7 +17,7 @@
 
   let sidebarWidth = $state(240);
   let valueWidth = $state(320);
-  let valueShown = $state(true);
+  let valueShown = $state(false);
 
   const tableTab = $derived(ws.activeTab?.kind === 'table' ? ws.activeTab : null);
 

@@ -2,6 +2,9 @@ package cassandra
 
 import (
 	"math/big"
+
+	gocql "github.com/apache/cassandra-gocql-driver/v2"
+	"gopkg.in/inf.v0"
 	"testing"
 	"time"
 
@@ -31,6 +34,34 @@ func TestNormalize(t *testing.T) {
 		{map[string]any{"city": "Austin", "zip": nil}, "frozen<address>", `{"city":"Austin","zip":null}`},
 		{float32(0.1), "float", 0.1},
 	}
+	dec := inf.NewDec(12900, 2)
+	cases = append(cases,
+		struct {
+			in   any
+			typ  string
+			want any
+		}{dec, "decimal", "129.00"},
+		struct {
+			in   any
+			typ  string
+			want any
+		}{&dec, "decimal", "129.00"},
+		struct {
+			in   any
+			typ  string
+			want any
+		}{&gocql.Duration{Months: 14, Days: 2, Nanoseconds: 3*int64(time.Hour) + 5e6}, "duration", "1y2mo2d3h5ms"},
+		struct {
+			in   any
+			typ  string
+			want any
+		}{map[string]*inf.Dec{"a": inf.NewDec(15, 1)}, "map<text, decimal>", `{"a":"1.5"}`},
+		struct {
+			in   any
+			typ  string
+			want any
+		}{struct{ A int }{1}, "", `{"A":1}`},
+	)
 	for _, c := range cases {
 		if got := normalize(c.in, c.typ); got != c.want {
 			t.Errorf("normalize(%#v, %s) = %#v, want %#v", c.in, c.typ, got, c.want)

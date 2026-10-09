@@ -38,6 +38,16 @@ func (a *App) ReadKey(sessionID, db, key, cursor string) (model.KeyValue, error)
 	return k.ReadKey(ctx, db, key, cursor)
 }
 
+func (a *App) KeyCounts(sessionID string) (map[string]int64, error) {
+	k, err := a.keyStore(sessionID)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(a.context(), catalogTimeout)
+	defer cancel()
+	return k.KeyCounts(ctx)
+}
+
 func (a *App) EditKey(sessionID, db string, e model.KeyEdit) error {
 	k, err := a.keyStore(sessionID)
 	if err != nil {

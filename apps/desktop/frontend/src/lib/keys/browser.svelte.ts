@@ -6,6 +6,7 @@ const PAGE = 500;
 
 export class KeyBrowser {
   keys = $state<KeyInfo[]>([]);
+  counts = $state<Record<string, number>>({});
   filter = $state('');
   done = $state(true);
   loading = $state(false);
@@ -26,6 +27,10 @@ export class KeyBrowser {
     this.done = false;
     this.error = '';
     this.loading = false;
+    api.keyCounts(this.sessionId()).then(
+      c => (this.counts = c),
+      () => {},
+    );
     await this.more();
   }
 

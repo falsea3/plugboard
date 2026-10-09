@@ -87,6 +87,7 @@ export interface GoApp {
   ScanKeys(sessionId: string, db: string, pattern: string, cursor: string, count: number): Promise<KeyPage>;
   ReadKey(sessionId: string, db: string, key: string, cursor: string): Promise<KeyValue>;
   EditKey(sessionId: string, db: string, edit: KeyEdit): Promise<void>;
+  KeyCounts(sessionId: string): Promise<Record<string, number>>;
   ListScripts(connId: string): Promise<string[]>;
   ReadScript(connId: string, name: string): Promise<string>;
   CreateScript(connId: string, name: string, sql: string): Promise<void>;

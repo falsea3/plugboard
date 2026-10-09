@@ -118,6 +118,7 @@
         class:active={i === active}
         class:chosen={o.value === value}
         class:disabled={o.disabled}
+        class:muted={o.muted}
         role="option"
         aria-selected={o.value === value}
         aria-disabled={o.disabled}
@@ -176,7 +177,7 @@
     white-space: nowrap;
   }
   .option.active { background: var(--accent); color: var(--on-accent); }
-  .option.disabled { color: var(--text-3); }
+  .option.disabled, .option.muted { color: var(--text-3); }
   .check { flex: none; display: inline-flex; width: 14px; justify-content: center; }
   .label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
   .hint { color: var(--text-3); font-size: 11.5px; }

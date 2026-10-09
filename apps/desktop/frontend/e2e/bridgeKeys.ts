@@ -31,6 +31,7 @@ export async function installKeys(page: Page, engine: unknown) {
         id === 'cache'
           ? ok({ session: { sessionId: 's-cache', connection: cache, serverVersion: 'Redis 7.4.0', schemas: Array.from({ length: 16 }, (_, i) => String(i)), defaultSchema: '0', engine } })
           : connect(id, secrets),
+      KeyCounts: () => ok({ '0': Object.keys(store).length, '9': 3 }),
       ScanKeys: (_: string, _db: string, pattern: string) =>
         ok({ keys: Object.keys(store).filter(k => glob(pattern).test(k)).map(k => ({ name: k, key: k, type: store[k].type })), cursor: '0', done: true }),
       ReadKey: (_: string, _db: string, key: string) => {

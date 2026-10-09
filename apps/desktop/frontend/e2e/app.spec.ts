@@ -93,10 +93,12 @@ test('opens What’s new from the update banner every time', async ({ page }) =>
   }
 });
 
-test('shows the selected cell in the Value panel of a table tab only', async ({ page }) => {
+test('shows the selected cell in the Value panel, hidden until asked, on table tabs only', async ({ page }) => {
   await connect(page);
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const panel = page.getByRole('region', { name: 'Selected cell value' });
+  await expect(panel).toBeHidden();
+  await page.getByRole('button', { name: 'Value', exact: true }).click();
   await expect(panel).toContainText('Select a cell to view its value');
   await page.getByRole('grid').getByText('ann.novak1@example.com').click();
   await expect(panel.locator('pre')).toHaveText('ann.novak1@example.com');

@@ -11,6 +11,7 @@
   import ObjectGroups from '../objects/ObjectGroups.svelte';
   import ScriptList from '../scripts/ScriptList.svelte';
   import KeyTree from '../keys/KeyTree.svelte';
+  import { databaseOptions } from '../keys/folders';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
@@ -91,7 +92,12 @@
 
   {#if ws.session.schemas.length > 1}
     <div class="schema">
-      <Select value={ws.schema} options={ws.session.schemas.map(s => ({ value: s, label: ws.session.engine.keyValue ? `Database ${s}` : s }))} onchange={s => ws.setSchema(s)} aria-label={ws.session.engine.keyValue ? 'Database' : 'Schema'} />
+      <Select
+        value={ws.schema}
+        options={ws.session.engine.keyValue ? databaseOptions(ws.session.schemas, ws.keys.counts) : ws.session.schemas.map(s => ({ value: s, label: s }))}
+        onchange={s => ws.setSchema(s)}
+        aria-label={ws.session.engine.keyValue ? 'Database' : 'Schema'}
+      />
     </div>
   {/if}
 

@@ -1,5 +1,6 @@
 import type { KeyInfo } from '../api/wire';
 import type { MenuItem } from '../grid/grid';
+import type { SelectOption } from '../ui/Select.svelte';
 
 export type KeyRow =
   | { kind: 'folder'; path: string; name: string; depth: number; count: number; open: boolean }
@@ -61,4 +62,12 @@ export function keyMenu(readOnly: boolean): MenuItem[] {
     { id: 'key-copy-name', label: 'Copy name' },
   ];
   return readOnly ? items : [...items, 'sep', { id: 'key-delete', label: 'Delete…', danger: true }];
+}
+
+export function databaseOptions(databases: string[], counts: Record<string, number>): SelectOption<string>[] {
+  const keys = (db: string) => counts[db] ?? 0;
+  const label = (n: number) => (n === 1 ? '1 key' : `${n.toLocaleString('en-US')} keys`);
+  return [...databases]
+    .sort((a, b) => Number(keys(b) > 0) - Number(keys(a) > 0) || Number(a) - Number(b))
+    .map(db => ({ value: db, label: `Database ${db}`, hint: keys(db) > 0 ? label(keys(db)) : 'empty', muted: keys(db) === 0 }));
 }

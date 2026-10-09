@@ -238,3 +238,37 @@ func TestStructureStatementsRun(t *testing.T) {
 	run(t, s, s.DropIndexSQL("shop", "scratch", "scratch_cc"))
 	run(t, s, "DROP TABLE shop.scratch")
 }
+
+func TestEveryTypeShowsAndRoundTrips(t *testing.T) {
+	s := open(t, conn(t))
+	ctx := context.Background()
+	res := run(t, s, "SELECT * FROM shop.orders_by_customer")
+	if len(res[0].Rows) == 0 {
+		t.Fatal("no orders")
+	}
+	run(t, s, `CREATE TABLE IF NOT EXISTS shop.types (k int PRIMARY KEY, d duration, n decimal, m map<text, decimal>, v varint, u timeuuid, t time, dt date, ip inet);
+		INSERT INTO shop.types (k, d, n, m, v, u, t, dt, ip) VALUES (1, 1y2mo3d4h5m, 129.00, {'a': 1.50}, 123456789012345678901234567890, now(), '10:30:05.5', '2026-01-03', '10.0.0.1')`)
+	defer run(t, s, "DROP TABLE shop.types")
+	page, err := s.TablePage(ctx, model.TableQuery{Schema: "shop", Table: "types"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	row := map[string]any{}
+	for i, c := range page.Result.Columns {
+		row[c.Name] = page.Result.Rows[0][i]
+	}
+	want := map[string]any{"d": "1y2mo3d4h5m", "n": "129.00", "m": `{"a":"1.50"}`, "v": "123456789012345678901234567890", "t": "10:30:05.5", "dt": "2026-01-03", "ip": "10.0.0.1"}
+	for k, w := range want {
+		if row[k] != w {
+			t.Errorf("%s = %#v, want %#v", k, row[k], w)
+		}
+	}
+	values := map[string]any{}
+	for _, k := range []string{"d", "n", "m", "v", "t", "dt", "ip"} {
+		values[k] = row[k]
+	}
+	cs := model.ChangeSet{Schema: "shop", Table: "types", Changes: []model.RowChange{{Kind: model.ChangeUpdate, Key: map[string]any{"k": row["k"]}, Values: values}}}
+	if _, err := s.ApplyChanges(ctx, cs); err != nil {
+		t.Fatalf("writing the shown values back: %v", err)
+	}
+}

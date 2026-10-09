@@ -10,8 +10,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.7.2] - 2026-10-10
 
+### Changed
+
+- **The Value panel starts hidden.** Open it with the Value button beside the tabs; it stays open while you work.
+- **Redis shows which databases hold keys.** The database list says how many keys each one has, puts those first and dims the empty ones.
+
 ### Fixed
 
+- **Cassandra tables with `decimal` or `duration` columns no longer crash Plugboard.** Decimals show with all their digits, durations as CQL writes them (`1y2mo3d4h`), and both save back as shown.
 - **Sidebar menus speak each database's language.** *Delete all rows…* is `TRUNCATE` on ClickHouse and Cassandra (a bare `DELETE` fails there), and dropping a Cassandra column writes valid CQL. Cassandra's sidebar can create and drop indexes and rename key columns, and *Rename table…* is gone where the database can't rename tables.
 - **Redis key menus have icons** like every other menu.
 

@@ -54,6 +54,7 @@ type KeyStore interface {
 	ScanKeys(ctx context.Context, db, pattern, cursor string, count int) (model.KeyPage, error)
 	ReadKey(ctx context.Context, db, key, cursor string) (model.KeyValue, error)
 	EditKey(ctx context.Context, db string, e model.KeyEdit) error
+	KeyCounts(ctx context.Context) (map[string]int64, error)
 }
 
 var ErrNotSupported = apperr.New("not_supported", "this database doesn't support that")

@@ -11,6 +11,9 @@ const item = (page: Page, name: string) => tree(page).getByRole('treeitem').filt
 test('browses keys by folder and edits a hash field', async ({ page }) => {
   await connectCache(page);
   await expect(page.getByRole('button', { name: 'Database', exact: true })).toContainText('Database 0');
+  await page.getByRole('button', { name: 'Database', exact: true }).click();
+  await expect(page.getByRole('option')).toHaveText([/Database 0\s*6 keys/, /Database 9\s*3 keys/, /Database 1\s*empty/, ...Array(13).fill(/empty/)]);
+  await page.keyboard.press('Escape');
   await item(page, 'shop').click();
   await item(page, 'customer').click();
   await item(page, '1').click();

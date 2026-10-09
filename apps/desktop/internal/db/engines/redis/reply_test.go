@@ -43,3 +43,10 @@ func TestReplyShapes(t *testing.T) {
 		t.Errorf("double = %v", got)
 	}
 }
+
+func TestKeyCounts(t *testing.T) {
+	got := keyCounts("# Keyspace\r\ndb0:keys=17,expires=1,avg_ttl=0,subexpiry=0\r\ndb9:keys=7,expires=0,avg_ttl=0\r\n")
+	if len(got) != 2 || got["0"] != 17 || got["9"] != 7 {
+		t.Fatalf("keyCounts = %v", got)
+	}
+}

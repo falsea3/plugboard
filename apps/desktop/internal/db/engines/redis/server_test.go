@@ -27,7 +27,12 @@ func open(t *testing.T, readOnly bool) *redis.Session {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { s.Close() })
+	t.Cleanup(func() {
+		if !readOnly {
+			s.Run(context.Background(), "SELECT "+scratch+"\nFLUSHDB")
+		}
+		s.Close()
+	})
 	return s
 }
 
@@ -64,6 +69,10 @@ func TestInfoAndDatabases(t *testing.T) {
 	}
 	if len(info.Schemas) < 16 || info.DefaultSchema != scratch || !info.Engine.KeyValue {
 		t.Errorf("info = %+v", info)
+	}
+	run(t, s, "SET t:count 1")
+	if counts, err := s.KeyCounts(context.Background()); err != nil || counts[scratch] != 1 || counts["0"] == 0 {
+		t.Errorf("key counts = %v, %v", counts, err)
 	}
 }
 

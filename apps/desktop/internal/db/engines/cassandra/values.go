@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	gocql "github.com/apache/cassandra-gocql-driver/v2"
 	"math"
 	"math/big"
 	"net"
@@ -89,13 +90,23 @@ func normalize(v any, cqlType string) any {
 		return x.String()
 	case net.IP:
 		return x.String()
+	case gocql.Duration:
+		return durationText(x)
 	case fmt.Stringer:
 		return x.String()
 	}
+	if rv.CanAddr() {
+		if s, ok := rv.Addr().Interface().(fmt.Stringer); ok {
+			return s.String()
+		}
+	}
 	switch rv.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Map, reflect.Struct:
-		b, err := json.Marshal(plain(v))
-		if err == nil {
+	case reflect.Slice, reflect.Array, reflect.Map:
+		if b, err := json.Marshal(plain(v)); err == nil {
+			return string(b)
+		}
+	case reflect.Struct:
+		if b, err := json.Marshal(v); err == nil {
 			return string(b)
 		}
 	}
@@ -154,7 +165,7 @@ func plain(v any) any {
 		}
 		return out
 	}
-	n := normalize(rv.Interface(), "")
+	n := normalize(v, "")
 	if s, ok := n.(string); ok {
 		if f, err := strconv.ParseFloat(s, 64); err == nil && rv.Kind() >= reflect.Int && rv.Kind() <= reflect.Float64 {
 			return f
@@ -188,4 +199,36 @@ func jsonFor(col model.Column, text string) (string, error) {
 		return "", fmt.Errorf("%s takes JSON, like [1, 2] or {\"a\": 1}", col.Name)
 	}
 	return t, nil
+}
+
+func durationText(d gocql.Duration) string {
+	if d.Months == 0 && d.Days == 0 && d.Nanoseconds == 0 {
+		return "0s"
+	}
+	var b strings.Builder
+	neg := d.Months < 0 || d.Days < 0 || d.Nanoseconds < 0
+	abs := func(n int64) int64 {
+		if n < 0 {
+			return -n
+		}
+		return n
+	}
+	if neg {
+		b.WriteByte('-')
+	}
+	units := []struct {
+		n    int64
+		name string
+	}{
+		{abs(int64(d.Months)) / 12, "y"}, {abs(int64(d.Months)) % 12, "mo"}, {abs(int64(d.Days)), "d"},
+		{abs(d.Nanoseconds) / int64(time.Hour), "h"}, {abs(d.Nanoseconds) % int64(time.Hour) / int64(time.Minute), "m"},
+		{abs(d.Nanoseconds) % int64(time.Minute) / int64(time.Second), "s"}, {abs(d.Nanoseconds) % int64(time.Second) / int64(time.Millisecond), "ms"},
+		{abs(d.Nanoseconds) % int64(time.Millisecond) / int64(time.Microsecond), "us"}, {abs(d.Nanoseconds) % int64(time.Microsecond), "ns"},
+	}
+	for _, u := range units {
+		if u.n > 0 {
+			fmt.Fprintf(&b, "%d%s", u.n, u.name)
+		}
+	}
+	return b.String()
 }
