@@ -4,6 +4,8 @@ const ENDS_OTHER = new Set(['IF', 'LOOP', 'WHILE', 'REPEAT']);
 export class Blocks {
   words = 0;
   private create = false;
+  private begin = false;
+  private batch = false;
   private routine = false;
   private depth = 0;
   private prev = '';
@@ -11,8 +13,13 @@ export class Blocks {
   word(w: string) {
     const u = w.toUpperCase();
     this.words++;
-    if (this.words === 1) this.create = u === 'CREATE';
-    else if (!this.routine) this.routine = this.create && this.words <= 8 && ROUTINES.has(u);
+    if (this.words === 1) {
+      this.create = u === 'CREATE';
+      this.begin = u === 'BEGIN';
+    } else if (this.begin && this.words <= 3 && u === 'BATCH') this.batch = true;
+    else if (this.batch) {
+      if (this.prev === 'APPLY' && u === 'BATCH') this.batch = this.begin = false;
+    } else if (!this.routine) this.routine = this.create && this.words <= 8 && ROUTINES.has(u);
     else if (u === 'END') this.depth--;
     else if (this.prev === 'END' && ENDS_OTHER.has(u)) this.depth++;
     else if (u === 'BEGIN' || (u === 'CASE' && this.prev !== 'END')) this.depth++;
@@ -20,7 +27,7 @@ export class Blocks {
   }
 
   get open(): boolean {
-    return this.routine && this.depth > 0;
+    return (this.routine && this.depth > 0) || this.batch;
   }
 }
 

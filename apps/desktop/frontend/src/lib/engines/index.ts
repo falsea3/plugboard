@@ -4,12 +4,13 @@ import { mysql } from './mysql';
 import { postgres } from './postgres';
 import { redis } from './redis';
 import { clickhouse } from './clickhouse';
+import { cassandra } from './cassandra';
 import { sqlite } from './sqlite';
 
 export type { Engine } from './engine';
-export { clickhouse, mysql, postgres, redis, sqlite };
+export { cassandra, clickhouse, mysql, postgres, redis, sqlite };
 
-export const ENGINES: Engine[] = [postgres, mysql, sqlite, clickhouse, redis];
+export const ENGINES: Engine[] = [postgres, mysql, sqlite, clickhouse, cassandra, redis];
 
 export function engine(driver: Driver): Engine {
   const e = ENGINES.find(e => e.driver === driver);

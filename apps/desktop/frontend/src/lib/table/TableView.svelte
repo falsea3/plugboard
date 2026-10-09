@@ -65,7 +65,7 @@
   });
   const canEdit = $derived(!readOnlyReason && columns.length > 0 && !!page);
   const structureReadOnlyReason = $derived(
-    ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : !ws.session.engine.editable ? 'Change the structure in the SQL editor' : '',
+    ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : !ws.session.engine.structureEditable ? 'Change the structure in the SQL editor' : '',
   );
 
   $effect(() => {
@@ -104,6 +104,10 @@
   }
 
   function sortBy(next: { column: string; desc: boolean } | null) {
+    if (next && !ws.session.engine.sortable) {
+      app.notify('This database returns rows in primary key order and can’t sort a table — sort in the SQL editor within one partition.', 'info');
+      return;
+    }
     if (!canLeavePage()) return;
     sort = next;
     rows.load('start');

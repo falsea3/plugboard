@@ -53,6 +53,7 @@ describe('lintSql', () => {
     expect(marked('-- note\n  upadte t set a = 1')).toEqual(['upadte']);
     expect(messages('vaccum analyze')).toEqual(['Unknown statement “vaccum” — did you mean VACUUM?']);
     expect(messages('frobnicate the database')).toEqual([]);
+    expect(messages('list roles; exists table t; system flush logs')).toEqual([]);
   });
 
   it('keeps checking the rest when a quote is left open', () => {

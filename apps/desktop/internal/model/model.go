@@ -14,6 +14,7 @@ const (
 	SQLite     Driver = "sqlite"
 	Redis      Driver = "redis"
 	ClickHouse Driver = "clickhouse"
+	Cassandra  Driver = "cassandra"
 )
 
 type Connection struct {
@@ -114,6 +115,8 @@ type EngineFeatures struct {
 	ColumnTypes        []string  `json:"columnTypes"`
 	KeyValue           bool      `json:"keyValue"`
 	Editable           bool      `json:"editable"`
+	StructureEditable  bool      `json:"structureEditable"`
+	Sortable           bool      `json:"sortable"`
 }
 
 type SQLSyntax struct {

@@ -3,60 +3,119 @@
     "name": "sqlite trigger body",
     "engine": "sqlite",
     "in": "create trigger t after update on a begin update b set n = n + 1; insert into log values (1); end; select 2",
-    "want": ["create trigger t after update on a begin update b set n = n + 1; insert into log values (1); end", "select 2"]
+    "want": [
+      "create trigger t after update on a begin update b set n = n + 1; insert into log values (1); end",
+      "select 2"
+    ]
   },
   {
     "name": "case expression inside a trigger",
     "engine": "sqlite",
     "in": "CREATE TRIGGER t BEFORE INSERT ON a BEGIN SELECT CASE WHEN new.n < 0 THEN RAISE(ABORT, 'no') END; END; select 3",
-    "want": ["CREATE TRIGGER t BEFORE INSERT ON a BEGIN SELECT CASE WHEN new.n < 0 THEN RAISE(ABORT, 'no') END; END", "select 3"]
+    "want": [
+      "CREATE TRIGGER t BEFORE INSERT ON a BEGIN SELECT CASE WHEN new.n < 0 THEN RAISE(ABORT, 'no') END; END",
+      "select 3"
+    ]
   },
   {
     "name": "begin as a transaction still splits",
     "engine": "sqlite",
     "in": "begin; update a set n = 1; end; select 1",
-    "want": ["begin", "update a set n = 1", "end", "select 1"]
+    "want": [
+      "begin",
+      "update a set n = 1",
+      "end",
+      "select 1"
+    ]
   },
   {
     "name": "a name that starts like a keyword",
     "engine": "sqlite",
     "in": "create trigger begin_end after insert on a begin select 1; end; select 2",
-    "want": ["create trigger begin_end after insert on a begin select 1; end", "select 2"]
+    "want": [
+      "create trigger begin_end after insert on a begin select 1; end",
+      "select 2"
+    ]
   },
   {
     "name": "mysql procedure with nested blocks",
     "engine": "mysql",
     "in": "CREATE DEFINER=`root`@`%` PROCEDURE p(IN x INT)\nBEGIN\n  IF x > 0 THEN\n    SELECT 1;\n  ELSE\n    BEGIN SELECT 2; END;\n  END IF;\n  WHILE x > 0 DO SET x = x - 1; END WHILE;\n  CASE x WHEN 0 THEN SELECT 3; ELSE SELECT 4; END CASE;\nEND;\nSELECT 5",
-    "want": ["CREATE DEFINER=`root`@`%` PROCEDURE p(IN x INT)\nBEGIN\n  IF x > 0 THEN\n    SELECT 1;\n  ELSE\n    BEGIN SELECT 2; END;\n  END IF;\n  WHILE x > 0 DO SET x = x - 1; END WHILE;\n  CASE x WHEN 0 THEN SELECT 3; ELSE SELECT 4; END CASE;\nEND", "SELECT 5"]
+    "want": [
+      "CREATE DEFINER=`root`@`%` PROCEDURE p(IN x INT)\nBEGIN\n  IF x > 0 THEN\n    SELECT 1;\n  ELSE\n    BEGIN SELECT 2; END;\n  END IF;\n  WHILE x > 0 DO SET x = x - 1; END WHILE;\n  CASE x WHEN 0 THEN SELECT 3; ELSE SELECT 4; END CASE;\nEND",
+      "SELECT 5"
+    ]
   },
   {
     "name": "mysql trigger with an if",
     "engine": "mysql",
     "in": "create trigger t before update on a for each row begin if new.n < 0 then set new.n = 0; end if; end; select 1",
-    "want": ["create trigger t before update on a for each row begin if new.n < 0 then set new.n = 0; end if; end", "select 1"]
+    "want": [
+      "create trigger t before update on a for each row begin if new.n < 0 then set new.n = 0; end if; end",
+      "select 1"
+    ]
   },
   {
     "name": "mysql routine without a block",
     "engine": "mysql",
     "in": "create function f(a int) returns int deterministic return a + 1; select f(1)",
-    "want": ["create function f(a int) returns int deterministic return a + 1", "select f(1)"]
+    "want": [
+      "create function f(a int) returns int deterministic return a + 1",
+      "select f(1)"
+    ]
   },
   {
     "name": "delimiter from a dump",
     "engine": "mysql",
     "in": "DELIMITER $$\nCREATE PROCEDURE p() BEGIN SELECT 1; END$$\nDELIMITER ;\nSELECT 2;",
-    "want": ["CREATE PROCEDURE p() BEGIN SELECT 1; END", "SELECT 2"]
+    "want": [
+      "CREATE PROCEDURE p() BEGIN SELECT 1; END",
+      "SELECT 2"
+    ]
   },
   {
     "name": "postgres atomic body",
     "engine": "postgres",
     "in": "create function f(a int) returns int language sql begin atomic select a + 1; end; select 2",
-    "want": ["create function f(a int) returns int language sql begin atomic select a + 1; end", "select 2"]
+    "want": [
+      "create function f(a int) returns int language sql begin atomic select a + 1; end",
+      "select 2"
+    ]
   },
   {
     "name": "an unclosed block runs to the end",
     "engine": "sqlite",
     "in": "create trigger t after update on a begin select 1; select 2",
-    "want": ["create trigger t after update on a begin select 1; select 2"]
+    "want": [
+      "create trigger t after update on a begin select 1; select 2"
+    ]
+  },
+  {
+    "name": "cql batch",
+    "engine": "cassandra",
+    "in": "BEGIN BATCH\nINSERT INTO t (k) VALUES (1);\nUPDATE t SET v = 2 WHERE k = 1;\nAPPLY BATCH;\nSELECT * FROM t",
+    "want": [
+      "BEGIN BATCH\nINSERT INTO t (k) VALUES (1);\nUPDATE t SET v = 2 WHERE k = 1;\nAPPLY BATCH",
+      "SELECT * FROM t"
+    ]
+  },
+  {
+    "name": "cql unlogged batch with a timestamp",
+    "engine": "cassandra",
+    "in": "begin unlogged batch using timestamp 5 insert into t (k) values (1); apply batch; select 1",
+    "want": [
+      "begin unlogged batch using timestamp 5 insert into t (k) values (1); apply batch",
+      "select 1"
+    ]
+  },
+  {
+    "name": "a transaction is not a batch",
+    "engine": "postgres",
+    "in": "begin; update t set batch = 1; commit",
+    "want": [
+      "begin",
+      "update t set batch = 1",
+      "commit"
+    ]
   }
 ]

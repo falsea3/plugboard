@@ -9,7 +9,9 @@ var endsOther = map[string]bool{"IF": true, "LOOP": true, "WHILE": true, "REPEAT
 type blocks struct {
 	words   int
 	create  bool
+	begin   bool
 	routine bool
+	batch   bool
 	depth   int
 	prev    string
 }
@@ -20,6 +22,17 @@ func (b *blocks) word(w string) {
 	defer func() { b.prev = u }()
 	if b.words == 1 {
 		b.create = u == "CREATE"
+		b.begin = u == "BEGIN"
+		return
+	}
+	if b.begin && b.words <= 3 && u == "BATCH" {
+		b.batch = true
+		return
+	}
+	if b.batch {
+		if b.prev == "APPLY" && u == "BATCH" {
+			b.batch, b.begin = false, false
+		}
 		return
 	}
 	if !b.routine {
@@ -36,7 +49,7 @@ func (b *blocks) word(w string) {
 	}
 }
 
-func (b *blocks) open() bool { return b.routine && b.depth > 0 }
+func (b *blocks) open() bool { return b.routine && b.depth > 0 || b.batch }
 
 func delimiterAt(s string, i int) (delim string, next int, ok bool) {
 	const kw = "DELIMITER"

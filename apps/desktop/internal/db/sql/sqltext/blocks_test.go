@@ -22,7 +22,7 @@ func TestSplitBlocksAsTheFrontendDoes(t *testing.T) {
 	if err := json.Unmarshal(data, &cases); err != nil {
 		t.Fatal(err)
 	}
-	syntax := map[string]sqltext.Syntax{"postgres": pg, "mysql": my, "sqlite": sqlite.Dialect{}.Syntax()}
+	syntax := map[string]sqltext.Syntax{"postgres": pg, "mysql": my, "sqlite": sqlite.Dialect{}.Syntax(), "cassandra": {DollarQuotes: true}}
 	for _, tc := range cases {
 		t.Run(tc.Name, func(t *testing.T) {
 			if got := sqltext.Split(tc.In, syntax[tc.Engine]); !reflect.DeepEqual(got, tc.Want) {

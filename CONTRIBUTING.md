@@ -39,7 +39,7 @@ keychain prompts. The running app is also reachable in a browser at http://local
 ### Databases to develop against
 
 ```bash
-make db-up      # PostgreSQL :55432, MySQL :53306, ClickHouse :59000 (native), Redis :56379 and an SSH bastion :52222 — all relay/relay, database "shop"
+make db-up      # PostgreSQL :55432, MySQL :53306, ClickHouse :59000 (native), Cassandra :59042, Redis :56379 and an SSH bastion :52222 — all relay/relay, database "shop"
 make db-down    # stop them and drop their data
 make sample-db  # dev/sample.db, a small SQLite file
 ```

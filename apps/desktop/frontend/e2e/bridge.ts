@@ -18,6 +18,11 @@ export async function installBridge(page: Page) {
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
       },
       {
+        id: 'ledger', name: 'Ledger', driver: 'cassandra', host: 'cass.internal', port: 9042, user: '', savePassword: true,
+        database: 'ledger', file: '', sslMode: '', env: 'dev', color: '', readOnly: false,
+        ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
+      },
+      {
         id: 'warehouse', name: 'Warehouse', driver: 'clickhouse', host: 'olap.internal', port: 9000, user: 'default', savePassword: true,
         database: 'olap', file: '', sslMode: '', env: 'dev', color: '', readOnly: false,
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },

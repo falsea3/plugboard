@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/cassandra"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/redis"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
@@ -33,7 +34,10 @@ func TestFrontendEngineFixture(t *testing.T) {
 	if want := redis.Features(); !reflect.DeepEqual(fixture[model.Redis], want) {
 		t.Errorf("frontend/e2e/engines.json redis = %+v, the engine says %+v", fixture[model.Redis], want)
 	}
-	if len(fixture) != 5 {
+	if want := cassandra.Features(); !reflect.DeepEqual(fixture[model.Cassandra], want) {
+		t.Errorf("frontend/e2e/engines.json cassandra = %+v, the engine says %+v", fixture[model.Cassandra], want)
+	}
+	if len(fixture) != 6 {
 		t.Errorf("frontend/e2e/engines.json lists %d engines", len(fixture))
 	}
 }

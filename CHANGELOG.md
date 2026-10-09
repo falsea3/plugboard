@@ -10,6 +10,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Apache Cassandra.** Browse keyspaces, tables, materialized views, user types, functions and indexes, and page through large tables with the server's own paging. Edit rows in the grid — every change is checked against the row you saw — and run CQL, batches included. Works over SSH tunnels, including clusters behind a bastion.
+
+### Added
+
 - **ClickHouse.** Browse databases, tables, views, dictionaries and SQL functions, with each table's sorting key and skip indexes. Tables open read-only — change data in the SQL editor, which checks syntax as you type without running anything. Read-only connections also use ClickHouse's own `readonly` setting.
 
 ### Added

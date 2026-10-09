@@ -159,6 +159,51 @@ services:
       interval: 2s
       retries: 60
 
+  cassandra:
+    image: cassandra:5.0
+    environment:
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 128M
+      CASSANDRA_CLUSTER_NAME: plugboard
+    command: >
+      sh -c "sed -i -E 's/^authenticator:.*$$/authenticator: PasswordAuthenticator/' /etc/cassandra/cassandra.yaml
+      && sed -i -E 's/^( *)class_name *: *(org.apache.cassandra.auth.)?AllowAllAuthenticator/\\1class_name: PasswordAuthenticator/' /etc/cassandra/cassandra.yaml
+      && sed -i -E 's/^materialized_views_enabled: false/materialized_views_enabled: true/; s/^enable_materialized_views: false/enable_materialized_views: true/' /etc/cassandra/cassandra.yaml
+      && (docker-entrypoint.sh cassandra -f &
+      until cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' >/dev/null 2>&1; do sleep 3; done;
+      cqlsh -u cassandra -p cassandra -f /seed/cassandra.cql; wait)"
+    ports: ["127.0.0.1:59042:9042"]
+    volumes:
+      - ./seed/cassandra.cql:/seed/cassandra.cql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -u relay -p relay -e 'SELECT id FROM shop.seeded' | grep -q done"]
+      interval: 5s
+      retries: 60
+      start_period: 30s
+
+  cassandra41:
+    image: cassandra:4.1
+    profiles: [all]
+    environment:
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 128M
+      CASSANDRA_CLUSTER_NAME: plugboard
+    command: >
+      sh -c "sed -i -E 's/^authenticator:.*$$/authenticator: PasswordAuthenticator/' /etc/cassandra/cassandra.yaml
+      && sed -i -E 's/^( *)class_name *: *(org.apache.cassandra.auth.)?AllowAllAuthenticator/\\1class_name: PasswordAuthenticator/' /etc/cassandra/cassandra.yaml
+      && sed -i -E 's/^materialized_views_enabled: false/materialized_views_enabled: true/; s/^enable_materialized_views: false/enable_materialized_views: true/' /etc/cassandra/cassandra.yaml
+      && (docker-entrypoint.sh cassandra -f &
+      until cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' >/dev/null 2>&1; do sleep 3; done;
+      cqlsh -u cassandra -p cassandra -f /seed/cassandra.cql; wait)"
+    ports: ["127.0.0.1:59043:9042"]
+    volumes:
+      - ./seed/cassandra.cql:/seed/cassandra.cql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -u relay -p relay -e 'SELECT id FROM shop.seeded' | grep -q done"]
+      interval: 5s
+      retries: 60
+      start_period: 30s
+
   bastion:
     image: alpine:3.20
     command: >

@@ -2,7 +2,7 @@
 
 # Plugboard
 
-**A fast, local-first database client for PostgreSQL, MySQL, SQLite, ClickHouse and Redis. No accounts, no cloud sync, no telemetry — just you and your data.**
+**A fast, local-first database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis. No accounts, no cloud sync, no telemetry — just you and your data.**
 
 [![CI](https://github.com/relay-client/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/relay-client/plugboard/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/relay-client/plugboard?sort=semver)](https://github.com/relay-client/plugboard/releases/latest)
@@ -42,9 +42,9 @@ You do this once; updates the app installs itself don't ask again.
 ## Features
 
 **Connections**
-- PostgreSQL, MySQL and MariaDB, SQLite files, ClickHouse, and Redis or Valkey — several open at once, each with its own tabs. `⌘K` jumps to any of them by name.
+- PostgreSQL, MySQL and MariaDB, SQLite files, ClickHouse, Cassandra, and Redis or Valkey — several open at once, each with its own tabs. `⌘K` jumps to any of them by name.
 - Tag a connection *local*, *dev*, *staging* or *prod*: the tag colours the window, so you always know where you are.
-- Paste a connection URL — `postgres://…`, `mysql://…`, `clickhouse://…`, `redis://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
+- Paste a connection URL — `postgres://…`, `mysql://…`, `clickhouse://…`, `cassandra://…`, `redis://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
 - **SSH tunnels** through a bastion, or straight into the database server, with a password, a private key or ssh-agent. A dropped tunnel comes back on its own.
 - Passwords stay in the system keychain (Keychain, Windows Credential Manager, Secret Service) — never in a file on disk.
 
@@ -79,6 +79,13 @@ You do this once; updates the app installs itself don't ask again.
 - Tables open read-only — ClickHouse has no transactions and its updates are background mutations, so changes go through the SQL editor, where you see exactly what runs.
 - The editor checks syntax with `EXPLAIN AST` as you type, which parses without running anything.
 - Read-only connections run with the server's `readonly` setting as well as Plugboard's own check.
+
+**Cassandra**
+- Keyspaces, tables, materialized views, user types, functions and secondary indexes, with partition and clustering keys shown as the primary key.
+- Tables page through the server's own paging, so a large table scrolls without `OFFSET`. Filter with `=`, `<`, `>`, `IN`, and `CONTAINS` on collections.
+- Edit rows in the grid: each change is a lightweight transaction (`IF EXISTS` / `IF NOT EXISTS`), so it lands on exactly the row you saw, and values go through `fromJson`, collections and user types included.
+- A CQL editor that keeps `BEGIN BATCH … APPLY BATCH` together and follows `USE`.
+- Works through SSH tunnels to a whole cluster: every node is reached through the tunnel.
 
 **Redis**
 - Keys as a tree, grouped by `:`, from every database 0–15 (or however many the server has), scanned page by page so a huge keyspace doesn't stall the server. Filter by text or a pattern like `user:*`.

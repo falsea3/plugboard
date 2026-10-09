@@ -110,6 +110,8 @@ func Features(d dialect.Dialect) model.EngineFeatures {
 		TransactionalDDL:   d.TransactionalDDL(),
 		ColumnTypes:        d.ColumnTypes(),
 		Editable:           d.Editable(),
+		StructureEditable:  d.Editable(),
+		Sortable:           true,
 	}
 }
 

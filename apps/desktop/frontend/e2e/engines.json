@@ -38,7 +38,9 @@
       "binary(16)"
     ],
     "keyValue": false,
-    "editable": true
+    "editable": true,
+    "structureEditable": true,
+    "sortable": true
   },
   "postgres": {
     "syntax": {
@@ -81,7 +83,9 @@
       "integer[]"
     ],
     "keyValue": false,
-    "editable": true
+    "editable": true,
+    "structureEditable": true,
+    "sortable": true
   },
   "sqlite": {
     "syntax": {
@@ -105,7 +109,9 @@
       "BLOB"
     ],
     "keyValue": false,
-    "editable": true
+    "editable": true,
+    "structureEditable": true,
+    "sortable": true
   },
   "redis": {
     "syntax": {
@@ -123,7 +129,9 @@
     "transactionalDDL": false,
     "columnTypes": [],
     "keyValue": true,
-    "editable": false
+    "editable": false,
+    "structureEditable": false,
+    "sortable": false
   },
   "clickhouse": {
     "syntax": {
@@ -167,6 +175,51 @@
       "JSON"
     ],
     "keyValue": false,
-    "editable": false
+    "editable": false,
+    "structureEditable": false,
+    "sortable": true
+  },
+  "cassandra": {
+    "syntax": {
+      "hashComments": false,
+      "dashCommentNeedsSpace": false,
+      "backslashEscapes": false,
+      "escapeStrings": false,
+      "doubleQuotedStrings": false,
+      "dollarQuotes": true,
+      "executableComments": false
+    },
+    "booleanType": false,
+    "canUpdateToDefault": false,
+    "canAlterColumns": false,
+    "transactionalDDL": false,
+    "columnTypes": [
+      "text",
+      "int",
+      "bigint",
+      "smallint",
+      "tinyint",
+      "varint",
+      "float",
+      "double",
+      "decimal",
+      "boolean",
+      "uuid",
+      "timeuuid",
+      "timestamp",
+      "date",
+      "time",
+      "duration",
+      "inet",
+      "blob",
+      "list<text>",
+      "set<text>",
+      "map<text, text>",
+      "frozen<list<int>>"
+    ],
+    "keyValue": false,
+    "editable": true,
+    "structureEditable": false,
+    "sortable": false
   }
 }
