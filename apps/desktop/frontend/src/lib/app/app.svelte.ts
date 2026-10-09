@@ -10,7 +10,7 @@ let seq = 0;
 
 export type Toast = { id: number; kind: 'error' | 'info'; text: string; detail?: string; action?: { label: string; run: () => void } };
 
-export type SettingsSection = 'general' | 'editor' | 'about';
+export type SettingsSection = 'general' | 'editor' | 'agents' | 'about';
 
 export type Update =
   | { status: 'available' | 'installing' | 'installed'; info: UpdateInfo }

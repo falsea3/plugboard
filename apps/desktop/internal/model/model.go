@@ -32,6 +32,7 @@ type Connection struct {
 	Env          string    `json:"env"`
 	Color        string    `json:"color"`
 	ReadOnly     bool      `json:"readOnly"`
+	AIAccess     bool      `json:"aiAccess"`
 	SSH          SSHTunnel `json:"ssh"`
 }
 

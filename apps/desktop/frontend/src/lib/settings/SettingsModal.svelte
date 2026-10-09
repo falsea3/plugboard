@@ -6,6 +6,7 @@
   import SettingsGeneral from './SettingsGeneral.svelte';
   import SettingsEditor from './SettingsEditor.svelte';
   import SettingsAbout from './SettingsAbout.svelte';
+  import SettingsAgents from './SettingsAgents.svelte';
 
   let info = $state<AppInfo | null>(null);
   api.appInfo().then(i => (info = i)).catch(() => {});
@@ -15,6 +16,7 @@
   const sections: { id: SettingsSection; label: string; icon: IconName }[] = [
     { id: 'general', label: 'General', icon: 'settings' },
     { id: 'editor', label: 'SQL Editor', icon: 'code' },
+    { id: 'agents', label: 'AI agents', icon: 'terminal' },
     { id: 'about', label: 'About', icon: 'info' },
   ];
 
@@ -50,6 +52,8 @@
         <SettingsGeneral />
       {:else if section === 'editor'}
         <SettingsEditor />
+      {:else if section === 'agents'}
+        <SettingsAgents />
       {:else}
         <SettingsAbout {info} />
       {/if}

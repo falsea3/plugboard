@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/relay-client/plugboard/apps/desktop/internal/api"
 	"github.com/relay-client/plugboard/apps/desktop/internal/crash"
+	"github.com/relay-client/plugboard/apps/desktop/internal/mcp"
+	"github.com/relay-client/plugboard/apps/desktop/internal/store"
 	"github.com/relay-client/plugboard/apps/desktop/internal/update"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -27,6 +32,8 @@ func main() {
 			info := api.NewApp().AppInfo()
 			fmt.Printf("%s %s (%s)\n", info.Name, info.Version, info.GoVersion)
 			os.Exit(0)
+		case "mcp":
+			os.Exit(serveMCP(os.Args[2:]))
 		}
 	}
 
@@ -77,4 +84,20 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
+}
+
+func serveMCP(args []string) int {
+	opts, err := mcp.ParseFlags(args, os.Stderr)
+	if err != nil {
+		return 2
+	}
+	dir := api.DataDir()
+	agent := mcp.NewAgent(store.NewConnections(dir, store.NewSecrets(dir)), dir, opts)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if err := mcp.Serve(ctx, agent, api.NewApp().AppInfo().Version); err != nil && ctx.Err() == nil {
+		fmt.Fprintln(os.Stderr, "plugboard mcp:", err)
+		return 1
+	}
+	return 0
 }

@@ -16,6 +16,7 @@ export interface Connection {
   env: Env;
   color: string;
   readOnly: boolean;
+  aiAccess?: boolean;
   ssh: SSHTunnel;
 }
 

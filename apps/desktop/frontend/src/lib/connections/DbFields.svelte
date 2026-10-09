@@ -83,6 +83,12 @@
     {#snippet title()}<Icon name="lock" size={13} />Read-only{/snippet}
     The session can only read. Writes are refused by Plugboard and by the server. You can switch it per session from the sidebar.
   </ToggleRow>
+
+  <span></span>
+  <ToggleRow bind:checked={form.aiAccess}>
+    {#snippet title()}<Icon name="terminal" size={13} />AI agents (MCP){/snippet}
+    Claude Code, Cursor and other agents can read this database through Plugboard — see Settings ▸ AI agents. They only ever see connections with this on, and never write to Production.
+  </ToggleRow>
 </div>
 
 <style>

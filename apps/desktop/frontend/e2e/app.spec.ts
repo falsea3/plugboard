@@ -125,3 +125,19 @@ test('reorders tabs by dragging and keeps a click a click', async ({ page }) => 
   await tabs.getByRole('tab', { name: 'Query 2' }).getByRole('button').first().click();
   await expect(tabs.getByRole('tab', { name: 'Query 2' })).toHaveAttribute('aria-selected', 'true');
 });
+
+test('opens a connection to AI agents and shows how to add Plugboard to Claude Code', async ({ page }) => {
+  await page.getByRole('button', { name: 'Settings' }).first().click();
+  await page.getByRole('dialog', { name: 'Settings' }).getByRole('button', { name: 'AI agents' }).click();
+  const settings = page.getByRole('dialog', { name: 'Settings' });
+  await expect(settings.getByText('claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp')).toBeVisible();
+  await expect(settings.getByRole('listitem')).toHaveText(['Shop · staging']);
+  await page.keyboard.press('Escape');
+
+  const option = page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Music library' });
+  await option.hover();
+  await option.getByTitle('Edit').click();
+  await page.getByText('AI agents (MCP)').click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect.poll(() => page.evaluate(() => (window as any).savedConnection?.aiAccess)).toBe(true);
+});

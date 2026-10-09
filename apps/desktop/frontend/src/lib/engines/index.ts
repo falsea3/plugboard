@@ -44,6 +44,7 @@ export function emptyConnection(e: Engine = ENGINES[0]): Connection {
     env: '',
     color: '',
     readOnly: false,
+    aiAccess: false,
     ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '', password: '', passphrase: '' },
   };
 }

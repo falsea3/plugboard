@@ -94,6 +94,12 @@ You do this once; updates the app installs itself don't ask again.
 - A command console with completion, one command per line on its own connection, so `SELECT`, `MULTI … EXEC` and `WATCH` work.
 - Read-only connections refuse any command the server marks as writing, and the Production confirmation asks before one runs.
 
+**AI agents (MCP)**
+- Plugboard is also an MCP server: `claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp` (Settings ▸ AI agents shows the exact command), and Claude Code, Cursor or any other agent can list your tables, read their structure and run queries.
+- Agents never see a password: they ask Plugboard, which connects with your saved connections, Keychain and SSH tunnels.
+- Nothing is shared until you turn on *AI agents (MCP)* for a connection. Sessions are read-only unless you start it with `--write`, and Production is read-only for agents no matter what. `--env staging,dev` narrows it further.
+- Every call is logged to `logs/mcp.log` in the profile folder.
+
 **Everything else**
 - Keyboard-first (`Ctrl` instead of `⌘` on Windows and Linux): tabs with `⌘1`–`⌘9`, `⌘T` for a new query, `⌘W` to close, `⌘C` / `⇧⌘C` to copy a cell or a row, `⌘A` for the whole result as TSV.
 - Dark and light themes, or follow the system.

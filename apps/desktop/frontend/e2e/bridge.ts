@@ -9,7 +9,7 @@ export async function installBridge(page: Page) {
     const connections = [
       {
         id: 'shop', name: 'Shop', driver: 'postgres', host: 'db.internal', port: 5432, user: 'app', savePassword: true,
-        database: 'shop', file: '', sslMode: 'require', env: 'staging', color: '', readOnly: false,
+        database: 'shop', file: '', sslMode: 'require', env: 'staging', color: '', readOnly: false, aiAccess: true,
         ssh: { enabled: true, host: 'bastion.example.com', port: 22, user: 'deploy', auth: 'agent', keyFile: '' },
       },
       {
@@ -90,7 +90,7 @@ export async function installBridge(page: Page) {
           GetSettings: () => ok(settings),
           SaveSettings: (s: typeof settings) => ok(Object.assign(settings, s)),
           ListConnections: () => ok(connections),
-          SaveConnection: (c: any) => ok(c),
+          SaveConnection: (c: any) => ok(((window as any).savedConnection = c)),
           DeleteConnection: () => ok(undefined),
           TestConnection: () => ok({ ok: true, serverVersion: 'PostgreSQL 17.2', latencyMs: 18.4 }),
           Connect: (id: string) => {
@@ -199,6 +199,8 @@ export async function installBridge(page: Page) {
           QueryTabs: (id: string) =>
             ok((queryTabs[id] ?? []).map(t => (t.script ? (t.script in scripts(id) ? { ...t, saved: scripts(id)[t.script] } : { ...t, script: '', saved: '' }) : t))),
           SaveQueryTabs: (id: string, tabs: { script?: string; saved: string }[]) => ok(void ((queryTabs[id] = tabs), keep())),
+          MCPCommand: () => ok('claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp'),
+          MCPLog: () => ok('/Users/demo/Library/Application Support/Plugboard/logs/mcp.log'),
           ChooseSQLiteFile: () => ok(''),
           ChooseSSHKeyFile: () => ok(''),
           TrustHostKey: () => ok(undefined),
