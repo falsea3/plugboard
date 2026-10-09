@@ -1,4 +1,4 @@
-export type Driver = 'postgres' | 'mysql' | 'sqlite';
+export type Driver = 'postgres' | 'mysql' | 'sqlite' | 'redis';
 export type Env = '' | 'local' | 'dev' | 'staging' | 'prod';
 
 export interface Connection {
@@ -77,6 +77,7 @@ export interface EngineFeatures {
   canAlterColumns: boolean;
   transactionalDDL: boolean;
   columnTypes: string[];
+  keyValue: boolean;
 }
 
 export interface SqlSyntax {
@@ -97,5 +98,6 @@ export interface AppErrorInfo {
 
 
 export * from './wireSchema';
+export * from './wireKeys';
 export * from './wireQuery';
 export * from './wireApp';

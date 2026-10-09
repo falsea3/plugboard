@@ -2,7 +2,7 @@
 
 # Plugboard
 
-**A fast, local-first database client for PostgreSQL, MySQL and SQLite. No accounts, no cloud sync, no telemetry — just you and your data.**
+**A fast, local-first database client for PostgreSQL, MySQL, SQLite and Redis. No accounts, no cloud sync, no telemetry — just you and your data.**
 
 [![CI](https://github.com/relay-client/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/relay-client/plugboard/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/relay-client/plugboard?sort=semver)](https://github.com/relay-client/plugboard/releases/latest)
@@ -42,9 +42,9 @@ You do this once; updates the app installs itself don't ask again.
 ## Features
 
 **Connections**
-- PostgreSQL, MySQL and MariaDB, and SQLite files — several open at once, each with its own tabs. `⌘K` jumps to any of them by name.
+- PostgreSQL, MySQL and MariaDB, SQLite files, and Redis or Valkey — several open at once, each with its own tabs. `⌘K` jumps to any of them by name.
 - Tag a connection *local*, *dev*, *staging* or *prod*: the tag colours the window, so you always know where you are.
-- Paste a connection URL — `postgres://…`, `mysql://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
+- Paste a connection URL — `postgres://…`, `mysql://…`, `redis://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
 - **SSH tunnels** through a bastion, or straight into the database server, with a password, a private key or ssh-agent. A dropped tunnel comes back on its own.
 - Passwords stay in the system keychain (Keychain, Windows Credential Manager, Secret Service) — never in a file on disk.
 
@@ -73,6 +73,13 @@ You do this once; updates the app installs itself don't ask again.
 - Results arrive a thousand rows at a time instead of the whole table at once.
 
 ![The SQL editor with a query and its result](.github/assets/screenshots/query.png)
+
+**Redis**
+- Keys as a tree, grouped by `:`, from every database 0–15 (or however many the server has), scanned page by page so a huge keyspace doesn't stall the server. Filter by text or a pattern like `user:*`.
+- Strings, hashes, lists, sets, sorted sets and streams each open in a view that fits them: edit a JSON string with formatting, double-click a field or a member to change it, add or remove items, set a TTL, rename or delete the key.
+- Changes that depend on what's there — renaming a field, removing a list item — run atomically and refuse if someone else changed the value first.
+- A command console with completion, one command per line on its own connection, so `SELECT`, `MULTI … EXEC` and `WATCH` work.
+- Read-only connections refuse any command the server marks as writing, and the Production confirmation asks before one runs.
 
 **Everything else**
 - Keyboard-first (`Ctrl` instead of `⌘` on Windows and Linux): tabs with `⌘1`–`⌘9`, `⌘T` for a new query, `⌘W` to close, `⌘C` / `⇧⌘C` to copy a cell or a row, `⌘A` for the whole result as TSV.

@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { installKeys } from './bridgeKeys';
 
 const engines = JSON.parse(readFileSync(new URL('./engines.json', import.meta.url), 'utf8'));
 
@@ -204,4 +205,5 @@ export async function installBridge(page: Page) {
       BrowserOpenURL: () => {},
     };
   }, engines);
+  await installKeys(page, engines.redis);
 }

@@ -24,9 +24,9 @@ export function suggestName(title: string, taken: string[]): string {
   }
 }
 
-export function untitled(titles: string[]): string {
+export function untitled(titles: string[], prefix = 'Query'): string {
   for (let n = 1; ; n++) {
-    const title = `Query ${n}`;
+    const title = `${prefix} ${n}`;
     if (!titles.includes(title)) return title;
   }
 }

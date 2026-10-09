@@ -27,6 +27,7 @@
     { value: 'verify-full', label: 'Verify certificate' },
   ];
   const e = $derived(engine(form.driver));
+  const sslOptions = $derived(e.canPreferSsl ? sslModes : [{ value: '', label: 'Disabled' }, ...sslModes.slice(2)]);
 
   async function chooseFile() {
     try {
@@ -62,7 +63,7 @@
     </div>
 
     <label for="cf-user">User</label>
-    <input id="cf-user" class="input" bind:value={form.user} spellcheck="false" autocomplete="off" />
+    <input id="cf-user" class="input" bind:value={form.user} placeholder={e.userHint} spellcheck="false" autocomplete="off" />
 
     <label for="cf-password">Password</label>
     <div class="form-row">
@@ -71,10 +72,10 @@
     </div>
 
     <label for="cf-db">Database</label>
-    <input id="cf-db" class="input" bind:value={form.database} placeholder={e.defaultDatabase ? `Optional — defaults to ${e.defaultDatabase}` : 'Optional'} spellcheck="false" autocomplete="off" />
+    <input id="cf-db" class="input" bind:value={form.database} placeholder={e.databaseHint} spellcheck="false" autocomplete="off" />
 
     <label for="cf-ssl">SSL</label>
-    <Select id="cf-ssl" bind:value={form.sslMode} options={sslModes} aria-label="SSL" />
+    <Select id="cf-ssl" bind:value={form.sslMode} options={sslOptions} aria-label="SSL" />
   {/if}
 
   <span></span>

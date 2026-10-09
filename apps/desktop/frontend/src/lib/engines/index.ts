@@ -2,12 +2,13 @@ import type { Connection, Driver } from '../api/wire';
 import type { Engine } from './engine';
 import { mysql } from './mysql';
 import { postgres } from './postgres';
+import { redis } from './redis';
 import { sqlite } from './sqlite';
 
 export type { Engine } from './engine';
-export { mysql, postgres, sqlite };
+export { mysql, postgres, redis, sqlite };
 
-export const ENGINES: Engine[] = [postgres, mysql, sqlite];
+export const ENGINES: Engine[] = [postgres, mysql, sqlite, redis];
 
 export function engine(driver: Driver): Engine {
   const e = ENGINES.find(e => e.driver === driver);

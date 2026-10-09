@@ -95,6 +95,35 @@ services:
     volumes: *mariadb-seed
     healthcheck: *mariadb-health
 
+  redis:
+    image: redis:7.4-alpine
+    command: >
+      sh -c "redis-server --requirepass relay --save '' --appendonly no &
+      until redis-cli -a relay --no-auth-warning ping >/dev/null 2>&1; do sleep 0.2; done;
+      redis-cli -a relay --no-auth-warning < /seed/redis.txt >/dev/null; wait"
+    ports: ["127.0.0.1:56379:6379"]
+    volumes:
+      - ./seed/redis.txt:/seed/redis.txt:ro
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a relay --no-auth-warning exists shop:seeded | grep -q 1"]
+      interval: 2s
+      retries: 30
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    profiles: [all]
+    command: >
+      sh -c "valkey-server --requirepass relay --save '' &
+      until valkey-cli -a relay --no-auth-warning ping >/dev/null 2>&1; do sleep 0.2; done;
+      valkey-cli -a relay --no-auth-warning < /seed/redis.txt >/dev/null; wait"
+    ports: ["127.0.0.1:56380:6379"]
+    volumes:
+      - ./seed/redis.txt:/seed/redis.txt:ro
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a relay --no-auth-warning exists shop:seeded | grep -q 1"]
+      interval: 2s
+      retries: 30
+
   bastion:
     image: alpine:3.20
     command: >

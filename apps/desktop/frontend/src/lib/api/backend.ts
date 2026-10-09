@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, NewIndex, QueryTabState, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, QueryTabState, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -91,6 +91,11 @@ export const api = {
   renameTableSQL: (sessionId: string, schema: string, from: string, to: string) => call(a => a.RenameTableSQL(sessionId, schema, from, to)),
   createIndexSQL: (sessionId: string, schema: string, table: string, idx: NewIndex) => call(a => a.CreateIndexSQL(sessionId, schema, table, idx)),
   dropIndexSQL: (sessionId: string, schema: string, table: string, name: string) => call(a => a.DropIndexSQL(sessionId, schema, table, name)),
+  scanKeys: (sessionId: string, db: string, pattern: string, cursor: string, count: number) =>
+    call(a => a.ScanKeys(sessionId, db, pattern, cursor, count)),
+  readKey: (sessionId: string, db: string, key: string, cursor: string) => call(a => a.ReadKey(sessionId, db, key, cursor)),
+  editKey: (sessionId: string, db: string, edit: Partial<KeyEdit> & { key: string; op: string }) =>
+    call(a => a.EditKey(sessionId, db, { field: '', value: '', score: '', old: '', index: 0, ...edit })),
   listScripts: (connId: string) => call(a => a.ListScripts(connId)),
   readScript: (connId: string, name: string) => call(a => a.ReadScript(connId, name)),
   createScript: (connId: string, name: string, sql: string) => call(a => a.CreateScript(connId, name, sql)),

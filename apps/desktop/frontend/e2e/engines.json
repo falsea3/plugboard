@@ -36,7 +36,8 @@
       "blob",
       "longblob",
       "binary(16)"
-    ]
+    ],
+    "keyValue": false
   },
   "postgres": {
     "syntax": {
@@ -77,7 +78,8 @@
       "inet",
       "text[]",
       "integer[]"
-    ]
+    ],
+    "keyValue": false
   },
   "sqlite": {
     "syntax": {
@@ -99,6 +101,24 @@
       "NUMERIC",
       "TEXT",
       "BLOB"
-    ]
+    ],
+    "keyValue": false
+  },
+  "redis": {
+    "syntax": {
+      "hashComments": false,
+      "dashCommentNeedsSpace": false,
+      "backslashEscapes": false,
+      "escapeStrings": false,
+      "doubleQuotedStrings": false,
+      "dollarQuotes": false,
+      "executableComments": false
+    },
+    "booleanType": false,
+    "canUpdateToDefault": false,
+    "canAlterColumns": false,
+    "transactionalDDL": false,
+    "columnTypes": [],
+    "keyValue": true
   }
 }

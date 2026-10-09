@@ -1,7 +1,7 @@
 <script lang="ts">
   import { app } from '../app/app.svelte';
   import { api, type Connection } from '../api/backend';
-  import { engine } from '../engines';
+  import { ENGINES, engine } from '../engines';
   import { connectionTarget } from '../ui/format';
   import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
@@ -48,7 +48,7 @@
         <button class="btn primary" onclick={() => (app.editing = null)}><Icon name="plus" />New connection<span class="kbd on-accent">⌘N</span></button>
         <button class="btn" onclick={() => app.openSQLiteFile()}><Icon name="folder" />Open SQLite file…</button>
       </div>
-      <p class="hint faint">PostgreSQL · MySQL · SQLite</p>
+      <p class="hint faint">{ENGINES.map(e => e.name).join(' · ')}</p>
     </aside>
 
     <section class="list-pane">

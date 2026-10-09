@@ -4,6 +4,8 @@ import { gradient, initials } from './ConnAvatar.svelte';
 describe('ConnAvatar', () => {
   it('takes initials from the connection name', () => {
     expect(initials('Shop via SSH')).toBe('SV');
+    expect(initials('Redis (sample)')).toBe('RS');
+    expect(initials('(db)')).toBe('DB');
     expect(initials('pl')).toBe('PL');
     expect(initials('music_library')).toBe('ML');
     expect(initials('prodReplica')).toBe('PR');

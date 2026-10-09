@@ -1,0 +1,22 @@
+SET shop:config:currency USD
+SET shop:config:banner "Free shipping on orders over $50"
+SET shop:config:flags "{\"newCheckout\": true, \"betaSearch\": false}"
+HSET shop:customer:1 name "Ann Novak" email ann.novak@example.com country US plan pro
+HSET shop:customer:2 name "Bob Ito" email bob.ito@example.com country JP plan free
+HSET shop:customer:3 name "Chen Garcia" email chen.garcia@example.com country DE plan team
+HSET shop:product:1 title "Mechanical keyboard" price 129.00 stock 42
+HSET shop:product:2 title "USB-C hub" price 39.90 stock 310
+HSET shop:product:3 title "4K monitor" price 449.00 stock 7
+RPUSH shop:queue:emails "welcome:1" "receipt:1042" "welcome:2" "receipt:1043"
+SADD shop:tags:product:1 keyboard mechanical usb bestseller
+SADD shop:tags:product:3 monitor 4k display
+ZADD shop:leaderboard:revenue 1284390.5 US 702118 DE 655004.75 JP 318760.2 BR 402551.1 NL
+XADD shop:events * type signup customer 1
+XADD shop:events * type order customer 1 total 129.00
+XADD shop:events * type order customer 3 total 488.90
+SET shop:session:8f2a "{\"customer\": 1, \"cart\": [1, 3]}" EX 86400
+INCRBY shop:stats:orders 1043
+SELECT 1
+SET cache:homepage "<html>…</html>" EX 600
+SELECT 0
+SET shop:seeded 1

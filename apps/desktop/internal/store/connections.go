@@ -158,7 +158,7 @@ func Validate(c model.Connection) error {
 		return errors.New("name is required")
 	}
 	switch c.Driver {
-	case model.Postgres, model.MySQL:
+	case model.Postgres, model.MySQL, model.Redis:
 		if strings.TrimSpace(c.Host) == "" {
 			return errors.New("host is required")
 		}

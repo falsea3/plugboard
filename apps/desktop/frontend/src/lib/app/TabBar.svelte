@@ -1,7 +1,7 @@
 <script lang="ts">
   import { app } from './app.svelte';
-  import type { Workspace } from './workspace.svelte';
-  import Icon from '../ui/Icon.svelte';
+  import type { Tab, Workspace } from './workspace.svelte';
+  import Icon, { type IconName } from '../ui/Icon.svelte';
   import { DragOrder } from '../ui/dragOrder.svelte';
   import { moveItem } from '../ui/reorder';
   import { iconOf } from '../objects/kinds';
@@ -10,6 +10,14 @@
   let { ws, valueShown = $bindable(), valueToggle }: { ws: Workspace; valueShown: boolean; valueToggle: boolean } = $props();
 
   let list = $state<HTMLElement>();
+
+  function tabIcon(tab: Tab): IconName {
+    if (tab.kind === 'query') return ws.session.engine.keyValue ? 'terminal' : 'code';
+    if (tab.kind === 'diagram') return 'diagram';
+    if (tab.kind === 'ddl') return iconOf(tab.object);
+    if (tab.kind === 'key') return 'key';
+    return tab.tableKind === 'view' ? 'view' : 'table';
+  }
   const order = new DragOrder({
     list: () => list,
     attr: 'tab',
@@ -43,7 +51,7 @@
           onclick={e => order.clicked(e, tab.id) && (ws.activeTabId = tab.id)}
           title={tab.kind === 'table' ? `${tab.schema}.${tab.table}` : tab.title}
         >
-          <Icon name={tab.kind === 'query' ? 'code' : tab.kind === 'diagram' ? 'diagram' : tab.kind === 'ddl' ? iconOf(tab.object) : tab.tableKind === 'view' ? 'view' : 'table'} size={12} />
+          <Icon name={tabIcon(tab)} size={12} />
           <span>{tab.kind === 'table' ? tab.table : tab.title}</span>
           {#if tab.kind === 'table' && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
           {#if tab.kind === 'query' && isDirty(tab)}<span class="dirty-dot" title="Unsaved changes"></span>{/if}

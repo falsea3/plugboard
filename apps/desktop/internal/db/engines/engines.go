@@ -7,13 +7,22 @@ import (
 	"github.com/relay-client/plugboard/apps/desktop/internal/db"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/mysql"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/redis"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/sqlite"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
+var (
+	_ db.Session  = (*redis.Session)(nil)
+	_ db.KeyStore = (*redis.Session)(nil)
+)
+
 func Open(ctx context.Context, id string, c model.Connection, opts db.OpenOptions) (db.Session, error) {
+	if c.Driver == model.Redis {
+		return redis.Open(ctx, id, c, opts)
+	}
 	d, err := Dialect(c.Driver)
 	if err != nil {
 		return nil, err

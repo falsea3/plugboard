@@ -12,7 +12,7 @@
 
   let { ws, object, toolbar = true }: { ws: Workspace; object: DBObject; toolbar?: boolean } = $props();
 
-  const dialect = untrack(() => engine(ws.session.connection.driver).sqlDialect);
+  const dialect = untrack(() => engine(ws.session.connection.driver).sqlDialect!);
   let text = $state('');
   let loading = $state(false);
   let error = $state('');

@@ -80,6 +80,7 @@ jobs:
           PLUGBOARD_TEST_PG: 127.0.0.1:55432
           PLUGBOARD_TEST_MYSQL: 127.0.0.1:53306
           PLUGBOARD_TEST_SSH: 127.0.0.1:52222
+          PLUGBOARD_TEST_REDIS: 127.0.0.1:56379
         run: go test -race -count=1 ./apps/desktop/internal/db/...
 
   server-versions:
@@ -97,6 +98,7 @@ jobs:
           - { server: mariadb104, var: PLUGBOARD_TEST_MYSQL, port: 53310 }
           - { server: mariadb106, var: PLUGBOARD_TEST_MYSQL, port: 53311 }
           - { server: mariadb114, var: PLUGBOARD_TEST_MYSQL, port: 53312 }
+          - { server: valkey, var: PLUGBOARD_TEST_REDIS, port: 56380 }
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v5

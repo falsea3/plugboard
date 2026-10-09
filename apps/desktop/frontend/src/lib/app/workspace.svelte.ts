@@ -1,6 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
-import { api, type CellValue, type Column, type DBObject, type Filter, type Index, type ResultColumn, type SessionInfo, type TableInfo } from '../api/backend';
+import { api, type CellValue, type Column, type DBObject, type Filter, type Index, type KeyInfo, type ResultColumn, type SessionInfo, type TableInfo } from '../api/backend';
 import { Scripts } from '../scripts/store.svelte';
+import { KeyBrowser } from '../keys/browser.svelte';
 import { untitled, type ScriptTab } from '../scripts/names';
 
 export type TableTab = {
@@ -34,7 +35,15 @@ export type DDLTab = {
   object: DBObject;
 };
 
-export type Tab = TableTab | QueryTab | DiagramTab | DDLTab;
+export type KeyTab = {
+  id: string;
+  kind: 'key';
+  title: string;
+  key: KeyInfo;
+  db: string;
+};
+
+export type Tab = TableTab | QueryTab | DiagramTab | DDLTab | KeyTab;
 
 let seq = 0;
 const nextId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(++seq).toString(36)}`;
@@ -55,6 +64,10 @@ export class Workspace {
   columns = new SvelteMap<string, Column[] | 'loading' | Error>();
   indexes = new SvelteMap<string, Index[] | 'loading' | Error>();
   scripts: Scripts;
+  keys = new KeyBrowser(
+    () => this.session.sessionId,
+    () => this.schema,
+  );
   activeTab = $derived(this.tabs.find(t => t.id === this.activeTabId) ?? null);
 
   constructor(
@@ -105,6 +118,7 @@ export class Workspace {
   }
 
   async loadTables() {
+    if (this.session.engine.keyValue) return this.keys.load();
     this.columns.clear();
     this.indexes.clear();
     this.tablesLoading = true;
@@ -157,6 +171,27 @@ export class Workspace {
     return jump;
   }
 
+  openKey(key: KeyInfo) {
+    const existing = this.tabs.find((tab): tab is KeyTab => tab.kind === 'key' && tab.key.key === key.key && tab.db === this.schema);
+    if (existing) {
+      this.activeTabId = existing.id;
+      return;
+    }
+    const tab: KeyTab = { id: nextId('key'), kind: 'key', title: key.name, key, db: this.schema };
+    this.tabs.push(tab);
+    this.activeTabId = tab.id;
+  }
+
+  renameKey(tab: KeyTab, to: KeyInfo) {
+    this.keys.renamed(tab.key.key, to);
+    tab.key = to;
+    tab.title = to.name;
+  }
+
+  closeKey(key: string) {
+    for (const t of this.tabs.filter(t => t.kind === 'key' && t.key.key === key && t.db === this.schema)) this.closeTab(t.id);
+  }
+
   openDiagram(schema = this.schema) {
     const existing = this.tabs.find(tab => tab.kind === 'diagram' && tab.schema === schema);
     if (existing) {
@@ -182,7 +217,7 @@ export class Workspace {
   }
 
   newQuery(sql = '') {
-    const title = untitled(this.tabs.flatMap(t => (t.kind === 'query' ? [t.title] : [])));
+    const title = untitled(this.tabs.flatMap(t => (t.kind === 'query' ? [t.title] : [])), this.session.engine.keyValue ? 'Console' : 'Query');
     this.addQuery({ title, sql, saved: sql }, true);
   }
 

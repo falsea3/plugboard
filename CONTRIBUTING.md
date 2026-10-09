@@ -39,7 +39,7 @@ keychain prompts. The running app is also reachable in a browser at http://local
 ### Databases to develop against
 
 ```bash
-make db-up      # PostgreSQL :55432, MySQL :53306 and an SSH bastion :52222 — all relay/relay, database "shop"
+make db-up      # PostgreSQL :55432, MySQL :53306, Redis :56379 and an SSH bastion :52222 — all relay/relay, database "shop"
 make db-down    # stop them and drop their data
 make sample-db  # dev/sample.db, a small SQLite file
 ```
@@ -113,7 +113,8 @@ Match the surrounding code. Beyond that:
 - **Go** — `gofmt`. Comments explain *why*, not *what*; a comment that restates the line below
   it will be asked about in review.
 - **Engines** — anything that differs between PostgreSQL, MySQL and SQLite goes behind
-  `db.Dialect`; shared logic uses `database/sql`.
+  `db.Dialect`; shared logic uses `database/sql`. Engines that aren't SQL (Redis) implement
+  `db.Session` themselves, in their own package under `internal/db/engines`.
 - **Svelte 5** — runes (`$state`, `$derived`, `$effect`), not the legacy store API.
 - **TypeScript** — no `any` in new code. Go types sent to the frontend are mirrored by hand in
   `lib/wire.ts`: change the json tags and the TypeScript fields together.

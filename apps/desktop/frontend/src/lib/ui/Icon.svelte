@@ -36,6 +36,7 @@
   import shield from '@phosphor-icons/core/regular/shield-check.svg?raw';
   import info from '@phosphor-icons/core/regular/info.svg?raw';
   import terminal from '@phosphor-icons/core/regular/terminal-window.svg?raw';
+  import timer from '@phosphor-icons/core/regular/timer.svg?raw';
   import link from '@phosphor-icons/core/regular/link-simple.svg?raw';
   import lock from '@phosphor-icons/core/fill/lock-simple-fill.svg?raw';
   import lockOpen from '@phosphor-icons/core/regular/lock-simple-open.svg?raw';
@@ -64,7 +65,7 @@
     plus, x, search, table, view, refresh, play, stop,
     'chevron-left': chevronLeft, 'chevron-right': chevronRight, 'chevron-down': chevronDown, 'chevrons-left': chevronsLeft, 'chevrons-right': chevronsRight,
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
-    arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, link, lock, lockOpen, tunnel, funnel,
+    arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, timer, link, lock, lockOpen, tunnel, funnel,
     download, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, json, restore, sortDefault, fitWidth,
     function: fn, procedure, sequence, enum: enumType, domain, trigger, extension, event, ddl,
   } as const;

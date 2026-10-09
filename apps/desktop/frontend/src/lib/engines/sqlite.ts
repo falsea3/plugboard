@@ -14,5 +14,8 @@ export const sqlite: Engine = {
   defaultDatabase: '',
   schemes: ['sqlite', 'sqlite3', 'file'],
   sslModeFromUrl: () => undefined,
+  canPreferSsl: true,
+  databaseHint: '',
+  userHint: '',
   sqlDialect: SQLite,
 };

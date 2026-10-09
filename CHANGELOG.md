@@ -8,6 +8,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Redis and Valkey.** Connect over TLS or an SSH tunnel and browse keys as a tree grouped by `:`, in any database. Strings, hashes, lists, sets, sorted sets and streams open in their own views: edit values and JSON, add and remove items, set TTLs, rename and delete keys. A command console runs one command per line. Read-only connections refuse writing commands, and Production asks before running one.
+
+### Changed
+
+- **Connection initials skip punctuation.** A connection named “Redis (sample)” shows RS, not R(.
+
 ## [0.6.5] - 2026-10-09
 
 ### Added

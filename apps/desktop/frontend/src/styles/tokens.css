@@ -107,5 +107,6 @@
 
   --engine-postgres: linear-gradient(155deg, #6a9bff 0%, #3466e0 55%, #2a52bd 100%);
   --engine-mysql:    linear-gradient(155deg, #ffb547 0%, #f28a12 55%, #d96d00 100%);
+  --engine-redis:    linear-gradient(155deg, #ff6b5e 0%, #e5372b 55%, #c22a1f 100%);
   --engine-sqlite:   linear-gradient(155deg, #5fd3f5 0%, #149bd8 55%, #0b78b8 100%);
 }

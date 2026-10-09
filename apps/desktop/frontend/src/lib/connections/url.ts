@@ -32,7 +32,7 @@ export function parseConnectionUrl(input: string): Connection {
   if (url.password) c.password = decodeURIComponent(url.password);
   c.database = decodeURIComponent(url.pathname.replace(/^\//, ''));
 
-  const sslMode = e.sslModeFromUrl(url.searchParams);
+  const sslMode = e.sslModeFromUrl(url.searchParams, scheme);
   if (sslMode !== undefined) c.sslMode = sslMode;
 
   c.name = c.database ? `${c.database} @ ${c.host}` : c.host;

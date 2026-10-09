@@ -17,7 +17,7 @@
   let { ws, tab }: { ws: Workspace; tab: QueryTab } = $props();
 
   const session = untrack(() => ws.session);
-  const dialect = engine(session.connection.driver).sqlDialect;
+  const dialect = engine(session.connection.driver).sqlDialect!;
   const syntax = session.engine.syntax;
   const isProd = session.connection.env === 'prod';
 

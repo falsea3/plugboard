@@ -39,6 +39,7 @@ describe('untitled', () => {
   it('takes the first free number', () => {
     expect(untitled([])).toBe('Query 1');
     expect(untitled(['Query 1', 'Query 3'])).toBe('Query 2');
+    expect(untitled(['Console 1'], 'Console')).toBe('Console 2');
   });
 });
 

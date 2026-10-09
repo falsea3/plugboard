@@ -12,6 +12,9 @@ export interface Engine {
   defaultUser: string;
   defaultDatabase: string;
   schemes: string[];
-  sslModeFromUrl(q: URLSearchParams): string | undefined;
-  sqlDialect: SQLDialect;
+  sslModeFromUrl(q: URLSearchParams, scheme: string): string | undefined;
+  canPreferSsl: boolean;
+  databaseHint: string;
+  userHint: string;
+  sqlDialect?: SQLDialect;
 }

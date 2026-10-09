@@ -10,6 +10,7 @@
   import TreeMenus from './TreeMenus.svelte';
   import ObjectGroups from '../objects/ObjectGroups.svelte';
   import ScriptList from '../scripts/ScriptList.svelte';
+  import KeyTree from '../keys/KeyTree.svelte';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
@@ -90,65 +91,72 @@
 
   {#if ws.session.schemas.length > 1}
     <div class="schema">
-      <Select value={ws.schema} options={ws.session.schemas.map(s => ({ value: s, label: s }))} onchange={s => ws.setSchema(s)} aria-label="Schema" />
+      <Select value={ws.schema} options={ws.session.schemas.map(s => ({ value: s, label: ws.session.engine.keyValue ? `Database ${s}` : s }))} onchange={s => ws.setSchema(s)} aria-label={ws.session.engine.keyValue ? 'Database' : 'Schema'} />
     </div>
   {/if}
 
-  <div class="filter">
-    <Icon name="search" size={13} />
-    <input class="input" bind:this={input} bind:value={filter} onkeydown={onFilterKey} placeholder="Filter tables" spellcheck="false" />
-  </div>
+  {#if ws.session.engine.keyValue}
+    <KeyTree {ws} {active} />
+    <div class="bottom">
+      <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New console (⌘T)"><Icon name="terminal" size={13} />New console</button>
+    </div>
+  {:else}
+    <div class="filter">
+      <Icon name="search" size={13} />
+      <input class="input" bind:this={input} bind:value={filter} onkeydown={onFilterKey} placeholder="Filter tables" spellcheck="false" />
+    </div>
 
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="list" onkeydown={onListKey}>
-    {#if ws.tablesLoading && ws.tables.length === 0}
-      <div class="note faint loading"><Spinner size={11} />Loading tables…</div>
-    {:else if ws.tablesError}
-      <div class="note error">{ws.tablesError}</div>
-    {:else}
-      {#each [{ label: 'Tables', items: tables, icon: 'table' as const }, { label: 'Views', items: views, icon: 'view' as const }] as group (group.label)}
-        {#if group.items.length > 0 || (group.label === 'Tables' && !filter)}
-          <div class="group">
-            <span>{group.label}</span>
-            <span class="count">{group.items.length}</span>
-          </div>
-          {#each group.items as t (t.name)}
-            <TableNode
-              {ws}
-              {t}
-              active={activeTable?.table === t.name && activeTable?.schema === t.schema}
-              picked={picked.includes(keyOf(t))}
-              onclick={e => onItemClick(e, t)}
-              onmenu={(e, column, index) => menus?.openTree(e, { table: t, column, index })}
-            />
-          {/each}
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="list" onkeydown={onListKey}>
+      {#if ws.tablesLoading && ws.tables.length === 0}
+        <div class="note faint loading"><Spinner size={11} />Loading tables…</div>
+      {:else if ws.tablesError}
+        <div class="note error">{ws.tablesError}</div>
+      {:else}
+        {#each [{ label: 'Tables', items: tables, icon: 'table' as const }, { label: 'Views', items: views, icon: 'view' as const }] as group (group.label)}
+          {#if group.items.length > 0 || (group.label === 'Tables' && !filter)}
+            <div class="group">
+              <span>{group.label}</span>
+              <span class="count">{group.items.length}</span>
+            </div>
+            {#each group.items as t (t.name)}
+              <TableNode
+                {ws}
+                {t}
+                active={activeTable?.table === t.name && activeTable?.schema === t.schema}
+                picked={picked.includes(keyOf(t))}
+                onclick={e => onItemClick(e, t)}
+                onmenu={(e, column, index) => menus?.openTree(e, { table: t, column, index })}
+              />
+            {/each}
+          {/if}
+        {/each}
+        <ObjectGroups {ws} {filter} onmenu={(e, o) => menus?.openObject(e, o)} />
+        <ScriptList {ws} {filter} />
+        {#if visible.length === 0 && filter && !ws.objects.some(o => o.name.toLowerCase().includes(filter.trim().toLowerCase())) && !ws.scripts.names.some(n => n.toLowerCase().includes(filter.trim().toLowerCase()))}
+          <div class="note faint">Nothing matches “{filter}”.</div>
         {/if}
-      {/each}
-      <ObjectGroups {ws} {filter} onmenu={(e, o) => menus?.openObject(e, o)} />
-      <ScriptList {ws} {filter} />
-      {#if visible.length === 0 && filter && !ws.objects.some(o => o.name.toLowerCase().includes(filter.trim().toLowerCase())) && !ws.scripts.names.some(n => n.toLowerCase().includes(filter.trim().toLowerCase()))}
-        <div class="note faint">Nothing matches “{filter}”.</div>
       {/if}
-    {/if}
-  </div>
+    </div>
 
-  {#if pickedShown.length > 0}
-    <div class="picked-bar">
-      <span class="small">{pickedShown.length} selected</span>
+    {#if pickedShown.length > 0}
+      <div class="picked-bar">
+        <span class="small">{pickedShown.length} selected</span>
+        <span style="flex:1"></span>
+        <button class="btn sm ghost" onclick={() => (picked = [])}>Clear</button>
+        <button class="btn sm primary" onclick={openPicked}>Open {pickedShown.length}</button>
+      </div>
+    {/if}
+
+    <TreeMenus bind:this={menus} {ws} />
+
+    <div class="bottom">
+      <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="code" size={13} />New query</button>
       <span style="flex:1"></span>
-      <button class="btn sm ghost" onclick={() => (picked = [])}>Clear</button>
-      <button class="btn sm primary" onclick={openPicked}>Open {pickedShown.length}</button>
+      <button class="btn icon sm ghost" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={13} /></button>
+      <button class="btn icon sm ghost" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables">{#if ws.tablesLoading}<Spinner size={12} label="Loading tables" />{:else}<Icon name="refresh" size={13} />{/if}</button>
     </div>
   {/if}
-
-  <TreeMenus bind:this={menus} {ws} />
-
-  <div class="bottom">
-    <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="code" size={13} />New query</button>
-    <span style="flex:1"></span>
-    <button class="btn icon sm ghost" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={13} /></button>
-    <button class="btn icon sm ghost" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables">{#if ws.tablesLoading}<Spinner size={12} label="Loading tables" />{:else}<Icon name="refresh" size={13} />{/if}</button>
-  </div>
 </aside>
 
 <style>

@@ -10,6 +10,8 @@
   import DdlView from '../objects/DdlView.svelte';
   import ScriptDialogs from '../scripts/Dialogs.svelte';
   import ValuePanel from '../table/ValuePanel.svelte';
+  import KeyView from '../keys/KeyView.svelte';
+  import ConsoleView from '../keys/ConsoleView.svelte';
 
   let { ws, visible }: { ws: Workspace; visible: boolean } = $props();
 
@@ -51,6 +53,10 @@
             <DiagramView {ws} {tab} />
           {:else if tab.kind === 'ddl'}
             <DdlView {ws} object={tab.object} />
+          {:else if tab.kind === 'key'}
+            <KeyView {ws} {tab} active={visible && shown} />
+          {:else if ws.session.engine.keyValue}
+            <ConsoleView {ws} {tab} />
           {:else}
             <QueryView {ws} {tab} />
           {/if}

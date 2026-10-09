@@ -9,6 +9,7 @@
     value,
     suggestions = [],
     action,
+    hint = 'Opens the statement in a new query tab — look it over and run it there.',
     onsubmit,
     onclose,
   }: {
@@ -17,6 +18,7 @@
     value: string;
     suggestions?: string[];
     action: string;
+    hint?: string;
     onsubmit: (value: string) => void;
     onclose: () => void;
   } = $props();
@@ -34,7 +36,7 @@
   <form id="{id}-form" onsubmit={submit}>
     <label class="label" for={id}>{label}</label>
     <Autocomplete {id} bind:value={text} {suggestions} autofocus />
-    <p class="hint">Opens the statement in a new query tab — look it over and run it there.</p>
+    {#if hint}<p class="hint">{hint}</p>{/if}
   </form>
   {#snippet footer()}
     <span style="flex:1"></span>

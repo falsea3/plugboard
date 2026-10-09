@@ -19,7 +19,7 @@
   }
 
   export function initials(name: string): string {
-    const words = name.trim().split(/[\s_\-./]+|(?<=[a-z])(?=[A-Z])/).filter(Boolean);
+    const words: string[] = [...(name.replace(/(?<=[a-z])(?=[A-Z])/g, ' ').match(/[\p{L}\p{N}]+/gu) ?? [])];
     if (words.length === 0) return '?';
     if (words.length === 1) return [...words[0]].slice(0, 2).join('').toUpperCase();
     return (words[0][0] + words[1][0]).toUpperCase();

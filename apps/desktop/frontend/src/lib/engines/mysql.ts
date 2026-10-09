@@ -21,5 +21,8 @@ export const mysql: Engine = {
     if (mode === 'verify_identity' || mode === 'verify_ca' || tls === 'true') return 'verify-full';
     return undefined;
   },
+  canPreferSsl: true,
+  databaseHint: 'Optional',
+  userHint: '',
   sqlDialect: MySQL,
 };

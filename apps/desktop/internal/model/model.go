@@ -12,6 +12,7 @@ const (
 	Postgres Driver = "postgres"
 	MySQL    Driver = "mysql"
 	SQLite   Driver = "sqlite"
+	Redis    Driver = "redis"
 )
 
 type Connection struct {
@@ -110,6 +111,7 @@ type EngineFeatures struct {
 	CanAlterColumns    bool      `json:"canAlterColumns"`
 	TransactionalDDL   bool      `json:"transactionalDDL"`
 	ColumnTypes        []string  `json:"columnTypes"`
+	KeyValue           bool      `json:"keyValue"`
 }
 
 type SQLSyntax struct {

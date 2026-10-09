@@ -19,5 +19,8 @@ export const postgres: Engine = {
     if (q.get('ssl') === 'true' || q.get('ssl') === '1') return 'require';
     return undefined;
   },
+  canPreferSsl: true,
+  databaseHint: 'Optional — defaults to postgres',
+  userHint: '',
   sqlDialect: PostgreSQL,
 };
