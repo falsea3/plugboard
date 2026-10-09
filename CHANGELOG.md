@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-10-09
+
 ### Added
 
 - **Plugboard as an MCP server for AI agents.** Run `plugboard mcp` from Claude Code, Cursor or any other agent (Settings ▸ AI agents has the command to copy) and it can list tables, read their structure and run queries on the connections you open to it — without ever seeing a password. Only connections with *AI agents (MCP)* turned on are visible; agents are read-only unless started with `--write`, and never write to Production. Every call is logged.
