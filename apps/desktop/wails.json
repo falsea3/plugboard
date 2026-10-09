@@ -10,7 +10,7 @@
   "info": {
     "companyName": "Relay Client",
     "productName": "Plugboard",
-    "productVersion": "0.6.4",
+    "productVersion": "0.6.5",
     "copyright": "Copyright © 2026 Relay Client",
     "comments": "Local-first desktop database client"
   },

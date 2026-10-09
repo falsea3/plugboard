@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.5] - 2026-10-09
+
 ### Added
 
 - **A Value panel for table cells.** In a table tab, select a cell to see its full value beside the table. Resize the panel or hide it with the Value button.
