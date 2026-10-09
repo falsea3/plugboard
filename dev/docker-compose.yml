@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17-alpine
+    image: ${REGISTRY:-docker.io}/library/postgres:17-alpine
     environment:
       POSTGRES_USER: relay
       POSTGRES_PASSWORD: relay
@@ -14,7 +14,7 @@ services:
       retries: 30
 
   mysql:
-    image: mysql:8.4
+    image: ${REGISTRY:-docker.io}/library/mysql:8.4
     command: --log-bin-trust-function-creators=1
     environment:
       MYSQL_ROOT_PASSWORD: relay
@@ -31,7 +31,7 @@ services:
       retries: 60
 
   postgres14:
-    image: postgres:14-alpine
+    image: ${REGISTRY:-docker.io}/library/postgres:14-alpine
     profiles: [all]
     environment:
       POSTGRES_USER: relay
@@ -46,7 +46,7 @@ services:
       retries: 30
 
   mysql80:
-    image: mysql:8.0
+    image: ${REGISTRY:-docker.io}/library/mysql:8.0
     command: --log-bin-trust-function-creators=1
     profiles: [all]
     environment:
@@ -64,7 +64,7 @@ services:
       retries: 60
 
   mariadb104:
-    image: mariadb:10.4
+    image: ${REGISTRY:-docker.io}/library/mariadb:10.4
     profiles: [all]
     environment: &mariadb-env
       MARIADB_ROOT_PASSWORD: relay
@@ -80,7 +80,7 @@ services:
       retries: 60
 
   mariadb106:
-    image: mariadb:10.6
+    image: ${REGISTRY:-docker.io}/library/mariadb:10.6
     profiles: [all]
     environment: *mariadb-env
     ports: ["127.0.0.1:53311:3306"]
@@ -88,7 +88,7 @@ services:
     healthcheck: *mariadb-health
 
   mariadb114:
-    image: mariadb:11.4
+    image: ${REGISTRY:-docker.io}/library/mariadb:11.4
     profiles: [all]
     environment: *mariadb-env
     ports: ["127.0.0.1:53312:3306"]
@@ -96,7 +96,7 @@ services:
     healthcheck: *mariadb-health
 
   redis:
-    image: redis:7.4-alpine
+    image: ${REGISTRY:-docker.io}/library/redis:7.4-alpine
     command: >
       sh -c "redis-server --requirepass relay --save '' --appendonly no &
       until redis-cli -a relay --no-auth-warning ping >/dev/null 2>&1; do sleep 0.2; done;
@@ -110,7 +110,7 @@ services:
       retries: 30
 
   valkey:
-    image: valkey/valkey:8-alpine
+    image: ${REGISTRY:-docker.io}/valkey/valkey:8-alpine
     profiles: [all]
     command: >
       sh -c "valkey-server --requirepass relay --save '' &
@@ -125,7 +125,7 @@ services:
       retries: 30
 
   clickhouse:
-    image: clickhouse/clickhouse-server:25.3-alpine
+    image: ${REGISTRY:-docker.io}/clickhouse/clickhouse-server:25.3-alpine
     environment:
       CLICKHOUSE_USER: relay
       CLICKHOUSE_PASSWORD: relay
@@ -142,7 +142,7 @@ services:
       retries: 60
 
   clickhouse248:
-    image: clickhouse/clickhouse-server:24.8-alpine
+    image: ${REGISTRY:-docker.io}/clickhouse/clickhouse-server:24.8-alpine
     profiles: [all]
     environment:
       CLICKHOUSE_USER: relay
@@ -160,7 +160,7 @@ services:
       retries: 60
 
   cassandra:
-    image: cassandra:5.0
+    image: ${REGISTRY:-docker.io}/library/cassandra:5.0
     environment:
       MAX_HEAP_SIZE: 512M
       HEAP_NEWSIZE: 128M
@@ -182,7 +182,7 @@ services:
       start_period: 30s
 
   cassandra41:
-    image: cassandra:4.1
+    image: ${REGISTRY:-docker.io}/library/cassandra:4.1
     profiles: [all]
     environment:
       MAX_HEAP_SIZE: 512M
@@ -205,7 +205,7 @@ services:
       start_period: 30s
 
   bastion:
-    image: alpine:3.20
+    image: ${REGISTRY:-docker.io}/library/alpine:3.20
     command: >
       sh -c "apk add --no-cache openssh >/dev/null && ssh-keygen -A
       && (id relay >/dev/null 2>&1 || adduser -D relay) && echo relay:relay | chpasswd

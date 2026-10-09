@@ -73,13 +73,9 @@ jobs:
         with:
           go-version-file: apps/desktop/go.mod
           cache-dependency-path: apps/desktop/go.sum
-      - name: Pull images through Google's Docker Hub mirror
-        # Docker Hub limits unauthenticated pulls per IP, and runners share IPs.
-        run: |
-          f=/etc/docker/daemon.json
-          sudo sh -c "{ [ -s $f ] && cat $f || echo '{}'; } | jq '. + {\"registry-mirrors\": [\"https://mirror.gcr.io\"]}' > $f.new && mv $f.new $f"
-          sudo systemctl restart docker
       - name: Start the sample servers
+        env:
+          REGISTRY: mirror.gcr.io
         run: docker compose -f dev/docker-compose.yml up -d --wait
       - name: Test against them
         env:
@@ -115,13 +111,9 @@ jobs:
         with:
           go-version-file: apps/desktop/go.mod
           cache-dependency-path: apps/desktop/go.sum
-      - name: Pull images through Google's Docker Hub mirror
-        # Docker Hub limits unauthenticated pulls per IP, and runners share IPs.
-        run: |
-          f=/etc/docker/daemon.json
-          sudo sh -c "{ [ -s $f ] && cat $f || echo '{}'; } | jq '. + {\"registry-mirrors\": [\"https://mirror.gcr.io\"]}' > $f.new && mv $f.new $f"
-          sudo systemctl restart docker
       - name: Start ${{ matrix.server }}
+        env:
+          REGISTRY: mirror.gcr.io
         run: docker compose -f dev/docker-compose.yml --profile all up -d --wait ${{ matrix.server }}
       - name: Test against it
         run: env "${{ matrix.var }}=127.0.0.1:${{ matrix.port }}" go test -race -count=1 ./apps/desktop/internal/db/...
