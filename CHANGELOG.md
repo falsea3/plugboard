@@ -8,17 +8,15 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Added
+## [0.7.0] - 2026-10-09
 
-- **Apache Cassandra.** Browse keyspaces, tables, materialized views, user types, functions and indexes, and page through large tables with the server's own paging. Edit rows in the grid — every change is checked against the row you saw — and run CQL, batches included. Works over SSH tunnels, including clusters behind a bastion.
-
-### Added
-
-- **ClickHouse.** Browse databases, tables, views, dictionaries and SQL functions, with each table's sorting key and skip indexes. Tables open read-only — change data in the SQL editor, which checks syntax as you type without running anything. Read-only connections also use ClickHouse's own `readonly` setting.
+Three new kinds of database: Redis, ClickHouse and Cassandra.
 
 ### Added
 
 - **Redis and Valkey.** Connect over TLS or an SSH tunnel and browse keys as a tree grouped by `:`, in any database. Strings, hashes, lists, sets, sorted sets and streams open in their own views: edit values and JSON, add and remove items, set TTLs, rename and delete keys. A command console runs one command per line. Read-only connections refuse writing commands, and Production asks before running one.
+- **ClickHouse.** Browse databases, tables, views, dictionaries and SQL functions, with each table's sorting key and skip indexes. Tables open read-only — change data in the SQL editor, which checks syntax as you type without running anything. Read-only connections also use ClickHouse's own `readonly` setting.
+- **Apache Cassandra.** Browse keyspaces, tables, materialized views, user types, functions and indexes, and page through large tables with the server's own paging. Edit rows in the grid — every change is checked against the row you saw — and run CQL, batches included. Works over SSH tunnels, including clusters behind a bastion.
 
 ### Changed
 
