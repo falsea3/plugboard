@@ -174,6 +174,17 @@ func msSince(t time.Time) float64 {
 
 const maxChecked = 200
 
+func checkStatement(ctx context.Context, d dialect.Dialect, conn *sql.Conn, stmt string) error {
+	if c, ok := d.(dialect.SyntaxCheck); ok {
+		return c.CheckSyntax(ctx, conn, stmt)
+	}
+	prepared, err := conn.PrepareContext(ctx, stmt)
+	if err == nil {
+		prepared.Close()
+	}
+	return err
+}
+
 func (s *Session) CheckSyntax(ctx context.Context, script string) ([]model.SyntaxProblem, error) {
 	stmts := sqltext.Split(script, s.Dialect.Syntax())
 	if len(stmts) > maxChecked {
@@ -186,9 +197,8 @@ func (s *Session) CheckSyntax(ctx context.Context, script string) ([]model.Synta
 	defer conn.Close()
 	out := []model.SyntaxProblem{}
 	for i, stmt := range stmts {
-		prepared, err := conn.PrepareContext(ctx, stmt)
+		err := checkStatement(ctx, s.Dialect, conn, stmt)
 		if err == nil {
-			prepared.Close()
 			continue
 		}
 		if ctx.Err() != nil {

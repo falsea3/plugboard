@@ -10,6 +10,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **ClickHouse.** Browse databases, tables, views, dictionaries and SQL functions, with each table's sorting key and skip indexes. Tables open read-only — change data in the SQL editor, which checks syntax as you type without running anything. Read-only connections also use ClickHouse's own `readonly` setting.
+
+### Added
+
 - **Redis and Valkey.** Connect over TLS or an SSH tunnel and browse keys as a tree grouped by `:`, in any database. Strings, hashes, lists, sets, sorted sets and streams open in their own views: edit values and JSON, add and remove items, set TTLs, rename and delete keys. A command console runs one command per line. Read-only connections refuse writing commands, and Production asks before running one.
 
 ### Changed

@@ -2,8 +2,10 @@ package sqlcore
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -18,6 +20,9 @@ const (
 )
 
 func normalizeValue(v any, t dialect.Type) any {
+	if t.List && v != nil {
+		return jsonText(v)
+	}
 	switch x := v.(type) {
 	case nil, bool, string:
 		return x
@@ -57,7 +62,26 @@ func normalizeValue(v any, t dialect.Type) any {
 	case fmt.Stringer:
 		return x.String()
 	}
+	switch reflect.ValueOf(v).Kind() {
+	case reflect.Slice, reflect.Array, reflect.Map:
+		return jsonText(v)
+	}
 	return fmt.Sprint(v)
+}
+
+func jsonText(v any) string {
+	if b, ok := v.([]byte); ok {
+		nums := make([]int, len(b))
+		for i, n := range b {
+			nums[i] = int(n)
+		}
+		v = nums
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return fmt.Sprint(v)
+	}
+	return string(b)
 }
 
 func formatTime(v time.Time, t dialect.Type) string {

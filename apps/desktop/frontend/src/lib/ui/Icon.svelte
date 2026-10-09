@@ -54,6 +54,7 @@
   import fn from '@phosphor-icons/core/regular/function.svg?raw';
   import procedure from '@phosphor-icons/core/regular/gear-fine.svg?raw';
   import sequence from '@phosphor-icons/core/regular/list-numbers.svg?raw';
+  import dictionary from '@phosphor-icons/core/regular/book-open-text.svg?raw';
   import enumType from '@phosphor-icons/core/regular/list-bullets.svg?raw';
   import domain from '@phosphor-icons/core/regular/tag-simple.svg?raw';
   import trigger from '@phosphor-icons/core/regular/lightning.svg?raw';
@@ -67,7 +68,7 @@
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
     arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, timer, link, lock, lockOpen, tunnel, funnel,
     download, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, json, restore, sortDefault, fitWidth,
-    function: fn, procedure, sequence, enum: enumType, domain, trigger, extension, event, ddl,
+    function: fn, procedure, sequence, dictionary, enum: enumType, domain, trigger, extension, event, ddl,
   } as const;
 
   export type IconName = keyof typeof ICONS;

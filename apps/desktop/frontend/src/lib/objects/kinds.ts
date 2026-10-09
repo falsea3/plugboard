@@ -9,6 +9,7 @@ export const GROUPS: { kinds: DBObject['kind'][]; label: string; icon: IconName 
   { kinds: ['enum', 'domain'], label: 'Types', icon: 'enum' },
   { kinds: ['trigger'], label: 'Triggers', icon: 'trigger' },
   { kinds: ['event'], label: 'Events', icon: 'event' },
+  { kinds: ['dictionary'], label: 'Dictionaries', icon: 'dictionary' },
   { kinds: ['extension'], label: 'Extensions', icon: 'extension' },
 ];
 

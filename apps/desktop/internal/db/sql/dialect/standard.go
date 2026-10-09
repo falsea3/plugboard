@@ -47,6 +47,12 @@ func createIndex(quote func(string) string, name, table string, idx model.NewInd
 	return "CREATE " + unique + "INDEX " + name + " ON " + table + " (" + strings.Join(cols, ", ") + ")"
 }
 
+var likeEscaper = strings.NewReplacer(`!`, `!!`, `%`, `!%`, `_`, `!_`)
+
+func (Standard) EscapeLike(text string) (string, string) {
+	return likeEscaper.Replace(text), ` ESCAPE '!'`
+}
+
 func (Standard) Placeholder(int) string { return "?" }
 
 func (Standard) Param(int, model.Column) string { return "?" }
@@ -56,6 +62,8 @@ func (Standard) InsertDefaults(table string) string {
 }
 
 func (Standard) CanUpdateToDefault() bool { return true }
+
+func (Standard) Editable() bool { return true }
 
 func (Standard) EstimateRows(context.Context, *sql.DB, string, string) (int64, bool, error) {
 	return 0, false, nil

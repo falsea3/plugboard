@@ -21,7 +21,6 @@ func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []mode
 	}
 	asText := func(name string) string { return d.TextOf(d.QuoteIdent(name)) }
 	like := d.LikeIgnoringCase()
-	const escape = ` ESCAPE '!'`
 
 	for _, f := range filters {
 		col, ok := cols[f.Column]
@@ -37,7 +36,7 @@ func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []mode
 			}
 			parts = append(parts, q+" "+op+" "+bind(col, f.Value))
 		case "contains", "not_contains", "starts", "ends":
-			pattern := escapeLike(f.Value)
+			pattern, escape := d.EscapeLike(f.Value)
 			switch f.Op {
 			case "starts":
 				pattern += "%"
@@ -79,10 +78,4 @@ func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []mode
 		}
 	}
 	return strings.Join(parts, " AND "), args, nil
-}
-
-var likeEscaper = strings.NewReplacer(`!`, `!!`, `%`, `!%`, `_`, `!_`)
-
-func escapeLike(s string) string {
-	return likeEscaper.Replace(s)
 }

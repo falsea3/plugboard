@@ -9,10 +9,11 @@ import (
 type Driver string
 
 const (
-	Postgres Driver = "postgres"
-	MySQL    Driver = "mysql"
-	SQLite   Driver = "sqlite"
-	Redis    Driver = "redis"
+	Postgres   Driver = "postgres"
+	MySQL      Driver = "mysql"
+	SQLite     Driver = "sqlite"
+	Redis      Driver = "redis"
+	ClickHouse Driver = "clickhouse"
 )
 
 type Connection struct {
@@ -112,6 +113,7 @@ type EngineFeatures struct {
 	TransactionalDDL   bool      `json:"transactionalDDL"`
 	ColumnTypes        []string  `json:"columnTypes"`
 	KeyValue           bool      `json:"keyValue"`
+	Editable           bool      `json:"editable"`
 }
 
 type SQLSyntax struct {

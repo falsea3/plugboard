@@ -12,6 +12,7 @@
   style:width="{size}px"
   style:height="{size}px"
   style:background={e.background}
+  style:--ink={e.ink ?? '#fff'}
   title={e.name}
   aria-label={e.name}
   role="img"
@@ -31,7 +32,7 @@
   .mark :global(svg) {
     width: 62%;
     height: 62%;
-    fill: #fff;
+    fill: var(--ink);
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.22));
   }
   .mark :global(title) { display: none; }

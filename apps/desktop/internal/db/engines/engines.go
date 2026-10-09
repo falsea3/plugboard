@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/relay-client/plugboard/apps/desktop/internal/db"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/clickhouse"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/mysql"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/redis"
@@ -38,6 +39,8 @@ func Dialect(d model.Driver) (dialect.Dialect, error) {
 		return mysql.Dialect{}, nil
 	case model.SQLite:
 		return sqlite.Dialect{}, nil
+	case model.ClickHouse:
+		return clickhouse.Dialect{}, nil
 	}
 	return nil, fmt.Errorf("unsupported driver %q", d)
 }

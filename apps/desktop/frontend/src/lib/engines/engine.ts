@@ -6,6 +6,7 @@ export interface Engine {
   name: string;
   logo: string;
   background: string;
+  ink?: string;
   file: boolean;
   fileExtensions: string[];
   defaultPort: number;

@@ -18,6 +18,11 @@ export async function installBridge(page: Page) {
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
       },
       {
+        id: 'warehouse', name: 'Warehouse', driver: 'clickhouse', host: 'olap.internal', port: 9000, user: 'default', savePassword: true,
+        database: 'olap', file: '', sslMode: '', env: 'dev', color: '', readOnly: false,
+        ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
+      },
+      {
         id: 'music', name: 'Music library', driver: 'sqlite', host: '', port: 0, user: '', savePassword: true, database: '',
         file: '/Users/demo/Music/library.sqlite3', sslMode: '', env: 'local', color: '', readOnly: false,
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },

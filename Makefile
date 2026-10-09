@@ -5,8 +5,8 @@ SHELL := /bin/sh
 
 help:
 	@$(MAKE) -s -C apps/desktop help
-	@printf '  %-14s %s\n' 'make db-up' 'Start sample PostgreSQL, MySQL and Redis in Docker'
-	@printf '  %-14s %s\n' 'make db-up-all' 'Also PostgreSQL 14, MySQL 8.0, MariaDB 10.4/10.6/11.4 and Valkey'
+	@printf '  %-14s %s\n' 'make db-up' 'Start sample PostgreSQL, MySQL, ClickHouse and Redis in Docker'
+	@printf '  %-14s %s\n' 'make db-up-all' 'Also PostgreSQL 14, MySQL 8.0, MariaDB 10.4/10.6/11.4, ClickHouse 24.8 and Valkey'
 	@printf '  %-14s %s\n' 'make test-servers' 'Run the live-server tests against every one of them'
 	@printf '  %-14s %s\n' 'make db-down' 'Stop them and drop their data'
 	@printf '  %-14s %s\n' 'make sample-db' 'Rebuild dev/sample.db (SQLite)'
@@ -27,6 +27,7 @@ db-up-all:
 PG_SERVERS    := 55432 55433
 MYSQL_SERVERS := 53306 53307 53310 53311 53312
 REDIS_SERVERS := 56379 56380
+CLICKHOUSE_SERVERS := 59000 59001
 test-servers:
 	@cd apps/desktop && for port in $(PG_SERVERS); do \
 		echo "== PostgreSQL on :$$port"; PLUGBOARD_TEST_PG=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
@@ -34,7 +35,9 @@ test-servers:
 		echo "== MySQL/MariaDB on :$$port"; PLUGBOARD_TEST_MYSQL=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
 	@cd apps/desktop && for port in $(REDIS_SERVERS); do \
 		echo "== Redis/Valkey on :$$port"; PLUGBOARD_TEST_REDIS=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
-	@cd apps/desktop && echo "== SSH tunnels" && PLUGBOARD_TEST_PG=127.0.0.1:55432 PLUGBOARD_TEST_MYSQL=127.0.0.1:53306 PLUGBOARD_TEST_REDIS=127.0.0.1:56379 PLUGBOARD_TEST_SSH=127.0.0.1:52222 go test -count=1 ./internal/db/...
+	@cd apps/desktop && for port in $(CLICKHOUSE_SERVERS); do \
+		echo "== ClickHouse on :$$port"; PLUGBOARD_TEST_CLICKHOUSE=127.0.0.1:$$port go test -count=1 ./internal/db/... || exit 1; done
+	@cd apps/desktop && echo "== SSH tunnels" && PLUGBOARD_TEST_CLICKHOUSE=127.0.0.1:59000 PLUGBOARD_TEST_PG=127.0.0.1:55432 PLUGBOARD_TEST_MYSQL=127.0.0.1:53306 PLUGBOARD_TEST_REDIS=127.0.0.1:56379 PLUGBOARD_TEST_SSH=127.0.0.1:52222 go test -count=1 ./internal/db/...
 
 db-down:
 	docker compose -f dev/docker-compose.yml --profile all down -v

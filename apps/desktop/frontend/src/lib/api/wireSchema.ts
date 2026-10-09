@@ -17,7 +17,7 @@ export interface Column {
 export interface DBObject {
   schema: string;
   name: string;
-  kind: 'function' | 'procedure' | 'sequence' | 'enum' | 'domain' | 'trigger' | 'event' | 'extension' | 'table' | 'view';
+  kind: 'function' | 'procedure' | 'sequence' | 'enum' | 'domain' | 'trigger' | 'event' | 'extension' | 'dictionary' | 'table' | 'view';
   detail?: string;
   values?: string[];
 }

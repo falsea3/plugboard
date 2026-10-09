@@ -30,6 +30,9 @@ func (s *Session) ApplyStructure(ctx context.Context, sc model.StructureChange) 
 	if s.Conn.ReadOnly {
 		return 0, false, &db.ReadOnlyError{Reason: "structure changes"}
 	}
+	if !s.Dialect.Editable() {
+		return 0, false, db.ErrNotSupported
+	}
 	built, err := s.buildStructure(ctx, sc)
 	if err != nil {
 		return 0, false, err

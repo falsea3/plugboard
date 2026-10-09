@@ -37,7 +37,8 @@
       "longblob",
       "binary(16)"
     ],
-    "keyValue": false
+    "keyValue": false,
+    "editable": true
   },
   "postgres": {
     "syntax": {
@@ -79,7 +80,8 @@
       "text[]",
       "integer[]"
     ],
-    "keyValue": false
+    "keyValue": false,
+    "editable": true
   },
   "sqlite": {
     "syntax": {
@@ -102,7 +104,8 @@
       "TEXT",
       "BLOB"
     ],
-    "keyValue": false
+    "keyValue": false,
+    "editable": true
   },
   "redis": {
     "syntax": {
@@ -119,6 +122,51 @@
     "canAlterColumns": false,
     "transactionalDDL": false,
     "columnTypes": [],
-    "keyValue": true
+    "keyValue": true,
+    "editable": false
+  },
+  "clickhouse": {
+    "syntax": {
+      "hashComments": true,
+      "dashCommentNeedsSpace": false,
+      "backslashEscapes": true,
+      "escapeStrings": false,
+      "doubleQuotedStrings": false,
+      "dollarQuotes": false,
+      "executableComments": false
+    },
+    "booleanType": true,
+    "canUpdateToDefault": false,
+    "canAlterColumns": true,
+    "transactionalDDL": false,
+    "columnTypes": [
+      "String",
+      "UInt8",
+      "UInt16",
+      "UInt32",
+      "UInt64",
+      "Int8",
+      "Int16",
+      "Int32",
+      "Int64",
+      "Float32",
+      "Float64",
+      "Decimal(18, 2)",
+      "Bool",
+      "Date",
+      "Date32",
+      "DateTime",
+      "DateTime64(3)",
+      "UUID",
+      "IPv4",
+      "IPv6",
+      "LowCardinality(String)",
+      "Nullable(String)",
+      "Array(String)",
+      "Map(String, String)",
+      "JSON"
+    ],
+    "keyValue": false,
+    "editable": false
   }
 }

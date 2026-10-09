@@ -1,4 +1,4 @@
-export type Driver = 'postgres' | 'mysql' | 'sqlite' | 'redis';
+export type Driver = 'postgres' | 'mysql' | 'sqlite' | 'redis' | 'clickhouse';
 export type Env = '' | 'local' | 'dev' | 'staging' | 'prod';
 
 export interface Connection {
@@ -78,6 +78,7 @@ export interface EngineFeatures {
   transactionalDDL: boolean;
   columnTypes: string[];
   keyValue: boolean;
+  editable: boolean;
 }
 
 export interface SqlSyntax {

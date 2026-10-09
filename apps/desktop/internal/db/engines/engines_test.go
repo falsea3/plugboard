@@ -21,7 +21,7 @@ func TestFrontendEngineFixture(t *testing.T) {
 	if err := json.Unmarshal(data, &fixture); err != nil {
 		t.Fatal(err)
 	}
-	for _, driver := range []model.Driver{model.Postgres, model.MySQL, model.SQLite} {
+	for _, driver := range []model.Driver{model.Postgres, model.MySQL, model.SQLite, model.ClickHouse} {
 		d, err := Dialect(driver)
 		if err != nil {
 			t.Fatal(err)
@@ -33,7 +33,7 @@ func TestFrontendEngineFixture(t *testing.T) {
 	if want := redis.Features(); !reflect.DeepEqual(fixture[model.Redis], want) {
 		t.Errorf("frontend/e2e/engines.json redis = %+v, the engine says %+v", fixture[model.Redis], want)
 	}
-	if len(fixture) != 4 {
+	if len(fixture) != 5 {
 		t.Errorf("frontend/e2e/engines.json lists %d engines", len(fixture))
 	}
 }

@@ -24,6 +24,20 @@ func TestNormalizeValue(t *testing.T) {
 			t.Errorf("normalizeValue(%#v) = %#v, want %#v", c.in, got, c.want)
 		}
 	}
+	list := dialect.Type{List: true}
+	for in, want := range map[string]string{
+		`[1,2]`:             normalizeValue([]uint8{1, 2}, list).(string),
+		`{"source":"blog"}`: normalizeValue(map[string]string{"source": "blog"}, dialect.Type{}).(string),
+		`[1,"x"]`:           normalizeValue([]any{1, "x"}, dialect.Type{}).(string),
+		`["a","b"]`:         normalizeValue([]string{"a", "b"}, list).(string),
+	} {
+		if in != want {
+			t.Errorf("list value = %s, want %s", want, in)
+		}
+	}
+	if got := normalizeValue(nil, list); got != nil {
+		t.Errorf("NULL list = %#v", got)
+	}
 	if got := normalizeValue([]byte("hi"), dialect.Type{Kind: model.KindBinary}); got != "0x6869" {
 		t.Errorf("binary text = %#v", got)
 	}

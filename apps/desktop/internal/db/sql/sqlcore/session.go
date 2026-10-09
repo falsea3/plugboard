@@ -109,6 +109,7 @@ func Features(d dialect.Dialect) model.EngineFeatures {
 		CanAlterColumns:    d.CanAlterColumns(),
 		TransactionalDDL:   d.TransactionalDDL(),
 		ColumnTypes:        d.ColumnTypes(),
+		Editable:           d.Editable(),
 	}
 }
 

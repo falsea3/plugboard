@@ -2,7 +2,7 @@
 
 # Plugboard
 
-**A fast, local-first database client for PostgreSQL, MySQL, SQLite and Redis. No accounts, no cloud sync, no telemetry — just you and your data.**
+**A fast, local-first database client for PostgreSQL, MySQL, SQLite, ClickHouse and Redis. No accounts, no cloud sync, no telemetry — just you and your data.**
 
 [![CI](https://github.com/relay-client/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/relay-client/plugboard/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/relay-client/plugboard?sort=semver)](https://github.com/relay-client/plugboard/releases/latest)
@@ -42,9 +42,9 @@ You do this once; updates the app installs itself don't ask again.
 ## Features
 
 **Connections**
-- PostgreSQL, MySQL and MariaDB, SQLite files, and Redis or Valkey — several open at once, each with its own tabs. `⌘K` jumps to any of them by name.
+- PostgreSQL, MySQL and MariaDB, SQLite files, ClickHouse, and Redis or Valkey — several open at once, each with its own tabs. `⌘K` jumps to any of them by name.
 - Tag a connection *local*, *dev*, *staging* or *prod*: the tag colours the window, so you always know where you are.
-- Paste a connection URL — `postgres://…`, `mysql://…`, `redis://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
+- Paste a connection URL — `postgres://…`, `mysql://…`, `clickhouse://…`, `redis://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
 - **SSH tunnels** through a bastion, or straight into the database server, with a password, a private key or ssh-agent. A dropped tunnel comes back on its own.
 - Passwords stay in the system keychain (Keychain, Windows Credential Manager, Secret Service) — never in a file on disk.
 
@@ -73,6 +73,12 @@ You do this once; updates the app installs itself don't ask again.
 - Results arrive a thousand rows at a time instead of the whole table at once.
 
 ![The SQL editor with a query and its result](.github/assets/screenshots/query.png)
+
+**ClickHouse**
+- Databases, tables and views from `system.*`, with each table's sorting key and data-skipping indexes, dictionaries and SQL functions.
+- Tables open read-only — ClickHouse has no transactions and its updates are background mutations, so changes go through the SQL editor, where you see exactly what runs.
+- The editor checks syntax with `EXPLAIN AST` as you type, which parses without running anything.
+- Read-only connections run with the server's `readonly` setting as well as Plugboard's own check.
 
 **Redis**
 - Keys as a tree, grouped by `:`, from every database 0–15 (or however many the server has), scanned page by page so a huge keyspace doesn't stall the server. Filter by text or a pattern like `user:*`.

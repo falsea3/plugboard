@@ -19,6 +19,9 @@ func (s *Session) ApplyChanges(ctx context.Context, cs model.ChangeSet) (int, er
 	if s.Conn.ReadOnly {
 		return 0, &db.ReadOnlyError{Reason: "edits"}
 	}
+	if !s.Dialect.Editable() {
+		return 0, db.ErrNotSupported
+	}
 	stmts, err := s.buildChanges(ctx, cs, false)
 	if err != nil {
 		return 0, err

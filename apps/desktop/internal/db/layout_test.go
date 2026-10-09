@@ -14,7 +14,7 @@ import (
 
 const module = "github.com/relay-client/plugboard/apps/desktop/internal/"
 
-var driverImports = []string{"github.com/jackc/pgx", "github.com/go-sql-driver/mysql", "modernc.org/sqlite", "github.com/redis/go-redis"}
+var driverImports = []string{"github.com/jackc/pgx", "github.com/go-sql-driver/mysql", "modernc.org/sqlite", "github.com/redis/go-redis", "github.com/ClickHouse/clickhouse-go"}
 
 func TestLayout(t *testing.T) {
 	for _, e := range readDir(t, ".") {

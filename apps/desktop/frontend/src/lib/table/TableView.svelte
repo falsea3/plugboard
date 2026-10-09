@@ -59,11 +59,14 @@
   const readOnlyReason = $derived.by(() => {
     if (ws.readOnly) return 'Read-only session';
     if (tab.tableKind === 'view') return 'Views are read-only';
+    if (!ws.session.engine.editable) return 'Rows can’t be edited here — change them in the SQL editor';
     if (columns.length > 0 && keyColumns.length === 0) return 'No primary key — rows can’t be identified safely';
     return '';
   });
   const canEdit = $derived(!readOnlyReason && columns.length > 0 && !!page);
-  const structureReadOnlyReason = $derived(ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : '');
+  const structureReadOnlyReason = $derived(
+    ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : !ws.session.engine.editable ? 'Change the structure in the SQL editor' : '',
+  );
 
   $effect(() => {
     ondirty(edits.dirty || structureDirty);

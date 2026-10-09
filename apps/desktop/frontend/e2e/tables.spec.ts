@@ -2,7 +2,7 @@ import { connect, expect, shot, test } from './setup';
 
 test('connects, browses a table and runs a query', async ({ page }) => {
   const options = page.getByRole('listbox', { name: 'Connections' }).getByRole('option');
-  await expect(options).toHaveCount(4);
+  await expect(options).toHaveCount(5);
   await shot(page, 'connections');
 
   await options.filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();

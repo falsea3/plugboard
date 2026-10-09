@@ -54,7 +54,7 @@
     {/if}
   </div>
   <p class="blurb">
-    A native database client for PostgreSQL, MySQL, SQLite and Redis. Connections and credentials stay on this
+    A native database client for PostgreSQL, MySQL, SQLite, ClickHouse and Redis. Connections and credentials stay on this
     computer — passwords are kept in the system keychain, and Plugboard has no accounts, no cloud sync
     and no telemetry.
   </p>

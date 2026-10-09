@@ -31,6 +31,7 @@ type Dialect interface {
 	Param(n int, col model.Column) string
 	TextOf(expr string) string
 	LikeIgnoringCase() string
+	EscapeLike(text string) (pattern, clause string)
 	InsertDefaults(table string) string
 	CanUpdateToDefault() bool
 	BooleanType() bool
@@ -55,8 +56,17 @@ type Dialect interface {
 	DropIndex(schema, table, name string) string
 	TransactionalDDL() bool
 	CanAlterColumns() bool
+	Editable() bool
 	ColumnTypes() []string
 	LockWait(seconds int) (set, reset string)
+}
+
+type SortKey interface {
+	SortKey(ctx context.Context, db *sql.DB, schema, table string) ([]string, error)
+}
+
+type SyntaxCheck interface {
+	CheckSyntax(ctx context.Context, conn *sql.Conn, stmt string) error
 }
 
 type Versioned interface {
@@ -88,4 +98,5 @@ type Type struct {
 	Date    bool
 	Time    bool
 	Zone    bool
+	List    bool
 }

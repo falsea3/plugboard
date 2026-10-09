@@ -8,8 +8,28 @@ import (
 	"strings"
 	"time"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
+
+func (s *Session) sortKey(ctx context.Context, schema, table string, keys []model.Column, byName map[string]model.Column) ([]string, error) {
+	sk, ok := s.Dialect.(dialect.SortKey)
+	if !ok || len(keys) > 0 {
+		return nil, nil
+	}
+	names, err := retry(ctx, s, func() ([]string, error) { return sk.SortKey(ctx, s.DB, schema, table) })
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, n := range names {
+		if _, ok := byName[n]; !ok {
+			break
+		}
+		out = append(out, n)
+	}
+	return out, nil
+}
 
 func (s *Session) TablePage(ctx context.Context, q model.TableQuery) (model.TablePage, error) {
 	if q.Table == "" {
@@ -31,6 +51,10 @@ func (s *Session) TablePage(ctx context.Context, q model.TableQuery) (model.Tabl
 		if c.PrimaryKey {
 			keys = append(keys, c)
 		}
+	}
+	sortKey, err := s.sortKey(ctx, q.Schema, q.Table, keys, byName)
+	if err != nil {
+		return model.TablePage{}, err
 	}
 	if q.OrderBy != "" {
 		if _, ok := byName[q.OrderBy]; !ok {
@@ -95,6 +119,14 @@ func (s *Session) TablePage(ctx context.Context, q model.TableQuery) (model.Tabl
 		if k.Name != q.OrderBy {
 			order = append(order, orderCol{k.Name, false})
 		}
+	}
+	for _, k := range sortKey {
+		if k != q.OrderBy {
+			order = append(order, orderCol{k, false})
+		}
+	}
+	if !keyset && q.OrderBy == "" && len(sortKey) > 0 {
+		page.DefaultOrder = sortKey
 	}
 	if keyset {
 		page.DefaultOrder = make([]string, len(keys))
