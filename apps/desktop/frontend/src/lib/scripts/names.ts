@@ -1,4 +1,5 @@
 import type { QueryTabState } from '../api/wire';
+import type { MenuItem } from '../grid/grid';
 
 export type ScriptTab = { title: string; sql: string; saved: string; script?: string };
 
@@ -40,3 +41,13 @@ export const toState = (tab: ScriptTab, active: boolean): QueryTabState => ({
 });
 
 export const sortNames = (names: string[]) => [...names].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+export function scriptMenu(): MenuItem[] {
+  return [
+    { id: 'script-open', label: 'Open' },
+    { id: 'script-rename', label: 'Rename…' },
+    { id: 'script-copy-name', label: 'Copy name' },
+    'sep',
+    { id: 'script-delete', label: 'Delete…', danger: true },
+  ];
+}

@@ -10,8 +10,7 @@
   import ItemTable from './ItemTable.svelte';
   import KeyActions from './KeyActions.svelte';
   import StringValue from './StringValue.svelte';
-  import { patchItems, sizeLabel, type Change } from './items';
-  import { formatTTL, TYPE_LABEL } from './tree';
+  import { formatTTL, patchItems, sizeLabel, TYPE_LABEL, type Change } from './items';
 
   let { ws, tab, active }: { ws: Workspace; tab: KeyTab; active: boolean } = $props();
 

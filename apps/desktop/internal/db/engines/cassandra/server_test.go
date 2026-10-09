@@ -204,3 +204,37 @@ func TestWrongPassword(t *testing.T) {
 		t.Fatalf("wrong password = %v", err)
 	}
 }
+
+func TestStructureStatementsRun(t *testing.T) {
+	s := open(t, conn(t))
+	ctx := context.Background()
+	run(t, s, "CREATE TABLE IF NOT EXISTS shop.scratch (p int, c int, v text, PRIMARY KEY (p, c)); INSERT INTO shop.scratch (p, c, v) VALUES (1, 1, 'x')")
+	sc := func(ch model.ColumnChange) model.StructureChange {
+		return model.StructureChange{Schema: "shop", Table: "scratch", Changes: []model.ColumnChange{ch}}
+	}
+	name, typ := "cc", "text"
+	if _, err := s.PreviewStructure(ctx, sc(model.ColumnChange{Kind: model.ChangeUpdate, Column: "v", Type: &typ})); err != nil {
+		t.Errorf("same type = %v", err)
+	}
+	typ = "int"
+	if _, err := s.PreviewStructure(ctx, sc(model.ColumnChange{Kind: model.ChangeUpdate, Column: "v", Type: &typ})); err == nil {
+		t.Error("a type change passed")
+	}
+	if _, err := s.PreviewStructure(ctx, sc(model.ColumnChange{Kind: model.ChangeUpdate, Column: "v", Name: &name})); err == nil {
+		t.Error("renaming a regular column passed")
+	}
+	for _, ch := range []model.ColumnChange{{Kind: model.ChangeUpdate, Column: "c", Name: &name}, {Kind: model.ChangeDelete, Column: "v"}} {
+		stmts, err := s.PreviewStructure(ctx, sc(ch))
+		if err != nil {
+			t.Fatal(err)
+		}
+		run(t, s, stmts[0])
+	}
+	run(t, s, s.TruncateSQL("shop", "scratch"))
+	if n := run(t, s, "SELECT COUNT(*) FROM shop.scratch")[0].Rows[0][0]; n != int64(0) {
+		t.Errorf("after truncate = %v", n)
+	}
+	run(t, s, s.CreateIndexSQL("shop", "scratch", model.NewIndex{Name: "scratch_cc", Columns: []string{"cc"}}))
+	run(t, s, s.DropIndexSQL("shop", "scratch", "scratch_cc"))
+	run(t, s, "DROP TABLE shop.scratch")
+}

@@ -82,6 +82,7 @@ export interface GoApp {
   PreviewStructure(sessionId: string, sc: StructureChange): Promise<string[]>;
   RenameTableSQL(sessionId: string, schema: string, from: string, to: string): Promise<string>;
   CreateIndexSQL(sessionId: string, schema: string, table: string, idx: NewIndex): Promise<string>;
+  TruncateSQL(sessionId: string, schema: string, table: string): Promise<string>;
   DropIndexSQL(sessionId: string, schema: string, table: string, name: string): Promise<string>;
   ScanKeys(sessionId: string, db: string, pattern: string, cursor: string, count: number): Promise<KeyPage>;
   ReadKey(sessionId: string, db: string, key: string, cursor: string): Promise<KeyValue>;

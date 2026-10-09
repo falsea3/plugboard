@@ -18,13 +18,15 @@ describe('sidebar tree', () => {
 
   it('keeps changes off in a read-only session and for views', () => {
     const ids = (items: ReturnType<typeof treeMenu>) => items.flatMap(i => (i !== 'sep' && !i.disabled ? [i.id] : []));
-    expect(ids(treeMenu({ table: albums }, true, true))).not.toContain('tree-drop');
-    expect(ids(treeMenu({ table: { ...albums, kind: 'view' } }, false, true))).toEqual(
+    expect(ids(treeMenu({ table: albums }, true, true, true))).not.toContain('tree-drop');
+    expect(ids(treeMenu({ table: { ...albums, kind: 'view' } }, false, true, true))).toEqual(
       expect.arrayContaining(['tree-open', 'tree-drop']),
     );
-    expect(ids(treeMenu({ table: { ...albums, kind: 'view' } }, false, true))).not.toContain('tree-rename');
-    expect(ids(treeMenu({ table: albums, column }, false, true))).toEqual(['tree-copy-name', 'tree-query', 'tree-structure', 'tree-rename', 'tree-type', 'tree-index', 'tree-drop']);
-    expect(ids(treeMenu({ table: albums, column }, false, false))).not.toContain('tree-type');
+    expect(ids(treeMenu({ table: { ...albums, kind: 'view' } }, false, true, true))).not.toContain('tree-rename');
+    expect(ids(treeMenu({ table: albums, column }, false, true, true))).toEqual(['tree-copy-name', 'tree-query', 'tree-structure', 'tree-rename', 'tree-type', 'tree-index', 'tree-drop']);
+    expect(ids(treeMenu({ table: albums, column }, false, false, true))).not.toContain('tree-type');
+    expect(ids(treeMenu({ table: albums }, false, true, false))).not.toContain('tree-rename');
+    expect(ids(treeMenu({ table: albums }, false, true, false))).toContain('tree-truncate');
   });
 
   it('asks for a new name or type and turns it into a structure change', () => {
@@ -47,7 +49,7 @@ describe('sidebar tree', () => {
     expect(indexName('orders', ['customer_id', 'placed at'], false)).toBe('orders_customer_id_placed_at_idx');
     expect(indexName('orders', ['code'], true)).toBe('orders_code_key');
     const pk = { name: 'albums_pkey', columns: ['id'], unique: true, primary: true } as never;
-    const items = treeMenu({ table: albums, index: pk }, false, true);
+    const items = treeMenu({ table: albums, index: pk }, false, true, true);
     expect(items.find(i => i !== 'sep' && i.id === 'tree-drop-index')).toMatchObject({ disabled: true });
   });
 });

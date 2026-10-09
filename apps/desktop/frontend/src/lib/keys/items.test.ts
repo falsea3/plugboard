@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addChange, canEdit, createChange, itemColumns, patchItems, removeChange, sizeLabel } from './items';
+import { addChange, canEdit, createChange, formatTTL, itemColumns, patchItems, removeChange, sizeLabel } from './items';
 
 const h = [
   { field: 'a', value: '1' },
@@ -60,4 +60,14 @@ it('sizeLabel names what the type holds', () => {
   expect(sizeLabel('string', 1)).toBe('1 byte');
   expect(sizeLabel('hash', 1200)).toBe('1,200 fields');
   expect(sizeLabel('list', 2)).toBe('2 items');
+});
+
+describe('formatTTL', () => {
+  it('reads like a duration', () => {
+    expect(formatTTL(-1)).toBe('No expiry');
+    expect(formatTTL(42)).toBe('42s');
+    expect(formatTTL(600)).toBe('10m');
+    expect(formatTTL(3725)).toBe('1h 2m');
+    expect(formatTTL(86400 * 2 + 3600)).toBe('2d 1h');
+  });
 });

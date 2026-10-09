@@ -31,6 +31,10 @@ func (s Standard) DropIndex(schema, _, name string) string {
 	return "DROP INDEX " + s.QuoteIdent(schema) + "." + s.QuoteIdent(name)
 }
 
+func (s Standard) Truncate(schema, table string) string {
+	return "DELETE FROM " + s.QuoteIdent(schema) + "." + s.QuoteIdent(table)
+}
+
 func CreateIndex(quote func(string) string, name, table string, idx model.NewIndex) string {
 	return createIndex(quote, name, table, idx)
 }

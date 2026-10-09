@@ -1,4 +1,5 @@
 import type { KeyInfo } from '../api/wire';
+import type { MenuItem } from '../grid/grid';
 
 export type KeyRow =
   | { kind: 'folder'; path: string; name: string; depth: number; count: number; open: boolean }
@@ -54,23 +55,10 @@ export function scanPattern(filter: string): string {
   return `*${f.replace(/\\/g, '\\\\')}*`;
 }
 
-export function formatTTL(seconds: number): string {
-  if (seconds < 0) return 'No expiry';
-  if (seconds < 60) return `${seconds}s`;
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (d > 0) return h ? `${d}d ${h}h` : `${d}d`;
-  if (h > 0) return m ? `${h}h ${m}m` : `${h}h`;
-  return s ? `${m}m ${s}s` : `${m}m`;
+export function keyMenu(readOnly: boolean): MenuItem[] {
+  const items: MenuItem[] = [
+    { id: 'key-open', label: 'Open' },
+    { id: 'key-copy-name', label: 'Copy name' },
+  ];
+  return readOnly ? items : [...items, 'sep', { id: 'key-delete', label: 'Delete…', danger: true }];
 }
-
-export const TYPE_LABEL: Record<string, string> = {
-  string: 'STR',
-  hash: 'HASH',
-  list: 'LIST',
-  set: 'SET',
-  zset: 'ZSET',
-  stream: 'STREAM',
-};

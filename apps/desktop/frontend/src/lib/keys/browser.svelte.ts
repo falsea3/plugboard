@@ -1,6 +1,6 @@
 import { SvelteSet } from 'svelte/reactivity';
 import { api, type KeyInfo } from '../api/backend';
-import { scanPattern } from './tree';
+import { scanPattern } from './folders';
 
 const PAGE = 500;
 

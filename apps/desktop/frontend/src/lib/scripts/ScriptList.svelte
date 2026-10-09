@@ -1,21 +1,13 @@
 <script lang="ts">
   import type { Workspace } from '../app/workspace.svelte';
   import GridMenu from '../grid/GridMenu.svelte';
-  import type { MenuItem } from '../grid/grid';
   import Icon from '../ui/Icon.svelte';
   import Modal from '../ui/Modal.svelte';
   import { copyToClipboard } from '../ui/clipboard';
   import NameModal from './NameModal.svelte';
+  import { scriptMenu } from './names';
 
   let { ws, filter }: { ws: Workspace; filter: string } = $props();
-
-  const MENU: MenuItem[] = [
-    { id: 'script-open', label: 'Open' },
-    { id: 'script-rename', label: 'Rename…' },
-    { id: 'script-copy-name', label: 'Copy name' },
-    'sep',
-    { id: 'script-delete', label: 'Delete…', danger: true },
-  ];
 
   let open = $state(true);
   let menu = $state<{ x: number; y: number; name: string } | null>(null);
@@ -66,7 +58,7 @@
 
 {#if menu}
   {@const m = menu}
-  <GridMenu items={MENU} x={m.x} y={m.y} onpick={id => pick(id, m.name)} onclose={() => (menu = null)} />
+  <GridMenu items={scriptMenu()} x={m.x} y={m.y} onpick={id => pick(id, m.name)} onclose={() => (menu = null)} />
 {/if}
 
 {#if renaming !== null}

@@ -57,6 +57,10 @@ func (d Dialect) CreateIndex(schema, table string, idx model.NewIndex) string {
 	return "ALTER TABLE " + dialect.Qualified(d, schema, table) + " ADD INDEX " + d.QuoteIdent(idx.Name) + " " + expr + " TYPE minmax GRANULARITY 1"
 }
 
+func (d Dialect) Truncate(schema, table string) string {
+	return "TRUNCATE TABLE " + dialect.Qualified(d, schema, table)
+}
+
 func (d Dialect) DropIndex(schema, table, name string) string {
 	return "ALTER TABLE " + dialect.Qualified(d, schema, table) + " DROP INDEX " + d.QuoteIdent(name)
 }

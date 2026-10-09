@@ -137,3 +137,24 @@ export function sizeLabel(type: string, size: number): string {
   }
   return size === 1 ? '1 item' : `${n} items`;
 }
+
+export function formatTTL(seconds: number): string {
+  if (seconds < 0) return 'No expiry';
+  if (seconds < 60) return `${seconds}s`;
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (d > 0) return h ? `${d}d ${h}h` : `${d}d`;
+  if (h > 0) return m ? `${h}h ${m}m` : `${h}h`;
+  return s ? `${m}m ${s}s` : `${m}m`;
+}
+
+export const TYPE_LABEL: Record<string, string> = {
+  string: 'STR',
+  hash: 'HASH',
+  list: 'LIST',
+  set: 'SET',
+  zset: 'ZSET',
+  stream: 'STREAM',
+};

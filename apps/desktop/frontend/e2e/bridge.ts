@@ -180,9 +180,10 @@ export async function installBridge(page: Page) {
           PreviewChanges: () => ok([]),
           ApplyStructure: () => ok({ applied: 1, failedIndex: -1, partial: false, cancelled: false }),
           PreviewStructure: (_: string, sc: { table: string; changes: { kind: string; name?: string; type?: string }[] }) =>
-            ok(sc.changes.map(c => `ALTER TABLE "public"."${sc.table}" ${c.kind === 'insert' ? `ADD COLUMN "${c.name}" ${c.type}` : c.type ? `ALTER COLUMN "${(c as any).column}" TYPE ${c.type}` : '…'}`)),
+            ok(sc.changes.map(c => `ALTER TABLE "public"."${sc.table}" ${c.kind === 'insert' ? `ADD COLUMN "${c.name}" ${c.type}` : c.kind === 'delete' ? `DROP COLUMN "${(c as any).column}"` : c.type ? `ALTER COLUMN "${(c as any).column}" TYPE ${c.type}` : '…'}`)),
           CreateIndexSQL: (_: string, schema: string, table: string, idx: { name: string; columns: string[]; unique: boolean }) =>
             ok(`CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX "${idx.name}" ON "${schema}"."${table}" (${idx.columns.map(c => `"${c}"`).join(', ')});`),
+          TruncateSQL: (_: string, schema: string, table: string) => ok(`DELETE FROM "${schema}"."${table}";`),
           DropIndexSQL: (_: string, schema: string, _t: string, name: string) => ok(`DROP INDEX "${schema}"."${name}";`),
           RenameTableSQL: (_: string, schema: string, from: string, to: string) => ok(`ALTER TABLE "${schema}"."${from}" RENAME TO "${to}";`),
           ListScripts: (id: string) => ok(Object.keys(scripts(id)).sort((a, b) => a.localeCompare(b))),

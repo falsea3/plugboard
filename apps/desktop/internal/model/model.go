@@ -118,6 +118,7 @@ type EngineFeatures struct {
 	Editable           bool      `json:"editable"`
 	StructureEditable  bool      `json:"structureEditable"`
 	Sortable           bool      `json:"sortable"`
+	CanRenameTables    bool      `json:"canRenameTables"`
 }
 
 type SQLSyntax struct {

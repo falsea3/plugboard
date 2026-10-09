@@ -4,7 +4,6 @@
   import { FILTER_TABLES_EVENT } from '../app/commands';
   import type { Workspace } from '../app/workspace.svelte';
   import GridMenu from '../grid/GridMenu.svelte';
-  import type { MenuItem } from '../grid/grid';
   import Icon from '../ui/Icon.svelte';
   import Modal from '../ui/Modal.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -12,7 +11,8 @@
   import NewKeyModal from './NewKeyModal.svelte';
   import ScriptList from '../scripts/ScriptList.svelte';
   import type { Change } from './items';
-  import { keyRows, TYPE_LABEL } from './tree';
+  import { keyMenu, keyRows } from './folders';
+  import { TYPE_LABEL } from './items';
 
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
@@ -25,13 +25,6 @@
   let menu = $state<{ x: number; y: number; key: KeyInfo } | null>(null);
   let deleting = $state<KeyInfo | null>(null);
   let creating = $state(false);
-
-  const MENU: MenuItem[] = [
-    { id: 'key-open', label: 'Open' },
-    { id: 'key-copy-name', label: 'Copy name' },
-    'sep',
-    { id: 'key-delete', label: 'Delete…', danger: true },
-  ];
 
   function onFilter() {
     clearTimeout(timer);
@@ -136,7 +129,7 @@
 
 {#if menu}
   {@const m = menu}
-  <GridMenu items={ws.readOnly ? MENU.slice(0, 2) : MENU} x={m.x} y={m.y} onpick={id => pick(id, m.key)} onclose={() => (menu = null)} />
+  <GridMenu items={keyMenu(ws.readOnly)} x={m.x} y={m.y} onpick={id => pick(id, m.key)} onclose={() => (menu = null)} />
 {/if}
 
 {#if deleting}

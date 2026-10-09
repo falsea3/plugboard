@@ -62,6 +62,10 @@ func (s *Session) CreateIndexSQL(schema, table string, idx model.NewIndex) strin
 	return s.Dialect.CreateIndex(schema, table, idx)
 }
 
+func (s *Session) TruncateSQL(schema, table string) string {
+	return s.Dialect.Truncate(schema, table)
+}
+
 func (s *Session) DropIndexSQL(schema, table, name string) string {
 	return s.Dialect.DropIndex(schema, table, name)
 }

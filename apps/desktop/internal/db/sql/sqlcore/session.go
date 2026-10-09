@@ -112,6 +112,7 @@ func Features(d dialect.Dialect) model.EngineFeatures {
 		Editable:           d.Editable(),
 		StructureEditable:  d.Editable(),
 		Sortable:           true,
+		CanRenameTables:    true,
 	}
 }
 

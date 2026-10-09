@@ -20,9 +20,10 @@ var (
 	_ db.Session  = (*redis.Session)(nil)
 	_ db.KeyStore = (*redis.Session)(nil)
 
-	_ db.Session      = (*cassandra.Session)(nil)
-	_ db.RowEditor    = (*cassandra.Session)(nil)
-	_ db.SchemaReader = (*cassandra.Session)(nil)
+	_ db.Session         = (*cassandra.Session)(nil)
+	_ db.RowEditor       = (*cassandra.Session)(nil)
+	_ db.SchemaReader    = (*cassandra.Session)(nil)
+	_ db.StructureEditor = (*cassandra.Session)(nil)
 )
 
 func Open(ctx context.Context, id string, c model.Connection, opts db.OpenOptions) (db.Session, error) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatTTL, keyRows, scanPattern } from './tree';
+import { keyRows, scanPattern } from './folders';
 
 const k = (name: string, type = 'string') => ({ name, key: name, type });
 const keys = [k('shop:customer:1', 'hash'), k('shop:customer:2', 'hash'), k('shop:config:currency'), k('stats'), k('shop:events', 'stream')];
@@ -38,15 +38,5 @@ describe('scanPattern', () => {
     expect(scanPattern(' user ')).toBe('*user*');
     expect(scanPattern('user:*')).toBe('user:*');
     expect(scanPattern('a\\b')).toBe('*a\\\\b*');
-  });
-});
-
-describe('formatTTL', () => {
-  it('reads like a duration', () => {
-    expect(formatTTL(-1)).toBe('No expiry');
-    expect(formatTTL(42)).toBe('42s');
-    expect(formatTTL(600)).toBe('10m');
-    expect(formatTTL(3725)).toBe('1h 2m');
-    expect(formatTTL(86400 * 2 + 3600)).toBe('2d 1h');
   });
 });

@@ -82,6 +82,7 @@ export interface EngineFeatures {
   editable: boolean;
   structureEditable: boolean;
   sortable: boolean;
+  canRenameTables: boolean;
 }
 
 export interface SqlSyntax {

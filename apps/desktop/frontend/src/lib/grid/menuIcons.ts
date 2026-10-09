@@ -45,6 +45,9 @@ const BY_ID: Record<string, IconName> = {
   'script-rename': 'pencil',
   'script-copy-name': 'copy',
   'script-delete': 'trash',
+  'key-open': 'key',
+  'key-copy-name': 'copy',
+  'key-delete': 'trash',
 };
 
 export function menuIcon(id: string): IconName | undefined {

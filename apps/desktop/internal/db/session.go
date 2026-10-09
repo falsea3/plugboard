@@ -47,6 +47,7 @@ type StructureEditor interface {
 	RenameTableSQL(schema, from, to string) string
 	CreateIndexSQL(schema, table string, idx model.NewIndex) string
 	DropIndexSQL(schema, table, name string) string
+	TruncateSQL(schema, table string) string
 }
 
 type KeyStore interface {

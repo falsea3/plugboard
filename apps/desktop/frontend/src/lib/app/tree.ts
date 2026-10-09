@@ -4,7 +4,7 @@ import { quoteIdent } from '../sql/generate';
 
 export type TreeTarget = { table: TableInfo; column?: Column; index?: Index };
 
-export function treeMenu({ table, column, index }: TreeTarget, readOnly: boolean, canAlter: boolean): MenuItem[] {
+export function treeMenu({ table, column, index }: TreeTarget, readOnly: boolean, canAlter: boolean, canRename: boolean): MenuItem[] {
   const view = table.kind === 'view';
   const off = readOnly;
   if (index) {
@@ -38,7 +38,7 @@ export function treeMenu({ table, column, index }: TreeTarget, readOnly: boolean
     { id: 'tree-copy-select', label: 'Copy SELECT *' },
     'sep',
     { id: 'tree-index', label: 'Create index…', disabled: off || view },
-    { id: 'tree-rename', label: 'Rename table…', disabled: off || view },
+    ...(canRename ? [{ id: 'tree-rename', label: 'Rename table…', disabled: off || view }] : []),
     { id: 'tree-truncate', label: 'Delete all rows…', danger: true, disabled: off || view },
     { id: 'tree-drop', label: view ? 'Drop view…' : 'Drop table…', danger: true, disabled: off },
   ];
@@ -50,11 +50,9 @@ export function treeSQL(id: string, e: EngineFeatures, { table, column }: TreeTa
   if (column) {
     const c = q(column.name);
     if (id === 'tree-query') return `SELECT ${c}\nFROM ${t}\nLIMIT 100;`;
-    if (id === 'tree-drop') return `ALTER TABLE ${t}\n  DROP COLUMN ${c};`;
     return null;
   }
   if (id === 'tree-query' || id === 'tree-copy-select') return `SELECT *\nFROM ${t}\nLIMIT 100;`;
-  if (id === 'tree-truncate') return `DELETE FROM ${t};`;
   if (id === 'tree-drop') return `DROP ${table.kind === 'view' ? 'VIEW' : 'TABLE'} ${t};`;
   return null;
 }

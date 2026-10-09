@@ -90,6 +90,7 @@ export const api = {
   previewStructure: (sessionId: string, sc: StructureChange) => call(a => a.PreviewStructure(sessionId, sc)),
   renameTableSQL: (sessionId: string, schema: string, from: string, to: string) => call(a => a.RenameTableSQL(sessionId, schema, from, to)),
   createIndexSQL: (sessionId: string, schema: string, table: string, idx: NewIndex) => call(a => a.CreateIndexSQL(sessionId, schema, table, idx)),
+  truncateSQL: (sessionId: string, schema: string, table: string) => call(a => a.TruncateSQL(sessionId, schema, table)),
   dropIndexSQL: (sessionId: string, schema: string, table: string, name: string) => call(a => a.DropIndexSQL(sessionId, schema, table, name)),
   scanKeys: (sessionId: string, db: string, pattern: string, cursor: string, count: number) =>
     call(a => a.ScanKeys(sessionId, db, pattern, cursor, count)),

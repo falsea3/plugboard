@@ -185,3 +185,23 @@ func TestThroughSSH(t *testing.T) {
 		t.Fatalf("res = %v, err = %v", res, err)
 	}
 }
+
+func TestTruncateAndDropColumn(t *testing.T) {
+	s := open(t, false)
+	ctx := context.Background()
+	if _, err := s.Run(ctx, "CREATE TABLE IF NOT EXISTS shop.scratch (a UInt8, b String) ENGINE = MergeTree ORDER BY a; INSERT INTO shop.scratch VALUES (1, 'x')"); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Run(ctx, "DROP TABLE IF EXISTS shop.scratch")
+	stmts, err := s.PreviewStructure(ctx, model.StructureChange{Schema: "shop", Table: "scratch", Changes: []model.ColumnChange{{Kind: model.ChangeDelete, Column: "b"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Run(ctx, stmts[0]+"; "+s.TruncateSQL("shop", "scratch")); err != nil {
+		t.Fatal(err)
+	}
+	res, err := s.Run(ctx, "SELECT count() FROM shop.scratch")
+	if err != nil || res[0].Rows[0][0] != uint64(0) {
+		t.Fatalf("after truncate = %v, %v", res, err)
+	}
+}

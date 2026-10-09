@@ -54,6 +54,7 @@ type Dialect interface {
 	RenameTable(schema, from, to string) string
 	CreateIndex(schema, table string, idx model.NewIndex) string
 	DropIndex(schema, table, name string) string
+	Truncate(schema, table string) string
 	TransactionalDDL() bool
 	CanAlterColumns() bool
 	Editable() bool

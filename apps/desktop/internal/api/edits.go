@@ -89,6 +89,14 @@ func (a *App) CreateIndexSQL(sessionID, schema, table string, idx model.NewIndex
 	return s.CreateIndexSQL(schema, table, idx) + ";", nil
 }
 
+func (a *App) TruncateSQL(sessionID, schema, table string) (string, error) {
+	s, err := a.structureEditor(sessionID)
+	if err != nil {
+		return "", err
+	}
+	return s.TruncateSQL(schema, table) + ";", nil
+}
+
 func (a *App) DropIndexSQL(sessionID, schema, table, name string) (string, error) {
 	s, err := a.structureEditor(sessionID)
 	if err != nil {

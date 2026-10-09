@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { api, type DBObject, type NewIndex } from '../api/backend';
+  import { api, type DBObject, type NewIndex, type StructureChange } from '../api/backend';
   import { app } from './app.svelte';
   import type { Workspace } from './workspace.svelte';
   import GridMenu from '../grid/GridMenu.svelte';
@@ -28,6 +28,10 @@
     objMenu = { x: e.clientX, y: e.clientY, object };
   }
 
+  async function structureSQL(sc: StructureChange) {
+    return (await api.previewStructure(ws.session.sessionId, sc)).map(s => s + ';').join('\n');
+  }
+
   async function sql(make: () => Promise<string>) {
     try {
       ws.newQuery(await make());
@@ -47,6 +51,8 @@
       ws.loadColumns(table);
       newIndex = target;
     } else if (id === 'tree-drop-index' && index) sql(() => api.dropIndexSQL(ws.session.sessionId, table.schema, table.name, index.name));
+    else if (id === 'tree-truncate') sql(() => api.truncateSQL(ws.session.sessionId, table.schema, table.name));
+    else if (id === 'tree-drop' && column) sql(() => structureSQL({ schema: table.schema, table: table.name, changes: [{ kind: 'delete', column: column.name, defaultSet: false, default: null }] }));
     else if (id === 'tree-open') ws.openTable(table);
     else if (id === 'tree-structure') ws.openTable(table, undefined, 'structure');
     else if (id === 'tree-ddl') ws.openTable(table, undefined, 'ddl');
@@ -75,7 +81,7 @@
     const change = columnChange(p.id, p.target, value);
     sql(async () =>
       change
-        ? (await api.previewStructure(ws.session.sessionId, change)).map(s => s + ';').join('\n')
+        ? structureSQL(change)
         : api.renameTableSQL(ws.session.sessionId, table.schema, table.name, value),
     );
   }
@@ -83,7 +89,7 @@
 
 {#if menu}
   {@const m = menu}
-  <GridMenu items={treeMenu(m.target, ws.readOnly, ws.session.engine.canAlterColumns)} x={m.x} y={m.y} onpick={id => pick(id, m.target)} onclose={() => (menu = null)} />
+  <GridMenu items={treeMenu(m.target, ws.readOnly, ws.session.engine.canAlterColumns, ws.session.engine.canRenameTables)} x={m.x} y={m.y} onpick={id => pick(id, m.target)} onclose={() => (menu = null)} />
 {/if}
 
 {#if objMenu}
