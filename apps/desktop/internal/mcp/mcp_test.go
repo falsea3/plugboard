@@ -16,12 +16,18 @@ import (
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
-type fakeStore []model.Connection
+type fakeStore struct{ list []model.Connection }
 
-func (f fakeStore) List() ([]model.Connection, error) { return f, nil }
+func (f *fakeStore) List() ([]model.Connection, error) { return f.list, nil }
 
-func (f fakeStore) Get(id string) (model.Connection, error) {
-	for _, c := range f {
+func (f *fakeStore) Save(c model.Connection) (model.Connection, error) {
+	c.ID = fmt.Sprintf("n%d", len(f.list))
+	f.list = append(f.list, c)
+	return c, nil
+}
+
+func (f *fakeStore) Get(id string) (model.Connection, error) {
+	for _, c := range f.list {
 		if c.ID == id {
 			return c, nil
 		}
@@ -45,7 +51,7 @@ func sample(t *testing.T) string {
 	return path
 }
 
-func client(t *testing.T, conns fakeStore, opts Options) (*sdk.ClientSession, string) {
+func client(t *testing.T, conns *fakeStore, opts Options) (*sdk.ClientSession, string) {
 	t.Helper()
 	dir := t.TempDir()
 	a := NewAgent(conns, dir, opts)
@@ -78,12 +84,12 @@ func call(t *testing.T, cs *sdk.ClientSession, tool string, args map[string]any)
 	return b.String(), res.IsError
 }
 
-func conns(path string) fakeStore {
-	return fakeStore{
+func conns(path string) *fakeStore {
+	return &fakeStore{[]model.Connection{
 		{ID: "a", Name: "Shop", Driver: model.SQLite, File: path, Env: "dev", AIAccess: true},
 		{ID: "b", Name: "Prod shop", Driver: model.SQLite, File: path, Env: "prod", AIAccess: true},
 		{ID: "c", Name: "Private", Driver: model.SQLite, File: path, Env: "dev"},
-	}
+	}}
 }
 
 func TestReadsWhatTheUserOpened(t *testing.T) {
@@ -150,5 +156,46 @@ func TestParseFlags(t *testing.T) {
 	o, err := ParseFlags([]string{"--env", "Staging, dev", "--write"}, os.Stderr)
 	if err != nil || !o.Write || len(o.Envs) != 2 || o.Envs[0] != "staging" {
 		t.Fatalf("flags = %+v, %v", o, err)
+	}
+}
+
+func TestCreatesConnectionsOnlyWhenAllowed(t *testing.T) {
+	path := sample(t)
+	cs, _ := client(t, conns(path), Options{})
+	tools, err := cs.ListTools(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tool := range tools.Tools {
+		if tool.Name == "create_connection" {
+			t.Fatal("create_connection offered without --create")
+		}
+	}
+
+	store := conns(path)
+	cs, dir := client(t, store, Options{Create: true})
+	if out, isErr := call(t, cs, "create_connection", map[string]any{"name": "Shop", "engine": "sqlite", "file": path}); !isErr || !strings.Contains(out, "already exists") {
+		t.Fatalf("duplicate name = %s", out)
+	}
+	if out, isErr := call(t, cs, "create_connection", map[string]any{"name": "X", "engine": "oracle"}); !isErr || !strings.Contains(out, "engine is one of") {
+		t.Fatalf("bad engine = %s", out)
+	}
+	if out, isErr := call(t, cs, "create_connection", map[string]any{"name": "Down", "engine": "postgres", "host": "127.0.0.1", "port": 1}); !isErr || !strings.Contains(out, "nothing was saved") {
+		t.Fatalf("unreachable server = %s", out)
+	}
+	out, isErr := call(t, cs, "create_connection", map[string]any{"name": "Copy", "engine": "sqlite", "file": path, "env": "dev"})
+	if isErr || !strings.Contains(out, `"access": "read-only"`) {
+		t.Fatalf("create = %s", out)
+	}
+	saved := store.list[len(store.list)-1]
+	if saved.Name != "Copy" || !saved.AIAccess || !saved.ReadOnly || !saved.SavePassword || len(store.list) != 4 {
+		t.Fatalf("saved = %+v (%d connections)", saved, len(store.list))
+	}
+	if out, _ := call(t, cs, "run_query", map[string]any{"connection": "Copy", "sql": "SELECT count(*) AS n FROM customers"}); !strings.Contains(out, "3") {
+		t.Fatalf("query on the new connection = %s", out)
+	}
+	log, _ := os.ReadFile(filepath.Join(dir, "logs", "mcp.log"))
+	if !strings.Contains(string(log), `create_connection "Copy" sqlite`) || strings.Contains(string(log), "password") {
+		t.Errorf("audit log = %s", log)
 	}
 }

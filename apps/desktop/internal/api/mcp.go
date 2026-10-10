@@ -3,21 +3,17 @@ package api
 import (
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-func (a *App) MCPCommand() string {
+func (a *App) MCPExecutable() string {
 	exe, err := os.Executable()
 	if err != nil {
-		exe = "plugboard"
+		return "plugboard"
 	}
 	if resolved, err := filepath.EvalSymlinks(exe); err == nil {
-		exe = resolved
+		return resolved
 	}
-	if strings.ContainsAny(exe, " '\"") {
-		exe = `"` + strings.ReplaceAll(exe, `"`, `\"`) + `"`
-	}
-	return "claude mcp add plugboard -- " + exe + " mcp"
+	return exe
 }
 
 func (a *App) MCPLog() string {

@@ -19,6 +19,7 @@ func ParseFlags(args []string, stderr io.Writer) (Options, error) {
 	fs.SetOutput(stderr)
 	env := fs.String("env", "", "only connections with these environment tags, comma separated (local, dev, staging, prod)")
 	write := fs.Bool("write", false, "let agents write to connections that aren't read-only (never Production)")
+	create := fs.Bool("create", false, "let agents add connections; they are tested first and open to agents")
 	if err := fs.Parse(args); err != nil {
 		return Options{}, err
 	}
@@ -28,7 +29,7 @@ func ParseFlags(args []string, stderr io.Writer) (Options, error) {
 			envs = append(envs, e)
 		}
 	}
-	return Options{Envs: envs, Write: *write}, nil
+	return Options{Envs: envs, Write: *write, Create: *create}, nil
 }
 
 func NewServer(a *Agent, version string) *sdk.Server {
@@ -41,6 +42,9 @@ func NewServer(a *Agent, version string) *sdk.Server {
 	sdk.AddTool(s, &sdk.Tool{Name: "run_query", Description: "Runs SQL (CQL for Cassandra, commands for Redis) and returns the rows. Read-only connections refuse writes."}, a.runQuery)
 	sdk.AddTool(s, &sdk.Tool{Name: "scan_keys", Description: "Redis: keys matching a pattern, a page at a time.", Annotations: readOnly}, a.scanKeys)
 	sdk.AddTool(s, &sdk.Tool{Name: "read_key", Description: "Redis: a key's type, TTL and value.", Annotations: readOnly}, a.readKey)
+	if a.opts.Create {
+		sdk.AddTool(s, &sdk.Tool{Name: "create_connection", Description: "Adds a connection to Plugboard, open to agents. Plugboard connects first and saves it only if that works; the password goes to the system keychain. Read-only unless read_only is false."}, a.createConnection)
+	}
 	return s
 }
 

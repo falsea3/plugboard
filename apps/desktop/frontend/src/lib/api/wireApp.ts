@@ -96,7 +96,7 @@ export interface GoApp {
   DeleteScript(connId: string, name: string): Promise<void>;
   QueryTabs(connId: string): Promise<QueryTabState[]>;
   SaveQueryTabs(connId: string, tabs: QueryTabState[]): Promise<void>;
-  MCPCommand(): Promise<string>;
+  MCPExecutable(): Promise<string>;
   MCPLog(): Promise<string>;
   GetSettings(): Promise<Settings>;
   SaveSettings(s: Settings): Promise<Settings>;

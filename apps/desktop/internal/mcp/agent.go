@@ -20,11 +20,13 @@ import (
 type Store interface {
 	List() ([]model.Connection, error)
 	Get(id string) (model.Connection, error)
+	Save(c model.Connection) (model.Connection, error)
 }
 
 type Options struct {
-	Envs  []string
-	Write bool
+	Envs   []string
+	Write  bool
+	Create bool
 }
 
 type Agent struct {

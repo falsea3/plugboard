@@ -200,7 +200,7 @@ export async function installBridge(page: Page) {
           QueryTabs: (id: string) =>
             ok((queryTabs[id] ?? []).map(t => (t.script ? (t.script in scripts(id) ? { ...t, saved: scripts(id)[t.script] } : { ...t, script: '', saved: '' }) : t))),
           SaveQueryTabs: (id: string, tabs: { script?: string; saved: string }[]) => ok(void ((queryTabs[id] = tabs), keep())),
-          MCPCommand: () => ok('claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp'),
+          MCPExecutable: () => ok('/Applications/Plugboard.app/Contents/MacOS/plugboard'),
           MCPLog: () => ok('/Users/demo/Library/Application Support/Plugboard/logs/mcp.log'),
           ChooseSQLiteFile: () => ok(''),
           ChooseSSHKeyFile: () => ok(''),

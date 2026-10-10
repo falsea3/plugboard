@@ -106,7 +106,7 @@ export const api = {
   deleteScript: (connId: string, name: string) => call(a => a.DeleteScript(connId, name)),
   queryTabs: (connId: string) => call(a => a.QueryTabs(connId)),
   saveQueryTabs: (connId: string, tabs: QueryTabState[]) => call(a => a.SaveQueryTabs(connId, tabs)),
-  mcpCommand: () => call(a => a.MCPCommand()),
+  mcpExecutable: () => call(a => a.MCPExecutable()),
   mcpLog: () => call(a => a.MCPLog()),
   getSettings: () => call(a => a.GetSettings()),
   saveSettings: (s: Settings) => call(a => a.SaveSettings(s)),

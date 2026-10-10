@@ -101,11 +101,11 @@ test('shows the selected cell in the Value panel, hidden until asked, on table t
   await page.getByRole('button', { name: 'Value', exact: true }).click();
   await expect(panel).toContainText('Select a cell to view its value');
   await page.getByRole('grid').getByText('ann.novak1@example.com').click();
-  await expect(panel.locator('pre')).toHaveText('ann.novak1@example.com');
+  await expect(panel.getByRole('textbox')).toHaveValue('ann.novak1@example.com');
   await page.getByRole('button', { name: 'Value', exact: true }).click();
   await expect(panel).toBeHidden();
   await page.getByRole('button', { name: 'Value', exact: true }).click();
-  await expect(panel.locator('pre')).toHaveText('ann.novak1@example.com');
+  await expect(panel.getByRole('textbox')).toHaveValue('ann.novak1@example.com');
   await page.getByRole('button', { name: 'New query (⌘T)' }).click();
   await expect(panel).toBeHidden();
   await expect(page.getByRole('button', { name: 'Value', exact: true })).toHaveCount(0);
@@ -132,7 +132,16 @@ test('opens a connection to AI agents and shows how to add Plugboard to Claude C
   await page.getByRole('button', { name: 'Settings' }).first().click();
   await page.getByRole('dialog', { name: 'Settings' }).getByRole('button', { name: 'AI agents' }).click();
   const settings = page.getByRole('dialog', { name: 'Settings' });
-  await expect(settings.getByText('claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp')).toBeVisible();
+  const snippet = settings.locator('.snippet pre');
+  await expect(snippet).toHaveText('claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp --create');
+  await settings.getByRole('tab', { name: 'Codex' }).click();
+  await settings.getByText('Let agents add connections').click();
+  await settings.getByText('Let agents change data').click();
+  await expect(snippet).toHaveText('codex mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp --write');
+  await settings.getByRole('tab', { name: 'Cursor' }).click();
+  await expect(snippet).toContainText('"mcpServers"');
+  await expect(snippet).toContainText('"--write"');
+  await expect(snippet).not.toContainText('--create');
   await expect(settings.getByRole('listitem')).toHaveText(['Shop · staging']);
   await page.keyboard.press('Escape');
 
