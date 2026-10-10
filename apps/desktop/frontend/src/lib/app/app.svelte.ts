@@ -4,6 +4,7 @@ import {
 } from '../api/backend';
 import { setThemeMode } from './theme';
 import { emptyConnection, engine, nameFromFile, sqlite } from '../engines';
+import { scheduleUpdateChecks } from './updateSchedule';
 import { Workspace } from './workspace.svelte';
 
 let seq = 0;
@@ -45,8 +46,9 @@ class AppState {
 
   async init() {
     onTunnelState(ev => this.onTunnel(ev));
+    window.addEventListener('focus', () => this.loadConnections());
     await Promise.all([this.loadConnections(), this.loadSettings()]);
-    setTimeout(() => this.checkForUpdate(), 3000);
+    scheduleUpdateChecks(() => this.checkForUpdate());
     const crashLog = await api.lastCrash().catch(() => '');
     if (crashLog) {
       this.notify('Plugboard quit unexpectedly last time. The crash log can help find out why.', 'error', {
