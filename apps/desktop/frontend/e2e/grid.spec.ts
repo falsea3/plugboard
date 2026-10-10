@@ -142,3 +142,24 @@ test('reruns a filter as soon as its operator changes', async ({ page }) => {
   await page.getByRole('option', { name: 'plan' }).click();
   await expect.poll(filters).toEqual([{ column: 'plan', op: '!=', value: 'DE' }]);
 });
+
+test('edits a cell from the Value panel and commits it like any edit', async ({ page }) => {
+  await connect(page);
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  const grid = page.getByRole('grid');
+  await grid.getByText('ann.novak1@example.com').click();
+  const box = page.getByRole('textbox', { name: 'Value of email' });
+  await expect(box).toHaveValue('ann.novak1@example.com');
+  await box.fill('ann@example.com');
+  await box.press('ControlOrMeta+Enter');
+  await expect(grid.getByText('ann@example.com', { exact: true })).toBeVisible();
+  await expect(page.getByText('1 change')).toBeVisible();
+
+  await grid.getByText('US').first().click();
+  await page.getByRole('button', { name: 'Set NULL' }).click();
+  await expect(page.getByRole('region', { name: 'Selected cell value' }).getByRole('textbox')).toHaveAttribute('placeholder', 'NULL');
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect.poll(() => page.evaluate(() => (window as any).lastChanges?.changes?.length)).toBe(1);
+  expect(await page.evaluate(() => (window as any).lastChanges.changes[0].values)).toEqual({ email: 'ann@example.com', country: null });
+});

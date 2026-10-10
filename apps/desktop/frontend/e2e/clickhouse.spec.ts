@@ -9,6 +9,9 @@ test('opens ClickHouse tables read-only and leaves changes to the SQL editor', a
   await grid.getByText('ann.novak1@example.com').dblclick();
   await expect(page.locator('.cell-editor')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Add row' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Selected cell value' }).locator('pre')).toHaveText('ann.novak1@example.com');
+  await expect(page.getByRole('button', { name: 'Apply' })).toHaveCount(0);
   await page.getByRole('tab', { name: 'Structure' }).click();
   await expect(page.getByText('Change the structure in the SQL editor')).toBeVisible();
 });

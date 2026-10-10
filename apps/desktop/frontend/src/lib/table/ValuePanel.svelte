@@ -1,15 +1,58 @@
 <script lang="ts">
-  import type { CellValue, ResultColumn } from '../api/backend';
+  import { untrack } from 'svelte';
+  import type { TableTab } from '../app/workspace.svelte';
   import { copyText } from '../ui/format';
   import { copyToClipboard } from '../ui/clipboard';
+  import { jsonError, jsonToSave, looksLikeJSON } from '../json/text';
   import Icon from '../ui/Icon.svelte';
 
-  let { selected }: { selected: { value: CellValue; column: ResultColumn } | null } = $props();
+  let { selected }: { selected: TableTab['selected'] | null } = $props();
 
-  const text = $derived(selected ? (selected.value === null ? 'NULL' : String(selected.value)) : '');
+  const original = $derived(selected && selected.value !== null ? String(selected.value) : '');
+  const json = $derived(!!selected && (selected.column.kind === 'json' || looksLikeJSON(selected.value)));
+  let draft = $state('');
+  let problem = $state('');
+
+  $effect(() => {
+    const text = original;
+    void selected?.key;
+    untrack(() => {
+      draft = text;
+      problem = '';
+    });
+  });
+
+  const dirty = $derived(!!selected && draft !== original);
 
   function copy() {
     if (selected) void copyToClipboard(copyText(selected.value));
+  }
+
+  function apply() {
+    if (!selected?.edit || !dirty) return;
+    if (json && draft.trim() !== '') {
+      problem = jsonError(draft);
+      if (problem) return;
+      const value = jsonToSave(original, draft);
+      if (value !== null) selected.edit(value);
+      else draft = original;
+      return;
+    }
+    selected.edit(draft);
+  }
+
+  function onkeydown(e: KeyboardEvent) {
+    const mod = e.metaKey || e.ctrlKey;
+    if (mod && e.key === 'Enter') {
+      e.preventDefault();
+      apply();
+    } else if (mod && e.key.toLowerCase() === 's' && dirty) {
+      apply();
+    } else if (e.key === 'Escape' && dirty) {
+      e.stopPropagation();
+      draft = original;
+      problem = '';
+    }
   }
 </script>
 
@@ -25,7 +68,29 @@
       <span class="column" title={selected.column.name}>{selected.column.name}</span>
       <span class="type" title={selected.column.type}>{selected.column.type || 'Unknown type'}</span>
     </div>
-    <pre class:null={selected.value === null}>{text}</pre>
+    {#if selected.edit}
+      <textarea
+        class="editor"
+        class:null={selected.value === null && !dirty}
+        bind:value={draft}
+        oninput={() => (problem = '')}
+        {onkeydown}
+        placeholder={selected.value === null ? 'NULL' : ''}
+        spellcheck="false"
+        aria-label="Value of {selected.column.name}"
+      ></textarea>
+      {#if problem}<p class="problem" role="alert">{problem}</p>{/if}
+      <div class="actions">
+        {#if selected.nullable && selected.value !== null}
+          <button class="btn sm ghost" onclick={() => selected?.edit?.(null)}>Set NULL</button>
+        {/if}
+        <span style="flex:1"></span>
+        <button class="btn sm ghost" onclick={() => ((draft = original), (problem = ''))} disabled={!dirty}>Revert</button>
+        <button class="btn sm primary" onclick={apply} disabled={!dirty} title="Apply to the cell (⌘↵) — commit with ⌘S">Apply</button>
+      </div>
+    {:else}
+      <pre class:null={selected.value === null}>{selected.value === null ? 'NULL' : original}</pre>
+    {/if}
   {:else}
     <div class="empty">Select a cell to view its value</div>
   {/if}
@@ -66,7 +131,7 @@
   }
   .column { min-width: 0; overflow: hidden; color: var(--text); font: 11.5px var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
   .type { flex: none; max-width: 45%; overflow: hidden; padding: 2px 6px; border: 1px solid var(--border-subtle); border-radius: 4px; color: var(--text-3); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
-  pre {
+  pre, .editor {
     flex: 1;
     min-height: 0;
     margin: 8px;
@@ -82,6 +147,10 @@
     user-select: text;
     -webkit-user-select: text;
   }
-  pre.null { color: var(--cell-null); font-style: italic; }
+  .editor { resize: none; outline: none; }
+  .editor:focus { border-color: var(--accent); }
+  pre.null, .editor.null::placeholder { color: var(--cell-null); font-style: italic; }
+  .problem { flex: none; margin: 0 8px 4px; color: var(--danger); font-size: 11.5px; }
+  .actions { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 8px 8px; }
   .empty { display: grid; flex: 1; place-items: center; padding: 20px; color: var(--text-3); font-size: 12px; text-align: center; }
 </style>

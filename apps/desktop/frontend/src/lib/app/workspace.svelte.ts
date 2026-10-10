@@ -13,7 +13,7 @@ export type TableTab = {
   dirty?: boolean;
   jump?: Filter[];
   view?: 'structure' | 'ddl';
-  selected?: { value: CellValue; column: ResultColumn } | null;
+  selected?: { value: CellValue; column: ResultColumn; key?: string; nullable?: boolean; edit?: (value: string | null) => void } | null;
 };
 
 export type QueryTab = ScriptTab & {

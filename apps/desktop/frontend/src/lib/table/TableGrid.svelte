@@ -18,6 +18,7 @@
   import PendingBar from './PendingBar.svelte';
   import SqlPreview from './SqlPreview.svelte';
   import ValueEditor, { type ValueEdit } from './ValueEditor.svelte';
+  import { failMessage } from './commit';
 
   type Sort = { column: string; desc: boolean } | null;
 
@@ -103,12 +104,20 @@
     if (at) openValue(at.row, at.col, colAt(at.col)?.kind === 'json');
   }
 
+  const setCell = (r: number, c: number, v: string | null) => (edits.set(r, c, v), grid?.showRow(r, c, false));
+
   function saveValue(value: string) {
     const e = valueEdit;
     valueEdit = null;
-    if (!e) return;
-    edits.set(e.r, e.c, value);
-    grid?.showRow(e.r, e.c, false);
+    if (e) setCell(e.r, e.c, value);
+  }
+
+  function selection(value: CellValue | undefined, column: ResultColumn | undefined): TableTab['selected'] {
+    const at = grid?.cursor();
+    if (!column || value === undefined || !at) return null;
+    const { row: r, col: c } = at;
+    const edit = cellEditable(r, c) ? (v: string | null) => setCell(r, c, v) : undefined;
+    return { value, column, key: `${r}:${c}`, nullable: colAt(c)?.nullable ?? true, edit };
   }
 
   function cellMenu(r: number, c: number): MenuItem[] {
@@ -224,13 +233,7 @@
       if (res.error) {
         const failed = res.failedIndex >= 0 ? cs.changes[res.failedIndex] : null;
         edits.failedRow = failed ? changed[res.failedIndex] : null;
-        if (failed && edits.failedRow !== null) {
-          const verb = { delete: 'Deleting', update: 'Updating', insert: 'Inserting' }[failed.kind];
-          const which = failed.kind === 'insert' ? 'a new row' : `row ${edits.failedRow + 1}`;
-          saveError = `${verb} ${which} failed — nothing was saved: ${res.error}`;
-        } else {
-          saveError = res.error;
-        }
+        saveError = failMessage(failed?.kind, edits.failedRow, res.error);
         if (edits.failedRow !== null) grid?.showRow(edits.failedRow, -1, false);
         return;
       }
@@ -244,10 +247,7 @@
     }
   }
 
-  function discard() {
-    edits.discard();
-    saveError = '';
-  }
+  const discard = () => (edits.discard(), (saveError = ''));
 </script>
 
 <div class="grid-area">
@@ -265,7 +265,7 @@
     {cellMenu}
     {headerMenu}
     {onmenu}
-    onselect={(value, column) => ws.selectCell(tab, column && value !== undefined ? { value, column } : null)}
+    onselect={(value, column) => ws.selectCell(tab, selection(value, column))}
   />
 </div>
 {#if edits.dirty}
