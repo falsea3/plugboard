@@ -8,6 +8,18 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-10-10
+
+### Added
+
+- **AI agents can add connections.** Start Plugboard's MCP server with `--create` and an agent can save a new connection: Plugboard connects first and keeps it only if that works, the password goes to the keychain, and the connection is open to agents and read-only unless the agent asks otherwise. The home screen picks it up when you switch back to Plugboard.
+- **Setup for Codex, Cursor and any other agent.** Settings ▸ AI agents has the command for Claude Code and Codex, the `mcpServers` config for Cursor and other clients, and switches that add `--write` and `--create` to it.
+- **Edit a cell from the Value panel.** Change the value in the panel and press ⌘↵ (or Apply), or set it to NULL; the change waits with your other edits until you commit with ⌘S. JSON is checked before it's applied and keeps its compact or pretty style. Read-only tables, views and ClickHouse show the value without editing it.
+
+### Changed
+
+- **Updates are noticed while Plugboard runs.** It checks every 15 minutes and when you switch back to it after five minutes away, not only at launch — one small file per check, skipped while offline.
+
 ## [0.7.2] - 2026-10-10
 
 ### Changed
