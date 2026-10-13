@@ -2,7 +2,7 @@ import type { Connection, ConnectSecrets, ConnectResult, TestResult, SessionInfo
 import type { TableInfo, Column, Relation, Index, Diagram, DBObject, NewIndex } from './wireSchema';
 import type { ResultSet, TableQuery, RowCount, TablePage, QueryRun, SyntaxProblem, ChangeSet, ApplyResult, StructureChange } from './wireQuery';
 import type { KeyEdit, KeyPage, KeyValue } from './wireKeys';
-import type { ConfigFile, ConfigSaved, ConfigText, Role, RoleSpec } from './wireAdmin';
+import type { ConfigFile, ConfigSaved, ConfigText, RoleList, RoleSpec } from './wireAdmin';
 
 export interface AppInfo {
   name: string;
@@ -92,10 +92,11 @@ export interface GoApp {
   ConfigFiles(sessionId: string): Promise<ConfigFile[]>;
   ReadConfig(sessionId: string, path: string): Promise<ConfigText>;
   WriteConfig(sessionId: string, path: string, text: string): Promise<ConfigSaved>;
-  Roles(sessionId: string): Promise<Role[]>;
+  Roles(sessionId: string): Promise<RoleList>;
   RoleSQL(sessionId: string, from: string, to: RoleSpec): Promise<string[]>;
-  SaveRole(sessionId: string, from: string, to: RoleSpec): Promise<void>;
-  DropRole(sessionId: string, name: string): Promise<void>;
+  SaveRole(sessionId: string, from: string, to: RoleSpec): Promise<string>;
+  DropRole(sessionId: string, id: string): Promise<void>;
+  SaveDiagram(name: string, data: string): Promise<string>;
   ListScripts(connId: string): Promise<string[]>;
   ReadScript(connId: string, name: string): Promise<string>;
   CreateScript(connId: string, name: string, sql: string): Promise<void>;

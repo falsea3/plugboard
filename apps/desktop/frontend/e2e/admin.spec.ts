@@ -43,7 +43,7 @@ test('creates a role through the SQL the backend writes', async ({ page }) => {
   await connect(page);
   await page.getByRole('button', { name: 'Roles' }).click();
   const list = page.getByRole('listbox', { name: 'Roles' });
-  await expect(list.getByRole('option')).toHaveText([/app\s*login/, /readers/, /relay\s*you\s*superuser\s*login/]);
+  await expect(list.getByRole('option')).toHaveText([/app\s*login/, /readers/, /relay\s*you\s*login\s*superuser/]);
   await page.getByText('Built-in roles').click();
   await expect(list.getByRole('option', { name: /pg_monitor/ })).toBeVisible();
   await page.getByRole('button', { name: 'New role' }).last().click();
@@ -58,6 +58,20 @@ test('creates a role through the SQL the backend writes', async ({ page }) => {
   await expect(page.getByRole('dialog', { name: 'Role changes' })).toContainText(`CREATE ROLE "reporting" WITH LOGIN PASSWORD '********'`);
   await page.getByRole('button', { name: 'Commit' }).click();
   await expect(list.getByRole('option', { name: /reporting/ })).toHaveAttribute('aria-selected', 'true');
-  expect(await page.evaluate(() => (window as any).lastRole)).toMatchObject({ from: '', to: { name: 'reporting', password: 's3cret', createDB: true, login: true, memberOf: ['readers'] } });
+  expect(await page.evaluate(() => (window as any).lastRole)).toMatchObject({ from: '', to: { name: 'reporting', password: 's3cret', flags: { createDB: true, login: true }, memberOf: ['readers'] } });
   await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
+});
+
+test('manages MySQL users with a host, and opens their grants as SQL', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Analytics' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'Roles' }).click();
+  const list = page.getByRole('listbox', { name: 'Roles' });
+  await expect(list.getByRole('option')).toHaveText([/reporting@%/, /root@localhost\s*you\s*all privileges/]);
+  await list.getByRole('option', { name: /reporting/ }).click();
+  await expect(page.getByRole('heading', { name: 'reporting@%' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Host' })).toHaveValue('%');
+  await expect(page.getByText('Valid until')).toHaveCount(0);
+  await expect(page.getByText('GRANT SELECT ON `events`.*')).toBeVisible();
+  await page.getByRole('button', { name: 'Open as SQL' }).click();
+  await expect(page.locator('.cm-content')).toContainText('GRANT SELECT ON `events`.* TO `reporting`@`%`;');
 });

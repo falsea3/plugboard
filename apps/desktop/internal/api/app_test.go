@@ -97,3 +97,18 @@ func TestMovesOldSecretsAndRemembersIt(t *testing.T) {
 		t.Fatal("the move wasn't recorded, so it would run on every launch")
 	}
 }
+
+func TestExportPath(t *testing.T) {
+	for _, tc := range []struct{ name, chosen, want string }{
+		{"shop.png", "/tmp/a.png", "/tmp/a.png"},
+		{"shop.png", "/tmp/a", "/tmp/a.png"},
+		{"shop.svg", "/tmp/a.PNG", "/tmp/a.PNG.svg"},
+	} {
+		if got, err := exportPath(tc.name, tc.chosen); err != nil || got != tc.want {
+			t.Errorf("%s %s: %q %v", tc.name, tc.chosen, got, err)
+		}
+	}
+	if _, err := exportPath("shop.exe", "/tmp/x"); err == nil {
+		t.Error("only images")
+	}
+}

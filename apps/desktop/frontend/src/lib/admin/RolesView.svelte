@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick, untrack } from 'svelte';
-  import { api, type Role, type RoleSpec } from '../api/backend';
+  import { api, type Role, type RoleForm as Form, type RoleSpec } from '../api/backend';
   import { app } from '../app/app.svelte';
   import type { Workspace } from '../app/workspace.svelte';
   import SqlPreview from '../table/SqlPreview.svelte';
@@ -9,10 +9,12 @@
   import Modal from '../ui/Modal.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import RoleForm from './RoleForm.svelte';
-  import { filterRoles, newRole, roleBadges, sameSpec, specOf } from './roles';
+  import { displayName, filterRoles, grantsScript, newRole, roleBadges, sameSpec, specOf } from './roles';
 
   let { ws }: { ws: Workspace } = $props();
 
+  const emptyForm: Form = { noun: 'role', flags: [], host: false, validUntil: false, new: { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], grantable: true, system: false, current: false } };
+  let form = $state<Form>(emptyForm);
   let roles = $state<Role[]>([]);
   let loading = $state(false);
   let error = $state('');
@@ -20,8 +22,8 @@
   let showSystem = $state(false);
   let selected = $state<string | null>(null);
   let creating = $state(false);
-  let original = $state<RoleSpec>(newRole());
-  let spec = $state<RoleSpec>(newRole());
+  let original = $state<RoleSpec>(newRole(emptyForm));
+  let spec = $state<RoleSpec>(newRole(emptyForm));
   let preview = $state<string[] | null>(null);
   let busy = $state(false);
   let askDrop = $state(false);
@@ -30,15 +32,18 @@
   const shown = $derived(filterRoles(roles, query, showSystem));
   const changed = $derived(!sameSpec(spec, original));
   const editing = $derived(selected !== null || creating);
-  const others = $derived(roles.map(r => r.name));
-  const newTitle = $derived(ws.readOnly ? 'Read-only is on — turn it off to create roles' : 'New role');
+  const noun = $derived(form.noun);
+  const newTitle = $derived(ws.readOnly ? `Read-only is on — turn it off to create ${noun}s` : `New ${noun}`);
+  const current = $derived(roles.find(r => r.id === selected));
 
   async function load(keep = selected) {
     loading = true;
     error = '';
     try {
-      roles = await api.roles(ws.session.sessionId);
-      const role = roles.find(r => r.name === keep);
+      const list = await api.roles(ws.session.sessionId);
+      form = list.form;
+      roles = list.roles;
+      const role = roles.find(r => r.id === keep);
       if (role) select(role);
       else selected = null;
     } catch (err) {
@@ -49,7 +54,7 @@
   }
 
   function select(role: Role) {
-    selected = role.name;
+    selected = role.id;
     creating = false;
     original = specOf(role);
     spec = specOf(role);
@@ -58,8 +63,8 @@
   function startNew() {
     selected = null;
     creating = true;
-    original = newRole();
-    spec = newRole();
+    original = newRole(form);
+    spec = newRole(form);
     void tick().then(() => document.getElementById('role-name')?.focus());
   }
 
@@ -83,10 +88,8 @@
   async function apply() {
     preview = null;
     busy = true;
-    const name = spec.name.trim();
     try {
-      await api.saveRole(ws.session.sessionId, selected ?? '', sent());
-      await load(name);
+      await load(await api.saveRole(ws.session.sessionId, selected ?? '', sent()));
     } catch (err) {
       app.notify(err);
     } finally {
@@ -115,22 +118,22 @@
 <div class="roles">
   <aside class="list">
     <div class="top">
-      <input class="input" bind:value={query} placeholder="Filter roles" spellcheck="false" aria-label="Filter roles" />
+      <input class="input" bind:value={query} placeholder="Filter {noun}s" spellcheck="false" aria-label="Filter {noun}s" />
       <button class="btn icon sm ghost" onclick={() => load()} disabled={loading} title="Reload" aria-label="Reload roles"><Icon name="refresh" size={13} /></button>
-      <button class="btn icon sm ghost" onclick={startNew} disabled={ws.readOnly} title={newTitle} aria-label="New role"><Icon name="plus" size={13} /></button>
+      <button class="btn icon sm ghost" onclick={startNew} disabled={ws.readOnly} title={newTitle} aria-label="New {noun}"><Icon name="plus" size={13} /></button>
     </div>
     <div class="items" role="listbox" aria-label="Roles">
       {#if loading}<LoadBar label="Loading roles" />{/if}
-      {#each shown as r (r.name)}
-        <button class="item" class:on={r.name === selected} role="option" aria-selected={r.name === selected} onclick={() => select(r)}>
-          <span class="name mono">{r.name}</span>
+      {#each shown as r (r.id)}
+        <button class="item" class:on={r.id === selected} role="option" aria-selected={r.id === selected} onclick={() => select(r)}>
+          <span class="name mono">{displayName(r)}</span>
           {#if r.current}<span class="tag you">you</span>{/if}
-          {#each roleBadges(r) as b (b)}<span class="tag">{b}</span>{/each}
+          {#each roleBadges(r, form) as b (b)}<span class="tag">{b}</span>{/each}
         </button>
       {/each}
     </div>
     <div class="bottom">
-      <label class="check"><input type="checkbox" bind:checked={showSystem} />Built-in roles</label>
+      <label class="check"><input type="checkbox" bind:checked={showSystem} />Built-in {noun}s</label>
     </div>
   </aside>
 
@@ -138,24 +141,32 @@
     {#if error}
       <div class="error" role="alert"><Icon name="alert" />{error}</div>
     {:else if editing}
-      <h2>{selected ?? 'New role'}</h2>
-      {#if ws.readOnly}<p class="hint">Read-only is on — turn it off to change roles.</p>{/if}
-      <RoleForm bind:spec existing={selected !== null} {others} readOnly={ws.readOnly || original.system} />
+      <h2>{current ? displayName(current) : `New ${noun}`}</h2>
+      {#if ws.readOnly}<p class="hint">Read-only is on — turn it off to change {noun}s.</p>{/if}
+      <RoleForm
+        bind:spec
+        {form}
+        existing={selected !== null}
+        showHost={form.host && (!current || !!current.host)}
+        {roles}
+        readOnly={ws.readOnly || original.system}
+        onquery={() => ws.newQuery(grantsScript(original.grants))}
+      />
       <div class="actions">
         {#if selected !== null}
-          <button class="btn danger" onclick={() => (askDrop = true)} disabled={ws.readOnly || busy || original.system || original.current}>Drop role</button>
+          <button class="btn danger" onclick={() => (askDrop = true)} disabled={ws.readOnly || busy || original.system || original.current}>Drop {noun}</button>
         {/if}
         <span style="flex:1"></span>
         <button class="btn" onclick={() => (selected ? select(roles.find(r => r.name === selected)!) : startNew())} disabled={!changed || busy}>Revert</button>
         <button class="btn primary" onclick={review} disabled={!changed || busy || ws.readOnly || !spec.name.trim()}>
-          {#if busy}<Spinner size={12} />{/if}{selected ? 'Save' : 'Create role'}
+          {#if busy}<Spinner size={12} />{/if}{selected ? 'Save' : `Create ${noun}`}
         </button>
       </div>
     {:else}
       <div class="empty">
-        <p>Pick a role on the left, or</p>
-        <button class="btn primary" onclick={startNew} disabled={ws.readOnly} title={newTitle}><Icon name="plus" size={13} />New role</button>
-        {#if ws.readOnly}<p class="hint">Read-only is on — turn it off to create roles.</p>{/if}
+        <p>Pick a {noun} on the left, or</p>
+        <button class="btn primary" onclick={startNew} disabled={ws.readOnly} title={newTitle}><Icon name="plus" size={13} />New {noun}</button>
+        {#if ws.readOnly}<p class="hint">Read-only is on — turn it off to create {noun}s.</p>{/if}
       </div>
     {/if}
   </section>
@@ -163,7 +174,7 @@
 
 {#if preview}
   <SqlPreview
-    title={prod ? 'Change roles on Production?' : 'Role changes'}
+    title={prod ? `Change ${noun}s on Production?` : `${noun[0].toUpperCase()}${noun.slice(1)} changes`}
     sql={preview}
     confirm={prod}
     confirmLabel="Run on Production"
@@ -171,18 +182,18 @@
     oncommit={apply}
     onclose={() => (preview = null)}
   >
-    {#if prod}<strong>{ws.connection.name}</strong> is tagged Production. {/if}These statements run in one transaction; a new password is sent as a SCRAM hash, never as text.
+    {#if prod}<strong>{ws.connection.name}</strong> is tagged Production. {/if}These statements run in one transaction; the password never shows in the preview.
   </SqlPreview>
 {/if}
 
 {#if askDrop}
-  <Modal title="Drop role {selected}?" width={420} onclose={() => (askDrop = false)}>
-    <p class="text">The role can’t be dropped while it owns objects or holds privileges — reassign or revoke them first.</p>
+  <Modal title="Drop {noun} {current ? displayName(current) : ''}?" width={420} onclose={() => (askDrop = false)}>
+    <p class="text">The server refuses while the {noun} still owns objects — reassign or drop them first.</p>
     {#snippet footer()}
       <span style="flex:1"></span>
       <!-- svelte-ignore a11y_autofocus -->
       <button class="btn" autofocus onclick={() => (askDrop = false)}>Cancel</button>
-      <button class="btn primary danger-fill" onclick={drop}>Drop role</button>
+      <button class="btn primary danger-fill" onclick={drop}>Drop {noun}</button>
     {/snippet}
   </Modal>
 {/if}

@@ -24,23 +24,41 @@ type ConfigProblem struct {
 }
 
 type Role struct {
-	Name        string   `json:"name"`
-	Login       bool     `json:"login"`
-	Superuser   bool     `json:"superuser"`
-	CreateDB    bool     `json:"createDB"`
-	CreateRole  bool     `json:"createRole"`
-	Inherit     bool     `json:"inherit"`
-	Replication bool     `json:"replication"`
-	BypassRLS   bool     `json:"bypassRLS"`
-	ConnLimit   int      `json:"connLimit"`
-	ValidUntil  string   `json:"validUntil"`
-	MemberOf    []string `json:"memberOf"`
-	System      bool     `json:"system"`
-	Current     bool     `json:"current"`
+	ID         string          `json:"id"`
+	Name       string          `json:"name"`
+	Host       string          `json:"host"`
+	Flags      map[string]bool `json:"flags"`
+	ConnLimit  int             `json:"connLimit"`
+	ValidUntil string          `json:"validUntil"`
+	MemberOf   []string        `json:"memberOf"`
+	Grants     []string        `json:"grants"`
+	Grantable  bool            `json:"grantable"`
+	System     bool            `json:"system"`
+	Current    bool            `json:"current"`
 }
 
 type RoleSpec struct {
 	Role
 	Password      string `json:"password"`
 	ClearPassword bool   `json:"clearPassword"`
+}
+
+type RoleFlag struct {
+	Key   string `json:"key"`
+	Label string `json:"label"`
+	Hint  string `json:"hint"`
+	Badge string `json:"badge"`
+}
+
+type RoleForm struct {
+	Noun       string     `json:"noun"`
+	Flags      []RoleFlag `json:"flags"`
+	Host       bool       `json:"host"`
+	ValidUntil bool       `json:"validUntil"`
+	New        Role       `json:"new"`
+}
+
+type RoleList struct {
+	Form  RoleForm `json:"form"`
+	Roles []Role   `json:"roles"`
 }

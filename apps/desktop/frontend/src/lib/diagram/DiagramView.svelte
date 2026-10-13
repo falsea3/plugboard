@@ -4,7 +4,9 @@
   import type { DiagramTab, Workspace } from '../app/workspace.svelte';
   import { bounds, layout, makeCards, makeLinks, manyMark, oneMark, relationText, type Card, type Measure, type Point } from './layout';
   import { startDrag } from '../ui/drag';
-  import { formatCount } from '../ui/format';
+  import { app } from '../app/app.svelte';
+  import { diagramSvg, pngBase64, svgBase64, themePalette } from './export';
+  import DiagramToolbar from './DiagramToolbar.svelte';
   import Icon from '../ui/Icon.svelte';
   import LoadBar from '../ui/LoadBar.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -27,15 +29,11 @@
   let view = $state({ x: 0, y: 0, k: 1 });
   let selected = $state<Selected>(null);
   let loading = $state(false);
+  let exporting = $state(false);
   let error = $state('');
   let moved = false;
 
   const links = $derived(diagram ? makeLinks(diagram, cards, pos) : []);
-  const gridStep = $derived.by(() => {
-    let step = 20 * view.k;
-    while (step < 14) step *= 2;
-    return step;
-  });
   const relation = $derived(selected?.kind === 'relation' ? diagram?.relations[selected.index] ?? null : null);
   const activeLinks = $derived.by(() => {
     if (!selected) return null;
@@ -50,6 +48,21 @@
     for (const l of links) if (activeLinks?.has(l.index)) out.add(l.relation.table).add(l.relation.refTable);
     return out;
   });
+
+  async function exportAs(format: 'png' | 'svg') {
+    if (!diagram) return;
+    exporting = true;
+    try {
+      const { svg, w, h } = diagramSvg(cards, pos, links, themePalette());
+      const data = format === 'svg' ? svgBase64(svg) : await pngBase64(svg, w, h);
+      const path = await api.saveDiagram(`${tab.schema}-diagram.${format}`, data);
+      if (path) app.notify(`Saved ${path}`, 'info');
+    } catch (err) {
+      app.notify(err);
+    } finally {
+      exporting = false;
+    }
+  }
 
   function makeMeasure(): Measure {
     const ctx = document.createElement('canvas').getContext('2d');
@@ -155,21 +168,18 @@
 </script>
 
 <div class="view">
-  <div class="toolbar">
-    <Icon name="diagram" size={13} />
-    <span class="title mono faint">{tab.schema}</span>
-    {#if diagram}
-      <span class="small faint">{formatCount(diagram.tables.length, 'table')} · {formatCount(links.length, 'relation')}</span>
-    {/if}
-    <span style="flex:1"></span>
-    <button class="btn icon sm ghost" onclick={() => zoomBy(1 / 1.2)} title="Zoom out (−)" aria-label="Zoom out"><Icon name="zoomOut" size={13} /></button>
-    <span class="zoom small muted">{Math.round(view.k * 100)}%</span>
-    <button class="btn icon sm ghost" onclick={() => zoomBy(1.2)} title="Zoom in (+)" aria-label="Zoom in"><Icon name="zoomIn" size={13} /></button>
-    <button class="btn icon sm ghost" onclick={fit} title="Fit to window (0)" aria-label="Fit to window"><Icon name="fit" size={13} /></button>
-    <button class="btn icon sm ghost" onclick={load} disabled={loading} title="Reload" aria-label="Reload">
-      {#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={13} />{/if}
-    </button>
-  </div>
+  <DiagramToolbar
+    schema={tab.schema}
+    tables={diagram?.tables.length ?? null}
+    relations={links.length}
+    zoom={view.k}
+    {loading}
+    {exporting}
+    onzoom={zoomBy}
+    onfit={fit}
+    onreload={load}
+    onexport={exportAs}
+  />
 
   <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
   <div
@@ -181,8 +191,6 @@
     onpointerdown={startPan}
     onclick={() => !moved && (selected = null)}
     {onkeydown}
-    style:background-size="{gridStep}px {gridStep}px"
-    style:background-position="{view.x}px {view.y}px"
   >
     {#if loading}<LoadBar label="Loading the diagram" />{/if}
     {#if error}
@@ -249,20 +257,6 @@
 
 <style>
   .view { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .toolbar {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 36px;
-    padding: 0 10px 0 14px;
-    border-bottom: 1px solid var(--border-subtle);
-    color: var(--text-2);
-  }
-  .title { font-size: 12px; }
-  .small { font-size: 12px; }
-  .zoom { min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; }
-
   .canvas {
     position: relative;
     flex: 1;
@@ -271,7 +265,6 @@
     outline: none;
     cursor: grab;
     background-color: var(--bg);
-    background-image: radial-gradient(var(--border) 1px, transparent 1px);
     user-select: none;
     -webkit-user-select: none;
   }

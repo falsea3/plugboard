@@ -22,17 +22,15 @@ export interface ConfigSaved {
 }
 
 export interface Role {
+  id: string;
   name: string;
-  login: boolean;
-  superuser: boolean;
-  createDB: boolean;
-  createRole: boolean;
-  inherit: boolean;
-  replication: boolean;
-  bypassRLS: boolean;
+  host: string;
+  flags: Record<string, boolean>;
   connLimit: number;
   validUntil: string;
   memberOf: string[];
+  grants: string[];
+  grantable: boolean;
   system: boolean;
   current: boolean;
 }
@@ -40,4 +38,24 @@ export interface Role {
 export interface RoleSpec extends Role {
   password: string;
   clearPassword: boolean;
+}
+
+export interface RoleFlag {
+  key: string;
+  label: string;
+  hint: string;
+  badge: string;
+}
+
+export interface RoleForm {
+  noun: string;
+  flags: RoleFlag[];
+  host: boolean;
+  validUntil: boolean;
+  new: Role;
+}
+
+export interface RoleList {
+  form: RoleForm;
+  roles: Role[];
 }

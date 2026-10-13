@@ -16,7 +16,9 @@ type ServerConfig interface {
 }
 
 type Roles interface {
+	RoleForm() model.RoleForm
 	ListRoles(ctx context.Context, db *sql.DB) ([]model.Role, error)
-	RoleSQL(from *model.Role, to model.RoleSpec, preview bool) ([]string, error)
-	DropRoleSQL(name string) string
+	RoleSQL(from *model.Role, to model.RoleSpec, all []model.Role, preview bool) ([]string, error)
+	DropRoleSQL(r model.Role) string
+	RoleID(from *model.Role, to model.RoleSpec) string
 }

@@ -8,6 +8,15 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Manage MySQL and MariaDB users.** The people button lists accounts as `user@host`: create one, change its name, host, password, connection limit and global rights (all privileges, grant option, create users, processes, reload, replication), lock it, add it to roles, or drop it. Its grants are listed, and *Open as SQL* puts them in a query to change database privileges.
+- **Export the schema diagram** as a PNG (twice the screen's resolution) or an SVG, in the current theme.
+
+### Changed
+
+- The schema diagram sits on a plain background, without the dot grid.
+
 ## [0.7.4] - 2026-10-13
 
 ### Added

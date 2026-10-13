@@ -53,10 +53,10 @@ func (a *App) WriteConfig(sessionID, path, text string) (model.ConfigSaved, erro
 	return c.WriteConfig(ctx, path, text)
 }
 
-func (a *App) Roles(sessionID string) ([]model.Role, error) {
+func (a *App) Roles(sessionID string) (model.RoleList, error) {
 	r, err := sessionAs[db.RoleManager](a, sessionID)
 	if err != nil {
-		return nil, err
+		return model.RoleList{}, err
 	}
 	ctx, cancel := a.catalogCtx()
 	defer cancel()
@@ -73,22 +73,22 @@ func (a *App) RoleSQL(sessionID, from string, to model.RoleSpec) ([]string, erro
 	return r.RoleSQL(ctx, from, to)
 }
 
-func (a *App) SaveRole(sessionID, from string, to model.RoleSpec) error {
+func (a *App) SaveRole(sessionID, from string, to model.RoleSpec) (string, error) {
 	r, err := sessionAs[db.RoleManager](a, sessionID)
 	if err != nil {
-		return err
+		return "", err
 	}
 	ctx, cancel := a.catalogCtx()
 	defer cancel()
 	return r.SaveRole(ctx, from, to)
 }
 
-func (a *App) DropRole(sessionID, name string) error {
+func (a *App) DropRole(sessionID, id string) error {
 	r, err := sessionAs[db.RoleManager](a, sessionID)
 	if err != nil {
 		return err
 	}
 	ctx, cancel := a.catalogCtx()
 	defer cancel()
-	return r.DropRole(ctx, name)
+	return r.DropRole(ctx, id)
 }

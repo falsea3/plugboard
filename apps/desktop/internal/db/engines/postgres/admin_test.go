@@ -21,12 +21,12 @@ func TestRoles(t *testing.T) {
 	drop()
 	t.Cleanup(drop)
 
-	spec := model.RoleSpec{Role: model.Role{Name: "plugboard_app", Login: true, Inherit: true, ConnLimit: 3, MemberOf: []string{"pg_read_all_data"}}, Password: "pässword 1"}
-	if err := s.SaveRole(ctx, "", spec); err != nil {
+	spec := model.RoleSpec{Role: model.Role{Name: "plugboard_app", Flags: map[string]bool{"login": true, "inherit": true}, ConnLimit: 3, MemberOf: []string{"pg_read_all_data"}}, Password: "pässword 1"}
+	if _, err := s.SaveRole(ctx, "", spec); err != nil {
 		t.Fatal(err)
 	}
 	role := findRole(t, s.Roles, "plugboard_app")
-	if !role.Login || role.ConnLimit != 3 || !slices.Equal(role.MemberOf, []string{"pg_read_all_data"}) || role.System {
+	if !role.Flags["login"] || role.ConnLimit != 3 || !slices.Equal(role.MemberOf, []string{"pg_read_all_data"}) || role.System {
 		t.Fatalf("role = %+v", role)
 	}
 	as := c
@@ -42,7 +42,7 @@ func TestRoles(t *testing.T) {
 	if err != nil || len(preview) != 3 {
 		t.Fatalf("preview = %q, %v", preview, err)
 	}
-	if err := s.SaveRole(ctx, "plugboard_app", next); err != nil {
+	if _, err := s.SaveRole(ctx, "plugboard_app", next); err != nil {
 		t.Fatal(err)
 	}
 	role = findRole(t, s.Roles, "plugboard_app2")
@@ -58,18 +58,21 @@ func TestRoles(t *testing.T) {
 	ro := c
 	ro.ReadOnly = true
 	var readOnly *db.ReadOnlyError
-	if err := sqltest.Open(t, postgres.Dialect{}, ro).SaveRole(ctx, "", spec); !errors.As(err, &readOnly) {
+	if _, err := sqltest.Open(t, postgres.Dialect{}, ro).SaveRole(ctx, "", spec); !errors.As(err, &readOnly) {
 		t.Fatalf("read-only: %v", err)
 	}
 }
 
-func findRole(t *testing.T, list func(context.Context) ([]model.Role, error), name string) model.Role {
+func findRole(t *testing.T, list func(context.Context) (model.RoleList, error), name string) model.Role {
 	t.Helper()
 	roles, err := list(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, r := range roles {
+	if roles.Form.Noun != "role" || len(roles.Form.Flags) != 7 {
+		t.Fatalf("form = %+v", roles.Form)
+	}
+	for _, r := range roles.Roles {
 		if r.Name == name {
 			return r
 		}

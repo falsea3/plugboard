@@ -1,30 +1,43 @@
 import { describe, expect, it } from 'vitest';
-import type { Role } from '../api/backend';
-import { filterRoles, newRole, roleBadges, sameSpec, specOf } from './roles';
+import type { Role, RoleForm } from '../api/backend';
+import { displayName, filterRoles, grantsScript, newRole, roleBadges, sameSpec, specOf } from './roles';
 
-const role = (name: string, extra: Partial<Role> = {}): Role => ({ ...newRole(), name, ...extra });
+const blank: Role = { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], grantable: true, system: false, current: false };
+const form: RoleForm = {
+  noun: 'user',
+  flags: [{ key: 'full', label: 'All privileges', hint: '', badge: 'all privileges' }, { key: 'process', label: 'Process', hint: '', badge: '' }],
+  host: true,
+  validUntil: false,
+  new: { ...blank, host: '%', flags: { login: true } },
+};
+const role = (name: string, extra: Partial<Role> = {}): Role => ({ ...blank, id: name, name, ...extra });
 
 describe('roles', () => {
-  it('a new role logs in, inherits and has no connection limit', () => {
-    expect(newRole()).toMatchObject({ login: true, inherit: true, connLimit: -1, memberOf: [] });
+  it('starts a new role from what the backend says', () => {
+    const r = newRole(form);
+    r.flags.login = false;
+    expect(form.new.flags.login).toBe(true);
+    expect(r).toMatchObject({ host: '%', password: '', clearPassword: false });
   });
-  it('compares forms ignoring membership order and surrounding spaces', () => {
-    const a = specOf(role('app', { memberOf: ['a', 'b'] }));
-    expect(sameSpec(a, { ...a, name: ' app ', memberOf: ['b', 'a'] })).toBe(true);
+  it('compares forms ignoring order, spaces and flags that are off', () => {
+    const a = specOf(role('app', { memberOf: ['a', 'b'], flags: { full: true } }));
+    expect(sameSpec(a, { ...a, name: ' app ', memberOf: ['b', 'a'], flags: { full: true, process: false } })).toBe(true);
     expect(sameSpec(a, { ...a, password: 'x' })).toBe(false);
+    expect(sameSpec(a, { ...a, flags: {} })).toBe(false);
   });
-  it('copies the membership list so the form can change it', () => {
-    const r = role('app', { memberOf: ['a'] });
-    specOf(r).memberOf.push('b');
-    expect(r.memberOf).toEqual(['a']);
+  it('names MySQL accounts with their host', () => {
+    expect(displayName(role('app', { host: '%' }))).toBe('app@%');
+    expect(displayName(role('readers'))).toBe('readers');
   });
-  it('hides the built-in pg_ roles unless asked', () => {
-    const list = [role('app'), role('pg_monitor', { system: true }), role('admin')];
+  it('filters by the shown name and hides built-in accounts unless asked', () => {
+    const list = [role('app', { host: 'localhost' }), role('mysql.sys', { system: true }), role('admin')];
     expect(filterRoles(list, '', false).map(r => r.name)).toEqual(['app', 'admin']);
-    expect(filterRoles(list, 'MON', true).map(r => r.name)).toEqual(['pg_monitor']);
+    expect(filterRoles(list, '@LOCAL', true).map(r => r.name)).toEqual(['app']);
   });
-  it('shows what matters most first', () => {
-    expect(roleBadges(role('x', { superuser: true, login: true }))).toEqual(['superuser', 'login']);
-    expect(roleBadges(role('x', { login: false }))).toEqual([]);
+  it('shows the badges the engine marks', () => {
+    expect(roleBadges(role('x', { flags: { full: true, process: true } }), form)).toEqual(['all privileges']);
+  });
+  it('turns grants into a script', () => {
+    expect(grantsScript(['GRANT USAGE ON *.* TO `a`@`%`', 'GRANT ALL ON `shop`.* TO `a`@`%`;'])).toBe('GRANT USAGE ON *.* TO `a`@`%`;\nGRANT ALL ON `shop`.* TO `a`@`%`;');
   });
 });

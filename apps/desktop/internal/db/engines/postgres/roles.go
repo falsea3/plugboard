@@ -33,19 +33,46 @@ func (Dialect) ListRoles(ctx context.Context, db *sql.DB) ([]model.Role, error) 
 	for rows.Next() {
 		var r model.Role
 		var memberOf string
-		if err := rows.Scan(&r.Name, &r.Login, &r.Superuser, &r.CreateDB, &r.CreateRole, &r.Inherit, &r.Replication, &r.BypassRLS, &r.ConnLimit,
+		var login, super, createDB, createRole, inherit, replication, bypassRLS bool
+		if err := rows.Scan(&r.Name, &login, &super, &createDB, &createRole, &inherit, &replication, &bypassRLS, &r.ConnLimit,
 			&r.ValidUntil, &memberOf, &r.System, &r.Current); err != nil {
 			return nil, err
 		}
 		if err := json.Unmarshal([]byte(memberOf), &r.MemberOf); err != nil {
 			return nil, err
 		}
+		r.ID, r.Grantable, r.Grants = r.Name, true, []string{}
+		r.Flags = map[string]bool{"login": login, "superuser": super, "createDB": createDB, "createRole": createRole, "inherit": inherit, "replication": replication, "bypassRLS": bypassRLS}
 		out = append(out, r)
 	}
 	return out, rows.Err()
 }
 
-func (d Dialect) RoleSQL(from *model.Role, to model.RoleSpec, preview bool) ([]string, error) {
+var roleFlags = []model.RoleFlag{
+	{Key: "login", Label: "Can log in", Hint: "A user rather than a group", Badge: "login"},
+	{Key: "superuser", Label: "Superuser", Hint: "Bypasses every permission check", Badge: "superuser"},
+	{Key: "createDB", Label: "Create databases"},
+	{Key: "createRole", Label: "Create roles", Hint: "Create, change and drop other roles"},
+	{Key: "inherit", Label: "Inherit privileges", Hint: "Use the privileges of the roles it is a member of"},
+	{Key: "replication", Label: "Replication", Hint: "Connect for streaming replication and backups", Badge: "replication"},
+	{Key: "bypassRLS", Label: "Bypass row-level security"},
+}
+
+var flagWords = map[string]string{
+	"superuser": "SUPERUSER", "createDB": "CREATEDB", "createRole": "CREATEROLE", "inherit": "INHERIT",
+	"login": "LOGIN", "replication": "REPLICATION", "bypassRLS": "BYPASSRLS",
+}
+
+func (Dialect) RoleForm() model.RoleForm {
+	return model.RoleForm{
+		Noun:       "role",
+		Flags:      roleFlags,
+		ValidUntil: true,
+		New:        model.Role{Flags: map[string]bool{"login": true, "inherit": true}, ConnLimit: -1, MemberOf: []string{}, Grants: []string{}},
+	}
+}
+
+func (d Dialect) RoleSQL(from *model.Role, to model.RoleSpec, _ []model.Role, preview bool) ([]string, error) {
 	to.Name = strings.TrimSpace(to.Name)
 	to.ValidUntil = strings.TrimSpace(to.ValidUntil)
 	if to.Name == "" {
@@ -60,7 +87,7 @@ func (d Dialect) RoleSQL(from *model.Role, to model.RoleSpec, preview bool) ([]s
 	}
 	name := d.QuoteIdent(to.Name)
 	var out []string
-	base := model.Role{Inherit: true, ConnLimit: -1}
+	base := model.Role{Flags: map[string]bool{"inherit": true}, ConnLimit: -1}
 	if from == nil {
 		out = append(out, strings.TrimSuffix("CREATE ROLE "+name+" "+withClause(attributes(&base, to.Role), password), " "))
 	} else {
@@ -85,8 +112,12 @@ func (d Dialect) RoleSQL(from *model.Role, to model.RoleSpec, preview bool) ([]s
 	return out, nil
 }
 
-func (d Dialect) DropRoleSQL(name string) string {
-	return "DROP ROLE " + d.QuoteIdent(name)
+func (Dialect) RoleID(_ *model.Role, to model.RoleSpec) string {
+	return strings.TrimSpace(to.Name)
+}
+
+func (d Dialect) DropRoleSQL(r model.Role) string {
+	return "DROP ROLE " + d.QuoteIdent(r.Name)
 }
 
 func (Dialect) passwordClause(to model.RoleSpec, preview bool) (string, error) {
@@ -107,21 +138,16 @@ func (Dialect) passwordClause(to model.RoleSpec, preview bool) (string, error) {
 
 func attributes(from *model.Role, to model.Role) []string {
 	var out []string
-	flag := func(was, is bool, word string) {
+	for _, f := range roleFlags {
+		was, is := from.Flags[f.Key], to.Flags[f.Key]
 		if was != is {
+			word := flagWords[f.Key]
 			if !is {
 				word = "NO" + word
 			}
 			out = append(out, word)
 		}
 	}
-	flag(from.Superuser, to.Superuser, "SUPERUSER")
-	flag(from.CreateDB, to.CreateDB, "CREATEDB")
-	flag(from.CreateRole, to.CreateRole, "CREATEROLE")
-	flag(from.Inherit, to.Inherit, "INHERIT")
-	flag(from.Login, to.Login, "LOGIN")
-	flag(from.Replication, to.Replication, "REPLICATION")
-	flag(from.BypassRLS, to.BypassRLS, "BYPASSRLS")
 	if from.ConnLimit != to.ConnLimit {
 		out = append(out, "CONNECTION LIMIT "+strconv.Itoa(to.ConnLimit))
 	}

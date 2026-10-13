@@ -71,8 +71,8 @@ type ServerConfig interface {
 }
 
 type RoleManager interface {
-	Roles(ctx context.Context) ([]model.Role, error)
+	Roles(ctx context.Context) (model.RoleList, error)
 	RoleSQL(ctx context.Context, from string, to model.RoleSpec) ([]string, error)
-	SaveRole(ctx context.Context, from string, to model.RoleSpec) error
-	DropRole(ctx context.Context, name string) error
+	SaveRole(ctx context.Context, from string, to model.RoleSpec) (string, error)
+	DropRole(ctx context.Context, id string) error
 }

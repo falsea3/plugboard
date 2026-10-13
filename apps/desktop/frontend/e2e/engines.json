@@ -43,7 +43,7 @@
     "sortable": true,
     "canRenameTables": true,
     "serverConfig": false,
-    "roles": false
+    "roles": true
   },
   "postgres": {
     "syntax": {

@@ -152,3 +152,23 @@ test('opens a connection to AI agents and shows how to add Plugboard to Claude C
   await page.getByRole('button', { name: 'Save' }).click();
   await expect.poll(() => page.evaluate(() => (window as any).savedConnection?.aiAccess)).toBe(true);
 });
+
+test('exports the diagram as PNG and SVG on a plain background', async ({ page }) => {
+  await connect(page);
+  await page.getByRole('button', { name: 'Schema diagram' }).click();
+  await expect(page.locator('.card[data-table="orders"]')).toBeVisible();
+  expect(await page.locator('.canvas').evaluate(el => getComputedStyle(el).backgroundImage)).toBe('none');
+  const exported = () => page.evaluate(() => (window as any).lastExport);
+  await page.getByRole('button', { name: 'Export the diagram' }).click();
+  await page.getByRole('option', { name: 'PNG image' }).click();
+  await expect(page.getByText('Saved /Users/demo/Desktop/public-diagram.png')).toBeVisible();
+  const png = await exported();
+  expect(png.name).toBe('public-diagram.png');
+  expect(atob(png.data).slice(1, 4)).toBe('PNG');
+  await page.getByRole('button', { name: 'Export the diagram' }).click();
+  await page.getByRole('option', { name: 'SVG image' }).click();
+  await expect.poll(async () => (await exported()).name).toBe('public-diagram.svg');
+  const svg = atob((await exported()).data);
+  expect(svg).toContain('<svg xmlns="http://www.w3.org/2000/svg"');
+  expect(svg).toContain('>order_items<');
+});
