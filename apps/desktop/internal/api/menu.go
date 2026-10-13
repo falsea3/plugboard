@@ -46,7 +46,6 @@ func BuildMenu(a *App) *menu.Menu {
 
 	file := root.AddSubmenu("File")
 	file.AddText("New Connection…", keys.CmdOrCtrl("n"), emit("new-connection"))
-	file.AddText("Open SQLite File…", keys.CmdOrCtrl("o"), emit("open-sqlite"))
 	file.AddText("Switch Connection…", keys.CmdOrCtrl("k"), emit("switch-connection"))
 	file.AddText("All Connections", keys.Combo("h", keys.CmdOrCtrlKey, keys.ShiftKey), emit("home"))
 	file.AddSeparator()

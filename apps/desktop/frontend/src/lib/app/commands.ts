@@ -23,9 +23,6 @@ export function runCommand(command: string) {
     case 'new-connection':
       app.editing = null;
       break;
-    case 'open-sqlite':
-      app.openSQLiteFile();
-      break;
     case 'switch-connection':
       app.switcherOpen = true;
       break;
@@ -70,7 +67,6 @@ export function runCommand(command: string) {
 const SHORTCUTS: Record<string, string> = {
   ',': 'settings',
   n: 'new-connection',
-  o: 'open-sqlite',
   k: 'switch-connection',
   'shift+h': 'home',
   t: 'new-query',

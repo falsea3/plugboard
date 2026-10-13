@@ -52,10 +52,6 @@
       e.preventDefault();
       close();
       app.editing = null;
-    } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o') {
-      e.preventDefault();
-      close();
-      app.openSQLiteFile();
     }
   }
 </script>
@@ -104,9 +100,6 @@
     <div class="actions">
       <button class="action" onclick={() => { close(); app.editing = null; }}>
         <Icon name="plus" size={15} /><span>New connection…</span><span class="kbd">⌘N</span>
-      </button>
-      <button class="action" onclick={() => { close(); app.openSQLiteFile(); }}>
-        <Icon name="folder" size={15} /><span>Open SQLite file…</span><span class="kbd">⌘O</span>
       </button>
     </div>
 

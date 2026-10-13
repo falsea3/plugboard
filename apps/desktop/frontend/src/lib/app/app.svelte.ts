@@ -3,7 +3,7 @@ import {
   type Connection, type ConnectSecrets, type HostKeyChange, type Settings, type TunnelState, type UpdateInfo,
 } from '../api/backend';
 import { setThemeMode } from './theme';
-import { emptyConnection, engine, nameFromFile, sqlite } from '../engines';
+import { engine } from '../engines';
 import { scheduleUpdateChecks } from './updateSchedule';
 import { Workspace } from './workspace.svelte';
 
@@ -259,22 +259,6 @@ class AppState {
     }
     if (this.workspaces.length === 0) this.showHome = false;
     await api.disconnect(ws.session.sessionId).catch(() => {});
-  }
-
-  async openSQLiteFile() {
-    try {
-      const file = await api.chooseSQLiteFile();
-      if (!file) return;
-      const existing = this.connections.find(c => c.driver === sqlite.driver && c.file === file);
-      if (existing) {
-        await this.open(existing);
-        return;
-      }
-      const saved = await this.saveConnection({ ...emptyConnection(sqlite), name: nameFromFile(sqlite, file), file });
-      await this.open(saved);
-    } catch (err) {
-      this.notify(err);
-    }
   }
 
   notify(err: unknown, kind: Toast['kind'] = 'error', extra: { detail?: string; action?: Toast['action']; sticky?: boolean } = {}) {

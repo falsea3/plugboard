@@ -46,7 +46,6 @@
 
       <div class="actions">
         <button class="btn primary" onclick={() => (app.editing = null)}><Icon name="plus" />New connection<span class="kbd on-accent">⌘N</span></button>
-        <button class="btn" onclick={() => app.openSQLiteFile()}><Icon name="folder" />Open SQLite file…</button>
       </div>
       <p class="hint faint">{ENGINES.map(e => e.name).join(' · ')}</p>
     </aside>

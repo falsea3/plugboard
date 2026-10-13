@@ -8,6 +8,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Removed
+
+- **Open SQLite file** — the home screen button, the ⌘K action, the File menu item and ⌘O. Add a SQLite database like any other connection: *New connection* → SQLite, then pick the file.
+
 ## [0.7.5] - 2026-10-13
 
 ### Added
