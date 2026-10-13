@@ -13,10 +13,7 @@ import (
 
 var _ db.ServerConfig = (*Session)(nil)
 
-const (
-	viaSSH = "ssh"
-	viaSQL = "sql"
-)
+const viaSSH = "ssh"
 
 var errNoPath = apperr.New("bad_value", "enter the path of the file on the server")
 
@@ -44,7 +41,7 @@ func (s *Session) ReadConfig(ctx context.Context, path string) (model.ConfigText
 	if path == "" {
 		return model.ConfigText{}, errNoPath
 	}
-	if files := db.DatabaseHostFiles(s.Conn, s.tunnel); files != nil {
+	if files := s.hostFiles(path); files != nil {
 		data, err := files.ReadFile(ctx, path)
 		if err == nil {
 			return model.ConfigText{Path: path, Text: string(data), Via: viaSSH}, nil
@@ -53,11 +50,14 @@ func (s *Session) ReadConfig(ctx context.Context, path string) (model.ConfigText
 			return model.ConfigText{}, err
 		}
 	}
-	text, err := retry(ctx, s, func() (string, error) { return c.ReadServerFile(ctx, s.DB, path) })
-	if err != nil {
-		return model.ConfigText{}, err
+	return retry(ctx, s, func() (model.ConfigText, error) { return c.ReadServerFile(ctx, s.DB, path) })
+}
+
+func (s *Session) hostFiles(path string) db.HostFiles {
+	if !strings.HasPrefix(path, "/") {
+		return nil
 	}
-	return model.ConfigText{Path: path, Text: text, Via: viaSQL}, nil
+	return db.DatabaseHostFiles(s.Conn, s.tunnel)
 }
 
 func (s *Session) WriteConfig(ctx context.Context, path, text string) (model.ConfigSaved, error) {
@@ -85,14 +85,15 @@ func (s *Session) WriteConfig(ctx context.Context, path, text string) (model.Con
 		return saved, nil
 	}
 	if err := c.ReloadConfig(ctx, s.DB); err != nil {
-		return saved, err
+		saved.Problems = append(saved.Problems, model.ConfigProblem{Message: err.Error()})
+		return saved, nil
 	}
 	saved.Reloaded = true
 	return saved, nil
 }
 
 func (s *Session) writeFile(ctx context.Context, c dialect.ServerConfig, path, text string) (string, error) {
-	if files := db.DatabaseHostFiles(s.Conn, s.tunnel); files != nil {
+	if files := s.hostFiles(path); files != nil {
 		err := files.WriteFile(ctx, path, []byte(text))
 		if err == nil {
 			return viaSSH, nil
@@ -101,5 +102,5 @@ func (s *Session) writeFile(ctx context.Context, c dialect.ServerConfig, path, t
 			return "", err
 		}
 	}
-	return viaSQL, c.WriteServerFile(ctx, s.DB, path, text)
+	return "sql", c.WriteServerFile(ctx, s.DB, path, text)
 }

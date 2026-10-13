@@ -17,9 +17,10 @@ export async function installAdmin(page: Page) {
       mysql: { noun: 'user', host: true, validUntil: false, connLimit: true, membership: true, rules: '', flags: [flag('full', 'All privileges', 'all privileges'), flag('process', 'See all sessions'), flag('locked', 'Account locked', 'locked')] },
     };
     forms.cassandra = { noun: 'role', host: false, validUntil: false, connLimit: false, membership: true, rules: '', flags: [flag('login', 'Can log in', 'login'), flag('superuser', 'Superuser', 'superuser')] };
+    forms.clickhouse = { noun: 'user', host: false, validUntil: false, connLimit: false, membership: true, rules: '', flags: [flag('full', 'All privileges', 'all privileges')] };
     forms.redis = { noun: 'user', host: false, validUntil: false, connLimit: false, membership: false, rules: 'ACL rules: ~cache:* +@read', flags: [flag('disabled', 'Disabled', 'off'), flag('nopass', 'No password', 'nopass')] };
     const role = (name: string, extra: Record<string, unknown> = {}) => ({
-      id: name, name, host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [] as string[], grants: [] as string[], rules: '', grantable: true, system: false, current: false, ...extra,
+      id: name, name, host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [] as string[], grants: [] as string[], rules: '', kind: '', grantable: true, system: false, current: false, ...extra,
     });
     const store: Record<string, any[]> = {
       postgres: [
@@ -33,13 +34,15 @@ export async function installAdmin(page: Page) {
         role('root', { id: '`root`@`localhost`', host: 'localhost', flags: { full: true }, current: true }),
       ],
       cassandra: [role('relay', { flags: { login: true, superuser: true }, current: true }), role('readers')],
+      clickhouse: [role('default', { system: true, current: true, grantable: false }), role('analysts', { id: 'role:analysts', kind: 'role' })],
       redis: [role('default', { rules: '~* &* +@all', current: true, grantable: false })],
     };
     forms.postgres.new = role('', { flags: { login: true, inherit: true } });
     forms.mysql.new = role('', { host: '%' });
     forms.redis.new = role('', { grantable: false });
     forms.cassandra.new = role('', { flags: { login: true } });
-    const driver = (id: string) => (id === 's-analytics' ? 'mysql' : id === 's-cache' ? 'redis' : id === 's-ledger' ? 'cassandra' : 'postgres');
+    forms.clickhouse.new = role('', { grantable: false });
+    const driver = (id: string) => (id === 's-analytics' ? 'mysql' : id === 's-cache' ? 'redis' : id === 's-ledger' ? 'cassandra' : id === 's-warehouse' ? 'clickhouse' : 'postgres');
     let live = '# Live settings.\nmaxmemory 0\nmaxmemory-policy noeviction\n';
     Object.assign(App, {
       ConfigFiles: (s: string) =>

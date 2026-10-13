@@ -13,7 +13,7 @@
 
   let { ws }: { ws: Workspace } = $props();
 
-  const emptyForm: Form = { noun: 'role', flags: [], host: false, validUntil: false, connLimit: false, membership: false, rules: '', new: { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], rules: '', grantable: true, system: false, current: false } };
+  const emptyForm: Form = { noun: 'role', flags: [], host: false, validUntil: false, connLimit: false, membership: false, rules: '', new: { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], rules: '', kind: '', grantable: true, system: false, current: false } };
   let form = $state<Form>(emptyForm);
   let roles = $state<Role[]>([]);
   let loading = $state(false);
@@ -128,6 +128,7 @@
         <button class="item" class:on={r.id === selected} role="option" aria-selected={r.id === selected} onclick={() => select(r)}>
           <span class="name mono">{displayName(r)}</span>
           {#if r.current}<span class="tag you">you</span>{/if}
+          {#if r.kind}<span class="tag">{r.kind}</span>{/if}
           {#each roleBadges(r, form) as b (b)}<span class="tag">{b}</span>{/each}
         </button>
       {/each}

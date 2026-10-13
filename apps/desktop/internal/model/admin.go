@@ -35,6 +35,7 @@ type Role struct {
 	MemberOf   []string        `json:"memberOf"`
 	Grants     []string        `json:"grants"`
 	Rules      string          `json:"rules"`
+	Kind       string          `json:"kind"`
 	Grantable  bool            `json:"grantable"`
 	System     bool            `json:"system"`
 	Current    bool            `json:"current"`

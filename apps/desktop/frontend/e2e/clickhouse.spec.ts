@@ -15,3 +15,17 @@ test('opens ClickHouse tables read-only and leaves changes to the SQL editor', a
   await page.getByRole('tab', { name: 'Structure' }).click();
   await expect(page.getByText('Change the structure in the SQL editor')).toBeVisible();
 });
+
+test('lists ClickHouse users and roles apart, and leaves xml users alone', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Warehouse' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'Roles' }).click();
+  const list = page.getByRole('listbox', { name: 'Roles' });
+  await expect(list.getByRole('option')).toHaveText([/analysts\s*role/]);
+  await page.getByText('Built-in users').click();
+  await list.getByRole('option', { name: /default/ }).click();
+  await expect(page.getByRole('textbox', { name: 'Name' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Drop user' })).toBeDisabled();
+  await page.getByRole('button', { name: 'New user' }).first().click();
+  await page.getByRole('button', { name: 'Add to a role' }).click();
+  await expect(page.getByRole('option', { name: 'analysts', exact: true })).toBeVisible();
+});

@@ -28,10 +28,10 @@ func (Dialect) ConfigFiles(ctx context.Context, db *sql.DB) ([]model.ConfigFile,
 	}, nil
 }
 
-func (Dialect) ReadServerFile(ctx context.Context, db *sql.DB, file string) (string, error) {
+func (Dialect) ReadServerFile(ctx context.Context, db *sql.DB, file string) (model.ConfigText, error) {
 	var text string
 	err := db.QueryRowContext(ctx, `SELECT pg_read_file($1)`, file).Scan(&text)
-	return text, err
+	return model.ConfigText{Path: file, Text: text, Via: "sql"}, err
 }
 
 func (Dialect) WriteServerFile(ctx context.Context, db *sql.DB, file, text string) error {

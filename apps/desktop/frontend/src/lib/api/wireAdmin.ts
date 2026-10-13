@@ -33,6 +33,7 @@ export interface Role {
   memberOf: string[];
   grants: string[];
   rules: string;
+  kind: string;
   grantable: boolean;
   system: boolean;
   current: boolean;

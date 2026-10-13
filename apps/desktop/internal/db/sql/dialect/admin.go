@@ -9,7 +9,7 @@ import (
 
 type ServerConfig interface {
 	ConfigFiles(ctx context.Context, db *sql.DB) ([]model.ConfigFile, error)
-	ReadServerFile(ctx context.Context, db *sql.DB, path string) (string, error)
+	ReadServerFile(ctx context.Context, db *sql.DB, path string) (model.ConfigText, error)
 	WriteServerFile(ctx context.Context, db *sql.DB, path, text string) error
 	CheckConfig(ctx context.Context, db *sql.DB, path string) (problems []model.ConfigProblem, restart []string)
 	ReloadConfig(ctx context.Context, db *sql.DB) error
