@@ -15,7 +15,10 @@
   import Icon from '../ui/Icon.svelte';
   import LoadBar from '../ui/LoadBar.svelte';
   import Spinner from '../ui/Spinner.svelte';
-  import FilterBar, { newFilter, noValue, type FilterRow } from './FilterBar.svelte';
+  import FilterBar from './FilterBar.svelte';
+  import WhereBar from './WhereBar.svelte';
+  import { rowsLockReason, structureLockReason } from './lock';
+  import { appliedWhere, newFilter, toFilters, type FilterRow } from './filters';
 
   let { ws, tab, active, ondirty }: { ws: Workspace; tab: TableTab; active: boolean; ondirty: (dirty: boolean) => void } = $props();
 
@@ -29,6 +32,7 @@
   let relations = $state<Relation[]>([]);
   let filterRows = $state<FilterRow[]>([]);
   let filters = $state<Filter[]>([]);
+  let where = $state('');
   let showFilters = $state(false);
   let filterBar = $state<FilterBar>();
   let grid = $state<TableGrid>();
@@ -56,17 +60,10 @@
   const page = $derived(rows.page);
   const shownSort = $derived(sort ?? (page?.defaultOrder?.length ? { column: page.defaultOrder[0], desc: false } : null));
   const keyColumns = $derived(columns.filter(c => c.primaryKey).map(c => c.name));
-  const readOnlyReason = $derived.by(() => {
-    if (ws.readOnly) return 'Read-only session';
-    if (tab.tableKind === 'view') return 'Views are read-only';
-    if (!ws.session.engine.editable) return 'Rows can’t be edited here — change them in the SQL editor';
-    if (columns.length > 0 && keyColumns.length === 0) return 'No primary key — rows can’t be identified safely';
-    return '';
-  });
+  const lock = $derived({ readOnly: ws.readOnly, view: tab.tableKind === 'view', editable: ws.session.engine.editable, structureEditable: ws.session.engine.structureEditable });
+  const readOnlyReason = $derived(rowsLockReason({ ...lock, hasColumns: columns.length > 0, hasKey: keyColumns.length > 0 }));
   const canEdit = $derived(!readOnlyReason && columns.length > 0 && !!page);
-  const structureReadOnlyReason = $derived(
-    ws.readOnly ? 'Read-only session' : tab.tableKind === 'view' ? 'Views can’t be altered here' : !ws.session.engine.structureEditable ? 'Change the structure in the SQL editor' : '',
-  );
+  const structureReadOnlyReason = $derived(structureLockReason(lock));
 
   $effect(() => {
     ondirty(edits.dirty || structureDirty);
@@ -120,9 +117,7 @@
 
   function applyFilters() {
     if (!canLeavePage()) return;
-    filters = filterRows
-      .filter(r => r.on && r.column && (noValue(r.op) || r.value.trim() !== ''))
-      .map(r => ({ column: r.column, op: r.op, value: r.value.trim() }));
+    filters = toFilters(filterRows, where);
     rows.load('start');
     rows.quickCount();
   }
@@ -151,6 +146,7 @@
     const jump = ws.takeJump(tab);
     if (!jump) return false;
     filters = jump;
+    where = '';
     filterRows = jump.map(f => newFilter(columns, f.column, f.op as FilterOp, f.value));
     showFilters = true;
     return true;
@@ -215,7 +211,7 @@
     bind:mode
     schema={tab.schema}
     table={tab.table}
-    filterCount={filters.length}
+    filterCount={filters.filter(f => f.op !== 'sql').length}
     filtersOpen={showFilters}
     lockReason={mode === 'structure' ? structureReadOnlyReason : columns.length > 0 ? readOnlyReason : ''}
     canAdd={canEdit}
@@ -226,6 +222,7 @@
     onquery={() => ddl?.openInQuery()}
   />
 
+  {#if mode === 'data'}<WhereBar bind:value={where} applied={appliedWhere(filters)} onapply={applyFilters} />{/if}
   {#if showFilters && mode === 'data' && columns.length > 0}
     <FilterBar bind:this={filterBar} columns={page?.result.columns ?? columns} bind:rows={filterRows} onapply={applyFilters} onclose={() => (showFilters = false)} />
   {/if}

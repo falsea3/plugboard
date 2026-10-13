@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db"
 	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
-func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []model.Filter) (string, []any, error) {
+func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []model.Filter, readOnly bool) (string, []any, error) {
 	var parts []string
 	var args []any
 	bind := func(col model.Column, v string) string {
@@ -23,6 +26,14 @@ func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []mode
 	like := d.LikeIgnoringCase()
 
 	for _, f := range filters {
+		if f.Op == "sql" {
+			expr, err := customCondition(d, f.Value, readOnly)
+			if err != nil {
+				return "", nil, err
+			}
+			parts = append(parts, "("+expr+"\n)")
+			continue
+		}
 		col, ok := cols[f.Column]
 		if !ok {
 			return "", nil, fmt.Errorf("unknown column %s", f.Column)
@@ -78,4 +89,36 @@ func whereClause(d dialect.Dialect, cols map[string]model.Column, filters []mode
 		}
 	}
 	return strings.Join(parts, " AND "), args, nil
+}
+
+func customCondition(d dialect.Dialect, expr string, readOnly bool) (string, error) {
+	expr = strings.TrimSpace(expr)
+	if expr == "" {
+		return "", apperr.New("bad_value", "write a condition, like price > 100 AND status <> 'void'")
+	}
+	bare := sqltext.Strip(expr, d.Syntax())
+	if strings.Contains(bare, ";") {
+		return "", apperr.New("bad_value", "a filter is one condition — leave out the ;")
+	}
+	depth := 0
+	for _, ch := range bare {
+		switch ch {
+		case '(':
+			depth++
+		case ')':
+			depth--
+		}
+		if depth < 0 {
+			break
+		}
+	}
+	if depth != 0 {
+		return "", apperr.New("bad_value", "the brackets in the filter don't match")
+	}
+	if readOnly {
+		if reason := ReadOnlyReason(d, "SELECT 1 WHERE "+expr); reason != "" {
+			return "", &db.ReadOnlyError{Reason: reason}
+		}
+	}
+	return expr, nil
 }

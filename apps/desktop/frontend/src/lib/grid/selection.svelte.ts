@@ -57,7 +57,6 @@ export class GridSelection {
   }
 
   menuAt(row: number, col: number) {
-    if (this.marked?.has(row)) this.cursor = { row, col };
-    else this.only(row, col);
+    if (!this.marked?.has(row)) this.only(row, col);
   }
 }

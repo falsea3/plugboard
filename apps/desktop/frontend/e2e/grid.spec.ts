@@ -163,3 +163,36 @@ test('edits a cell from the Value panel and commits it like any edit', async ({ 
   await expect.poll(() => page.evaluate(() => (window as any).lastChanges?.changes?.length)).toBe(1);
   expect(await page.evaluate(() => (window as any).lastChanges.changes[0].values)).toEqual({ email: 'ann@example.com', country: null });
 });
+
+test('keeps a ⇧ selection when the menu opens on a row inside it', async ({ page }) => {
+  await connect(page);
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  const grid = page.getByRole('grid');
+  await grid.getByText('ann.novak1@example.com').click();
+  await grid.getByText('eli.haddad5@example.com').click({ modifiers: ['Shift'] });
+  await grid.getByText('chen.okafor3@example.com').click({ button: 'right' });
+  await expect(page.getByRole('menuitem', { name: 'Open 5 rows as SQL' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(grid.locator('.rn.active')).toHaveText(['1', '2', '3', '4', '5']);
+});
+
+test('filters with the WHERE typed above the grid, together with the conditions', async ({ page }) => {
+  await connect(page);
+  await page.getByRole('complementary').getByText('customers', { exact: true }).click();
+  const where = page.getByRole('textbox', { name: 'WHERE condition' });
+  await expect(where).toBeVisible();
+  const filters = () => page.evaluate(() => (window as any).lastPage.filters);
+  await where.fill("plan = 'pro' OR country IS NULL");
+  await expect(page.getByText('↵ apply')).toBeVisible();
+  await where.press('Enter');
+  await expect.poll(filters).toEqual([{ column: '', op: 'sql', value: "plan = 'pro' OR country IS NULL" }]);
+  await expect(page.getByText('↵ apply')).toHaveCount(0);
+  await page.getByRole('grid').getByRole('columnheader', { name: /country/ }).click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Equals…', exact: true }).click();
+  await page.keyboard.type('DE');
+  await page.keyboard.press('Enter');
+  await expect.poll(filters).toEqual([{ column: '', op: 'sql', value: "plan = 'pro' OR country IS NULL" }, { column: 'country', op: '=', value: 'DE' }]);
+  await page.getByRole('button', { name: 'Clear the condition' }).click();
+  await expect.poll(filters).toEqual([{ column: 'country', op: '=', value: 'DE' }]);
+  await expect(where).toHaveValue('');
+});

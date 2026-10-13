@@ -13,6 +13,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Edit PostgreSQL's configuration files.** The sliders button under the table list opens `postgresql.conf`, `pg_hba.conf`, `pg_ident.conf` or `postgresql.auto.conf` from where the server says they are — or any file by path — in a plain editor. ⌘S saves and reloads the configuration. If the server finds a mistake it doesn't reload: the lines it rejects are marked, and settings that need a restart are named. Over SSH, when the database runs on the SSH server, the file is read and written there (with `sudo -n` when your SSH user can't write it); otherwise through the database, which needs a superuser.
 - **Manage PostgreSQL roles.** The people button opens the roles: create one, change its password, login, superuser and other rights, connection limit, expiry and the roles it belongs to, or drop it. You see the SQL before it runs; passwords go to the server as a SCRAM hash, never as text.
 
+### Changed
+
+- **An SQL filter field above every table.** Type any condition — `plan = 'pro' OR country IS NULL` — and press ↵; empty shows every row. It combines with the filter conditions, and on Cassandra it takes CQL. Read-only sessions still refuse anything that writes.
+
+### Fixed
+
+- **Right-clicking inside a selection keeps it.** Select 50 rows, right-click the 30th, and the menu acts on all 50 instead of shrinking the selection to the clicked row.
+
 ## [0.7.3] - 2026-10-10
 
 ### Added

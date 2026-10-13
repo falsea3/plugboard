@@ -1,41 +1,10 @@
-<script lang="ts" module>
-  import type { FilterOp } from '../api/wire';
-
-  type Col = { name: string };
-
-  export type FilterRow = { id: number; on: boolean; column: string; op: FilterOp; value: string };
-
-  export const OPS: { value: FilterOp; label: string }[] = [
-    { value: '=', label: '=' },
-    { value: '!=', label: '≠' },
-    { value: '<', label: '<' },
-    { value: '>', label: '>' },
-    { value: '<=', label: '≤' },
-    { value: '>=', label: '≥' },
-    { value: 'contains', label: 'contains' },
-    { value: 'not_contains', label: 'not contains' },
-    { value: 'starts', label: 'starts with' },
-    { value: 'ends', label: 'ends with' },
-    { value: 'in', label: 'in list' },
-    { value: 'not_in', label: 'not in list' },
-    { value: 'empty', label: 'is empty' },
-    { value: 'not_empty', label: 'is not empty' },
-    { value: 'null', label: 'is NULL' },
-    { value: 'not_null', label: 'is not NULL' },
-  ];
-
-  export const noValue = (op: FilterOp) => op === 'null' || op === 'not_null' || op === 'empty' || op === 'not_empty';
-
-  let nextId = 0;
-  export function newFilter(columns: Col[], column?: string, op: FilterOp = '=', value = ''): FilterRow {
-    return { id: ++nextId, on: true, column: column ?? columns[0]?.name ?? '', op, value };
-  }
-</script>
-
 <script lang="ts">
   import { tick } from 'svelte';
   import Icon from '../ui/Icon.svelte';
   import Select from '../ui/Select.svelte';
+  import { OPS, newFilter, noValue, ready, type FilterRow } from './filters';
+
+  type Col = { name: string };
 
   let {
     columns,
@@ -57,8 +26,6 @@
     const target = id === undefined ? all[all.length - 1] : bar?.querySelector<HTMLElement>(`[data-row="${id}"] [data-focus]`);
     (target as HTMLElement | undefined)?.focus();
   }
-
-  const ready = (row: FilterRow) => row.on && (noValue(row.op) || row.value.trim() !== '');
 
   function add() {
     const last = rows[rows.length - 1];

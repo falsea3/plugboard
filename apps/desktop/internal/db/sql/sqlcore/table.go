@@ -62,7 +62,7 @@ func (s *Session) TablePage(ctx context.Context, q model.TableQuery) (model.Tabl
 		}
 	}
 
-	where, args, err := whereClause(s.Dialect, byName, q.Filters)
+	where, args, err := whereClause(s.Dialect, byName, q.Filters, s.Conn.ReadOnly)
 	if err != nil {
 		return model.TablePage{}, err
 	}
@@ -223,7 +223,7 @@ func (s *Session) CountRows(ctx context.Context, q model.TableQuery, exact bool)
 		for _, c := range cols {
 			byName[c.Name] = c
 		}
-		where, args, err := whereClause(s.Dialect, byName, q.Filters)
+		where, args, err := whereClause(s.Dialect, byName, q.Filters, s.Conn.ReadOnly)
 		if err != nil {
 			return model.RowCount{}, err
 		}

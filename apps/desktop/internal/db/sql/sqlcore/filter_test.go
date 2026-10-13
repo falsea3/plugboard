@@ -2,8 +2,10 @@ package sqlcore
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	"github.com/relay-client/plugboard/apps/desktop/internal/db"
 	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
@@ -45,6 +47,9 @@ func TestTableFiltersSQLite(t *testing.T) {
 		{[]model.Filter{{Column: "name", Op: "not_empty"}, {Column: "id", Op: "<", Value: "3"}}, []any{"ann", "bob"}},
 		{[]model.Filter{{Column: "score", Op: "not_null"}, {Column: "score", Op: "<", Value: "3"}}, []any{"ann", "bob"}},
 		{[]model.Filter{{Column: "name", Op: "!=", Value: "ann"}, {Column: "id", Op: "<=", Value: "3"}}, []any{"bob", "cy"}},
+		{[]model.Filter{{Op: "sql", Value: "score > 3 OR name = 'ann'"}, {Column: "id", Op: "<", Value: "6"}}, []any{"ann", "Annabel"}},
+		{[]model.Filter{{Op: "sql", Value: "name like 'b%' -- a comment"}}, []any{"bob"}},
+		{[]model.Filter{{Op: "sql", Value: "name = ';)'"}}, []any{}},
 	}
 	for _, tc := range cases {
 		got := names(t, s, tc.f...)
@@ -67,6 +72,10 @@ func TestTableFiltersRefuseBadInput(t *testing.T) {
 		{Column: `name" = '' or 1=1 --`, Op: "=", Value: "x"},
 		{Column: "name", Op: "; drop table users", Value: "x"},
 		{Column: "id", Op: "in", Value: " , "},
+		{Op: "sql", Value: "  "},
+		{Op: "sql", Value: "1=1; delete from users"},
+		{Op: "sql", Value: "1=1) or (1=1"},
+		{Op: "sql", Value: "(1=1"},
 	} {
 		if _, err := s.TablePage(context.Background(), model.TableQuery{Schema: "main", Table: "users", Filters: []model.Filter{f}}); err == nil {
 			t.Errorf("%+v was accepted", f)
@@ -93,5 +102,18 @@ func TestDefaultOrderIsPrimaryKey(t *testing.T) {
 	view, err := s.TablePage(ctx, model.TableQuery{Schema: "main", Table: "top_users"})
 	if err != nil || view.DefaultOrder != nil {
 		t.Fatalf("views have no key to order by: %v %v", view.DefaultOrder, err)
+	}
+}
+
+func TestSQLFilterOnReadOnlySessions(t *testing.T) {
+	s := openSQLite(t)
+	s.Conn.ReadOnly = true
+	if got := names(t, s, model.Filter{Op: "sql", Value: "id = 2"}); len(got) != 1 {
+		t.Fatalf("got %v", got)
+	}
+	_, err := s.TablePage(context.Background(), model.TableQuery{Schema: "main", Table: "users", Filters: []model.Filter{{Op: "sql", Value: "id in (select 1 into t)"}}})
+	var readOnly *db.ReadOnlyError
+	if !errors.As(err, &readOnly) {
+		t.Fatalf("a write inside the condition: %v", err)
 	}
 }

@@ -51,6 +51,14 @@ func (s *Session) tableQuery(ctx context.Context, q model.TableQuery, what strin
 	var conds []string
 	var args []any
 	for _, f := range q.Filters {
+		if f.Op == "sql" {
+			cond, err := cqlCondition(f.Value)
+			if err != nil {
+				return "", nil, nil, err
+			}
+			conds = append(conds, cond)
+			continue
+		}
 		col, ok := byName[f.Column]
 		if !ok {
 			return "", nil, nil, fmt.Errorf("unknown column %s", f.Column)
@@ -67,6 +75,29 @@ func (s *Session) tableQuery(ctx context.Context, q model.TableQuery, what strin
 		stmt += " WHERE " + strings.Join(conds, " AND ") + " ALLOW FILTERING"
 	}
 	return stmt, args, cols, nil
+}
+
+func cqlCondition(cond string) (string, error) {
+	cond = strings.TrimSpace(cond)
+	if cond == "" {
+		return "", apperr.New("bad_value", "write a condition, like amount > 100 AND status = 'paid'")
+	}
+	quoted := false
+	for i := 0; i < len(cond); i++ {
+		switch {
+		case cond[i] == '\'':
+			quoted = !quoted
+		case quoted:
+		case cond[i] == ';':
+			return "", apperr.New("bad_value", "a filter is one condition — leave out the ;")
+		case strings.HasPrefix(cond[i:], "--"), strings.HasPrefix(cond[i:], "//"), strings.HasPrefix(cond[i:], "/*"):
+			return "", apperr.New("bad_value", "a CQL filter can't have a comment")
+		}
+	}
+	if quoted {
+		return "", apperr.New("bad_value", "a quote in the filter isn't closed")
+	}
+	return cond, nil
 }
 
 var ops = map[string]string{"=": "=", "<": "<", ">": ">", "<=": "<=", ">=": ">="}

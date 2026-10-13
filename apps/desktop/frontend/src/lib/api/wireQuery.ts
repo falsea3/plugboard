@@ -24,7 +24,7 @@ export interface ResultSet {
 export type FilterOp =
   | '=' | '!=' | '<' | '>' | '<=' | '>='
   | 'contains' | 'not_contains' | 'starts' | 'ends'
-  | 'in' | 'not_in' | 'null' | 'not_null' | 'empty' | 'not_empty';
+  | 'in' | 'not_in' | 'null' | 'not_null' | 'empty' | 'not_empty' | 'sql';
 
 export interface Filter {
   column: string;

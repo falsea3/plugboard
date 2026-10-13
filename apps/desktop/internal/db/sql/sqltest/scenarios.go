@@ -105,6 +105,9 @@ func tableFilters(t *testing.T, srv Server, c model.Connection) {
 	if p := page(model.Filter{Column: "country", Op: "=", Value: "USA"}); len(p.Result.Rows) != 0 {
 		t.Fatalf("country = USA matched %d rows", len(p.Result.Rows))
 	}
+	if p := page(model.Filter{Op: "sql", Value: "id < 4 OR id = 10 -- by hand"}, model.Filter{Column: "id", Op: ">", Value: "1"}); len(p.Result.Rows) != 3 {
+		t.Fatalf("sql filter: %d rows", len(p.Result.Rows))
+	}
 	if p := page(); p.DefaultOrder[0] != "id" {
 		t.Fatalf("default order = %v", p.DefaultOrder)
 	}
