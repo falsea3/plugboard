@@ -94,4 +94,3 @@ func TestLiveSettings(t *testing.T) {
 		t.Fatalf("a file without SSH: %v", err)
 	}
 }
-

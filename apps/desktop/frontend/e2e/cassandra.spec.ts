@@ -13,3 +13,16 @@ test('edits Cassandra rows but leaves sorting and structure to CQL', async ({ pa
   await page.getByRole('tab', { name: 'Structure' }).click();
   await expect(page.getByText('Change the structure in the SQL editor')).toBeVisible();
 });
+
+test('shows Cassandra roles and its settings read-only', async ({ page }) => {
+  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Ledger' }).getByRole('button', { name: 'Connect' }).click();
+  await page.getByRole('button', { name: 'Roles' }).click();
+  await expect(page.getByRole('listbox', { name: 'Roles' }).getByRole('option')).toHaveText([/relay\s*you\s*login\s*superuser/, /readers/]);
+  await expect(page.getByText('Connections')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Server config' }).click();
+  await expect(page.locator('.config .cm-content')).toContainText('authenticator: PasswordAuthenticator');
+  await page.locator('.config .cm-content').click();
+  await page.keyboard.type('typed');
+  await expect(page.locator('.config .cm-content')).not.toContainText('typed');
+  await expect(page.getByRole('button', { name: 'Save & reload' })).toBeDisabled();
+});

@@ -155,9 +155,11 @@ func (s *Session) Info(ctx context.Context) (model.SessionInfo, error) {
 
 func Features() model.EngineFeatures {
 	return model.EngineFeatures{
-		Syntax:      model.SQLSyntax{DollarQuotes: true},
-		ColumnTypes: columnTypes,
-		Editable:    true,
+		Syntax:       model.SQLSyntax{DollarQuotes: true},
+		ColumnTypes:  columnTypes,
+		Editable:     true,
+		ServerConfig: true,
+		Roles:        true,
 	}
 }
 

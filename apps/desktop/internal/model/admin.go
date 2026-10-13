@@ -6,9 +6,10 @@ type ConfigFile struct {
 }
 
 type ConfigText struct {
-	Path string `json:"path"`
-	Text string `json:"text"`
-	Via  string `json:"via"`
+	Path     string `json:"path"`
+	Text     string `json:"text"`
+	Via      string `json:"via"`
+	ReadOnly bool   `json:"readOnly"`
 }
 
 type ConfigSaved struct {

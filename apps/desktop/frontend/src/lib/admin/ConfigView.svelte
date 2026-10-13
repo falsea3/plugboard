@@ -30,7 +30,7 @@
   let pickerKey = $state(0);
 
   const dirty = $derived(!!loaded && text !== loaded.text);
-  const readOnly = $derived(ws.readOnly);
+  const readOnly = $derived(ws.readOnly || !!loaded?.readOnly);
   const options = $derived([...files.map(f => ({ value: f.path, label: f.name, hint: f.path })), { value: OTHER, label: 'Other file…' }]);
   const via = $derived(loaded ? viaLabel(loaded.via) : null);
 
@@ -130,7 +130,7 @@
     <span style="flex:1"></span>
     {#if via}<span class="via" title={via.hint}>{via.label}</span>{/if}
     <button class="btn icon sm ghost" onclick={() => loaded && guarded(() => open(loaded!.path))} disabled={!loaded || loading} title="Reload from the server" aria-label="Reload"><Icon name="refresh" size={13} /></button>
-    <button class="btn sm primary" onclick={save} disabled={!dirty || saving || readOnly} title={readOnly ? 'Read-only is on — turn it off to save' : 'Save and reload the server configuration (⌘S)'}>
+    <button class="btn sm primary" onclick={save} disabled={!dirty || saving || readOnly} title={loaded?.readOnly ? 'The server shows these settings but can’t change them' : readOnly ? 'Read-only is on — turn it off to save' : 'Save and reload the server configuration (⌘S)'}>
       {#if saving}<Spinner size={12} />{/if}Save &amp; reload
     </button>
   </div>

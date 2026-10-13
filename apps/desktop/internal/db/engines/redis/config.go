@@ -167,4 +167,3 @@ func (s *Session) WriteConfig(ctx context.Context, file, text string) (model.Con
 	saved.Reloaded = true
 	return saved, nil
 }
-

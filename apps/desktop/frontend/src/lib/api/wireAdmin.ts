@@ -7,6 +7,7 @@ export interface ConfigText {
   path: string;
   text: string;
   via: 'ssh' | 'sql' | 'live';
+  readOnly?: boolean;
 }
 
 export interface ConfigProblem {

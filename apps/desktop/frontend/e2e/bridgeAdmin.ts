@@ -16,6 +16,7 @@ export async function installAdmin(page: Page) {
       postgres: { noun: 'role', host: false, validUntil: true, connLimit: true, membership: true, rules: '', flags: [flag('login', 'Can log in', 'login'), flag('superuser', 'Superuser', 'superuser'), flag('createDB', 'Create databases'), flag('inherit', 'Inherit privileges')] },
       mysql: { noun: 'user', host: true, validUntil: false, connLimit: true, membership: true, rules: '', flags: [flag('full', 'All privileges', 'all privileges'), flag('process', 'See all sessions'), flag('locked', 'Account locked', 'locked')] },
     };
+    forms.cassandra = { noun: 'role', host: false, validUntil: false, connLimit: false, membership: true, rules: '', flags: [flag('login', 'Can log in', 'login'), flag('superuser', 'Superuser', 'superuser')] };
     forms.redis = { noun: 'user', host: false, validUntil: false, connLimit: false, membership: false, rules: 'ACL rules: ~cache:* +@read', flags: [flag('disabled', 'Disabled', 'off'), flag('nopass', 'No password', 'nopass')] };
     const role = (name: string, extra: Record<string, unknown> = {}) => ({
       id: name, name, host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [] as string[], grants: [] as string[], rules: '', grantable: true, system: false, current: false, ...extra,
@@ -31,17 +32,19 @@ export async function installAdmin(page: Page) {
         role('reporting', { id: '`reporting`@`%`', host: '%', grants: ['GRANT USAGE ON *.* TO `reporting`@`%`', 'GRANT SELECT ON `events`.* TO `reporting`@`%`'] }),
         role('root', { id: '`root`@`localhost`', host: 'localhost', flags: { full: true }, current: true }),
       ],
+      cassandra: [role('relay', { flags: { login: true, superuser: true }, current: true }), role('readers')],
       redis: [role('default', { rules: '~* &* +@all', current: true, grantable: false })],
     };
     forms.postgres.new = role('', { flags: { login: true, inherit: true } });
     forms.mysql.new = role('', { host: '%' });
     forms.redis.new = role('', { grantable: false });
-    const driver = (id: string) => (id === 's-analytics' ? 'mysql' : id === 's-cache' ? 'redis' : 'postgres');
+    forms.cassandra.new = role('', { flags: { login: true } });
+    const driver = (id: string) => (id === 's-analytics' ? 'mysql' : id === 's-cache' ? 'redis' : id === 's-ledger' ? 'cassandra' : 'postgres');
     let live = '# Live settings.\nmaxmemory 0\nmaxmemory-policy noeviction\n';
     Object.assign(App, {
       ConfigFiles: (s: string) =>
-        ok(driver(s) === 'redis' ? [{ name: 'Live settings', path: 'CONFIG GET *' }] : ['postgresql.conf', 'pg_hba.conf', 'pg_ident.conf'].map(name => ({ name, path: `${dir}/${name}` }))),
-      ReadConfig: (_: string, path: string) => (path === 'CONFIG GET *' ? ok({ path, text: live, via: 'live' }) : path in disk ? ok({ path, text: disk[path], via: 'sql' }) : fail('error', `could not open file "${path}" for reading: No such file or directory`)),
+        ok(driver(s) === 'cassandra' ? [{ name: 'Current settings', path: 'system_views.settings' }, { name: 'cassandra.yaml', path: '/etc/cassandra/cassandra.yaml' }] : driver(s) === 'redis' ? [{ name: 'Live settings', path: 'CONFIG GET *' }] : ['postgresql.conf', 'pg_hba.conf', 'pg_ident.conf'].map(name => ({ name, path: `${dir}/${name}` }))),
+      ReadConfig: (_: string, path: string) => (path === 'system_views.settings' ? ok({ path, text: '# Read-only.\nauthenticator: PasswordAuthenticator\n', via: 'live', readOnly: true }) : path === 'CONFIG GET *' ? ok({ path, text: live, via: 'live' }) : path in disk ? ok({ path, text: disk[path], via: 'sql' }) : fail('error', `could not open file "${path}" for reading: No such file or directory`)),
       WriteConfig: (_: string, path: string, text: string) => {
         if (path === 'CONFIG GET *') {
           live = text;

@@ -24,7 +24,7 @@ help:
 	@printf '  %-14s %s\n' 'make dev' 'Run Wails dev mode (hot reload, keychain disabled)'
 	@printf '  %-14s %s\n' 'make frontend' 'Run only the Svelte/Vite frontend'
 	@printf '  %-14s %s\n' 'make install' 'Install npm deps and tidy Go deps'
-	@printf '  %-14s %s\n' 'make check' 'Typecheck the frontend and run all tests'
+	@printf '  %-14s %s\n' 'make check' 'Typecheck the frontend, check Go formatting, run all tests'
 	@printf '  %-14s %s\n' 'make build' 'Build the desktop app for this platform'
 
 dev:
@@ -43,6 +43,7 @@ tidy:
 check:
 	cd $(ROOT_DIR) && npm run frontend:check
 	cd $(ROOT_DIR) && npm run frontend:test
+	cd $(DESKTOP_DIR) && test -z "$$(gofmt -l .)" || { echo "Run gofmt -w on:"; gofmt -l .; exit 1; }
 	cd $(DESKTOP_DIR) && go vet ./... && go test ./...
 
 test:
