@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-10-13
+
 ### Added
 
 - **Manage MySQL and MariaDB users.** The people button lists accounts as `user@host`: create one, change its name, host, password, connection limit and global rights (all privileges, grant option, create users, processes, reload, replication), lock it, add it to roles, or drop it. Its grants are listed, and *Open as SQL* puts them in a query to change database privileges.
