@@ -11,6 +11,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - **Manage MySQL and MariaDB users.** The people button lists accounts as `user@host`: create one, change its name, host, password, connection limit and global rights (all privileges, grant option, create users, processes, reload, replication), lock it, add it to roles, or drop it. Its grants are listed, and *Open as SQL* puts them in a query to change database privileges.
+- **Redis and Valkey users and settings.** The people button lists ACL users: add one with a password and its rules (`~cache:* +@read`), turn it off, allow any password, change its rules, or delete it — you see the `ACL SETUSER` before it runs, and the change is saved to the ACL or config file when the server has one. The sliders button opens the live settings: change a value and save, each change runs `CONFIG SET` and `CONFIG REWRITE`, and a refused one is marked on its line. Over SSH to the machine Redis runs on, `redis.conf` and the ACL file open too.
 - **Export the schema diagram** as a PNG (twice the screen's resolution) or an SVG, in the current theme.
 
 ### Changed

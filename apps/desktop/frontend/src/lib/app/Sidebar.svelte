@@ -105,6 +105,9 @@
     <KeyTree {ws} {active} />
     <div class="bottom">
       <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New console (⌘T)"><Icon name="terminal" size={13} />New console</button>
+      <span style="flex:1"></span>
+      {#if ws.session.engine.serverConfig}<button class="btn icon sm ghost" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={13} /></button>{/if}
+      {#if ws.session.engine.roles}<button class="btn icon sm ghost" onclick={() => ws.openAdmin('roles')} title="Users" aria-label="Roles"><Icon name="roles" size={13} /></button>{/if}
     </div>
   {:else}
     <div class="filter">

@@ -6,7 +6,7 @@ export interface ConfigFile {
 export interface ConfigText {
   path: string;
   text: string;
-  via: 'ssh' | 'sql';
+  via: 'ssh' | 'sql' | 'live';
 }
 
 export interface ConfigProblem {
@@ -15,10 +15,11 @@ export interface ConfigProblem {
 }
 
 export interface ConfigSaved {
-  via: 'ssh' | 'sql';
+  via: 'ssh' | 'sql' | 'live';
   reloaded: boolean;
   problems: ConfigProblem[];
   restart: string[];
+  note: string;
 }
 
 export interface Role {
@@ -30,6 +31,7 @@ export interface Role {
   validUntil: string;
   memberOf: string[];
   grants: string[];
+  rules: string;
   grantable: boolean;
   system: boolean;
   current: boolean;
@@ -52,6 +54,9 @@ export interface RoleForm {
   flags: RoleFlag[];
   host: boolean;
   validUntil: boolean;
+  connLimit: boolean;
+  membership: boolean;
+  rules: string;
   new: Role;
 }
 

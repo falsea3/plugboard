@@ -257,5 +257,5 @@ func (s *Session) RunMore(context.Context, string, int) (model.ResultSet, error)
 }
 
 func Features() model.EngineFeatures {
-	return model.EngineFeatures{KeyValue: true, ColumnTypes: []string{}}
+	return model.EngineFeatures{KeyValue: true, ColumnTypes: []string{}, ServerConfig: true, Roles: true}
 }

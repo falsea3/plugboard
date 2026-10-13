@@ -142,8 +142,8 @@
     "structureEditable": false,
     "sortable": false,
     "canRenameTables": false,
-    "serverConfig": false,
-    "roles": false
+    "serverConfig": true,
+    "roles": true
   },
   "clickhouse": {
     "syntax": {

@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 import type { Role, RoleForm } from '../api/backend';
 import { displayName, filterRoles, grantsScript, newRole, roleBadges, sameSpec, specOf } from './roles';
 
-const blank: Role = { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], grantable: true, system: false, current: false };
+const blank: Role = { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], rules: '', grantable: true, system: false, current: false };
 const form: RoleForm = {
   noun: 'user',
   flags: [{ key: 'full', label: 'All privileges', hint: '', badge: 'all privileges' }, { key: 'process', label: 'Process', hint: '', badge: '' }],
   host: true,
   validUntil: false,
+  connLimit: true,
+  membership: true,
+  rules: '',
   new: { ...blank, host: '%', flags: { login: true } },
 };
 const role = (name: string, extra: Partial<Role> = {}): Role => ({ ...blank, id: name, name, ...extra });

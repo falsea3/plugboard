@@ -67,3 +67,32 @@ test('runs commands in a console and confirms writes on staging only when asked'
   await page.keyboard.press('ControlOrMeta+Enter');
   await expect(page.getByRole('grid').getByText('USD')).toBeVisible();
 });
+
+test('adds a Redis user with ACL rules and changes a live setting', async ({ page }) => {
+  await connectCache(page);
+  await page.getByRole('button', { name: 'Roles' }).click();
+  await expect(page.getByRole('listbox', { name: 'Roles' }).getByRole('option')).toHaveText([/default\s*you/]);
+  await expect(page.getByText('Member of')).toHaveCount(0);
+  await page.getByRole('button', { name: 'New user' }).last().click();
+  await page.keyboard.type('app');
+  await page.getByLabel('Password', { exact: true }).fill('pw');
+  await page.getByLabel('Rules').fill('~cache:* +@read');
+  await page.getByRole('button', { name: 'Create user' }).click();
+  await expect(page.getByRole('dialog')).toContainText('ACL SETUSER app on resetpass >******** ~cache:* +@read');
+  await page.getByRole('button', { name: 'Commit' }).click();
+  expect(await page.evaluate(() => (window as any).lastRole.to)).toMatchObject({ name: 'app', password: 'pw', rules: '~cache:* +@read' });
+
+  await page.getByRole('button', { name: 'Server config' }).click();
+  await expect(page.getByText('live', { exact: true })).toBeVisible();
+  const editor = page.locator('.config .cm-content');
+  await expect(editor).toContainText('maxmemory-policy noeviction');
+  await editor.click();
+  await page.keyboard.press('ControlOrMeta+End');
+  await page.keyboard.type('no-such-setting 1');
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect(page.getByRole('alert').filter({ hasText: 'The server refused a change' })).toContainText('line 4ERR Unknown option');
+  await page.keyboard.press('Backspace');
+  for (let i = 0; i < 16; i++) await page.keyboard.press('Backspace');
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect(page.getByText('Applied, but not written to a config file')).toBeVisible();
+});

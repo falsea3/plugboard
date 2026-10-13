@@ -104,7 +104,8 @@
     try {
       saved = await api.writeConfig(ws.session.sessionId, loaded.path, content);
       loaded = { ...loaded, text: content, via: saved.via };
-      if (saved.reloaded) app.notify(saved.restart.length ? `Saved and reloaded — ${saved.restart.join(', ')} ${saved.restart.length === 1 ? 'needs' : 'need'} a restart` : 'Saved and reloaded', 'info');
+      if (saved.note) app.notify(saved.note, 'info');
+      else if (saved.reloaded) app.notify(saved.restart.length ? `Saved and reloaded — ${saved.restart.join(', ')} ${saved.restart.length === 1 ? 'needs' : 'need'} a restart` : 'Saved and reloaded', 'info');
     } catch (err) {
       app.notify(err);
     } finally {
@@ -135,9 +136,13 @@
   </div>
   {#if saved && !saved.reloaded}
     <div class="problems" role="alert">
-      <strong><Icon name="alert" size={13} />Saved, but not reloaded — the server found {saved.problems.length === 1 ? 'a problem' : 'problems'}. Fix and save again; until then the server keeps its old settings, and a restart would fail.</strong>
+      {#if saved.via === 'live'}
+        <strong><Icon name="alert" size={13} />The server refused {saved.problems.length === 1 ? 'a change' : 'some changes'} — the others are applied.</strong>
+      {:else}
+        <strong><Icon name="alert" size={13} />Saved, but not reloaded — the server found {saved.problems.length === 1 ? 'a problem' : 'problems'}. Fix and save again; until then the server keeps its old settings, and a restart would fail.</strong>
+      {/if}
       {#each saved.problems as p, i (i)}
-        <button class="problem" onclick={() => editor?.goto(p.line)}><span class="mono">line {p.line}</span>{p.message}</button>
+        <button class="problem" onclick={() => editor?.goto(p.line)}>{#if p.line}<span class="mono">line {p.line}</span>{/if}{p.message}</button>
       {/each}
     </div>
   {/if}

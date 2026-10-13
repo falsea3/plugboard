@@ -32,8 +32,10 @@ func (Dialect) RoleForm() model.RoleForm {
 			{Key: "replication", Label: "Replication", Hint: "Read the binary log as a replica"},
 			{Key: "locked", Label: "Account locked", Hint: "Can't log in", Badge: "locked"},
 		},
-		Host: true,
-		New:  model.Role{Host: "%", Flags: map[string]bool{}, ConnLimit: -1, MemberOf: []string{}, Grants: []string{}},
+		Host:       true,
+		ConnLimit:  true,
+		Membership: true,
+		New:        model.Role{Host: "%", Flags: map[string]bool{}, ConnLimit: -1, MemberOf: []string{}, Grants: []string{}},
 	}
 }
 

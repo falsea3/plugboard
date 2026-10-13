@@ -13,7 +13,7 @@
 
   let { ws }: { ws: Workspace } = $props();
 
-  const emptyForm: Form = { noun: 'role', flags: [], host: false, validUntil: false, new: { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], grantable: true, system: false, current: false } };
+  const emptyForm: Form = { noun: 'role', flags: [], host: false, validUntil: false, connLimit: false, membership: false, rules: '', new: { id: '', name: '', host: '', flags: {}, connLimit: -1, validUntil: '', memberOf: [], grants: [], rules: '', grantable: true, system: false, current: false } };
   let form = $state<Form>(emptyForm);
   let roles = $state<Role[]>([]);
   let loading = $state(false);

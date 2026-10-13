@@ -16,6 +16,7 @@ type ConfigSaved struct {
 	Reloaded bool            `json:"reloaded"`
 	Problems []ConfigProblem `json:"problems"`
 	Restart  []string        `json:"restart"`
+	Note     string          `json:"note"`
 }
 
 type ConfigProblem struct {
@@ -32,6 +33,7 @@ type Role struct {
 	ValidUntil string          `json:"validUntil"`
 	MemberOf   []string        `json:"memberOf"`
 	Grants     []string        `json:"grants"`
+	Rules      string          `json:"rules"`
 	Grantable  bool            `json:"grantable"`
 	System     bool            `json:"system"`
 	Current    bool            `json:"current"`
@@ -55,6 +57,9 @@ type RoleForm struct {
 	Flags      []RoleFlag `json:"flags"`
 	Host       bool       `json:"host"`
 	ValidUntil bool       `json:"validUntil"`
+	ConnLimit  bool       `json:"connLimit"`
+	Membership bool       `json:"membership"`
+	Rules      string     `json:"rules"`
 	New        Role       `json:"new"`
 }
 

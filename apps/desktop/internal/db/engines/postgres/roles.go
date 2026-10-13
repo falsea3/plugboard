@@ -68,6 +68,8 @@ func (Dialect) RoleForm() model.RoleForm {
 		Noun:       "role",
 		Flags:      roleFlags,
 		ValidUntil: true,
+		ConnLimit:  true,
+		Membership: true,
 		New:        model.Role{Flags: map[string]bool{"login": true, "inherit": true}, ConnLimit: -1, MemberOf: []string{}, Grants: []string{}},
 	}
 }

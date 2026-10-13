@@ -58,8 +58,12 @@ export function problemRanges(text: string, problems: ConfigProblem[]): LineProb
   });
 }
 
-export function viaLabel(via: 'ssh' | 'sql'): { label: string; hint: string } {
-  return via === 'ssh'
-    ? { label: 'via SSH', hint: 'Read and written as a file on the SSH server, which runs the database' }
-    : { label: 'via SQL', hint: 'Read and written by the database server itself — needs a superuser, or the right to read and write server files' };
+const VIA = {
+  ssh: { label: 'via SSH', hint: 'Read and written as a file on the SSH server, which runs the database' },
+  sql: { label: 'via SQL', hint: 'Read and written by the database server itself — needs a superuser, or the right to read and write server files' },
+  live: { label: 'live', hint: 'The settings the server runs with now: saving applies each change at once' },
+};
+
+export function viaLabel(via: keyof typeof VIA): { label: string; hint: string } {
+  return VIA[via];
 }

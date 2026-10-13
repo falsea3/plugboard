@@ -53,11 +53,13 @@
       {/if}
     </div>
 
-    <label for="role-limit">Connections</label>
-    <div class="form-row">
-      <input id="role-limit" class="input limit" type="number" min="-1" bind:value={spec.connLimit} />
-      <span class="note">{spec.connLimit === -1 ? 'no limit' : 'at most at once'}</span>
-    </div>
+    {#if form.connLimit}
+      <label for="role-limit">Connections</label>
+      <div class="form-row">
+        <input id="role-limit" class="input limit" type="number" min="-1" bind:value={spec.connLimit} />
+        <span class="note">{spec.connLimit === -1 ? 'no limit' : 'at most at once'}</span>
+      </div>
+    {/if}
 
     {#if form.validUntil}
       <label for="role-until">Valid until</label>
@@ -74,6 +76,13 @@
     {/each}
   </div>
 
+  {#if form.rules}
+    <label class="label" for="role-rules">Rules</label>
+    <textarea id="role-rules" class="input rules mono" bind:value={spec.rules} rows="3" spellcheck="false" placeholder={form.rules}></textarea>
+    <p class="note rules-hint">{form.rules}</p>
+  {/if}
+
+  {#if form.membership}
   <div class="label">Member of</div>
   <div class="members">
     {#each spec.memberOf as g (g)}
@@ -87,6 +96,7 @@
       <span class="note">No roles to join</span>
     {/if}
   </div>
+  {/if}
 
 </fieldset>
 
@@ -109,6 +119,8 @@
   .attrs { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 18px; }
   .label { color: var(--text-2); font-size: 12px; font-weight: 550; }
   .grants-label { display: flex; align-items: center; justify-content: space-between; max-width: 720px; }
+  .rules { height: auto; min-height: 64px; max-width: 720px; padding: 6px 9px; margin-top: -8px; resize: vertical; line-height: 1.5; font-size: 12px; }
+  .rules-hint { margin: -10px 0 0; }
   .members { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: -6px; }
   .chip { display: inline-flex; align-items: center; gap: 2px; padding-left: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 12px; }
   .members :global(.add) { width: 180px; }
