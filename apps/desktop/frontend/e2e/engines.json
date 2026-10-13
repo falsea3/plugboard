@@ -41,7 +41,9 @@
     "editable": true,
     "structureEditable": true,
     "sortable": true,
-    "canRenameTables": true
+    "canRenameTables": true,
+    "serverConfig": false,
+    "roles": false
   },
   "postgres": {
     "syntax": {
@@ -87,7 +89,9 @@
     "editable": true,
     "structureEditable": true,
     "sortable": true,
-    "canRenameTables": true
+    "canRenameTables": true,
+    "serverConfig": true,
+    "roles": true
   },
   "sqlite": {
     "syntax": {
@@ -114,7 +118,9 @@
     "editable": true,
     "structureEditable": true,
     "sortable": true,
-    "canRenameTables": true
+    "canRenameTables": true,
+    "serverConfig": false,
+    "roles": false
   },
   "redis": {
     "syntax": {
@@ -135,7 +141,9 @@
     "editable": false,
     "structureEditable": false,
     "sortable": false,
-    "canRenameTables": false
+    "canRenameTables": false,
+    "serverConfig": false,
+    "roles": false
   },
   "clickhouse": {
     "syntax": {
@@ -182,7 +190,9 @@
     "editable": false,
     "structureEditable": false,
     "sortable": true,
-    "canRenameTables": true
+    "canRenameTables": true,
+    "serverConfig": false,
+    "roles": false
   },
   "cassandra": {
     "syntax": {
@@ -226,6 +236,8 @@
     "editable": true,
     "structureEditable": false,
     "sortable": false,
-    "canRenameTables": false
+    "canRenameTables": false,
+    "serverConfig": false,
+    "roles": false
   }
 }

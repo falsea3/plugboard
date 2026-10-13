@@ -83,6 +83,8 @@ export interface EngineFeatures {
   structureEditable: boolean;
   sortable: boolean;
   canRenameTables: boolean;
+  serverConfig: boolean;
+  roles: boolean;
 }
 
 export interface SqlSyntax {
@@ -106,3 +108,4 @@ export * from './wireSchema';
 export * from './wireKeys';
 export * from './wireQuery';
 export * from './wireApp';
+export * from './wireAdmin';

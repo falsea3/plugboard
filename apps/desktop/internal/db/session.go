@@ -63,3 +63,16 @@ type OpenOptions struct {
 	KnownHostsFile string
 	OnTunnelState  func(sshtunnel.State, error)
 }
+
+type ServerConfig interface {
+	ConfigFiles(ctx context.Context) ([]model.ConfigFile, error)
+	ReadConfig(ctx context.Context, path string) (model.ConfigText, error)
+	WriteConfig(ctx context.Context, path, text string) (model.ConfigSaved, error)
+}
+
+type RoleManager interface {
+	Roles(ctx context.Context) ([]model.Role, error)
+	RoleSQL(ctx context.Context, from string, to model.RoleSpec) ([]string, error)
+	SaveRole(ctx context.Context, from string, to model.RoleSpec) error
+	DropRole(ctx context.Context, name string) error
+}

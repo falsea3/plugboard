@@ -16,6 +16,8 @@
     if (tab.kind === 'diagram') return 'diagram';
     if (tab.kind === 'ddl') return iconOf(tab.object);
     if (tab.kind === 'key') return 'key';
+    if (tab.kind === 'config') return 'config';
+    if (tab.kind === 'roles') return 'roles';
     return tab.tableKind === 'view' ? 'view' : 'table';
   }
   const order = new DragOrder({
@@ -53,7 +55,7 @@
         >
           <Icon name={tabIcon(tab)} size={12} />
           <span>{tab.kind === 'table' ? tab.table : tab.title}</span>
-          {#if tab.kind === 'table' && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
+          {#if (tab.kind === 'table' || tab.kind === 'config') && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
           {#if tab.kind === 'query' && isDirty(tab)}<span class="dirty-dot" title="Unsaved changes"></span>{/if}
         </button>
         <button class="tab-close" onclick={() => app.requestCloseTab(ws, tab.id)} title="Close (⌘W or middle-click)" aria-label="Close tab"><Icon name="x" size={12} /></button>

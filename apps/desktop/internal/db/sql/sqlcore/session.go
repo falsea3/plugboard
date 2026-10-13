@@ -113,7 +113,19 @@ func Features(d dialect.Dialect) model.EngineFeatures {
 		StructureEditable:  d.Editable(),
 		Sortable:           true,
 		CanRenameTables:    true,
+		ServerConfig:       isServerConfig(d),
+		Roles:              isRoles(d),
 	}
+}
+
+func isServerConfig(d dialect.Dialect) bool {
+	_, ok := d.(dialect.ServerConfig)
+	return ok
+}
+
+func isRoles(d dialect.Dialect) bool {
+	_, ok := d.(dialect.Roles)
+	return ok
 }
 
 func (s *Session) Columns(ctx context.Context, schema, table string) ([]model.Column, error) {

@@ -12,6 +12,8 @@
   import ValuePanel from '../table/ValuePanel.svelte';
   import KeyView from '../keys/KeyView.svelte';
   import ConsoleView from '../keys/ConsoleView.svelte';
+  import ConfigView from '../admin/ConfigView.svelte';
+  import RolesView from '../admin/RolesView.svelte';
 
   let { ws, visible }: { ws: Workspace; visible: boolean } = $props();
 
@@ -53,6 +55,10 @@
             <DiagramView {ws} {tab} />
           {:else if tab.kind === 'ddl'}
             <DdlView {ws} object={tab.object} />
+          {:else if tab.kind === 'config'}
+            <ConfigView {ws} ondirty={d => (tab.dirty = d)} />
+          {:else if tab.kind === 'roles'}
+            <RolesView {ws} />
           {:else if tab.kind === 'key'}
             <KeyView {ws} {tab} active={visible && shown} />
           {:else if ws.session.engine.keyValue}

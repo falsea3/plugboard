@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, QueryTabState, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, QueryTabState, RoleSpec, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -96,6 +96,13 @@ export const api = {
     call(a => a.ScanKeys(sessionId, db, pattern, cursor, count)),
   readKey: (sessionId: string, db: string, key: string, cursor: string) => call(a => a.ReadKey(sessionId, db, key, cursor)),
   keyCounts: (sessionId: string) => call(a => a.KeyCounts(sessionId)),
+  configFiles: (sessionId: string) => call(a => a.ConfigFiles(sessionId)),
+  readConfig: (sessionId: string, path: string) => call(a => a.ReadConfig(sessionId, path)),
+  writeConfig: (sessionId: string, path: string, text: string) => call(a => a.WriteConfig(sessionId, path, text)),
+  roles: (sessionId: string) => call(a => a.Roles(sessionId)),
+  roleSQL: (sessionId: string, from: string, to: RoleSpec) => call(a => a.RoleSQL(sessionId, from, to)),
+  saveRole: (sessionId: string, from: string, to: RoleSpec) => call(a => a.SaveRole(sessionId, from, to)),
+  dropRole: (sessionId: string, name: string) => call(a => a.DropRole(sessionId, name)),
   editKey: (sessionId: string, db: string, edit: Partial<KeyEdit> & { key: string; op: string }) =>
     call(a => a.EditKey(sessionId, db, { field: '', value: '', score: '', old: '', index: 0, ...edit })),
   listScripts: (connId: string) => call(a => a.ListScripts(connId)),

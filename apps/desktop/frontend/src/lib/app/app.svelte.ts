@@ -224,8 +224,8 @@ class AppState {
 
   requestCloseTab(ws: Workspace, tabId: string) {
     const tab = ws.tabs.find(t => t.id === tabId);
-    if (tab?.kind === 'table' && tab.dirty) {
-      this.pendingClose = { ws, tabId, tables: [tab.table] };
+    if ((tab?.kind === 'table' || tab?.kind === 'config') && tab.dirty) {
+      this.pendingClose = { ws, tabId, tables: [tab.kind === 'table' ? tab.table : tab.title] };
       return;
     }
     if (tab?.kind === 'query') ws.scripts.requestClose(tab);

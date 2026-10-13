@@ -43,7 +43,20 @@ export type KeyTab = {
   db: string;
 };
 
-export type Tab = TableTab | QueryTab | DiagramTab | DDLTab | KeyTab;
+export type ConfigTab = {
+  id: string;
+  kind: 'config';
+  title: string;
+  dirty?: boolean;
+};
+
+export type RolesTab = {
+  id: string;
+  kind: 'roles';
+  title: string;
+};
+
+export type Tab = TableTab | QueryTab | DiagramTab | DDLTab | KeyTab | ConfigTab | RolesTab;
 
 let seq = 0;
 const nextId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(++seq).toString(36)}`;
@@ -212,6 +225,17 @@ export class Workspace {
       return;
     }
     const tab: DDLTab = { id: nextId('ddl'), kind: 'ddl', title: object.name, object };
+    this.tabs.push(tab);
+    this.activeTabId = tab.id;
+  }
+
+  openAdmin(kind: 'config' | 'roles') {
+    const existing = this.tabs.find(tab => tab.kind === kind);
+    if (existing) {
+      this.activeTabId = existing.id;
+      return;
+    }
+    const tab: ConfigTab | RolesTab = kind === 'config' ? { id: nextId(kind), kind, title: 'Server config' } : { id: nextId(kind), kind, title: 'Roles' };
     this.tabs.push(tab);
     this.activeTabId = tab.id;
   }
