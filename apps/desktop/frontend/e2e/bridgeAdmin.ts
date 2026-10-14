@@ -71,6 +71,7 @@ export async function installAdmin(page: Page) {
         store[driver(s)] = from ? list.map(r => (r.id === from ? saved : r)) : [...list, saved];
         return ok(saved.id);
       },
+      ReadCell: (_: string, q: { column: string; key: Record<string, unknown> }) => ((w.lastReadCell = q), ok(`whole value of ${q.column} in row ${q.key.id}: ` + 'x'.repeat(70000))),
       SaveDiagram: (name: string, data: string) => ((w.lastExport = { name, data }), ok(`/Users/demo/Desktop/${name}`)),
       DropRole: (s: string, id: string) => {
         store[driver(s)] = store[driver(s)].filter(r => r.id !== id);

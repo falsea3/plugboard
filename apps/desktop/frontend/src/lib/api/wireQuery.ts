@@ -19,6 +19,7 @@ export interface ResultSet {
   hasMore: boolean;
   offset: number;
   durationMs: number;
+  cut?: CutCell[];
 }
 
 export type FilterOp =
@@ -111,4 +112,17 @@ export interface StructureChange {
   schema: string;
   table: string;
   changes: ColumnChange[];
+}
+
+export interface CutCell {
+  row: number;
+  col: number;
+  size: number;
+}
+
+export interface CellQuery {
+  schema: string;
+  table: string;
+  column: string;
+  key: Record<string, CellValue>;
 }

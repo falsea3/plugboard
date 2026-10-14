@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 
@@ -135,8 +134,9 @@ func (s *Session) TablePage(ctx context.Context, q model.TableQuery) (model.Tabl
 		}
 	}
 
+	list, cut := s.selectList(cols)
 	var b strings.Builder
-	b.WriteString("SELECT * FROM " + s.qualified(q.Schema, q.Table))
+	b.WriteString("SELECT " + list + " FROM " + s.qualified(q.Schema, q.Table))
 	if len(conds) > 0 {
 		b.WriteString(" WHERE " + strings.Join(conds, " AND "))
 	}
@@ -168,12 +168,13 @@ func (s *Session) TablePage(ctx context.Context, q model.TableQuery) (model.Tabl
 	if err != nil {
 		return model.TablePage{}, err
 	}
+	cutInSQL(&rs, cols, cut)
 	more := len(rs.Rows) > limit
 	if more {
-		rs.Rows = rs.Rows[:limit]
+		keepRows(&rs, limit)
 	}
 	if backwards {
-		slices.Reverse(rs.Rows)
+		reverseRows(&rs)
 		page.HasPrev = more
 		page.HasMore = !q.Last
 	} else {

@@ -17,6 +17,13 @@ type ResultSet struct {
 	HasMore      bool           `json:"hasMore"`
 	Offset       int            `json:"offset"`
 	DurationMs   float64        `json:"durationMs"`
+	Cut          []CutCell      `json:"cut,omitempty"`
+}
+
+type CutCell struct {
+	Row  int `json:"row"`
+	Col  int `json:"col"`
+	Size int `json:"size"`
 }
 
 type QueryRun struct {
@@ -66,4 +73,11 @@ type RowCount struct {
 	Count int64 `json:"count"`
 	Exact bool  `json:"exact"`
 	Known bool  `json:"known"`
+}
+
+type CellQuery struct {
+	Schema string         `json:"schema"`
+	Table  string         `json:"table"`
+	Column string         `json:"column"`
+	Key    map[string]any `json:"key"`
 }

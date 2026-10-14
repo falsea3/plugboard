@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Diagram } from '../api/wire';
 import { layout, makeCards, makeLinks } from './layout';
-import { diagramSvg, svgBase64, type Palette } from './export';
+import { diagramSvg, pngScale, svgBase64, type Palette } from './export';
 
 const col = (name: string, primaryKey = false) => ({ name, type: name === 'id' ? 'bigint' : 'text', nullable: !primaryKey, default: null, primaryKey, enum: null, kind: 'text' as const });
 const d: Diagram = {
@@ -32,5 +32,13 @@ describe('diagramSvg', () => {
   });
   it('encodes text as UTF-8 base64', () => {
     expect(atob(svgBase64('<t>é</t>'))).toBe('<t>Ã©</t>');
+  });
+});
+
+describe('pngScale', () => {
+  it('draws at twice the size when it fits, smaller when it would not', () => {
+    expect(pngScale(2000, 1000)).toBe(2);
+    expect(pngScale(20000, 1000)).toBeCloseTo(16384 / 20000);
+    expect(() => pngScale(300000, 2000)).toThrow(/export it as SVG/);
   });
 });

@@ -60,6 +60,7 @@ type Dialect interface {
 	Editable() bool
 	ColumnTypes() []string
 	LockWait(seconds int) (set, reset string)
+	CutValue(expr string, kind model.ColumnKind, chars int) string
 }
 
 type SortKey interface {

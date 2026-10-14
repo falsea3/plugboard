@@ -8,6 +8,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Tables with huge values open.** A value longer than 64 KB comes to the grid cut (the database cuts it, so a table of multi-megabyte JSON documents no longer sends gigabytes to the app); the Value panel says how much is shown and *Load whole value* fetches it — then it can be edited. ⇧↵ and the JSON editor load the whole value first, and *Copy as SQL* refuses rows whose values are cut. The SQL editor cuts long values in its results the same way.
+- **Thousands of tabs.** A tab's view is built the first time you open it, so a connection that restores 2,000 query tabs is ready in about three seconds instead of freezing.
+- **Ten thousand tables.** The sidebar shows the first 500 of each group with a *show more* row, so filtering stays quick.
+- **Diagrams of thousands of tables.** A schema with more than 800 linked tables crashed the diagram ("Maximum call stack size exceeded"); such diagrams now use a simpler layered layout, draw only what's on screen, and open at the top-left. A PNG too big for one image is drawn smaller, or asks for SVG.
+- **Wide tables on PostgreSQL.** Reading the columns of a table with 1,500 columns took seven seconds; it takes a few milliseconds now.
+
 ### Removed
 
 - **Open SQLite file** — the home screen button, the ⌘K action, the File menu item and ⌘O. Add a SQLite database like any other connection: *New connection* → SQLite, then pick the file.

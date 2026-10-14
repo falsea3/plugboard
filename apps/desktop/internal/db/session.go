@@ -76,3 +76,7 @@ type RoleManager interface {
 	SaveRole(ctx context.Context, from string, to model.RoleSpec) (string, error)
 	DropRole(ctx context.Context, id string) error
 }
+
+type CellReader interface {
+	ReadCell(ctx context.Context, q model.CellQuery) (string, error)
+}

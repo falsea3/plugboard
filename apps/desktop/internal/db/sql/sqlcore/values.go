@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"slices"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -67,6 +68,30 @@ func normalizeValue(v any, t dialect.Type) any {
 		return jsonText(v)
 	}
 	return fmt.Sprint(v)
+}
+
+const MaxCellBytes = 64 << 10
+
+func keepRows(rs *model.ResultSet, n int) {
+	rs.Rows = rs.Rows[:n]
+	rs.Cut = slices.DeleteFunc(rs.Cut, func(c model.CutCell) bool { return c.Row >= n })
+}
+
+func reverseRows(rs *model.ResultSet) {
+	slices.Reverse(rs.Rows)
+	for i := range rs.Cut {
+		rs.Cut[i].Row = len(rs.Rows) - 1 - rs.Cut[i].Row
+	}
+}
+
+func cutText(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	for n > 0 && !utf8.RuneStart(s[n]) {
+		n--
+	}
+	return s[:n]
 }
 
 func jsonText(v any) string {

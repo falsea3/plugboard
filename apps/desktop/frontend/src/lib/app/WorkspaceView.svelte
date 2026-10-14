@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SvelteSet } from 'svelte/reactivity';
   import type { Workspace } from './workspace.svelte';
   import Sidebar from './Sidebar.svelte';
   import TabBar from './TabBar.svelte';
@@ -22,6 +23,10 @@
   let valueShown = $state(false);
 
   const tableTab = $derived(ws.activeTab?.kind === 'table' ? ws.activeTab : null);
+  const opened = new SvelteSet<string>();
+  $effect(() => {
+    if (ws.activeTabId) opened.add(ws.activeTabId);
+  });
 
   function startResize(e: PointerEvent) {
     const w0 = sidebarWidth;
@@ -48,25 +53,27 @@
     <div class="panes">
       {#each ws.tabs as tab (tab.id)}
         {@const shown = tab.id === ws.activeTabId}
-        <div class="pane" class:hidden={!shown}>
-          {#if tab.kind === 'table'}
-            <TableView {ws} {tab} active={visible && shown} ondirty={d => (tab.dirty = d)} />
-          {:else if tab.kind === 'diagram'}
-            <DiagramView {ws} {tab} />
-          {:else if tab.kind === 'ddl'}
-            <DdlView {ws} object={tab.object} />
-          {:else if tab.kind === 'config'}
-            <ConfigView {ws} ondirty={d => (tab.dirty = d)} />
-          {:else if tab.kind === 'roles'}
-            <RolesView {ws} />
-          {:else if tab.kind === 'key'}
-            <KeyView {ws} {tab} active={visible && shown} />
-          {:else if ws.session.engine.keyValue}
-            <ConsoleView {ws} {tab} />
-          {:else}
-            <QueryView {ws} {tab} />
-          {/if}
-        </div>
+        {#if shown || opened.has(tab.id)}
+          <div class="pane" class:hidden={!shown}>
+            {#if tab.kind === 'table'}
+              <TableView {ws} {tab} active={visible && shown} ondirty={d => (tab.dirty = d)} />
+            {:else if tab.kind === 'diagram'}
+              <DiagramView {ws} {tab} />
+            {:else if tab.kind === 'ddl'}
+              <DdlView {ws} object={tab.object} />
+            {:else if tab.kind === 'config'}
+              <ConfigView {ws} ondirty={d => (tab.dirty = d)} />
+            {:else if tab.kind === 'roles'}
+              <RolesView {ws} />
+            {:else if tab.kind === 'key'}
+              <KeyView {ws} {tab} active={visible && shown} />
+            {:else if ws.session.engine.keyValue}
+              <ConsoleView {ws} {tab} />
+            {:else}
+              <QueryView {ws} {tab} />
+            {/if}
+          </div>
+        {/if}
       {:else}
         <div class="welcome">
           <p class="muted">Pick a table on the left, or</p>

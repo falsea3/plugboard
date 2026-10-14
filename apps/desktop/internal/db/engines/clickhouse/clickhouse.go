@@ -197,3 +197,10 @@ func shortList(expected string) string {
 	}
 	return head + ": " + strings.Join(items[:6], ", ") + "…"
 }
+
+func (Dialect) CutValue(expr string, kind model.ColumnKind, chars int) string {
+	if kind != model.KindText && kind != model.KindJSON {
+		return ""
+	}
+	return "substringUTF8(toString(" + expr + "), 1, " + strconv.Itoa(chars) + ")"
+}

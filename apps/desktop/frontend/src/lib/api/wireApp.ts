@@ -1,6 +1,6 @@
 import type { Connection, ConnectSecrets, ConnectResult, TestResult, SessionInfo } from './wire';
 import type { TableInfo, Column, Relation, Index, Diagram, DBObject, NewIndex } from './wireSchema';
-import type { ResultSet, TableQuery, RowCount, TablePage, QueryRun, SyntaxProblem, ChangeSet, ApplyResult, StructureChange } from './wireQuery';
+import type { ResultSet, TableQuery, RowCount, TablePage, QueryRun, SyntaxProblem, ChangeSet, ApplyResult, StructureChange, CellQuery } from './wireQuery';
 import type { KeyEdit, KeyPage, KeyValue } from './wireKeys';
 import type { ConfigFile, ConfigSaved, ConfigText, RoleList, RoleSpec } from './wireAdmin';
 
@@ -97,6 +97,7 @@ export interface GoApp {
   SaveRole(sessionId: string, from: string, to: RoleSpec): Promise<string>;
   DropRole(sessionId: string, id: string): Promise<void>;
   SaveDiagram(name: string, data: string): Promise<string>;
+  ReadCell(sessionId: string, q: CellQuery): Promise<string>;
   ListScripts(connId: string): Promise<string[]>;
   ReadScript(connId: string, name: string): Promise<string>;
   CreateScript(connId: string, name: string, sql: string): Promise<void>;

@@ -58,7 +58,7 @@ func (s *Session) runPage(ctx context.Context, stmt string, offset int) (model.R
 	}
 	rs.Truncated = false
 	if len(rs.Rows) > EditorChunk {
-		rs.Rows = rs.Rows[:EditorChunk]
+		keepRows(&rs, EditorChunk)
 		rs.HasMore = true
 	}
 	rs.Statement = stmt

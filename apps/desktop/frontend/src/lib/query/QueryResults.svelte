@@ -1,5 +1,6 @@
 <script lang="ts">
   import { api, type CellValue, type QueryRun, type ResultColumn } from '../api/backend';
+  import { appendCut, cutCells, cutKey, cutNote, markCut } from '../table/cut';
   import { app } from '../app/app.svelte';
   import { formatCount, formatDuration } from '../ui/format';
   import DataGrid from '../grid/DataGrid.svelte';
@@ -27,9 +28,16 @@
     const rs = current;
     if (!rs || c < 0 || rs.columns[c]?.kind === 'binary') return;
     const value = rs.rows[r]?.[c] ?? null;
+    const size = cut.get(cutKey(r, c));
+    if (size !== undefined) {
+      viewing = { r, c, title: `${rs.columns[c].name} — ${cutNote(size, String(value).length).toLowerCase()}`, value, json: false, readOnly: true };
+      return;
+    }
     viewing = { r, c, title: rs.columns[c].name, value, json: rs.columns[c].kind === 'json' || looksLikeJSON(value), readOnly: true };
   }
   const current = $derived(run?.results[resultIndex] ?? null);
+  const cut = $derived(cutCells(current?.cut));
+  const shownRows = $derived(current ? markCut(current.rows, cut) : []);
 
   let loadingMore = $state(false);
 
@@ -43,6 +51,7 @@
       run.results[index] = {
         ...rs,
         rows: [...rs.rows, ...next.rows],
+        cut: appendCut(rs.cut, next.cut, rs.rows.length),
         hasMore: next.hasMore,
         durationMs: rs.durationMs + next.durationMs,
       };
@@ -106,7 +115,7 @@
               cellMenu={(r, c) => (c >= 0 ? [{ id: 'value', label: 'View in editor', kbd: '⇧↵' }] : [])}
               onmenu={(id, at) => (id === 'value' ? (view(at.r, at.c), true) : false)}
               columns={current.columns}
-              rows={current.rows}
+              rows={shownRows}
               onselect={(value, column) => (selected = column && value !== undefined ? { value, column } : null)}
             />
           {:else if !run.error}

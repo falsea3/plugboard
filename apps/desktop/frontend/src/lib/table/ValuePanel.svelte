@@ -5,13 +5,25 @@
   import { copyToClipboard } from '../ui/clipboard';
   import { jsonError, jsonToSave, looksLikeJSON } from '../json/text';
   import Icon from '../ui/Icon.svelte';
+  import Spinner from '../ui/Spinner.svelte';
+  import { app } from '../app/app.svelte';
 
   let { selected }: { selected: TableTab['selected'] | null } = $props();
 
-  const original = $derived(selected && selected.value !== null ? String(selected.value) : '');
+  let full = $state<string | null>(null);
+  let loading = $state(false);
+  const partial = $derived(!!selected?.cut && full === null);
+  const original = $derived(full ?? (selected && selected.value !== null ? String(selected.value) : ''));
+  const editable = $derived(!!selected?.edit && !partial);
   const json = $derived(!!selected && (selected.column.kind === 'json' || looksLikeJSON(selected.value)));
   let draft = $state('');
   let problem = $state('');
+
+  $effect(() => {
+    void selected?.key;
+    void selected?.value;
+    untrack(() => (full = null));
+  });
 
   $effect(() => {
     const text = original;
@@ -24,12 +36,24 @@
 
   const dirty = $derived(!!selected && draft !== original);
 
+  async function loadWhole() {
+    if (!selected?.cut || loading) return;
+    loading = true;
+    try {
+      full = await selected.cut.load();
+    } catch (err) {
+      app.notify(err);
+    } finally {
+      loading = false;
+    }
+  }
+
   function copy() {
-    if (selected) void copyToClipboard(copyText(selected.value));
+    if (selected) void copyToClipboard(full ?? copyText(selected.value));
   }
 
   function apply() {
-    if (!selected?.edit || !dirty) return;
+    if (!selected?.edit || !editable || !dirty) return;
     if (json && draft.trim() !== '') {
       problem = jsonError(draft);
       if (problem) return;
@@ -68,7 +92,13 @@
       <span class="column" title={selected.column.name}>{selected.column.name}</span>
       <span class="type" title={selected.column.type}>{selected.column.type || 'Unknown type'}</span>
     </div>
-    {#if selected.edit}
+    {#if partial}
+      <div class="partial">
+        <span>{selected.cut?.note}</span>
+        <button class="btn sm" onclick={loadWhole} disabled={loading}>{#if loading}<Spinner size={11} />{/if}Load whole value</button>
+      </div>
+    {/if}
+    {#if editable}
       <textarea
         class="editor"
         class:null={selected.value === null && !dirty}
@@ -152,5 +182,7 @@
   pre.null, .editor.null::placeholder { color: var(--cell-null); font-style: italic; }
   .problem { flex: none; margin: 0 8px 4px; color: var(--danger); font-size: 11.5px; }
   .actions { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 8px 8px; }
+  .partial { flex: none; display: flex; align-items: center; gap: 8px; margin: 8px 8px 0; padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-2); font-size: 11.5px; }
+  .partial span { flex: 1; min-width: 0; }
   .empty { display: grid; flex: 1; place-items: center; padding: 20px; color: var(--text-3); font-size: 12px; text-align: center; }
 </style>

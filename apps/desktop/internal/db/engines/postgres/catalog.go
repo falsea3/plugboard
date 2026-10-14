@@ -73,7 +73,7 @@ func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table stri
 		SELECT a.attname,
 		       format_type(a.atttypid, a.atttypmod),
 		       NOT a.attnotnull,
-		       pg_get_expr(d.adbin, d.adrelid),
+		       CASE WHEN a.attgenerated = '' THEN pg_get_expr(d.adbin, 0) ELSE pg_get_expr(d.adbin, d.adrelid) END,
 		       COALESCE(a.attnum = ANY(i.indkey), false),
 		       (SELECT json_agg(e.enumlabel ORDER BY e.enumsortorder)::text FROM pg_enum e WHERE e.enumtypid = a.atttypid),
 		       quote_ident(tn.nspname) || '.' || quote_ident(t.typname)

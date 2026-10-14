@@ -16,6 +16,13 @@
   let { ws, active }: { ws: Workspace; active: boolean } = $props();
 
   let filter = $state('');
+  const STEP = 500;
+  let limit = $state(STEP);
+  $effect(() => {
+    void filter;
+    void ws.tables;
+    limit = STEP;
+  });
   let input = $state<HTMLInputElement>();
 
   const visible = $derived.by(() => {
@@ -128,7 +135,7 @@
               <span>{group.label}</span>
               <span class="count">{group.items.length}</span>
             </div>
-            {#each group.items as t (t.name)}
+            {#each group.items.slice(0, limit) as t (t.name)}
               <TableNode
                 {ws}
                 {t}
@@ -138,6 +145,9 @@
                 onmenu={(e, column, index) => menus?.openTree(e, { table: t, column, index })}
               />
             {/each}
+            {#if group.items.length > limit}
+              <button class="more faint" onclick={() => (limit += STEP * 4)}>{(group.items.length - limit).toLocaleString('en-US')} more — show them, or filter</button>
+            {/if}
           {/if}
         {/each}
         <ObjectGroups {ws} {filter} onmenu={(e, o) => menus?.openObject(e, o)} />
@@ -180,6 +190,8 @@
     min-width: 0;
   }
   .schema { padding: 10px 10px 0; }
+  .more { display: block; width: 100%; padding: 4px 12px 6px 30px; border: 0; background: none; font-size: 12px; text-align: left; cursor: pointer; }
+  .more:hover { color: var(--text-2); }
   .filter { position: relative; padding: 10px; color: var(--text-3); }
   .filter :global(.icon) { position: absolute; left: 19px; top: 18px; }
   .filter .input { padding-left: 27px; height: 26px; }

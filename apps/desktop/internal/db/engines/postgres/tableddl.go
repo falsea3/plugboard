@@ -15,11 +15,12 @@ var serials = map[string]string{"integer": "serial", "bigint": "bigserial", "sma
 
 func (d Dialect) tableDDL(ctx context.Context, db *sql.DB, obj model.DBObject, name string) (string, error) {
 	rows, err := db.QueryContext(ctx, `
-		SELECT a.attname, format_type(a.atttypid, a.atttypmod), pg_get_expr(ad.adbin, ad.adrelid),
+		SELECT a.attname, format_type(a.atttypid, a.atttypmod), x.expr,
 		       a.attnotnull, a.attidentity::text, a.attgenerated::text,
-		       COALESCE(pg_get_expr(ad.adbin, ad.adrelid) = 'nextval(' || quote_literal(pg_get_serial_sequence(`+relation+`::text, a.attname)::regclass::text) || '::regclass)', false)
+		       COALESCE(x.expr = 'nextval(' || quote_literal(pg_get_serial_sequence(`+relation+`::text, a.attname)::regclass::text) || '::regclass)', false)
 		FROM pg_attribute a
 		LEFT JOIN pg_attrdef ad ON ad.adrelid = a.attrelid AND ad.adnum = a.attnum
+		LEFT JOIN LATERAL (SELECT CASE WHEN a.attgenerated = '' THEN pg_get_expr(ad.adbin, 0) ELSE pg_get_expr(ad.adbin, ad.adrelid) END AS expr) x ON true
 		WHERE a.attrelid = `+relation+` AND a.attnum > 0 AND NOT a.attisdropped
 		ORDER BY a.attnum`, obj.Schema, obj.Name)
 	if err != nil {

@@ -7,6 +7,7 @@
   import { app } from '../app/app.svelte';
   import { diagramSvg, pngBase64, svgBase64, themePalette } from './export';
   import DiagramToolbar from './DiagramToolbar.svelte';
+  import { inView, lineInView } from './layers';
   import Icon from '../ui/Icon.svelte';
   import LoadBar from '../ui/LoadBar.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -34,6 +35,9 @@
   let moved = false;
 
   const links = $derived(diagram ? makeLinks(diagram, cards, pos) : []);
+  const port = $derived({ ...view, width, height });
+  const onScreen = $derived(diagram && diagram.tables.length > 300 ? inView(cards, pos, port) : null);
+  const shownLinks = $derived(onScreen ? links.filter(l => lineInView(l.from, l.to, port)) : links);
   const relation = $derived(selected?.kind === 'relation' ? diagram?.relations[selected.index] ?? null : null);
   const activeLinks = $derived.by(() => {
     if (!selected) return null;
@@ -100,7 +104,7 @@
     const b = bounds(cards, pos);
     if (b.w === 0 || width === 0 || height === 0) return;
     const k = clamp(Math.min(1, (width - 80) / b.w, (height - 80) / b.h));
-    view = { k, x: (width - b.w * k) / 2 - b.x * k, y: (height - b.h * k) / 2 - b.y * k };
+    view = { k, x: Math.max(40, (width - b.w * k) / 2) - b.x * k, y: Math.max(40, (height - b.h * k) / 2) - b.y * k };
   }
 
   function zoomAt(cx: number, cy: number, factor: number) {
@@ -204,7 +208,7 @@
     {#if diagram}
       <div class="world" style:transform="translate({view.x}px, {view.y}px) scale({view.k})">
         <svg class="links" width="1" height="1" overflow="visible" aria-label="Relations">
-          {#each links as l (l.index)}
+          {#each shownLinks as l (l.index)}
             {@const on = activeLinks?.has(l.index) ?? false}
             <g class="link" class:on class:dim={!!activeLinks && !on}>
               <path class="line" d={l.path} />
@@ -230,7 +234,7 @@
         {#each diagram.tables as t (t.name)}
           {@const c = cards.get(t.name)}
           {@const p = pos.get(t.name)}
-          {#if c && p}
+          {#if c && p && (!onScreen || onScreen.has(t.name))}
             {@const on = activeTables?.has(t.name) ?? false}
             <DiagramCard
               table={t}

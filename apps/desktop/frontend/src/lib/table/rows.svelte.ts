@@ -1,4 +1,5 @@
 import { api, type CellValue, type Filter, type RowCount, type TablePage } from '../api/backend';
+import { appendCut } from './cut';
 
 export const MAX_ROWS = 100_000;
 
@@ -67,7 +68,7 @@ export class TableRows {
         ...(base.keyset && rows.length > 0 ? { after: this.keyOf(rows[rows.length - 1]) } : {}),
       });
       if (seq !== this.seq || this.page !== base) return;
-      this.page = { ...base, hasMore: p.hasMore, result: { ...base.result, durationMs: p.result.durationMs, rows: [...rows, ...p.result.rows] } };
+      this.page = { ...base, hasMore: p.hasMore, result: { ...base.result, durationMs: p.result.durationMs, rows: [...rows, ...p.result.rows], cut: appendCut(base.result.cut, p.result.cut, rows.length) } };
     } catch (err) {
       if (seq === this.seq) this.o.notify(err);
     } finally {

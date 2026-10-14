@@ -95,6 +95,8 @@ func (Standard) ReadKeywords() []string { return nil }
 
 func (Standard) LockWait(int) (set, reset string) { return "", "" }
 
+func (Standard) CutValue(string, model.ColumnKind, int) string { return "" }
+
 func StandardTransactionAfter(stmt string, open bool) bool {
 	switch sqltext.FirstKeyword(stmt) {
 	case "BEGIN":

@@ -72,7 +72,17 @@ function base64(bytes: Uint8Array): string {
 
 export const svgBase64 = (svg: string) => base64(new TextEncoder().encode(svg));
 
-export async function pngBase64(svg: string, w: number, h: number, scale = 2): Promise<string> {
+const MAX_SIDE = 16384;
+const MAX_PIXELS = 120e6;
+
+export function pngScale(w: number, h: number, want = 2): number {
+  const scale = Math.min(want, MAX_SIDE / w, MAX_SIDE / h, Math.sqrt(MAX_PIXELS / (w * h)));
+  if (scale < 0.25) throw new Error('The diagram is too big for a PNG — export it as SVG');
+  return scale;
+}
+
+export async function pngBase64(svg: string, w: number, h: number, want = 2): Promise<string> {
+  const scale = pngScale(w, h, want);
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   try {
     const img = new Image();

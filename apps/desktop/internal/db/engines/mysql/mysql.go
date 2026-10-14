@@ -284,3 +284,10 @@ func (Dialect) TypeOf(t string) dialect.Type {
 	}
 	return dialect.Type{}
 }
+
+func (Dialect) CutValue(expr string, kind model.ColumnKind, chars int) string {
+	if kind != model.KindText && kind != model.KindJSON {
+		return ""
+	}
+	return "LEFT(" + expr + ", " + strconv.Itoa(chars) + ")"
+}

@@ -1,4 +1,5 @@
 import dagre from '@dagrejs/dagre';
+import { layered } from './layers';
 import type { Column, Diagram, DiagramTable, Relation } from '../api/wire';
 
 export const ROW_H = 22;
@@ -67,9 +68,10 @@ export function makeCards(d: Diagram, measure: Measure): Map<string, Card> {
   return cards;
 }
 
-export function layout(d: Diagram, cards: Map<string, Card>): Map<string, Point> {
-  const relations = linked(d).filter(r => r.table !== r.refTable);
-  const connected = new Set(relations.flatMap(r => [r.table, r.refTable]));
+export const DAGRE_MAX = 800;
+
+function dagreLayout(connected: Set<string>, relations: Relation[], cards: Map<string, Card>): Map<string, Point> | null {
+  if (connected.size > DAGRE_MAX) return null;
   const g = new dagre.graphlib.Graph();
   g.setGraph({ rankdir: 'LR', nodesep: GAP, ranksep: 120, marginx: 0, marginy: 0 });
   g.setDefaultEdgeLabel(() => ({}));
@@ -78,16 +80,31 @@ export function layout(d: Diagram, cards: Map<string, Card>): Map<string, Point>
     g.setNode(name, { width: c.w, height: c.h });
   }
   for (const r of relations) g.setEdge(r.refTable, r.table);
-  dagre.layout(g);
-
+  try {
+    dagre.layout(g);
+  } catch (err) {
+    if (err instanceof RangeError) return null;
+    throw err;
+  }
   const out = new Map<string, Point>();
-  let bottom = 0;
-  let right = 0;
   for (const name of connected) {
     const n = g.node(name);
     const c = cards.get(name)!;
-    const p = { x: Math.round(n.x - c.w / 2), y: Math.round(n.y - c.h / 2) };
-    out.set(name, p);
+    out.set(name, { x: Math.round(n.x - c.w / 2), y: Math.round(n.y - c.h / 2) });
+  }
+  return out;
+}
+
+export function layout(d: Diagram, cards: Map<string, Card>): Map<string, Point> {
+  const relations = linked(d).filter(r => r.table !== r.refTable);
+  const connected = new Set(relations.flatMap(r => [r.table, r.refTable]));
+  const out =
+    dagreLayout(connected, relations, cards) ??
+    layered([...connected], relations.map(r => [r.refTable, r.table]), cards);
+  let bottom = 0;
+  let right = 0;
+  for (const [name, p] of out) {
+    const c = cards.get(name)!;
     bottom = Math.max(bottom, p.y + c.h);
     right = Math.max(right, p.x + c.w);
   }

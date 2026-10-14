@@ -161,7 +161,12 @@ func (s *Session) readRows(rows *sql.Rows, maxRows int) (model.ResultSet, error)
 			return model.ResultSet{}, err
 		}
 		for i, v := range vals {
-			vals[i] = normalizeValue(v, kinds[i])
+			v = normalizeValue(v, kinds[i])
+			if text, ok := v.(string); ok && len(text) > MaxCellBytes {
+				rs.Cut = append(rs.Cut, model.CutCell{Row: len(rs.Rows), Col: i, Size: len(text)})
+				v = cutText(text, MaxCellBytes)
+			}
+			vals[i] = v
 		}
 		rs.Rows = append(rs.Rows, vals)
 	}

@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-.PHONY: help dev frontend install check test build open clean db-up db-up-all db-down sample-db test-servers \
+.PHONY: help dev frontend install check test build open clean db-up db-up-all db-down sample-db db-stress stress test-servers \
         screenshots release release-minor release-major update-keygen
 
 help:
@@ -10,6 +10,8 @@ help:
 	@printf '  %-14s %s\n' 'make test-servers' 'Run the live-server tests against every one of them'
 	@printf '  %-14s %s\n' 'make db-down' 'Stop them and drop their data'
 	@printf '  %-14s %s\n' 'make sample-db' 'Rebuild dev/sample.db (SQLite)'
+	@printf '  %-14s %s\n' 'make db-stress' 'Load the ~2 GB stress database into the sample PostgreSQL'
+	@printf '  %-14s %s\n' 'make stress' 'Measure the backend on it and run the UI stress walkthrough'
 	@printf '  %-14s %s\n' 'make screenshots' 'Retake the README screenshots'
 	@printf '  %-14s %s\n' 'make release' 'Tag the next patch release (release-minor, release-major, v=x.y.z)'
 
@@ -47,6 +49,17 @@ db-down:
 
 sample-db:
 	rm -f dev/sample.db && sqlite3 dev/sample.db < dev/seed/sqlite.sql
+
+# About 2 GB in a "stress" database on the sample PostgreSQL: huge cells,
+# 5M rows, 1500 columns, 10 000 tables. Then `make stress`.
+db-stress:
+	docker compose -f dev/docker-compose.yml up -d --wait postgres
+	docker compose -f dev/docker-compose.yml exec -T postgres psql -U relay -d postgres -qc "DROP DATABASE IF EXISTS stress" -c "CREATE DATABASE stress"
+	docker compose -f dev/docker-compose.yml exec -T postgres psql -U relay -d stress -q -v ON_ERROR_STOP=1 < dev/stress/postgres.sql
+
+stress:
+	cd apps/desktop && PLUGBOARD_STRESS_PG=127.0.0.1:55432 go test -count=1 -run TestStress -v -timeout 20m ./internal/db/engines/postgres/
+	cd apps/desktop/frontend && PLUGBOARD_STRESS=1 npx playwright test e2e/stress.spec.ts --reporter=line
 
 # The walkthrough in apps/desktop/frontend/e2e drives the UI against a
 # stand-in backend, so the pictures are the same every time and hold no real data.

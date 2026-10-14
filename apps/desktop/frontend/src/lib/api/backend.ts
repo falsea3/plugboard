@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, QueryTabState, RoleSpec, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, CellQuery, QueryTabState, RoleSpec, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -104,6 +104,7 @@ export const api = {
   saveRole: (sessionId: string, from: string, to: RoleSpec) => call(a => a.SaveRole(sessionId, from, to)),
   dropRole: (sessionId: string, id: string) => call(a => a.DropRole(sessionId, id)),
   saveDiagram: (name: string, data: string) => call(a => a.SaveDiagram(name, data)),
+  readCell: (sessionId: string, q: CellQuery) => call(a => a.ReadCell(sessionId, q)),
   editKey: (sessionId: string, db: string, edit: Partial<KeyEdit> & { key: string; op: string }) =>
     call(a => a.EditKey(sessionId, db, { field: '', value: '', score: '', old: '', index: 0, ...edit })),
   listScripts: (connId: string) => call(a => a.ListScripts(connId)),
