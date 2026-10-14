@@ -8,6 +8,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-10-14
+
 ### Fixed
 
 - **Tables with huge values open.** A value longer than 64 KB comes to the grid cut (the database cuts it, so a table of multi-megabyte JSON documents no longer sends gigabytes to the app); the Value panel says how much is shown and *Load whole value* fetches it — then it can be edited. ⇧↵ and the JSON editor load the whole value first, and *Copy as SQL* refuses rows whose values are cut. The SQL editor cuts long values in its results the same way.
