@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltext"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 type Standard struct{}

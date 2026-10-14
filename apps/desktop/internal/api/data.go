@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	goruntime "runtime"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/crash"
-	"github.com/relay-client/plugboard/apps/desktop/internal/store"
+	"github.com/falsea3/plugboard/apps/desktop/internal/crash"
+	"github.com/falsea3/plugboard/apps/desktop/internal/store"
 )
 
 const oldDataDirName = "Relay DB"

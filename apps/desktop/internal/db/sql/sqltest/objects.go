@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func objects(t *testing.T, srv Server, c model.Connection) {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func (s *Session) Objects(ctx context.Context, ks string) ([]model.DBObject, error) {

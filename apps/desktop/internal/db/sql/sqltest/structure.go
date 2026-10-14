@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func structure(t *testing.T, srv Server, c model.Connection) {

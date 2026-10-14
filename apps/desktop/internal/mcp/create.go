@@ -9,11 +9,11 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
-	"github.com/relay-client/plugboard/apps/desktop/internal/store"
+	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/store"
 )
 
 var drivers = []model.Driver{model.Postgres, model.MySQL, model.SQLite, model.ClickHouse, model.Cassandra, model.Redis}

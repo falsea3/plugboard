@@ -8,8 +8,8 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 const (

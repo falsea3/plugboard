@@ -11,10 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 type Store interface {

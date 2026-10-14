@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltext"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 const EditorChunk = 1000

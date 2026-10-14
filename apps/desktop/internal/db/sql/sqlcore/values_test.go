@@ -3,8 +3,8 @@ package sqlcore
 import (
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestNormalizeValue(t *testing.T) {

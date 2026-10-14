@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
+	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
 )
 
 type ApplyError struct {

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltest"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltest"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestRoles(t *testing.T) {

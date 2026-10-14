@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func (s *Connections) FillSecrets(c *model.Connection) error {

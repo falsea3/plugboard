@@ -7,9 +7,9 @@ import (
 
 	ch "github.com/ClickHouse/clickhouse-go/v2"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestTypeOf(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func (s *Session) ApplyChanges(ctx context.Context, cs model.ChangeSet) (int, error) {

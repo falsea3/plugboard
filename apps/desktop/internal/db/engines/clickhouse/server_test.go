@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/clickhouse"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltest"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/clickhouse"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltest"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func open(t *testing.T, readOnly bool) *sqlcore.Session {

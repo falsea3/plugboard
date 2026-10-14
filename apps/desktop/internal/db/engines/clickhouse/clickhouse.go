@@ -13,9 +13,9 @@ import (
 
 	ch "github.com/ClickHouse/clickhouse-go/v2"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltext"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 type Dialect struct{ dialect.Standard }

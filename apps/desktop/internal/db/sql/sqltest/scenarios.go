@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func readOnly(t *testing.T, srv Server, c model.Connection) {

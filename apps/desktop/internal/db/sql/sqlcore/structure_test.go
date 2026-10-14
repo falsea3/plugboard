@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/sqlite"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/sqlite"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestStructureRefusedReadOnly(t *testing.T) {

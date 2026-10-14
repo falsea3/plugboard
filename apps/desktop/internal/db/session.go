@@ -3,9 +3,9 @@ package db
 import (
 	"context"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
-	"github.com/relay-client/plugboard/apps/desktop/internal/sshtunnel"
+	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/sshtunnel"
 )
 
 type Session interface {

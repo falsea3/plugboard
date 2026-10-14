@@ -13,7 +13,7 @@ import (
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	_ "modernc.org/sqlite"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 type fakeStore struct{ list []model.Connection }

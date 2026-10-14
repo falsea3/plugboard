@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func isSystem(ks string) bool {

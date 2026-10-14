@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestEditsEachType(t *testing.T) {

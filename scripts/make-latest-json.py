@@ -2,7 +2,7 @@
 """Write latest.json, the manifest the in-app updater reads.
 
     make-latest-json.py --release-dir release --tag v0.2.0 \
-        --repo relay-client/plugboard --notes-file release-notes.md
+        --repo falsea3/plugboard --notes-file release-notes.md
 
 For each platform it records the URL and SHA-256 of the file that platform
 installs, and the URL of that file's minisign signature, which must sit next

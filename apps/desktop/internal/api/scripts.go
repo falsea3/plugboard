@@ -1,6 +1,6 @@
 package api
 
-import "github.com/relay-client/plugboard/apps/desktop/internal/model"
+import "github.com/falsea3/plugboard/apps/desktop/internal/model"
 
 func (a *App) ListScripts(connID string) ([]string, error) {
 	return a.scripts.List(connID)

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func (s *Session) sortKey(ctx context.Context, schema, table string, keys []model.Column, byName map[string]model.Column) ([]string, error) {

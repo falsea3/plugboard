@@ -5,8 +5,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltext"
 )
 
 var standardReads = []string{

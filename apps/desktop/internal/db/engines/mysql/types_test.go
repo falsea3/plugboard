@@ -3,8 +3,8 @@ package mysql_test
 import (
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/mysql"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/mysql"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestTypeOf(t *testing.T) {

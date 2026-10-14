@@ -4,12 +4,12 @@
 
 **A fast, local-first database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis. No accounts, no cloud sync, no telemetry — just you and your data.**
 
-[![CI](https://github.com/relay-client/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/relay-client/plugboard/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/relay-client/plugboard?sort=semver)](https://github.com/relay-client/plugboard/releases/latest)
+[![CI](https://github.com/falsea3/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/falsea3/plugboard/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/falsea3/plugboard?sort=semver)](https://github.com/falsea3/plugboard/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/relay-client/plugboard/releases/latest)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/falsea3/plugboard/releases/latest)
 
-The database counterpart of [Relay](https://github.com/relay-client/relay), formerly called Relay DB. Built with Go, Svelte 5 and Wails.
+A desktop database client, formerly called Relay DB. Built with Go, Svelte 5 and Wails.
 
 </div>
 
@@ -19,7 +19,7 @@ The database counterpart of [Relay](https://github.com/relay-client/relay), form
 
 ## Download
 
-Grab the latest build from the [releases page](https://github.com/relay-client/plugboard/releases/latest).
+Grab the latest build from the [releases page](https://github.com/falsea3/plugboard/releases/latest).
 
 | Platform | File |
 | --- | --- |
@@ -119,7 +119,7 @@ You do this once; updates the app installs itself don't ask again.
 You need Go 1.26+, Node.js 22.12+ and the [Wails v2](https://wails.io/docs/gettingstarted/installation) CLI.
 
 ```bash
-git clone https://github.com/relay-client/plugboard
+git clone https://github.com/falsea3/plugboard
 cd plugboard
 npm install
 make dev

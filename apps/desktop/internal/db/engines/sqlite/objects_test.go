@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestObjectsAndDDL(t *testing.T) {

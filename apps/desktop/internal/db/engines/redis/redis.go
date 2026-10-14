@@ -13,9 +13,9 @@ import (
 
 	goredis "github.com/redis/go-redis/v9"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 const DefaultPort = 6379

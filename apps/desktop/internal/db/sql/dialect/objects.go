@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func QueryObjects(ctx context.Context, db *sql.DB, schema, query string, args ...any) ([]model.DBObject, error) {

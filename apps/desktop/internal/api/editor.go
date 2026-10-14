@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func (a *App) RunQuery(sessionID, queryID, script string) model.QueryRun {

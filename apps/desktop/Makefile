@@ -11,7 +11,7 @@ VERSION := $(shell git describe --tags --always --dirty 2>/dev/null | sed 's/^v/
 ifeq ($(VERSION),)
 VERSION := dev
 endif
-LDFLAGS := -X 'github.com/relay-client/plugboard/apps/desktop/internal/api.appVersion=$(VERSION)'
+LDFLAGS := -X 'github.com/falsea3/plugboard/apps/desktop/internal/api.appVersion=$(VERSION)'
 
 MAC_APP := $(DESKTOP_DIR)/build/bin/$(APP_NAME).app
 # build-macos builds for this Mac; MAC_ARCH=amd64 (or arm64) builds for the other.

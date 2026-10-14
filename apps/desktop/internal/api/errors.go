@@ -12,8 +12,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 type rule struct {

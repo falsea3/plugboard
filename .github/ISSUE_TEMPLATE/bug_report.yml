@@ -89,5 +89,5 @@ body:
           required: true
         - label: I searched the existing issues and didn't find this one
           required: true
-        - label: This isn't a security problem (those go to [a private report](https://github.com/relay-client/plugboard/security/advisories/new) instead)
+        - label: This isn't a security problem (those go to [a private report](https://github.com/falsea3/plugboard/security/advisories/new) instead)
           required: true

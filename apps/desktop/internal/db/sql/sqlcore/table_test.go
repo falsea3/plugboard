@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func numsSession(t *testing.T) *Session {

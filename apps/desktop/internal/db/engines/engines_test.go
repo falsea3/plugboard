@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/cassandra"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/redis"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqlcore"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/cassandra"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/redis"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqlcore"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestFrontendEngineFixture(t *testing.T) {

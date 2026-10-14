@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltext"
 )
 
 var syntax = sqltext.Syntax{DollarQuotes: true}

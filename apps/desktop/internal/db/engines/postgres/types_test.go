@@ -3,8 +3,8 @@ package postgres_test
 import (
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestTypeOf(t *testing.T) {

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func (a *App) GetSettings() model.Settings {

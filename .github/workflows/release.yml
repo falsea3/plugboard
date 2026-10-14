@@ -128,7 +128,7 @@ jobs:
           set -euo pipefail
           flags=(-platform "${{ matrix.platform }}")
           if [ "$RUNNER_OS" = Windows ]; then flags+=(-nsis); fi
-          mod=github.com/relay-client/plugboard/apps/desktop/internal
+          mod=github.com/falsea3/plugboard/apps/desktop/internal
           wails build "${flags[@]}" -ldflags "-X $mod/api.appVersion=$VERSION -X $mod/update.Repo=$UPDATE_REPOSITORY -X $mod/update.PublicKey=$UPDATE_PUBLIC_KEY"
 
       - name: Package macOS

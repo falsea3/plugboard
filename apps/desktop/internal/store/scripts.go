@@ -11,7 +11,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/apperr"
+	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
 )
 
 const (

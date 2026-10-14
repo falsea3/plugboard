@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/store"
+	"github.com/falsea3/plugboard/apps/desktop/internal/store"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
-	"github.com/relay-client/plugboard/apps/desktop/internal/sshtunnel"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/sshtunnel"
 )
 
 func newTestApp(t *testing.T) *App {

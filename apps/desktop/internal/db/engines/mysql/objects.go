@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 	mysqldriver "github.com/go-sql-driver/mysql"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func (Dialect) ListObjects(ctx context.Context, db *sql.DB, schema string) ([]model.DBObject, error) {

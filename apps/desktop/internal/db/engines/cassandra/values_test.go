@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func TestNormalize(t *testing.T) {

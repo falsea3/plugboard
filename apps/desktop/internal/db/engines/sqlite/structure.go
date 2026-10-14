@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 func (Dialect) TransactionalDDL() bool { return true }

@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 	"github.com/minio/selfupdate"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 	"golang.org/x/mod/semver"
 )
 
 var (
-	Repo      = "relay-client/plugboard"
+	Repo      = "falsea3/plugboard"
 	PublicKey = ""
 )
 

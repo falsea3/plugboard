@@ -5,8 +5,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
-	"github.com/relay-client/plugboard/apps/desktop/internal/sshtunnel"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/sshtunnel"
 )
 
 func OpenTunnel(ctx context.Context, c model.Connection, defaultPort int, opts OpenOptions) (model.Connection, io.Closer, error) {

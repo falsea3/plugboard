@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 	goredis "github.com/redis/go-redis/v9"
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
 )
 
 func TestACLUsers(t *testing.T) {

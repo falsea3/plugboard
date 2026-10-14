@@ -8,8 +8,8 @@ import (
 	goruntime "runtime"
 	"strings"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
-	"github.com/relay-client/plugboard/apps/desktop/internal/update"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/update"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 

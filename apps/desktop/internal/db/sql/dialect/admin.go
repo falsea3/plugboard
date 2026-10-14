@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/model"
+	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
 
 type ServerConfig interface {

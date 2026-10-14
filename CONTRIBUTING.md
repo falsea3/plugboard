@@ -25,7 +25,7 @@ Requirements:
 - Docker, for the sample databases
 
 ```bash
-git clone https://github.com/relay-client/plugboard
+git clone https://github.com/falsea3/plugboard
 cd plugboard
 npm install
 make dev

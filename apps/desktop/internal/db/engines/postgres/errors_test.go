@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/postgres"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/dialect"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/postgres"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/dialect"
 )
 
 func TestSyntaxErrors(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/engines/sqlite"
-	"github.com/relay-client/plugboard/apps/desktop/internal/db/sql/sqltext"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/engines/sqlite"
+	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltext"
 )
 
 func TestSplitBlocksAsTheFrontendDoes(t *testing.T) {
