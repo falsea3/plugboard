@@ -8,6 +8,15 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-15
+
+### Fixed
+
+- **The MCP command on Linux and Windows.** Settings ▸ AI agents gave a path inside the AppImage's temporary mount, which changes on every launch; it now points at the AppImage itself. On Windows the path is quoted so the command works in cmd as well as PowerShell.
+- The roles screen keeps its title and buttons in the list's card instead of a row above it.
+- The SQL editor marks the last run once, beside the line numbers.
+- A Cassandra server that closes the connection while starting up now says so instead of "unable to discover protocol version: EOF".
+
 ## [1.0.0] - 2026-10-15
 
 A new look for the whole app, connection groups, and a home screen that tells you about each database.
