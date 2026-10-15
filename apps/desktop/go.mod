@@ -13,10 +13,10 @@ require (
 	github.com/redis/go-redis/v9 v9.23.0
 	github.com/wailsapp/wails/v2 v2.16.0
 	github.com/zalando/go-keyring v0.2.8
-	golang.org/x/crypto v0.57.0
-	golang.org/x/mod v0.41.0
-	golang.org/x/sys v0.48.0
-	golang.org/x/text v0.42.0
+	golang.org/x/crypto v0.58.0
+	golang.org/x/mod v0.42.0
+	golang.org/x/sys v0.49.0
+	golang.org/x/text v0.43.0
 	gopkg.in/inf.v0 v0.9.1
 	modernc.org/sqlite v1.60.1
 )
@@ -71,9 +71,9 @@ require (
 	go.opentelemetry.io/otel v1.46.0 // indirect
 	go.opentelemetry.io/otel/trace v1.46.0 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	modernc.org/libc v1.77.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
