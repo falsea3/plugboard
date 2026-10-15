@@ -56,7 +56,7 @@
     background: var(--surface);
     color: var(--text-3);
   }
-  .url-row:focus-within { border-style: solid; border-color: var(--accent); }
+  .url-row:focus-within { border-style: solid; border-color: var(--focus-border); }
   .url-input {
     flex: 1;
     min-width: 0;

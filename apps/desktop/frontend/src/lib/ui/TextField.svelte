@@ -45,11 +45,11 @@
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius);
     color: var(--text-4);
-    transition: border-color 0.12s, box-shadow 0.12s;
+    transition: border-color 0.12s;
   }
   .field.outline { background: transparent; border-color: var(--border); }
   .field.sm { height: 30px; border-radius: 9px; }
-  .field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .field:focus-within { border-color: var(--focus-border); }
   .field input { flex: 1; min-width: 0; height: 100%; padding: 0; background: transparent; border: 0; outline: none; color: var(--text); font-size: 13px; }
   .field input::placeholder { color: var(--text-4); }
   .mono input { font-family: var(--font-mono); font-size: 12.5px; }

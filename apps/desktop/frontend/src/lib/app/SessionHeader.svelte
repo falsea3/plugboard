@@ -68,7 +68,7 @@
 <style>
   .confirm-text { margin: 0; color: var(--text-2); line-height: 1.5; }
   .confirm-text strong { color: var(--text); }
-  .top { display: flex; align-items: center; height: 16px; padding-top: 9px; }
+  .top { display: flex; align-items: center; height: 33px; }
   .lights { width: 64px; flex: none; }
   .home { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); }
   .home:hover { background: var(--hover); color: var(--text); }
@@ -77,7 +77,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 12px 8px 0;
+    margin: 6px 8px 0;
     padding: 6px 10px 6px 6px;
     border: 0;
     border-radius: 12px;

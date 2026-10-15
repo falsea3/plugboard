@@ -107,7 +107,7 @@
   .col { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px 0 40px; border-radius: 8px; color: var(--text-soft); font-size: 12.5px; }
   .col:hover { background: var(--hover); color: var(--text); }
   .col.error { color: var(--danger); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .key { flex: none; display: flex; width: 14px; margin-left: -20px; margin-right: 6px; color: var(--warn); }
+  .key { flex: none; display: flex; width: 14px; margin-left: -20px; margin-right: 6px; color: var(--text-3); }
   .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .type { flex: none; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-4); font-size: 10.5px; letter-spacing: 0.03em; text-transform: uppercase; }
 </style>

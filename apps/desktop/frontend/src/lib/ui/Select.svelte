@@ -94,7 +94,7 @@
   {onkeydown}
 >
   <span class="value" class:placeholder={!current}>{current?.label ?? placeholder}</span>
-  <Icon name="chevron-down" size={12} />
+  <Icon name="updown" size={13} />
 </button>
 
 {#if open}
@@ -105,26 +105,23 @@
   .select-button {
     display: flex;
     align-items: center;
-    gap: 6px;
-    height: 28px;
+    gap: 8px;
+    height: 34px;
     width: 100%;
     min-width: 0;
-    padding: 0 8px 0 9px;
-    border: 1px solid var(--border);
+    padding: 0 10px 0 12px;
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius);
     background: var(--surface);
     color: var(--text);
-    font-size: 12.5px;
+    font-size: 13px;
     text-align: left;
     outline: none;
-    transition: border-color 0.12s, box-shadow 0.12s;
+    transition: border-color 0.12s, background 0.12s;
   }
-  .select-button:hover { border-color: var(--text-3); }
-  .select-button:focus-visible, .select-button.open {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
-  }
-  .select-button > :global(.icon) { color: var(--text-3); }
+  .select-button:hover { background: var(--hover); }
+  .select-button:focus-visible, .select-button.open { border-color: var(--focus-border); }
+  .select-button > :global(.icon) { color: var(--text-4); }
   .value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .value.placeholder { color: var(--text-3); }
+  .value.placeholder { color: var(--text-4); }
 </style>

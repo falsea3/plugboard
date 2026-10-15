@@ -88,11 +88,11 @@
 <Modal {title} width={760} {onclose}>
   <div class="host" bind:this={host}></div>
   {#snippet footer()}
-    <span class="status" class:bad={!!error && !readOnly}>{readOnly ? 'Read-only' : error || 'Valid JSON'}</span>
+    <span class="status" class:bad={!!error && !readOnly} class:good={!error && !readOnly}><span class="dot"></span>{readOnly ? 'Read-only' : error || 'Valid JSON'}</span>
     <span style="flex:1"></span>
     {#if !readOnly}
-      <button class="btn" onclick={format} disabled={!!error}>Format</button>
-      <button class="btn" onclick={onclose}>Cancel</button>
+      <button class="btn ghost" onclick={format} disabled={!!error}>Format</button>
+      <button class="btn ghost" onclick={onclose}>Cancel</button>
       <button class="btn primary" onclick={save} disabled={!!error}>Save<span class="kbd on-accent">⌘S</span></button>
     {:else}
       <button class="btn" onclick={onclose}>Close</button>
@@ -101,8 +101,11 @@
 </Modal>
 
 <style>
-  .host { height: min(60vh, 520px); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .host { height: min(60vh, 520px); border: 1px solid var(--hover); border-radius: 12px; background: var(--card); overflow: hidden; }
   .host :global(.cm-editor) { height: 100%; }
   .status { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--text-3); }
+  .status { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; flex: none; border-radius: 50%; background: currentColor; }
+  .status.good { color: var(--ok); }
   .status.bad { color: var(--danger); }
 </style>

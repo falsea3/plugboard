@@ -52,17 +52,6 @@ export function toTSV(columns: string[], rows: CellValue[][]): string {
   return lines.join('\n');
 }
 
-export function calcColumnWidth(name: string, type: string, rows: CellValue[][], index: number, fit = false): number {
-  const charW = 7.4;
-  let longest = name.length + 2 + (type ? 1 + Math.min(type.length, 20) * 0.75 : 0);
-  const sample = Math.min(rows.length, fit ? 20000 : 200);
-  for (let i = 0; i < sample; i++) {
-    const len = formatCell(rows[i][index]).length;
-    if (len > longest) longest = len;
-  }
-  return Math.round(Math.min(Math.max(longest * charW + 24, 64), fit ? 800 : 360));
-}
-
 export function formatBytes(n: number): string {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let v = n;

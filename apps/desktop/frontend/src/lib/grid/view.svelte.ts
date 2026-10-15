@@ -5,6 +5,7 @@ import { startDrag } from '../ui/drag';
 export const ROW_H = 34;
 export const HEADER_H = 40;
 export const OVERSCAN = 8;
+export const ALL_COLUMNS = 80;
 
 export class GridView {
   el = $state<HTMLDivElement>();
@@ -20,9 +21,13 @@ export class GridView {
     return out;
   });
   shownCols = $derived.by(() => {
-    const from = this.left - this.width;
-    const to = this.left + 2 * this.width;
     const out: number[] = [];
+    if (this.widths.length <= ALL_COLUMNS) {
+      for (let c = 0; c < this.widths.length; c++) out.push(c);
+      return out;
+    }
+    const from = this.left - 2 * this.width;
+    const to = this.left + 3 * this.width;
     for (let c = 0; c < this.widths.length; c++) {
       if (this.starts[c + 1] > from && this.starts[c] < to) out.push(c);
     }

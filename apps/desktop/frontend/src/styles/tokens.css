@@ -43,6 +43,7 @@
   --cell-edited:   #2a2312;
   --gutter:        #3e3e44;
   --well:          #111113;
+  --focus-border:  #4a4a50;
   --stmt-bg:       rgba(94, 92, 230, 0.07);
   --stmt-head:     rgba(94, 92, 230, 0.13);
   --stmt-num:      #8a88e8;
@@ -110,6 +111,7 @@
   --cell-edited:   #fbf1dc;
   --gutter:        #b4b4bc;
   --well:          #f4f4f6;
+  --focus-border:  #a8a8b2;
   --stmt-bg:       rgba(85, 82, 224, 0.04);
   --stmt-head:     rgba(85, 82, 224, 0.08);
   --stmt-num:      #6b68e0;

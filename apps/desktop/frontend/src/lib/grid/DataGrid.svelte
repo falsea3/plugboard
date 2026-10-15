@@ -1,7 +1,8 @@
 <script lang="ts">
   import { tick, untrack } from 'svelte';
   import type { CellValue, ResultColumn } from '../api/wire';
-  import { copyText, calcColumnWidth, toTSV } from '../ui/format';
+  import { copyText, toTSV } from '../ui/format';
+  import { columnWidth } from './widths';
   import { copyToClipboard } from '../ui/clipboard';
   import { gridMenuItems, inCellEditor, keyAction, type GridEditing, type KeyAction, type MenuAt, type MenuItem } from './grid';
   import { GridSelection } from './selection.svelte';
@@ -61,10 +62,10 @@
 
   let shapeKey = '';
   $effect.pre(() => {
-    const key = columns.map(c => c.name + ':' + c.type).join('|');
+    const key = columns.map(c => c.name + ':' + c.type).join('|') + '#' + keyColumns.join(',');
     if (key !== shapeKey) {
       shapeKey = key;
-      view.widths = columns.map((c, i) => calcColumnWidth(c.name, c.type, rows, i));
+      view.widths = columns.map((c, i) => columnWidth(c, rows, i, { key: keyColumns?.includes(c.name) }));
       sel.clear();
     }
   });
@@ -198,7 +199,7 @@
 
   function autoFit(i: number) {
     const c = columns[i];
-    view.widths[i] = calcColumnWidth(c.name, c.type, rows, i, true);
+    view.widths[i] = columnWidth(c, rows, i, { fit: true, key: keyColumns?.includes(c.name) });
   }
 </script>
 

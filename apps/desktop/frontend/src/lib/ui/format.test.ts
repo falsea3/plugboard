@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cellKind, connectionTarget, calcColumnWidth, formatBytes, formatCell, formatDuration, toTSV } from './format';
+import { cellKind, connectionTarget, formatBytes, formatCell, formatDuration, toTSV } from './format';
 import { emptyConnection, mysql, postgres, sqlite } from '../engines';
 
 describe('formatCell', () => {
@@ -45,26 +45,6 @@ describe('formatDuration', () => {
     expect(formatDuration(0.5)).toBe('0.50 ms');
     expect(formatDuration(12.4)).toBe('12 ms');
     expect(formatDuration(2500)).toBe('2.50 s');
-  });
-});
-
-describe('calcColumnWidth', () => {
-  it('stays within bounds', () => {
-    expect(calcColumnWidth('id', '', [[1]], 0)).toBe(64);
-    expect(calcColumnWidth('body', 'text', [['x'.repeat(1000)]], 0)).toBe(360);
-  });
-
-  it('fits a column to everything loaded, wider or narrower, and stays put when fitted again', () => {
-    const rows = [...Array.from({ length: 300 }, () => ['a']), ['x'.repeat(60)]];
-    const fitted = calcColumnWidth('note', '', rows, 0, true);
-    expect(fitted).toBeGreaterThan(calcColumnWidth('note', '', rows, 0));
-    expect(fitted).toBe(calcColumnWidth('note', '', rows, 0, true));
-    expect(calcColumnWidth('id', '', [['a']], 0, true)).toBe(64);
-    expect(calcColumnWidth('body', '', [['x'.repeat(5000)]], 0, true)).toBe(800);
-  });
-
-  it('leaves room for the type next to the name in the header', () => {
-    expect(calcColumnWidth('is_active', 'boolean', [[false]], 0)).toBeGreaterThan(calcColumnWidth('is_active', '', [[false]], 0) + 40);
   });
 });
 

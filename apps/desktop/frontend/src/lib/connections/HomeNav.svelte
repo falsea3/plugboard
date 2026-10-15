@@ -59,11 +59,11 @@
 
 <style>
   .nav { width: 232px; flex: none; display: flex; flex-direction: column; margin: 8px 0 8px 8px; border: 1px solid var(--hover); border-radius: var(--radius-xl); background: var(--elevated); }
-  .top { display: flex; align-items: center; gap: 8px; height: 16px; padding: 9px 10px 0 0; }
+  .top { display: flex; align-items: center; gap: 8px; height: 33px; padding: 0 10px 0 0; }
   .lights { width: 64px; flex: none; }
   .back { min-width: 0; display: flex; align-items: center; gap: 4px; height: 26px; margin-left: auto; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .back:hover { background: var(--hover); color: var(--text); }
-  h1 { margin: 0; padding: 26px 16px 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  h1 { margin: 0; padding: 22px 16px 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
   nav { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 8px 0; }
   .item { width: 100%; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-soft); text-align: left; }
   .item:hover { background: var(--hover); color: var(--text); }

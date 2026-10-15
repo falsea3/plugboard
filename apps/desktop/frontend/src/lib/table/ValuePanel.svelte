@@ -130,7 +130,7 @@
   .chip + .chip { text-transform: none; }
   pre, .editor { flex: none; height: 120px; margin: 12px 0 0; padding: 10px 12px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); font: 12.5px/1.5 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; }
   .editor { resize: vertical; outline: none; }
-  .editor:focus { border-color: var(--accent); }
+  .editor:focus { border-color: var(--focus-border); }
   pre.null, .editor.null::placeholder { color: var(--cell-null); font-style: italic; }
   .problem { flex: none; margin: 6px 0 0; color: var(--danger); font-size: 12px; }
   .was { flex: none; margin: 6px 0 0; overflow: hidden; color: var(--text-4); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }

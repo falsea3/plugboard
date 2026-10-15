@@ -49,11 +49,11 @@
   .sql-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow: auto; }
   .sql-list pre {
     margin: 0;
-    padding: 8px 10px;
-    border-radius: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border-subtle);
-    border-left: 3px solid var(--accent);
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    background: var(--well);
+    border: 1px solid var(--hover);
+    box-shadow: inset 2px 0 0 var(--accent);
     font-family: var(--font-mono);
     font-size: 12px;
     white-space: pre-wrap;
@@ -61,5 +61,5 @@
     user-select: text;
     -webkit-user-select: text;
   }
-  .sql-list.prod pre { border-left-color: var(--env-prod); }
+  .sql-list.prod pre { box-shadow: inset 2px 0 0 var(--env-prod); }
 </style>

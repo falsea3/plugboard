@@ -5,7 +5,7 @@ import { statementRanges } from '../sql/statements';
 
 export type CursorInfo = { line: number; col: number; statement: number; statements: number };
 
-const MAX_DOC = 500_000;
+const MAX_DOC = 200_000;
 
 export function statementOf(script: string, pos: number, syntax: SqlSyntax): { from: number; to: number; index: number; count: number } | null {
   const ranges = statementRanges(script, syntax);

@@ -95,7 +95,7 @@
   .th:hover .resizer { background: linear-gradient(to right, transparent 3px, var(--border) 3px, var(--border) 5px, transparent 5px); }
   .th-name, .th-type { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .th-type { flex-shrink: 100; color: var(--text-4); font-size: 10.5px; font-weight: 400; letter-spacing: 0.03em; text-transform: uppercase; }
-  .pk { color: var(--warn); display: flex; }
+  .pk { color: var(--text-3); display: flex; }
   .sorted { display: flex; flex: none; color: var(--accent-text); }
   .resizer {
     position: absolute;

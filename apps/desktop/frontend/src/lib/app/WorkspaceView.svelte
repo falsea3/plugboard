@@ -94,7 +94,7 @@
 
 <style>
   .workspace { position: absolute; inset: 0; display: flex; background: var(--bg); }
-  .workspace.hidden, .pane.hidden { visibility: hidden; pointer-events: none; }
+  .workspace.hidden, .pane.hidden { visibility: hidden; pointer-events: none; content-visibility: hidden; }
   .side { flex: none; min-width: 0; padding: 8px 0 8px 8px; }
   .side.floating { position: absolute; top: 0; bottom: 0; left: 0; z-index: 40; padding-right: 8px; transform: translateX(-100%); transition: transform 0.18s ease; }
   .side.floating.peek { transform: none; }

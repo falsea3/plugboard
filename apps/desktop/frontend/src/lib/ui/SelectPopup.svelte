@@ -127,9 +127,9 @@
         onmousemove={() => !o.disabled && (active = i)}
         onclick={() => !o.disabled && onpick(o)}
       >
-        <span class="check">{#if o.value === value}<Icon name="check-mark" size={12} />{/if}</span>
         <span class="label">{o.label}</span>
         {#if o.hint}<span class="hint">{o.hint}</span>{/if}
+        <span class="check">{#if o.value === value}<Icon name="check-mark" size={12} />{/if}</span>
       </div>
     {:else}
       <div class="empty">Nothing matches “{query}”</div>
@@ -145,43 +145,24 @@
     display: flex;
     flex-direction: column;
     max-width: 360px;
-    padding: 4px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    padding: 6px;
+    border: 1px solid var(--hover);
+    border-radius: 12px;
     background: var(--elevated);
-    box-shadow: var(--shadow-modal);
+    box-shadow: var(--shadow-pop);
     animation: drop 0.1s ease-out;
   }
   .popup.above { transform: translateY(-100%); animation-name: rise; }
-  .search {
-    flex: none;
-    height: 26px;
-    margin-bottom: 4px;
-    padding: 0 8px;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    background: var(--surface);
-    font-size: 12px;
-    outline: none;
-  }
-  .search:focus { border-color: var(--accent); }
+  .search { flex: none; height: 30px; margin-bottom: 6px; padding: 0 10px; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--surface); font-size: 12.5px; outline: none; }
+  .search:focus { border-color: var(--focus-border); }
   .options { overflow-y: auto; outline: none; }
-  .option {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 26px;
-    padding: 0 10px 0 4px;
-    border-radius: 5px;
-    font-size: 12.5px;
-    white-space: nowrap;
-  }
-  .option.active { background: var(--accent); color: var(--on-accent); }
-  .option.disabled, .option.muted { color: var(--text-3); }
-  .check { flex: none; display: inline-flex; width: 14px; justify-content: center; }
+  .option { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px 0 10px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
+  .option.active { background: var(--hover); }
+  .option.chosen { color: var(--accent-text); }
+  .option.disabled, .option.muted { color: var(--text-4); }
+  .check { flex: none; display: inline-flex; width: 14px; justify-content: center; color: var(--accent-text); }
   .label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-  .hint { color: var(--text-3); font-size: 11.5px; }
-  .option.active .hint { color: inherit; opacity: 0.8; }
+  .hint { color: var(--text-4); font-size: 12px; }
   .empty { padding: 6px 10px; color: var(--text-3); font-size: 12px; }
   @keyframes drop { from { opacity: 0; transform: translateY(-3px); } }
   @keyframes rise { from { opacity: 0; transform: translateY(calc(-100% + 3px)); } }

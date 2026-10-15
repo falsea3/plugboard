@@ -29,11 +29,11 @@
   .confirm-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow: auto; }
   .confirm-list pre {
     margin: 0;
-    padding: 8px 10px;
-    border-radius: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border-subtle);
-    border-left: 3px solid var(--env-prod);
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    background: var(--well);
+    border: 1px solid var(--hover);
+    box-shadow: inset 2px 0 0 var(--env-prod);
     font-family: var(--font-mono);
     font-size: 12px;
     white-space: pre-wrap;

@@ -51,7 +51,7 @@
 <style>
   .where { flex: none; margin-top: 8px; }
   .field { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 4px 0 12px; border: 1px solid var(--hover); border-radius: var(--radius); background: var(--surface); }
-  .field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .field:focus-within { border-color: var(--focus-border); }
   .kw { flex: none; font-family: var(--font-mono); font-size: 12.5px; color: var(--text-4); }
   .field.active .kw { color: var(--accent-text); }
   input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: none; background: transparent; color: var(--text); font-family: var(--font-mono); font-size: 12.5px; }

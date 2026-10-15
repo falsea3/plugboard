@@ -67,7 +67,7 @@
     <span style="flex:1"></span>
     <button class="btn ghost" onclick={toggleWrap}>{wrap ? 'No wrap' : 'Wrap lines'}</button>
     {#if !readOnly}
-      <button class="btn" onclick={onclose}>Cancel</button>
+      <button class="btn ghost" onclick={onclose}>Cancel</button>
       <button class="btn primary" onclick={save}>Save<span class="kbd on-accent">⌘S</span></button>
     {:else}
       <button class="btn" onclick={onclose}>Close</button>
@@ -76,7 +76,7 @@
 </Modal>
 
 <style>
-  .host { height: min(60vh, 520px); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .host { height: min(60vh, 520px); border: 1px solid var(--hover); border-radius: 12px; background: var(--card); overflow: hidden; }
   .host :global(.cm-editor) { height: 100%; }
   .host :global(.cm-scroller) { font-family: var(--font-mono); }
   .status { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--text-3); }
