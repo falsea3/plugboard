@@ -38,4 +38,5 @@ export const clickhouse: Engine = {
   databaseHint: 'Optional — defaults to the user’s database',
   userHint: '',
   sqlDialect: ClickHouseSQL,
+  formatAs: 'clickhouse',
 };

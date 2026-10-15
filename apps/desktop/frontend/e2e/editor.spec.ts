@@ -16,7 +16,7 @@ test('keeps Run all after running the statement under the cursor', async ({ page
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1;\nselect 2;');
   await page.keyboard.press('ControlOrMeta+Enter');
-  await expect(page.locator('.cm-ran')).toHaveText('select 2;');
+  await expect(page.locator('.cm-lineNumbers .cm-ran')).toHaveText('2');
   await expect(page.getByRole('button', { name: 'Run all' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Run selection' })).toHaveCount(0);
 });
@@ -27,15 +27,15 @@ test('marks what the last run ran, whatever ran before', async ({ page }) => {
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1;\nselect 2;\nselect 3;');
   await page.getByRole('button', { name: 'Run all' }).click();
-  await expect(page.locator('.cm-ran')).toHaveCount(3);
+  await expect(page.locator('.cm-lineNumbers .cm-ran')).toHaveCount(3);
   await page.locator('.cm-content').click();
   await page.keyboard.press('ControlOrMeta+Home');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Shift+End');
-  await expect(page.locator('.cm-ran')).toHaveCount(0);
+  await expect(page.locator('.cm-lineNumbers .cm-ran')).toHaveCount(0);
   await page.getByRole('button', { name: 'Run selection' }).click();
-  await expect(page.locator('.cm-ran')).toHaveCount(1);
-  await expect(page.locator('.cm-ran')).toHaveText('select 2;');
+  await expect(page.locator('.cm-lineNumbers .cm-ran')).toHaveCount(1);
+  await expect(page.locator('.cm-lineNumbers .cm-ran')).toHaveText('2');
 });
 
 test('underlines what the server can\'t parse', async ({ page }) => {

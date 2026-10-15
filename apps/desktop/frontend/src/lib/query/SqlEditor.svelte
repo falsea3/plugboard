@@ -1,32 +1,35 @@
 <script lang="ts" module>
-  import { EditorState, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state';
-  import { Decoration, EditorView, type DecorationSet } from '@codemirror/view';
+  import { EditorState, RangeSet, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state';
+  import { EditorView, GutterMarker, gutterLineClass } from '@codemirror/view';
   import { forEachDiagnostic, setDiagnostics, type Diagnostic } from '@codemirror/lint';
   import type { Problem } from '../sql/problems';
 
   const setRan = StateEffect.define<{ from: number; to: number }>();
-  const ranLine = Decoration.line({ class: 'cm-ran' });
+  class RanMark extends GutterMarker {
+    elementClass = 'cm-ran';
+  }
+  const ranMark = new RanMark();
 
-  function ranLines(state: EditorState, from: number, to: number): DecorationSet {
-    if (from >= to) return Decoration.none;
-    const lines = new RangeSetBuilder<Decoration>();
+  function ranLines(state: EditorState, from: number, to: number): RangeSet<GutterMarker> {
+    if (from >= to) return RangeSet.empty;
+    const lines = new RangeSetBuilder<GutterMarker>();
     for (let pos = from; pos <= to; ) {
       const line = state.doc.lineAt(pos);
-      lines.add(line.from, line.from, ranLine);
+      lines.add(line.from, line.from, ranMark);
       pos = line.to + 1;
     }
     return lines.finish();
   }
 
-  const ranStatement = StateField.define<DecorationSet>({
-    create: () => Decoration.none,
+  const ranStatement = StateField.define<RangeSet<GutterMarker>>({
+    create: () => RangeSet.empty,
     update(marks, tr) {
       for (const e of tr.effects) {
         if (e.is(setRan)) return ranLines(tr.state, e.value.from, e.value.to);
       }
-      return tr.docChanged || tr.selection ? Decoration.none : marks;
+      return tr.docChanged || tr.selection ? RangeSet.empty : marks;
     },
-    provide: f => EditorView.decorations.from(f),
+    provide: f => gutterLineClass.from(f),
   });
 
   export function showRan(view: EditorView, from: number, to: number) {
@@ -44,7 +47,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Compartment, Prec } from '@codemirror/state';
-  import { drawSelection, tooltips, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view';
+  import { drawSelection, tooltips, keymap, lineNumbers, placeholder } from '@codemirror/view';
+  import { currentStatement, type CursorInfo } from './statementMark';
   import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
   import { bracketMatching, indentOnInput, syntaxHighlighting } from '@codemirror/language';
   import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
@@ -63,6 +67,7 @@
     defaultSchema = '',
     check,
     onrun,
+    oncursor,
     editor = $bindable<EditorView | undefined>(),
     hasSelection = $bindable(false),
   }: {
@@ -74,6 +79,7 @@
     defaultSchema?: string;
     check?: (doc: string) => Promise<Problem[]>;
     onrun: (all: boolean) => void;
+    oncursor?: (info: CursorInfo) => void;
     editor?: EditorView;
     hasSelection?: boolean;
   } = $props();
@@ -101,8 +107,7 @@
         extensions: [
           tooltips({ parent: document.body }),
           lineNumbers(),
-          highlightActiveLineGutter(),
-          highlightActiveLine(),
+          currentStatement(syntax, info => oncursor?.(info)),
           drawSelection(),
           ranStatement,
           history(),

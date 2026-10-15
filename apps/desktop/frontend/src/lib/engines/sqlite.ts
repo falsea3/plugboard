@@ -18,4 +18,5 @@ export const sqlite: Engine = {
   databaseHint: '',
   userHint: '',
   sqlDialect: SQLite,
+  formatAs: 'sqlite',
 };

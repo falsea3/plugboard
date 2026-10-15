@@ -13,6 +13,9 @@
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import { startDrag } from '../ui/drag';
+  import { isDirty } from '../scripts/names';
+  import { formatSql } from './format';
+  import type { CursorInfo } from './statementMark';
 
   let { ws, tab }: { ws: Workspace; tab: QueryTab } = $props();
 
@@ -30,7 +33,9 @@
   let elapsed = $state(0);
   let queryId = '';
   let resultIndex = $state(0);
-  let editorHeight = $state(260);
+  let editorHeight = $state(330);
+  let cursor = $state<CursorInfo | null>(null);
+  const formatAs = engine(session.connection.driver).formatAs;
 
   $effect(() => untrack(() => ws.scripts.track(tab.id, () => editor?.state.doc.toString() ?? tab.sql)));
 
@@ -110,6 +115,21 @@
     if (queryId) api.cancelQuery(queryId);
   }
 
+  function format() {
+    if (!editor || !formatAs) return;
+    const state = editor.state;
+    const sel = state.selection.main;
+    const from = sel.empty ? 0 : sel.from;
+    const to = sel.empty ? state.doc.length : sel.to;
+    try {
+      const text = formatSql(state.sliceDoc(from, to), formatAs);
+      editor.dispatch({ changes: { from, to, insert: text } });
+    } catch (err) {
+      app.notify(err);
+    }
+    editor.focus();
+  }
+
   function startResize(e: PointerEvent) {
     const h0 = editorHeight;
     startDrag(e, 'row-resize', (_, dy) => (editorHeight = Math.max(80, Math.min(window.innerHeight - 220, h0 + dy))));
@@ -118,28 +138,35 @@
 </script>
 
 <div class="view">
-  <div class="toolbar">
-    {#if running}
-      <button class="btn sm" onclick={cancel}><Icon name="stop" size={11} />Stop</button>
-    {:else}
-      <button class="btn sm primary" onclick={() => execute(false)} title={hasSelection ? 'Run the selected text (⌘↵)' : 'Run the statement under the cursor (⌘↵)'}><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run'}</button>
-      {#if !hasSelection}<button class="btn sm" onclick={() => execute(true)} title="Run all (⇧⌘↵)">Run all</button>{/if}
-    {/if}
-    <span class="faint small"><span class="kbd">⌘↵</span> statement · <span class="kbd">⇧⌘↵</span> all</span>
-    {#if ws.readOnly}
-      <span style="flex:1"></span>
-      <span class="ro-chip" title="Writes are refused in this session. Switch it in the sidebar."><Icon name="lock" size={11} />Read-only</span>
-    {/if}
-  </div>
-
-  <div class="editor" style:height="{editorHeight}px">
-    <SqlEditor value={tab.sql} onchange={sql => ws.saveQuery(tab.id, sql)} bind:editor bind:hasSelection {dialect} {syntax} check={checkSyntax} tables={tableNames} defaultSchema={ws.schema} onrun={execute} />
-  </div>
+  <section class="editor-card" aria-label="Editor" style:height="{editorHeight}px">
+    <div class="toolbar">
+      {#if running}
+        <button class="btn sm stop" onclick={cancel}><Icon name="stop" size={11} />Stop</button>
+      {:else}
+        <button class="btn sm primary run" onclick={() => execute(false)} title={hasSelection ? 'Run the selected text' : 'Run the statement under the cursor'}><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run'}<span class="kbd">⌘↵</span></button>
+        {#if !hasSelection}<button class="btn sm all" onclick={() => execute(true)}>Run all<span class="kbd">⇧⌘↵</span></button>{/if}
+      {/if}
+      {#if formatAs}<button class="btn sm ghost" onclick={format} title={hasSelection ? 'Format the selection' : 'Format the script'}>Format</button>{/if}
+      <span class="space"></span>
+      {#if ws.readOnly}<span class="ro-chip" title="Writes are refused in this session. Switch it in the sidebar."><Icon name="lock" size={11} />Read only</span>{/if}
+      <span class="saved">{#if tab.script}saved as <span class="name">{tab.script}</span>{isDirty(tab) ? ' · edited' : ''}{:else}not saved{/if}</span>
+    </div>
+    <div class="editor">
+      <SqlEditor value={tab.sql} onchange={sql => ws.saveQuery(tab.id, sql)} bind:editor bind:hasSelection {dialect} {syntax} check={checkSyntax} tables={tableNames} defaultSchema={ws.schema} onrun={execute} oncursor={c => (cursor = c)} />
+    </div>
+  </section>
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="splitter" onpointerdown={startResize}></div>
 
   <QueryResults sessionId={session.sessionId} tabId={tab.id} bind:run {running} {elapsed} bind:resultIndex />
+
+  <footer class="status">
+    {#if cursor}<span class="chip">Ln {cursor.line}, Col {cursor.col}</span>{/if}
+    {#if cursor && cursor.statements > 1 && cursor.statement > 0}<span class="chip">statement {cursor.statement} of {cursor.statements}</span>{/if}
+    <span class="space"></span>
+    <span>⌘S save script</span>
+  </footer>
 </div>
 
 {#if pending}
@@ -154,39 +181,19 @@
 
 <style>
   .view { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .toolbar {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 10px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-  .small { font-size: 12px; margin-left: 6px; white-space: nowrap; }
-  .ro-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    height: 20px;
-    padding: 0 8px;
-    border-radius: 5px;
-    color: var(--text-2);
-    background: var(--elevated);
-    font-size: 11.5px;
-    font-weight: 550;
-  }
-  .editor { flex: none; min-height: 80px; }
-  .splitter {
-    flex: none;
-    height: 5px;
-    margin-top: -2px;
-    margin-bottom: -3px;
-    position: relative;
-    z-index: 3;
-    cursor: row-resize;
-    border-top: 1px solid var(--border);
-  }
-  .splitter:hover { border-top: 2px solid var(--accent); }
+  .editor-card { flex: none; min-height: 120px; margin-top: 6px; display: flex; flex-direction: column; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
+  .toolbar { flex: none; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 10px; border-bottom: 1px solid var(--grid-line); }
+  .toolbar .btn.sm { height: 30px; border-radius: 9px; padding: 0 12px; gap: 7px; }
+  .run .kbd { padding: 0; background: transparent; color: inherit; opacity: 0.8; }
+  .all { background: var(--border-subtle); color: var(--text-soft); }
+  .all .kbd { padding: 0; background: transparent; color: var(--text-4); }
+  .space { flex: 1; }
+  .saved { overflow: hidden; color: var(--text-4); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+  .saved .name { color: var(--text-2); }
+  .ro-chip { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 6px; background: var(--hover); color: var(--text-2); font-size: 12px; }
+  .editor { flex: 1; min-height: 0; }
+  .splitter { flex: none; height: 10px; cursor: row-resize; position: relative; }
+  .splitter:hover::after { content: ''; position: absolute; left: 40%; right: 40%; top: 4px; height: 2px; border-radius: 1px; background: var(--accent); }
+  .status { flex: none; display: flex; align-items: center; gap: 8px; height: 30px; margin-top: 8px; font-size: 12px; color: var(--text-3); }
+  .chip { padding: 2px 8px; border-radius: 6px; background: var(--surface); }
 </style>

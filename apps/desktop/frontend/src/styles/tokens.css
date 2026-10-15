@@ -40,6 +40,10 @@
   --row-current:   #17172a;
   --tree-selected: #22223a;
   --cell-edited:   #2a2312;
+  --gutter:        #3e3e44;
+  --stmt-bg:       #16162a;
+  --stmt-head:     #1e1e3a;
+  --stmt-num:      #8a88e8;
   --cell-null:     #5c5c63;
   --cell-number:   #a6a6ac;
   --cell-bool:     #b39dff;
@@ -101,6 +105,10 @@
   --row-current:   #f3f3fd;
   --tree-selected: #ebebfc;
   --cell-edited:   #fbf1dc;
+  --gutter:        #b4b4bc;
+  --stmt-bg:       #f5f5fe;
+  --stmt-head:     #ebebfc;
+  --stmt-num:      #6b68e0;
   --cell-null:     #9a9aa3;
   --cell-number:   #0d7563;
   --cell-bool:     #7443cc;

@@ -18,4 +18,5 @@ export interface Engine {
   databaseHint: string;
   userHint: string;
   sqlDialect?: SQLDialect;
+  formatAs?: 'postgresql' | 'mysql' | 'sqlite' | 'clickhouse' | 'sql';
 }

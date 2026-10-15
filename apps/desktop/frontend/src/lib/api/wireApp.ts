@@ -98,7 +98,7 @@ export interface GoApp {
   RoleSQL(sessionId: string, from: string, to: RoleSpec): Promise<string[]>;
   SaveRole(sessionId: string, from: string, to: RoleSpec): Promise<string>;
   DropRole(sessionId: string, id: string): Promise<void>;
-  SaveDiagram(name: string, data: string): Promise<string>;
+  SaveExport(name: string, data: string): Promise<string>;
   ReadCell(sessionId: string, q: CellQuery): Promise<string>;
   ListScripts(connId: string): Promise<string[]>;
   ReadScript(connId: string, name: string): Promise<string>;

@@ -23,4 +23,5 @@ export const postgres: Engine = {
   databaseHint: 'Optional — defaults to postgres',
   userHint: '',
   sqlDialect: PostgreSQL,
+  formatAs: 'postgresql',
 };

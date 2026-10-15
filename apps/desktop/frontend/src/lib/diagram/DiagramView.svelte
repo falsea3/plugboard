@@ -59,7 +59,7 @@
     try {
       const { svg, w, h } = diagramSvg(cards, pos, links, themePalette());
       const data = format === 'svg' ? svgBase64(svg) : await pngBase64(svg, w, h);
-      const path = await api.saveDiagram(`${tab.schema}-diagram.${format}`, data);
+      const path = await api.saveExport(`${tab.schema}-diagram.${format}`, data);
       if (path) app.notify(`Saved ${path}`, 'info');
     } catch (err) {
       app.notify(err);

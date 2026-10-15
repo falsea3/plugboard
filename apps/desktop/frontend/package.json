@@ -28,6 +28,7 @@
     "@sveltejs/vite-plugin-svelte": "^5.1.1",
     "codemirror": "^6.0.2",
     "simple-icons": "^16.34.0",
+    "sql-formatter": "15.9.0",
     "svelte": "^5.57.1",
     "vite": "^6.4.4"
   },

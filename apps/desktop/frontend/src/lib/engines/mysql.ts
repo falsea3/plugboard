@@ -25,4 +25,5 @@ export const mysql: Engine = {
   databaseHint: 'Optional',
   userHint: '',
   sqlDialect: MySQL,
+  formatAs: 'mysql',
 };

@@ -138,7 +138,7 @@ test('shows that a table and a query are still loading', async ({ page }) => {
   await page.getByRole('button', { name: /^New query/ }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1');
-  await page.getByRole('button', { name: 'Run', exact: true }).click();
+  await page.getByRole('button', { name: /^Run ⌘/ }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Running…' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Stop' })).toBeVisible();
   await expect(page.getByRole('grid').getByText('1284390.50')).toBeVisible();
@@ -208,7 +208,7 @@ test('keeps unfolded tables showing their columns after a schema change in the e
   await page.getByRole('button', { name: /^New query/ }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('alter table customers add column nickname text');
-  await page.getByRole('button', { name: 'Run', exact: true }).click();
+  await page.getByRole('button', { name: /^Run ⌘/ }).click();
   await expect(cols.getByText('Loading columns…')).toHaveCount(0);
   await expect(cols.getByText('email', { exact: true })).toBeVisible();
 });

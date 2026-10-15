@@ -1,3 +1,4 @@
+import { textBase64 } from '../ui/encode';
 import { bounds, HEAD_H, manyMark, oneMark, ROW_H, type Card, type Link, type Point } from './layout';
 
 export type Palette = { bg: string; surface: string; head: string; border: string; text: string; faint: string; line: string; mono: string; ui: string };
@@ -64,13 +65,7 @@ export function themePalette(): Palette {
   };
 }
 
-function base64(bytes: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(s);
-}
-
-export const svgBase64 = (svg: string) => base64(new TextEncoder().encode(svg));
+export const svgBase64 = textBase64;
 
 const MAX_SIDE = 16384;
 const MAX_PIXELS = 120e6;

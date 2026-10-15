@@ -35,4 +35,5 @@ export const cassandra: Engine = {
   databaseHint: 'Optional — keyspace to open',
   userHint: 'Optional — for PasswordAuthenticator',
   sqlDialect: CQL,
+  formatAs: 'sql',
 };

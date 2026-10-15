@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { api, type CellValue, type QueryRun, type ResultColumn } from '../api/backend';
+  import { api, type QueryRun } from '../api/backend';
   import { appendCut, cutCells, cutKey, cutNote, markCut } from '../table/cut';
   import { app } from '../app/app.svelte';
-  import { formatCount, formatDuration } from '../ui/format';
+  import { formatCount, formatDuration, toTSV } from '../ui/format';
+  import { copyToClipboard } from '../ui/clipboard';
+  import { textBase64 } from '../ui/encode';
+  import { toCSV } from './csv';
   import DataGrid from '../grid/DataGrid.svelte';
-  import ValueBar from '../grid/ValueBar.svelte';
   import ValueEditor, { type ValueEdit } from '../table/ValueEditor.svelte';
   import { looksLikeJSON } from '../json/text';
   import Icon from '../ui/Icon.svelte';
@@ -20,7 +22,6 @@
     resultIndex = $bindable(0),
   }: { sessionId: string; tabId: string; run: QueryRun | null; running: boolean; elapsed: number; resultIndex?: number } = $props();
 
-  let selected = $state<{ value: CellValue; column: ResultColumn } | null>(null);
   let grid = $state<DataGrid>();
   let viewing = $state<ValueEdit | null>(null);
 
@@ -67,18 +68,54 @@
     return r.rolledBack ? 'Query cancelled. The connection was reset, so the open transaction was rolled back.' : 'Query cancelled.';
   }
 
-  function summary(): string {
-    if (!run) return '';
-    const total = run.results.reduce((a, r) => a + r.durationMs, 0);
-    if (current?.hasRows) {
-      const n = current.rows.length.toLocaleString('en-US');
-      const rows = current.hasMore ? `${n}+ rows` : current.truncated ? `first ${n} rows` : formatCount(current.rows.length, 'row');
-      return `${rows} · ${formatDuration(total)}`;
+  function rowsChip(): string {
+    if (!current) return '';
+    if (!current.hasRows) return `${formatCount(current.rowsAffected, 'row')} affected`;
+    const n = current.rows.length.toLocaleString('en-US');
+    return current.hasMore ? `${n}+ rows` : current.truncated ? `first ${n} rows` : formatCount(current.rows.length, 'row');
+  }
+
+  const total = $derived(run ? run.results.reduce((a, r) => a + r.durationMs, 0) : 0);
+
+  function copyAll() {
+    if (current?.hasRows) void copyToClipboard(toTSV(current.columns.map(c => c.name), current.rows));
+  }
+
+  async function exportCsv() {
+    if (!current?.hasRows) return;
+    try {
+      const path = await api.saveExport('result.csv', textBase64(toCSV(current.columns.map(c => c.name), current.rows)));
+      if (path) app.notify(`Saved ${path}`, 'info');
+    } catch (err) {
+      app.notify(err);
     }
-    if (current) return `${formatCount(current.rowsAffected, 'row')} affected · ${formatDuration(total)}`;
-    return '';
   }
 </script>
+
+<section class="card" aria-label="Result">
+  <div class="head">
+    {#if run && run.results.length > 1}
+      <div class="result-tabs" role="tablist" aria-label="Results">
+        {#each run.results as r, i (i)}
+          <button role="tab" aria-selected={i === resultIndex} class:on={i === resultIndex} onclick={() => (resultIndex = i)}>{r.hasRows ? `Result ${i + 1}` : `Statement ${i + 1}`}</button>
+        {/each}
+      </div>
+    {:else}
+      <span class="title">Result</span>
+    {/if}
+    {#if run && current && !running}
+      <span class="chip">{rowsChip()}</span>
+      <span class="chip">{formatDuration(total)}</span>
+    {/if}
+    {#if current?.hasMore && !running}
+      <button class="btn sm ghost" onclick={loadMore} disabled={loadingMore} title="Runs the query again from row {(current.offset + current.rows.length + 1).toLocaleString('en-US')} and appends the next rows">{#if loadingMore}<Spinner size={11} />Loading…{:else}Load 1,000 more{/if}</button>
+    {/if}
+    <span class="space"></span>
+    {#if current?.hasRows && !running}
+      <button class="btn sm outline" onclick={copyAll} title="Copy all rows as tab-separated text">Copy</button>
+      <button class="btn sm outline" onclick={exportCsv} title="Save the rows as CSV">Export</button>
+    {/if}
+  </div>
 
   <div class="results">
     {#if loadingMore}<LoadBar label="Loading more rows" />{/if}
@@ -87,15 +124,6 @@
     {:else if !run}
       <div class="placeholder faint">Results appear here.</div>
     {:else}
-      {#if run.results.length > 1}
-        <div class="result-tabs">
-          {#each run.results as r, i (i)}
-            <button class:on={i === resultIndex} onclick={() => (resultIndex = i)}>
-              {r.hasRows ? `Result ${i + 1}` : `Statement ${i + 1}`}
-            </button>
-          {/each}
-        </div>
-      {/if}
       {#if run.error}
         <div class="error" role="alert">
           <Icon name="alert" />
@@ -116,7 +144,6 @@
               onmenu={(id, at) => (id === 'value' ? (view(at.r, at.c), true) : false)}
               columns={current.columns}
               rows={shownRows}
-              onselect={(value, column) => (selected = column && value !== undefined ? { value, column } : null)}
             />
           {:else if !run.error}
             <div class="placeholder"><Icon name="check" /> {formatCount(current.rowsAffected, 'row')} affected</div>
@@ -126,87 +153,29 @@
     {/if}
   </div>
 
-  <div class="footer">
-    <span class="small muted">{summary()}</span>
-    {#if current?.hasMore}
-      <button
-        class="btn sm"
-        onclick={loadMore}
-        disabled={loadingMore || running}
-        title="Runs the query again from row {(current.offset + current.rows.length + 1).toLocaleString('en-US')} and appends the next rows"
-      >{#if loadingMore}<Spinner size={11} />Loading…{:else}Load 1,000 more{/if}</button>
-    {:else if current?.truncated}
-      <span class="small faint" title="Only the first rows of this statement were kept">— rows beyond this weren’t loaded</span>
-    {/if}
-    <span style="flex:1"></span>
-    {#if selected && current?.hasRows}
-      <ValueBar value={selected.value} column={selected.column} onopen={() => { const at = grid?.cursor(); if (at) view(at.row, at.col); }} />
-    {/if}
-  </div>
+</section>
 
 {#if viewing}
   <ValueEditor edit={viewing} onsave={() => (viewing = null)} onclose={() => (viewing = null)} />
 {/if}
 
 <style>
-  .footer {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 37px;
-    padding: 0 10px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .small { font-size: 12px; margin-left: 6px; white-space: nowrap; }
+  .card { flex: 1; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
+  .head { flex: none; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 12px; border-bottom: 1px solid var(--grid-line); }
+  .title { font-weight: 500; }
+  .chip { padding: 1px 7px; border-radius: 6px; background: var(--border-subtle); color: var(--text-3); font-size: 12px; white-space: nowrap; }
+  .space { flex: 1; }
+  .head .btn.sm { height: 28px; border-radius: 9px; }
+  .result-tabs { display: flex; gap: 2px; min-width: 0; overflow-x: auto; }
+  .result-tabs button { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--text-3); font-size: 12.5px; white-space: nowrap; }
+  .result-tabs button.on { background: var(--active); color: var(--text); font-weight: 500; }
   .small-text { font-size: 11.5px; margin-top: 3px; }
-  .results { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; border-top: 1px solid var(--border); }
+  .results { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
   .grid-wrap { flex: 1; min-height: 0; }
-  .placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    height: 100%;
-    color: var(--text-2);
-  }
+  .placeholder { display: flex; align-items: center; justify-content: center; gap: 8px; height: 100%; color: var(--text-2); }
   .placeholder.faint { color: var(--text-3); }
   .elapsed { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-  .result-tabs {
-    flex: none;
-    display: flex;
-    gap: 2px;
-    padding: 4px 8px;
-    border-bottom: 1px solid var(--border-subtle);
-    background: var(--surface);
-    overflow-x: auto;
-  }
-  .result-tabs button {
-    height: 22px;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-2);
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  .result-tabs button.on { background: var(--accent-dim); color: var(--text); }
-  .error {
-    flex: none;
-    display: flex;
-    gap: 8px;
-    margin: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius);
-    color: var(--danger);
-    background: color-mix(in srgb, var(--danger) 10%, transparent);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    user-select: text;
-    -webkit-user-select: text;
-  }
+  .error { flex: none; display: flex; gap: 8px; margin: 10px; padding: 10px 12px; border-radius: var(--radius); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); font-family: var(--font-mono); font-size: 12px; user-select: text; -webkit-user-select: text; }
   .error .message { white-space: pre-wrap; }
   .error :global(.icon) { flex: none; margin-top: 1px; }
 </style>
