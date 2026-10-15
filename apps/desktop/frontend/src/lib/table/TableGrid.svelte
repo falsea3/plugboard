@@ -277,6 +277,6 @@
 {/if}
 
 <style>
-  .body { flex: 1; min-height: 0; display: flex; gap: 10px; margin-top: 10px; }
+  .body { flex: 1; min-height: 0; display: flex; gap: 10px; margin-top: 8px; }
   .grid-area { flex: 1; min-width: 0; position: relative; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
 </style>

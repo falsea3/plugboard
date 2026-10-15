@@ -173,7 +173,7 @@
 
 </script>
 
-<div class="view">
+<div class="view pane-card boxed">
   <DiagramToolbar
     schema={tab.schema}
     tables={diagram?.tables.length ?? null}
@@ -189,7 +189,7 @@
 
   <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
   <div
-    class="canvas pane-card"
+    class="canvas"
     bind:this={canvas}
     bind:clientWidth={width}
     bind:clientHeight={height}

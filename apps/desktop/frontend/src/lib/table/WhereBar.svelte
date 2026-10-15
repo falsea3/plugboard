@@ -50,7 +50,7 @@
 </div>
 
 <style>
-  .where { flex: none; margin-top: 8px; }
+  .where { flex: none; margin-top: 6px; }
   .field { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 4px 0 12px; border: 1px solid var(--hover); border-radius: var(--radius); background: var(--surface); }
   .field:focus-within { border-color: var(--focus-border); }
   .kw { flex: none; font-family: var(--font-mono); font-size: 12.5px; color: var(--text-4); }

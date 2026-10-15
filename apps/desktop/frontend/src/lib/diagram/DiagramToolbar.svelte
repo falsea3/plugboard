@@ -35,8 +35,8 @@
   ];
 </script>
 
-<div class="pane-bar">
-  <span class="pane-title"><strong>{schema}</strong>{#if tables !== null} · {formatCount(tables, 'table')} · {formatCount(relations, 'relation')}{/if}</span>
+<div class="pane-head">
+  <span class="pane-title"><strong>{schema}</strong>{#if tables !== null}{' · '}{formatCount(tables, 'table')} · {formatCount(relations, 'relation')}{/if}</span>
   {#if tables}
     <div class="export" class:busy={exporting}>
       {#key picker}
@@ -49,17 +49,17 @@
     <span class="zoom">{Math.round(zoom * 100)}%</span>
     <button class="btn ghost icon" onclick={() => onzoom(1.2)} title="Zoom in (+)" aria-label="Zoom in"><Icon name="zoomIn" size={14} /></button>
   </div>
-  <button class="btn outline icon" onclick={onfit} title="Fit to window (0)" aria-label="Fit to window"><Icon name="fit" size={14} /></button>
-  <button class="btn outline icon" onclick={onreload} disabled={loading} title="Reload" aria-label="Reload">
+  <button class="btn ghost icon" onclick={onfit} title="Fit to window (0)" aria-label="Fit to window"><Icon name="fit" size={14} /></button>
+  <button class="btn ghost icon" onclick={onreload} disabled={loading} title="Reload" aria-label="Reload">
     {#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={14} />{/if}
   </button>
 </div>
 
 <style>
-  .zoom-group { display: flex; align-items: center; height: 32px; padding: 0 2px; border: 1px solid var(--border); border-radius: var(--radius); }
-  .zoom-group .btn { width: 28px; height: 26px; }
+  .zoom-group { display: flex; align-items: center; height: 28px; }
+  .zoom-group .btn { width: 28px; height: 28px; }
   .zoom { min-width: 42px; color: var(--text-2); font-size: 12px; text-align: center; font-variant-numeric: tabular-nums; }
   .export { width: 120px; }
-  .export :global(.select-button) { height: 32px; border-radius: var(--radius); }
+  .export :global(.select-button) { height: 28px; border-radius: 8px; font-size: 12.5px; }
   .export.busy { opacity: 0.5; pointer-events: none; }
 </style>

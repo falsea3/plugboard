@@ -63,7 +63,7 @@
 </div>
 
 <style>
-  .toolbar { flex: none; display: flex; align-items: center; gap: 10px; height: 44px; margin-top: 6px; min-width: 0; overflow: hidden; }
+  .toolbar { flex: none; display: flex; align-items: center; gap: 10px; height: 40px; margin-top: 2px; min-width: 0; overflow: hidden; }
   .title { flex: 1 1 auto; min-width: 0; overflow: hidden; color: var(--text-4); text-overflow: ellipsis; white-space: nowrap; }
   .name { color: var(--text); }
   .primary .kbd { background: transparent; color: inherit; opacity: 0.8; padding: 0; }

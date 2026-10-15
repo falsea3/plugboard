@@ -42,14 +42,22 @@
 
 <div class="ddl">
   {#if toolbar}
-    <div class="pane-bar">
-      <span class="pane-title">{object.schema ? object.schema + '.' : ''}<strong>{object.name}</strong>{object.kind === 'function' || object.kind === 'procedure' ? `(${object.detail ?? ''})` : ''} · {object.kind}</span>
-      <button class="btn outline" onclick={copy} disabled={!text}><Icon name="copy" size={14} />Copy</button>
-      <button class="btn outline" onclick={openInQuery} disabled={!text}><Icon name="code" size={14} />Open in query</button>
-      <button class="btn outline icon" onclick={load} disabled={loading} title="Reload" aria-label="Reload">{#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={14} />{/if}</button>
-    </div>
+    <section class="pane-card boxed">
+      <div class="pane-head">
+        <span class="pane-title">{object.schema ? object.schema + '.' : ''}<strong>{object.name}</strong>{object.kind === 'function' || object.kind === 'procedure' ? `(${object.detail ?? ''})` : ''} · {object.kind}</span>
+        <button class="btn ghost" onclick={copy} disabled={!text}><Icon name="copy" size={13} />Copy</button>
+        <button class="btn ghost" onclick={openInQuery} disabled={!text}><Icon name="code" size={13} />Open in query</button>
+        <button class="btn ghost icon" onclick={load} disabled={loading} title="Reload" aria-label="Reload">{#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={13} />{/if}</button>
+      </div>
+      {@render content()}
+    </section>
+  {:else}
+    {@render content()}
   {/if}
-  <div class="body" class:pane-card={toolbar}>
+</div>
+
+{#snippet content()}
+  <div class="body">
     {#if loading}<LoadBar label="Loading the DDL" />{/if}
     {#if error}
       <div class="error" role="alert"><Icon name="alert" />{error}</div>
@@ -57,7 +65,7 @@
       <SqlView {text} {dialect} />
     {/if}
   </div>
-</div>
+{/snippet}
 
 <style>
   .ddl { height: 100%; display: flex; flex-direction: column; min-width: 0; }

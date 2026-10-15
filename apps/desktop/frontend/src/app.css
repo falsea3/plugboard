@@ -128,3 +128,8 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
 .pane-title { flex: 1 1 auto; min-width: 0; overflow: hidden; color: var(--text-4); text-overflow: ellipsis; white-space: nowrap; }
 .pane-title strong { color: var(--text); font-weight: 400; }
 .pane-card { position: relative; flex: 1; min-height: 0; margin-top: 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
+.pane-head { flex: none; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px 0 14px; border-bottom: 1px solid var(--grid-line); min-width: 0; }
+.pane-head .pane-title { color: var(--text-3); font-size: 13px; }
+.pane-head .btn { height: 28px; padding: 0 10px; border-radius: 8px; font-size: 12.5px; }
+.pane-head .btn.icon { width: 28px; padding: 0; }
+.pane-card.boxed { display: flex; flex-direction: column; margin-top: 6px; height: calc(100% - 6px) !important; }

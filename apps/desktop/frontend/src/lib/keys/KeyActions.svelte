@@ -44,9 +44,9 @@
 </script>
 
 {#if !ws.readOnly}
-  <button class="btn outline" onclick={() => (asking = 'ttl')} title="Set when the key expires"><Icon name="timer" size={14} />TTL</button>
-  <button class="btn outline" onclick={() => (asking = 'rename')} disabled={tab.key.key !== tab.key.name}><Icon name="pencil" size={14} />Rename</button>
-  <button class="btn outline danger" onclick={() => (asking = 'delete')}><Icon name="trash" size={14} />Delete</button>
+  <button class="btn ghost" onclick={() => (asking = 'ttl')} title="Set when the key expires"><Icon name="timer" size={13} />TTL</button>
+  <button class="btn ghost" onclick={() => (asking = 'rename')} disabled={tab.key.key !== tab.key.name}><Icon name="pencil" size={13} />Rename</button>
+  <button class="btn ghost danger" onclick={() => (asking = 'delete')}><Icon name="trash" size={13} />Delete</button>
 {/if}
 
 {#if asking === 'ttl'}

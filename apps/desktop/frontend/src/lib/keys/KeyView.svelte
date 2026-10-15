@@ -78,9 +78,9 @@
   );
 </script>
 
-<div class="view">
+<div class="view pane-card boxed">
   {#if loading}<LoadBar />{/if}
-  <div class="pane-bar">
+  <div class="pane-head">
     {#if value}<span class="type t-{value.type}">{TYPE_LABEL[value.type] ?? value.type.toUpperCase()}</span>{/if}
     <span class="name mono" title={tab.key.name}>{tab.key.name}</span>
     <button class="btn icon ghost" onclick={() => copyToClipboard(tab.key.name)} title="Copy key name" aria-label="Copy key name"><Icon name="copy" size={13} /></button>
@@ -90,10 +90,10 @@
       <span class="meta faint" title="Time to live">TTL {formatTTL(value.ttl)}</span>
       <KeyActions {ws} {tab} ttl={value.ttl} onchange={change} />
     {/if}
-    <button class="btn outline icon" onclick={() => load()} title={keys('Refresh (⌘R)')} aria-label="Refresh"><Icon name="refresh" size={14} /></button>
+    <button class="btn ghost icon" onclick={() => load()} title={keys('Refresh (⌘R)')} aria-label="Refresh"><Icon name="refresh" size={14} /></button>
   </div>
 
-  <div class="pane-card body">
+  <div class="body">
   {#if error}
     <div class="error">{error}</div>
   {:else if value?.type === 'string'}

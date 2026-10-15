@@ -117,20 +117,20 @@
   untrack(start);
 </script>
 
-<div class="config">
-  <div class="pane-bar">
+<div class="config pane-card boxed">
+  <div class="pane-head">
     {#key pickerKey}<Select value={picked} {options} onchange={pick} aria-label="Configuration file" class="file-select" />{/key}
     {#if picked === OTHER}
       <form class="custom" onsubmit={e => (e.preventDefault(), guarded(() => open(customPath)))}>
         <input class="input mono" bind:value={customPath} placeholder={files[0]?.path ?? "/path/to/server.conf"} spellcheck="false" aria-label="File path" />
-        <button class="btn outline" disabled={!customPath.trim()}>Open</button>
+        <button class="btn ghost" disabled={!customPath.trim()}>Open</button>
       </form>
     {:else if loaded}
       <span class="path mono" title={loaded.path}>{loaded.path}</span>
     {/if}
     <span class="space"></span>
     {#if via}<span class="via" title={via.hint}>{via.label}</span>{/if}
-    <button class="btn outline icon" onclick={() => loaded && guarded(() => open(loaded!.path))} disabled={!loaded || loading} title="Reload from the server" aria-label="Reload"><Icon name="refresh" size={14} /></button>
+    <button class="btn ghost icon" onclick={() => loaded && guarded(() => open(loaded!.path))} disabled={!loaded || loading} title="Reload from the server" aria-label="Reload"><Icon name="refresh" size={14} /></button>
     <button class="btn primary" onclick={save} disabled={!dirty || saving || readOnly} title={loaded?.readOnly ? 'The server shows these settings but can’t change them' : readOnly ? 'Read-only is on — turn it off to save' : keys('Save and reload the server configuration (⌘S)')}>
       {#if saving}<Spinner size={12} />{/if}Save &amp; reload
     </button>
@@ -147,7 +147,7 @@
       {/each}
     </div>
   {/if}
-  <div class="body pane-card">
+  <div class="body">
     {#if loading}<LoadBar label="Loading the file" />{/if}
     {#if error}<div class="error" role="alert"><Icon name="alert" />{error}</div>{/if}
     {#if loaded}
@@ -184,15 +184,15 @@
 
 <style>
   .config { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .pane-bar :global(.file-select) { width: 200px; flex: none; }
-  .pane-bar :global(.select-button) { height: 32px; border-radius: var(--radius); }
+  .pane-head :global(.file-select) { width: 190px; flex: none; }
+  .pane-head :global(.select-button) { height: 28px; border-radius: 8px; font-size: 12.5px; }
   .space { flex: 1; }
   .custom { display: flex; gap: 6px; flex: 1; min-width: 0; max-width: 520px; }
-  .custom .input { flex: 1; min-width: 0; height: 32px; font-size: 12.5px; }
+  .custom .input { flex: 1; min-width: 0; height: 28px; font-size: 12.5px; }
   .path { min-width: 0; overflow: hidden; color: var(--text-4); text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
   .via { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; }
   .body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
-  .problems { flex: none; display: flex; flex-direction: column; gap: 2px; margin-top: 8px; padding: 10px 12px; border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); font-size: 12px; }
+  .problems { flex: none; display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-bottom: 1px solid var(--grid-line); background: color-mix(in srgb, var(--danger) 8%, var(--card)); font-size: 12px; }
   .problems strong { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: var(--danger); font-weight: 500; }
   .problem { display: flex; gap: 10px; padding: 2px 0; border: 0; background: none; color: var(--text-2); font-size: 12px; text-align: left; cursor: pointer; }
   .problem:hover { color: var(--text); }
