@@ -30,7 +30,7 @@
   });
 
   function anchor() {
-    const el = [...document.querySelectorAll<HTMLElement>('[data-switch-anchor]')].find(e => e.offsetParent !== null);
+    const el = [...document.querySelectorAll<HTMLElement>('[data-switch-anchor]')].find(e => e.offsetParent !== null && e.getBoundingClientRect().right > 0);
     if (!el) return null;
     const r = el.getBoundingClientRect();
     return { left: r.left, top: r.bottom + 6 };

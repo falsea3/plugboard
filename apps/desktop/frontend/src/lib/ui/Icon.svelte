@@ -66,6 +66,7 @@
   import updown from '@phosphor-icons/core/regular/caret-up-down.svg?raw';
   import grip from '@phosphor-icons/core/regular/dots-six-vertical.svg?raw';
   import group from '@phosphor-icons/core/regular/folder-simple-plus.svg?raw';
+  import sidebar from '@phosphor-icons/core/regular/sidebar-simple.svg?raw';
 
   const ICONS = {
     plus, x, search, table, view, refresh, play, stop,
@@ -73,7 +74,7 @@
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
     arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, timer, link, lock, lockOpen, tunnel, funnel,
     download, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, json, restore, sortDefault, fitWidth,
-    function: fn, procedure, sequence, dictionary, enum: enumType, domain, trigger, extension, event, ddl, config, roles, updown, grip, group,
+    function: fn, procedure, sequence, dictionary, enum: enumType, domain, trigger, extension, event, ddl, config, roles, updown, grip, group, sidebar,
   } as const;
 
   export type IconName = keyof typeof ICONS;

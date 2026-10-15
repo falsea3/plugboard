@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Workspace } from './workspace.svelte';
   import { app } from './app.svelte';
+  import { layout } from './layout.svelte';
   import { connectionTarget } from '../ui/format';
   import { engine } from '../engines';
   import ConnAvatar from '../connections/ConnAvatar.svelte';
@@ -27,6 +28,7 @@
 <div class="top drag">
   <span class="lights" aria-hidden="true"></span>
   <button class="home no-drag" onclick={() => app.goHome()} title="All connections (⇧⌘H)" aria-label="All connections"><Icon name="database" size={16} /></button>
+  <button class="home no-drag" onclick={() => layout.toggleSidebar()} title={layout.sidebarHidden ? 'Keep the sidebar open (⌘\\)' : 'Hide the sidebar (⌘\\)'} aria-label={layout.sidebarHidden ? 'Keep the sidebar open' : 'Hide the sidebar'}><Icon name="sidebar" size={16} /></button>
 </div>
 
 <button class="conn" data-switch-anchor onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog" aria-expanded={app.switcherOpen}>

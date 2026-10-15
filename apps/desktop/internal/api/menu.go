@@ -70,6 +70,7 @@ func BuildMenu(a *App) *menu.Menu {
 		m.themes[t.theme] = theme.AddRadio(t.label, t.theme == current, nil, emit("theme:"+string(t.theme)))
 	}
 	view.AddSeparator()
+	view.AddText("Toggle Sidebar", keys.CmdOrCtrl("\\"), emit("toggle-sidebar"))
 	view.AddText("Refresh", keys.CmdOrCtrl("r"), emit("refresh"))
 	view.AddText("Filter Rows", keys.CmdOrCtrl("f"), emit("filter"))
 	view.AddText("Filter Tables", keys.Combo("f", keys.CmdOrCtrlKey, keys.ShiftKey), emit("filter-tables"))

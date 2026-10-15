@@ -8,6 +8,7 @@
   import DiagramView from '../diagram/DiagramView.svelte';
   import Icon from '../ui/Icon.svelte';
   import { startDrag } from '../ui/drag';
+  import { layout } from './layout.svelte';
   import DdlView from '../objects/DdlView.svelte';
   import ScriptDialogs from '../scripts/Dialogs.svelte';
   import KeyView from '../keys/KeyView.svelte';
@@ -18,6 +19,7 @@
   let { ws, visible }: { ws: Workspace; visible: boolean } = $props();
 
   let sidebarWidth = $state(264);
+  let peek = $state(false);
   const opened = new SvelteSet<string>();
   $effect(() => {
     if (ws.activeTabId) opened.add(ws.activeTabId);
@@ -31,13 +33,20 @@
 </script>
 
 <div class="workspace" class:hidden={!visible}>
-  <div class="side" style:width="{sidebarWidth}px">
+  {#if layout.sidebarHidden}
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="edge" onmouseenter={() => (peek = true)}></div>
+  {/if}
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="side" class:floating={layout.sidebarHidden} class:peek={peek && layout.sidebarHidden} style:width="{sidebarWidth}px" onmouseleave={() => (peek = false)}>
     <Sidebar {ws} active={visible} />
   </div>
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="side-resizer" onpointerdown={startResize}></div>
+  {#if !layout.sidebarHidden}
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="side-resizer" onpointerdown={startResize}></div>
+  {/if}
 
-  <section class="center">
+  <section class="center" class:full={layout.sidebarHidden}>
     <TabBar {ws} />
 
     <div class="panes">
@@ -87,6 +96,12 @@
   .workspace { position: absolute; inset: 0; display: flex; background: var(--bg); }
   .workspace.hidden, .pane.hidden { visibility: hidden; pointer-events: none; }
   .side { flex: none; min-width: 0; padding: 8px 0 8px 8px; }
+  .side.floating { position: absolute; top: 0; bottom: 0; left: 0; z-index: 40; padding-right: 8px; transform: translateX(-100%); transition: transform 0.18s ease; }
+  .side.floating.peek { transform: none; }
+  .side.floating :global(.sidebar) { box-shadow: var(--shadow-pop); }
+  .edge { position: absolute; top: 0; bottom: 0; left: 0; z-index: 39; width: 8px; }
+  .center.full { padding-left: 12px; }
+  .center.full :global(.tabbar) { padding-left: 76px; }
   .side-resizer { flex: none; width: 8px; z-index: 2; cursor: col-resize; }
   .side-resizer:hover { background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 5px, transparent 5px); }
   .center { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 0 12px 10px 4px; container-type: inline-size; }

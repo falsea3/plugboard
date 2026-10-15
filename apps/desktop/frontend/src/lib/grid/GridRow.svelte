@@ -174,7 +174,6 @@
     border-radius: 7px;
     pointer-events: none;
   }
-  .td.selected { padding: 0 12px; }
 
   .td.edited::before { content: ''; position: absolute; inset: 3px 6px; border-radius: 7px; background: var(--cell-edited); z-index: -1; }
   .td.edited { color: var(--warn); z-index: 0; }

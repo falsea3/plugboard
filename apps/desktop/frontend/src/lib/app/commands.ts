@@ -1,4 +1,5 @@
 import { app } from './app.svelte';
+import { layout } from './layout.svelte';
 import type { ThemeMode } from '../api/wire';
 
 export const REFRESH_EVENT = 'plugboard:refresh';
@@ -33,6 +34,9 @@ export function runCommand(command: string) {
     case 'home':
       if (app.showHome) app.leaveHome();
       else app.goHome();
+      break;
+    case 'toggle-sidebar':
+      layout.toggleSidebar();
       break;
     case 'new-query':
       ws?.newQuery();
@@ -77,6 +81,7 @@ function cycleConnection(step: number) {
 
 const SHORTCUTS: Record<string, string> = {
   tab: 'next-connection',
+  '\\': 'toggle-sidebar',
   'shift+tab': 'prev-connection',
   ',': 'settings',
   n: 'new-connection',

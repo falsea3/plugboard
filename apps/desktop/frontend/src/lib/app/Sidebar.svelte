@@ -218,6 +218,7 @@
   .note.error { color: var(--danger); user-select: text; -webkit-user-select: text; }
 
   .bottom { display: flex; align-items: center; gap: 6px; padding: 10px 12px 12px; }
-  .bottom .new { flex: 1; }
-  .bottom .btn.icon { color: var(--text-2); }
+  .bottom .new { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; }
+  .bottom .new .kbd { flex-shrink: 1; min-width: 0; overflow: hidden; }
+  .bottom .btn.icon { flex: none; width: 32px; color: var(--text-2); }
 </style>
