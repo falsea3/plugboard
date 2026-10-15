@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Workspace } from './workspace.svelte';
+  import { app } from './app.svelte';
   import { connectionTarget } from '../ui/format';
   import { engine } from '../engines';
   import ConnAvatar from '../connections/ConnAvatar.svelte';
@@ -11,6 +12,7 @@
   let { ws }: { ws: Workspace } = $props();
 
   const conn = $derived(ws.connection);
+  const via = $derived(conn.ssh?.enabled && !engine(conn.driver).file);
   let confirmWrites = $state(false);
 
   function toggleReadOnly() {
@@ -22,30 +24,29 @@
   }
 </script>
 
-  <div class="conn" title="{conn.name} — {connectionTarget(conn)}">
-    <ConnAvatar connection={conn} size={32} />
-    <div class="conn-meta">
-      <div class="conn-name">{conn.name} <EnvBadge env={conn.env} /></div>
-      <div class="conn-target">
-        {#if conn.ssh?.enabled && !engine(conn.driver).file}<span class="via" class:down={ws.tunnel !== 'ok'} title={ws.tunnel !== 'ok' ? 'SSH connection lost — reconnecting' : `Through SSH ${conn.ssh.user}@${conn.ssh.host || conn.host}`}><Icon name="tunnel" size={11} />{ws.tunnel !== 'ok' ? 'SSH reconnecting…' : 'SSH'}</span>{/if}
-        {ws.session.serverVersion}
-      </div>
-    </div>
-  </div>
+<div class="top drag">
+  <span class="lights" aria-hidden="true"></span>
+  <button class="home no-drag" onclick={() => app.goHome()} title="All connections (⇧⌘H)" aria-label="All connections"><Icon name="database" size={15} /></button>
+</div>
 
-  <button
-    class="ro"
-    class:on={ws.readOnly}
-    disabled={ws.switchingReadOnly}
-    onclick={toggleReadOnly}
-    role="switch"
-    aria-checked={ws.readOnly}
-    title={ws.readOnly ? 'Read-only is on: writes are refused. Click to allow writes for this session.' : 'Read-only is off: writes are allowed. Click to make this session read-only.'}
-  >
-    {#if ws.switchingReadOnly}<Spinner size={12} />{:else}<Icon name={ws.readOnly ? 'lock' : 'lockOpen'} size={13} />{/if}
-    <span>{ws.switchingReadOnly ? 'Reconnecting…' : 'Read-only'}</span>
-    <span class="ro-switch" aria-hidden="true"></span>
-  </button>
+<button class="conn" onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog">
+  <ConnAvatar connection={conn} size={38} />
+  <span class="meta">
+    <span class="name"><span class="text">{conn.name}</span><EnvBadge env={conn.env} /></span>
+    <span class="target">
+      {#if via}<span class="via" class:down={ws.tunnel !== 'ok'} title={ws.tunnel !== 'ok' ? 'SSH connection lost — reconnecting' : `Through SSH ${conn.ssh.user}@${conn.ssh.host || conn.host}`}><Icon name="tunnel" size={10} />{ws.tunnel !== 'ok' ? 'reconnecting…' : 'SSH'}</span>{/if}
+      <span class="text">{ws.session.serverVersion}</span>
+    </span>
+  </span>
+  <Icon name="updown" size={14} />
+</button>
+
+<button class="ro" class:on={ws.readOnly} disabled={ws.switchingReadOnly} onclick={toggleReadOnly} role="switch" aria-checked={ws.readOnly}
+  title={ws.readOnly ? 'Read-only is on: writes are refused. Click to allow writes for this session.' : 'Read-only is off: writes are allowed. Click to make this session read-only.'}>
+  {#if ws.switchingReadOnly}<Spinner size={12} />{:else}<Icon name={ws.readOnly ? 'lock' : 'lockOpen'} size={14} />{/if}
+  <span>{ws.switchingReadOnly ? 'Reconnecting…' : 'Read-only'}</span>
+  <span class="track" aria-hidden="true"></span>
+</button>
 
 {#if confirmWrites}
   <Modal title="Allow writes on Production?" width={420} onclose={() => (confirmWrites = false)}>
@@ -65,79 +66,49 @@
 <style>
   .confirm-text { margin: 0; color: var(--text-2); line-height: 1.5; }
   .confirm-text strong { color: var(--text); }
+  .top { display: flex; align-items: center; height: 40px; padding: 0 8px 0 0; }
+  .lights { flex: 1; }
+  .home { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); }
+  .home:hover { background: var(--hover); color: var(--text); }
   .conn {
-    --avatar-ring: var(--surface);
+    --avatar-ring: var(--elevated);
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 12px 4px;
-    min-width: 0;
-  }
-  .conn-meta { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-  .conn-name {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-  .conn-target {
-    font-size: 11.5px;
+    margin: 2px 8px 0;
+    padding: 6px 10px 6px 6px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
     color: var(--text-3);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-align: left;
+    transition: background 0.12s;
   }
-  .conn-target { display: flex; align-items: center; gap: 6px; }
-  .via {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    padding: 0 4px;
-    border-radius: 3px;
-    background: var(--elevated);
-    color: var(--text-2);
-    font-size: 10px;
-    font-weight: 600;
-  }
+  .conn:hover { background: var(--hover); }
+  .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .name { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--text); font-size: 14px; font-weight: 500; }
+  .target { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; color: var(--text-3); }
+  .text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .via { flex: none; display: inline-flex; align-items: center; gap: 3px; padding: 0 5px; border-radius: 4px; background: var(--active); color: var(--text-2); font-size: 10px; font-weight: 600; }
   .via.down { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
   .ro {
     display: flex;
     align-items: center;
-    gap: 7px;
-    margin: 8px 10px 0;
-    height: 28px;
-    padding: 0 8px 0 9px;
+    gap: 8px;
+    height: 34px;
+    margin: 10px 12px 0;
+    padding: 0 10px;
     border: 0;
-    border-radius: 6px;
-    background: var(--elevated);
+    border-radius: var(--radius);
+    background: var(--hover);
     color: var(--text-2);
-    font-size: 12px;
+    font-size: 13px;
   }
-  .ro:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+  .ro:hover:not(:disabled) { color: var(--text); }
   .ro span:nth-child(2) { flex: 1; text-align: left; }
-  .ro.on { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); }
-  .ro.on:hover:not(:disabled) { color: var(--warn); background: color-mix(in srgb, var(--warn) 18%, var(--surface)); }
-  .ro-switch {
-    position: relative;
-    width: 24px;
-    height: 14px;
-    border-radius: 999px;
-    background: var(--active);
-    transition: background 0.15s;
-  }
-  .ro-switch::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #fff;
-    transition: transform 0.15s;
-  }
-  .ro.on .ro-switch { background: var(--warn); }
-  .ro.on .ro-switch::after { transform: translateX(10px); }
+  .ro.on { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, var(--elevated)); }
+  .track { position: relative; width: 28px; height: 16px; border-radius: 999px; background: var(--active); transition: background 0.15s; }
+  .track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: transform 0.15s; }
+  .ro.on .track { background: var(--warn); }
+  .ro.on .track::after { transform: translateX(12px); }
 </style>

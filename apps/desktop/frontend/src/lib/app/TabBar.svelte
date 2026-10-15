@@ -33,8 +33,8 @@
 
 <svelte:window onpointermove={order.pointermove} onpointerup={order.pointerup} onpointercancel={order.pointercancel} />
 
-<div class="tabbar">
-  <nav class="tabs" aria-label="Open tabs" bind:this={list}>
+<div class="tabbar drag">
+  <nav class="tabs no-drag" aria-label="Open tabs" bind:this={list}>
     {#each ws.tabs as tab (tab.id)}
       <div
         class="tab"
@@ -63,11 +63,13 @@
     {/each}
     <button class="tab-new" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="plus" size={13} /></button>
   </nav>
+  <span class="space"></span>
   {#if valueToggle}
-    <button class="value-toggle" class:active={valueShown} aria-pressed={valueShown} onclick={() => (valueShown = !valueShown)} title={valueShown ? 'Hide Value panel' : 'Show Value panel'}>
-      <Icon name="columns" size={13} /><span>Value</span>
+    <button class="btn ghost sm value-toggle no-drag" class:active={valueShown} aria-pressed={valueShown} onclick={() => (valueShown = !valueShown)} title={valueShown ? 'Hide Value panel' : 'Show Value panel'}>
+      <Icon name="columns" size={14} />Value
     </button>
   {/if}
+  <button class="btn ghost icon no-drag" onclick={() => (app.settingsOpen = 'general')} title="Settings (⌘,)" aria-label="Settings"><Icon name="settings" size={16} /></button>
 </div>
 {#if order.indicator}
   {@const d = order.indicator}
@@ -75,121 +77,34 @@
 {/if}
 
 <style>
-
-  .tabbar {
-    flex: none;
-    display: flex;
-    align-items: stretch;
-    height: 34px;
-    min-width: 0;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-  .tabs {
-    flex: 1;
-    display: flex;
-    align-items: stretch;
-    min-width: 0;
-    height: 34px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
+  .tabbar { flex: none; display: flex; align-items: center; gap: 4px; height: 48px; min-width: 0; padding: 0 0 0 2px; }
+  .tabs { display: flex; align-items: center; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
   .tabs::-webkit-scrollbar { display: none; }
-  .value-toggle {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 12px;
-    border: 0;
-    border-left: 1px solid var(--border-subtle);
-    background: transparent;
-    color: var(--text-3);
-    font-size: 12px;
-  }
-  .value-toggle:hover { background: var(--hover); color: var(--text); }
-  .value-toggle.active { color: var(--accent); background: var(--accent-dim); }
-  .drop-indicator {
-    position: fixed;
-    z-index: 100;
-    width: 2px;
-    border-radius: 2px;
-    background: var(--accent);
-    pointer-events: none;
-  }
+  .space { flex: 1; align-self: stretch; }
+  .value-toggle.active { background: var(--accent-bg); color: var(--accent-text); }
+  .drop-indicator { position: fixed; z-index: 100; width: 2px; border-radius: 2px; background: var(--accent); pointer-events: none; }
   .tab {
     position: relative;
     flex: none;
     display: flex;
     align-items: center;
     gap: 2px;
-    min-width: 120px;
-    max-width: 220px;
+    height: 34px;
+    max-width: 240px;
     padding: 0 6px 0 12px;
-    border-right: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
     color: var(--text-2);
+    transition: background 0.12s, color 0.12s;
   }
+  .tab:hover { background: var(--elevated); color: var(--text); }
   .tab.dragging { opacity: 0.45; }
-  .tab:hover { color: var(--text); }
-  .tab.active { background: var(--bg); color: var(--text); }
-  .tab.active::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    height: 1px;
-    background: var(--bg);
-  }
-  .tab.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 2px;
-    background: var(--accent);
-  }
-  .tab-main {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    min-width: 0;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    font-size: 12.5px;
-    text-align: left;
-    user-select: none;
-  }
+  .tab.active { background: var(--accent-bg); color: #fff; }
+  .tab-main { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; font-size: 13.5px; text-align: left; user-select: none; }
   .tab-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tab-main .dirty-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
-  .tab-close {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-3);
-    opacity: 0;
-  }
-  .tab:hover .tab-close, .tab.active .tab-close { opacity: 1; }
-  .tab-close:hover { background: var(--hover); color: var(--text); }
-  .tab-new {
-    flex: none;
-    width: 34px;
-    border: 0;
-    background: transparent;
-    color: var(--text-3);
-    display: grid;
-    place-items: center;
-  }
-  .tab-new:hover { color: var(--text); background: var(--hover); }
+  .tab-close { flex: none; display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: inherit; opacity: 0; }
+  .tab:hover .tab-close, .tab.active .tab-close { opacity: 0.7; }
+  .tab-close:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
+  .tab-new { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 9px; background: transparent; color: var(--text-3); }
+  .tab-new:hover { color: var(--text); background: var(--elevated); }
 </style>

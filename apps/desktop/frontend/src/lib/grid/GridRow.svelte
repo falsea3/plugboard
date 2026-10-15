@@ -123,19 +123,18 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 8px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    color: var(--text-3);
-    font-size: 11px;
+    padding-right: 10px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-4);
+    font-size: 11.5px;
   }
-  .rn.active { color: var(--text); background: var(--elevated); }
+  .rn.active { color: var(--accent-text); background: color-mix(in srgb, var(--accent) 10%, var(--card)); }
 
   .td {
     flex: none;
-    padding: 0 9px;
-    line-height: 26px;
-    border-right: 1px solid var(--border-subtle);
+    padding: 0 12px;
+    line-height: 29px;
     border-bottom: 1px solid var(--border-subtle);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -170,6 +169,7 @@
   .td.selected {
     background: var(--grid-selected);
     box-shadow: inset 0 0 0 1.5px var(--accent);
+    border-radius: 6px;
   }
 
   .td.edited { background: color-mix(in srgb, var(--warn) 16%, transparent); }

@@ -24,7 +24,7 @@
 <svelte:window onkeydown={handleShortcut} />
 
 <div class="shell">
-  <TitleBar />
+  {#if !app.active}<TitleBar />{/if}
   <main>
     {#each app.workspaces as ws (ws.id)}
       <WorkspaceView {ws} visible={app.active === ws} />

@@ -63,6 +63,7 @@
   import ddl from '@phosphor-icons/core/regular/brackets-angle.svg?raw';
   import config from '@phosphor-icons/core/regular/sliders-horizontal.svg?raw';
   import roles from '@phosphor-icons/core/regular/users.svg?raw';
+  import updown from '@phosphor-icons/core/regular/caret-up-down.svg?raw';
 
   const ICONS = {
     plus, x, search, table, view, refresh, play, stop,
@@ -70,7 +71,7 @@
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
     arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, timer, link, lock, lockOpen, tunnel, funnel,
     download, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, json, restore, sortDefault, fitWidth,
-    function: fn, procedure, sequence, dictionary, enum: enumType, domain, trigger, extension, event, ddl, config, roles,
+    function: fn, procedure, sequence, dictionary, enum: enumType, domain, trigger, extension, event, ddl, config, roles, updown,
   } as const;
 
   export type IconName = keyof typeof ICONS;

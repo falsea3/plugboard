@@ -52,7 +52,7 @@ test('keeps rows under the viewport while the wheel jumps', async ({ page }) => 
         const row = hit?.closest('[role="row"]');
         const number = row?.querySelector('.rn')?.textContent?.trim();
         const middle = row ? row.getBoundingClientRect().top + 13 : y;
-        const want = String(Math.floor((el.scrollTop + middle - box.top - 30) / 26) + 1);
+        const want = String(Math.floor((el.scrollTop + middle - box.top - 36) / 30) + 1);
         if (number !== want) out.push(`jump ${i}: at ${Math.round(y - box.top)}px row ${number ?? 'none'}, want ${want}`);
       }
       await new Promise(r => setTimeout(r, 0));
@@ -67,10 +67,10 @@ test('loads more rows as the table scrolls, and the paging keys go where they sh
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const grid = page.getByRole('grid');
   await grid.getByText('ann.novak1@example.com').click();
-  await expect(page.getByTitle('How long the last fetch took')).toHaveText('· 14 ms');
+  await expect(page.getByTitle('How long the last fetch took')).toHaveText('14 ms');
   await page.keyboard.press('End');
   await expect(page.getByText('600 of ~24,813 rows loaded')).toBeVisible();
-  await expect(page.getByTitle('How long the last fetch took')).toHaveText('· 10 ms');
+  await expect(page.getByTitle('How long the last fetch took')).toHaveText('10 ms');
   await page.keyboard.press('End');
   await expect(page.getByText('900 of ~24,813 rows loaded')).toBeVisible();
   await page.keyboard.press('End');

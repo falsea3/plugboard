@@ -30,7 +30,7 @@
 
 <div class="where">
   <div class="field" class:active={!!applied}>
-    <Icon name="funnel" size={12} />
+    <span class="kw">where</span>
     <input
       bind:this={input}
       bind:value
@@ -49,11 +49,12 @@
 </div>
 
 <style>
-  .where { flex: none; padding: 6px 8px; border-bottom: 1px solid var(--border); background: var(--surface); }
-  .field { display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 2px 0 9px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text-3); }
+  .where { flex: none; padding: 4px 0 10px; }
+  .field { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 4px 0 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius); background: var(--surface); }
   .field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
-  .field.active { color: var(--accent); }
-  input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: none; background: transparent; color: var(--text); font-size: 12px; }
-  input::placeholder { color: var(--text-3); }
+  .kw { flex: none; font-family: var(--font-mono); font-size: 12.5px; color: var(--text-4); }
+  .field.active .kw { color: var(--accent-text); }
+  input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: none; background: transparent; color: var(--text); font-family: var(--font-mono); font-size: 12.5px; }
+  input::placeholder { color: var(--text-4); }
   .hint { flex: none; font-size: 11px; }
 </style>

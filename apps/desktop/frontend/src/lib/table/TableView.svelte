@@ -277,7 +277,7 @@
 
 <style>
   .view { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .content { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+  .content { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
   .waiting { display: flex; align-items: center; justify-content: center; gap: 8px; height: 100%; font-size: 12.5px; }
   .error {
     display: flex;

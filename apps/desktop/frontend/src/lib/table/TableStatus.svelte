@@ -41,7 +41,7 @@
     <button class="link-btn" onclick={() => rows.countExactly()} disabled={rows.counting} title="Run COUNT(*) — can take a while on big tables">{#if rows.counting}<Spinner size={10} />Counting…{:else}Count{/if}</button>
   {/if}
   {#if filtered}<span class="filtered">filtered</span>{/if}
-  {#if page}<span class="small faint" title="How long the last fetch took">· {formatDuration(page.result.durationMs)}</span>{/if}
+  {#if page}<span class="small" title="How long the last fetch took">{formatDuration(page.result.durationMs)}</span>{/if}
   <span style="flex:1"></span>
   {#if selected}
     <ValueBar value={selected.value} column={selected.column} {onopen} />
@@ -49,37 +49,12 @@
 </div>
 
 <style>
-  .footer {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 37px;
-    min-width: 0;
-    padding: 0 10px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .small { font-size: 12px; padding: 0 4px; white-space: nowrap; }
+  .footer { flex: none; display: flex; align-items: center; gap: 6px; height: 38px; min-width: 0; padding: 8px 0 0; }
+  .small { padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; white-space: nowrap; }
+  .muted.small { color: var(--text-2); }
   .loading-more { display: inline-flex; align-items: center; gap: 6px; }
-  .link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    border: 0;
-    padding: 0 4px;
-    background: transparent;
-    color: var(--accent);
-    font-size: 12px;
-  }
-  .link-btn:hover:not(:disabled) { text-decoration: underline; }
+  .link-btn { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border: 0; border-radius: 6px; background: var(--surface); color: var(--accent-text); font-size: 12px; }
+  .link-btn:hover:not(:disabled) { background: var(--hover); }
   .link-btn:disabled { color: var(--text-3); }
-  .filtered {
-    padding: 0 6px;
-    border-radius: 4px;
-    background: var(--accent-dim);
-    color: var(--accent);
-    font-size: 11px;
-    line-height: 17px;
-  }
+  .filtered { padding: 2px 8px; border-radius: 6px; background: var(--accent-bg); color: var(--accent-text); font-size: 12px; }
 </style>

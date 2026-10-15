@@ -2,8 +2,8 @@ import { flushSync } from 'svelte';
 import { clamp } from './grid';
 import { startDrag } from '../ui/drag';
 
-export const ROW_H = 26;
-export const HEADER_H = 30;
+export const ROW_H = 30;
+export const HEADER_H = 36;
 export const OVERSCAN = 8;
 
 export class GridView {

@@ -5,6 +5,7 @@
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import Select from '../ui/Select.svelte';
+  import TextField from '../ui/TextField.svelte';
   import type { TableInfo } from '../api/wire';
   import TableNode from './TableNode.svelte';
   import TreeMenus from './TreeMenus.svelte';
@@ -111,15 +112,13 @@
   {#if ws.session.engine.keyValue}
     <KeyTree {ws} {active} />
     <div class="bottom">
-      <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New console (⌘T)"><Icon name="terminal" size={13} />New console</button>
-      <span style="flex:1"></span>
-      {#if ws.session.engine.serverConfig}<button class="btn icon sm ghost" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={13} /></button>{/if}
-      {#if ws.session.engine.roles}<button class="btn icon sm ghost" onclick={() => ws.openAdmin('roles')} title="Users" aria-label="Roles"><Icon name="roles" size={13} /></button>{/if}
+      <button class="btn new" onclick={() => ws.newQuery()} title="New console (⌘T)"><Icon name="terminal" size={14} />New console</button>
+      {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
+      {#if ws.session.engine.roles}<button class="btn icon" onclick={() => ws.openAdmin('roles')} title="Users" aria-label="Roles"><Icon name="roles" size={15} /></button>{/if}
     </div>
   {:else}
     <div class="filter">
-      <Icon name="search" size={13} />
-      <input class="input" bind:this={input} bind:value={filter} onkeydown={onFilterKey} placeholder="Filter tables" spellcheck="false" />
+      <TextField icon="search" kbd="⇧⌘F" placeholder="Filter tables" label="Filter tables" bind:value={filter} bind:element={input} onkeydown={onFilterKey} />
     </div>
 
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -170,12 +169,11 @@
     <TreeMenus bind:this={menus} {ws} />
 
     <div class="bottom">
-      <button class="btn sm ghost" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="code" size={13} />New query</button>
-      <span style="flex:1"></span>
-      <button class="btn icon sm ghost" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={13} /></button>
-      {#if ws.session.engine.serverConfig}<button class="btn icon sm ghost" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={13} /></button>{/if}
-      {#if ws.session.engine.roles}<button class="btn icon sm ghost" onclick={() => ws.openAdmin('roles')} title="Roles" aria-label="Roles"><Icon name="roles" size={13} /></button>{/if}
-      <button class="btn icon sm ghost" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables">{#if ws.tablesLoading}<Spinner size={12} label="Loading tables" />{:else}<Icon name="refresh" size={13} />{/if}</button>
+      <button class="btn new" onclick={() => ws.newQuery()} title="New query (⌘T)">New query <span class="kbd">⌘T</span></button>
+      <button class="btn icon" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={15} /></button>
+      {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
+      {#if ws.session.engine.roles}<button class="btn icon" onclick={() => ws.openAdmin('roles')} title="Roles" aria-label="Roles"><Icon name="roles" size={15} /></button>{/if}
+      <button class="btn icon" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables" aria-label="Reload tables">{#if ws.tablesLoading}<Spinner size={12} label="Loading tables" />{:else}<Icon name="refresh" size={15} />{/if}</button>
     </div>
   {/if}
 </aside>
@@ -185,38 +183,35 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
     min-width: 0;
+    background: var(--elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
   }
-  .schema { padding: 10px 10px 0; }
+  .schema { padding: 8px 12px 0; }
   .more { display: block; width: 100%; padding: 4px 12px 6px 30px; border: 0; background: none; font-size: 12px; text-align: left; cursor: pointer; }
   .more:hover { color: var(--text-2); }
-  .filter { position: relative; padding: 10px; color: var(--text-3); }
-  .filter :global(.icon) { position: absolute; left: 19px; top: 18px; }
-  .filter .input { padding-left: 27px; height: 26px; }
+  .filter { padding: 8px 12px 4px; }
 
-  .list { flex: 1; overflow-y: auto; padding: 0 6px 8px; }
+  .list { flex: 1; overflow-y: auto; padding: 8px 8px 8px; }
   .group {
     display: flex;
     justify-content: space-between;
-    padding: 10px 8px 4px;
+    padding: 12px 8px 6px;
     color: var(--text-3);
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
   .count { font-weight: 500; }
-  .picked-bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-top: 1px solid var(--border-subtle); color: var(--text-2); }
+  .picked-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--border-subtle); color: var(--text-2); }
   .note { padding: 12px 8px; font-size: 12px; }
   .note.loading { display: flex; align-items: center; gap: 7px; }
   .note.error { color: var(--danger); user-select: text; -webkit-user-select: text; }
 
-  .bottom {
-    display: flex;
-    align-items: center;
-    padding: 6px 8px;
-    border-top: 1px solid var(--border-subtle);
-  }
+  .bottom { display: flex; align-items: center; gap: 6px; padding: 10px 12px 12px; }
+  .bottom .new { flex: 1; }
+  .bottom .btn.icon { color: var(--text-2); }
 </style>

@@ -15,7 +15,7 @@ test('opens a range of tables at once and counts them on the connection', async 
   await sidebar.getByText('orders', { exact: true }).click({ modifiers: ['Shift'] });
   await expect(sidebar.getByText('4 selected')).toBeVisible();
   await sidebar.getByRole('button', { name: 'Open 4' }).click();
-  await expect(page.locator('[data-ws] .count')).toHaveText('4');
+  await expect(page.getByRole('navigation', { name: 'Open tabs' }).getByRole('tab')).toHaveCount(4);
   await expect(sidebar.getByText('4 selected')).toHaveCount(0);
 });
 

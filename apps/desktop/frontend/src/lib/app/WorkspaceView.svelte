@@ -18,7 +18,7 @@
 
   let { ws, visible }: { ws: Workspace; visible: boolean } = $props();
 
-  let sidebarWidth = $state(240);
+  let sidebarWidth = $state(264);
   let valueWidth = $state(320);
   let valueShown = $state(false);
 
@@ -30,7 +30,7 @@
 
   function startResize(e: PointerEvent) {
     const w0 = sidebarWidth;
-    startDrag(e, 'col-resize', dx => (sidebarWidth = Math.max(180, Math.min(480, w0 + dx))));
+    startDrag(e, 'col-resize', dx => (sidebarWidth = Math.max(220, Math.min(480, w0 + dx))));
   }
 
   function startValueResize(e: PointerEvent) {
@@ -101,18 +101,20 @@
 {#if visible}<ScriptDialogs {ws} />{/if}
 
 <style>
-  .workspace { position: absolute; inset: 0; display: flex; }
+  .workspace { position: absolute; inset: 0; display: flex; background: var(--bg); }
   .workspace.hidden, .pane.hidden { visibility: hidden; pointer-events: none; }
-  .side { flex: none; min-width: 0; }
-  .side-resizer { flex: none; width: 4px; margin-left: -2px; margin-right: -2px; z-index: 2; cursor: col-resize; }
-  .side-resizer:hover { background: var(--accent); }
-  .center { flex: 1; min-width: 0; display: flex; flex-direction: column; container-type: inline-size; }
+  .side { flex: none; min-width: 0; padding: 8px 0 8px 8px; }
+  .side-resizer { flex: none; width: 8px; z-index: 2; cursor: col-resize; }
+  .side-resizer:hover { background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 5px, transparent 5px); }
+  .center { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 0 12px 10px 4px; container-type: inline-size; }
   .value-side {
     flex: none;
     min-width: 0;
-    height: 100%;
-    border-left: 1px solid var(--border);
-    background: var(--bg);
+    margin: 56px 12px 10px 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--elevated);
+    overflow: hidden;
   }
 
   .panes { flex: 1; min-height: 0; position: relative; }
