@@ -179,7 +179,7 @@ export async function installBridge(page: Page) {
             results: [result(['country', 'customers', 'revenue'], [
               ['US', 6412, '1284390.50'], ['DE', 3180, '702118.00'], ['JP', 2957, '655004.75'], ['BR', 2210, '318760.20'],
               ['NL', 1874, '402551.10'], ['FR', 1602, '351920.00'], ['IN', 1544, '189402.35'],
-            ])],
+            ], { columns: [{ name: 'country', type: 'char', kind: 'text' }, { name: 'customers', type: 'int8', kind: 'number' }, { name: 'revenue', type: 'numeric', kind: 'number' }] })],
             errorIndex: -1, errorPosition: -1, cancelled: false, rolledBack: false,
           }),
           RunMore: () => ok(result([], [])),

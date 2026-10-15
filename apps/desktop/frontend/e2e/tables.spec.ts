@@ -1,8 +1,7 @@
-import { connect, expect, shot, test } from './setup';
+import { connect, expect, test } from './setup';
 
 test('connects, browses a table and runs a query', async ({ page }) => {
   await expect(page.locator('.home [data-conn]')).toHaveCount(6);
-  await shot(page, 'connections');
 
   await connect(page);
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
@@ -10,7 +9,6 @@ test('connects, browses a table and runs a query', async ({ page }) => {
   await expect(grid.getByText('ann.novak1@example.com')).toBeVisible();
   await expect(page.getByText('300 of ~24,813 rows loaded')).toBeVisible();
   await grid.getByText('dana.ito4@example.com').click();
-  await shot(page, 'table');
 
   await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
@@ -19,7 +17,6 @@ test('connects, browses a table and runs a query', async ({ page }) => {
   );
   await page.getByRole('button', { name: 'Run all' }).click();
   await expect(page.getByRole('grid').getByText('1284390.50')).toBeVisible();
-  await shot(page, 'query');
 });
 
 test('asks before writing to a Production connection', async ({ page }) => {
@@ -82,7 +79,6 @@ test('draws the schema and explains a relation when it is clicked', async ({ pag
   const canvas = page.locator('.canvas');
   await expect(canvas.locator('[data-table="orders"]')).toBeVisible();
   await expect(page.getByText('8 tables · 6 relations')).toBeVisible();
-  await shot(page, 'diagram');
 
   await page.locator('[data-relation="orders.orders_customer_id_fkey"]').dispatchEvent('click');
   await expect(page.locator('.detail code')).toHaveText('orders.customer_id → customers.id');

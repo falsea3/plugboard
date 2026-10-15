@@ -1,4 +1,4 @@
-import { connect, expect, shot, test } from './setup';
+import { connect, expect, test } from './setup';
 
 test('edits the server config, shows the server’s problems and saves', async ({ page }) => {
   await connect(page);
@@ -13,7 +13,6 @@ test('edits the server config, shows the server’s problems and saves', async (
   await page.keyboard.press('ControlOrMeta+s');
   const problems = page.getByRole('alert').filter({ hasText: 'Saved, but not reloaded' });
   await expect(problems).toContainText('line 5syntax error in file');
-  await shot(page, 'server-config');
   await page.keyboard.type('4MB');
   await page.getByRole('button', { name: 'Save & reload' }).click();
   await expect(page.getByText('Saved and reloaded')).toBeVisible();
@@ -53,7 +52,6 @@ test('creates a role through the SQL the backend writes', async ({ page }) => {
   await page.getByText('Create databases').click();
   await page.getByRole('button', { name: 'Add to a role' }).click();
   await page.getByRole('option', { name: 'readers', exact: true }).last().click();
-  await shot(page, 'roles');
   await page.getByRole('button', { name: 'Create role' }).click();
   await expect(page.getByRole('dialog', { name: 'Role changes' })).toContainText(`CREATE ROLE "reporting" WITH LOGIN PASSWORD '********'`);
   await page.getByRole('button', { name: 'Commit' }).click();

@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { shot } from './setup';
 
 test('shows every building block in both themes', async ({ page }) => {
   await page.goto('/#kit');
@@ -7,8 +6,6 @@ test('shows every building block in both themes', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Save' })).toBeVisible();
   await page.getByRole('tab', { name: 'Structure' }).first().click();
   await expect(page.getByRole('tab', { name: 'Structure' }).first()).toHaveAttribute('aria-selected', 'true');
-  await shot(page, 'kit-dark');
   await page.getByRole('tab', { name: 'Light' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await shot(page, 'kit-light');
 });

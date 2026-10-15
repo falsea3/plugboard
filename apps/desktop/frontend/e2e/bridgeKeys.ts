@@ -68,8 +68,13 @@ export async function installKeys(page: Page, engine: unknown) {
         const lines = script.split('\n').map(l => l.trim()).filter(Boolean);
         const results = lines.map(line => {
           const [cmd, key] = line.split(/\s+/);
+          const base = { statement: line, rowsAffected: 0, hasRows: true, truncated: false, pageable: false, hasMore: false, offset: 0, durationMs: 0.4 };
+          const items = store[key]?.items;
+          if (cmd.toUpperCase() === 'HGETALL' && items) {
+            return { ...base, columns: [{ name: 'field', type: '', kind: 'text' }, { name: 'value', type: '', kind: 'text' }], rows: items.map((i: { field: string; value: string }) => [i.field, i.value]) };
+          }
           const text = cmd.toUpperCase() === 'GET' ? (store[key]?.text ?? null) : 'OK';
-          return { statement: line, columns: [{ name: 'value', type: '', kind: 'text' }], rows: [[text]], rowsAffected: 0, hasRows: true, truncated: false, pageable: false, hasMore: false, offset: 0, durationMs: 0.4 };
+          return { ...base, columns: [{ name: 'value', type: '', kind: 'text' }], rows: [[text]] };
         });
         return ok({ results, errorIndex: -1, errorPosition: -1, cancelled: false, rolledBack: false });
       },

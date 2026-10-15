@@ -64,7 +64,7 @@ stress:
 # The walkthrough in apps/desktop/frontend/e2e drives the UI against a
 # stand-in backend, so the pictures are the same every time and hold no real data.
 screenshots:
-	cd apps/desktop/frontend && PLUGBOARD_SCREENSHOTS="$(CURDIR)/.github/assets/screenshots" npx playwright test
+	cd apps/desktop/frontend && PLUGBOARD_SCREENSHOTS="$(CURDIR)/.github/assets/screenshots" npx playwright test e2e/screenshots.spec.ts
 
 release:
 	scripts/release.sh $(or $(v),patch)
