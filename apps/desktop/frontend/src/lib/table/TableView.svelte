@@ -11,6 +11,7 @@
   import TableGrid from './TableGrid.svelte';
   import StructureView from './StructureView.svelte';
   import TableToolbar from './TableToolbar.svelte';
+  import { rowsLabel, wherePlaceholder } from './labels';
   import DdlView from '../objects/DdlView.svelte';
   import Icon from '../ui/Icon.svelte';
   import LoadBar from '../ui/LoadBar.svelte';
@@ -220,14 +221,17 @@
     onrefresh={() => (mode === 'ddl' ? ddl?.load() : refresh())}
     oncopy={() => ddl?.copy()}
     onquery={() => ddl?.openInQuery()}
+    rowsLabel={rowsLabel(rows.page?.result.rows.length ?? null, !!rows.page?.hasMore, rows.count)}
+    dirty={mode === 'structure' ? structureDirty : edits.dirty}
+    onsave={canEdit || mode === 'structure' ? commit : undefined}
   />
 
-  {#if mode === 'data'}<WhereBar bind:value={where} applied={appliedWhere(filters)} onapply={applyFilters} />{/if}
+  {#if mode === 'data'}<WhereBar bind:value={where} applied={appliedWhere(filters)} placeholder={wherePlaceholder(columns)} onapply={applyFilters} />{/if}
   {#if showFilters && mode === 'data' && columns.length > 0}
     <FilterBar bind:this={filterBar} columns={page?.result.columns ?? columns} bind:rows={filterRows} onapply={applyFilters} onclose={() => (showFilters = false)} />
   {/if}
 
-  <div class="content">
+  <div class="content" class:card={mode !== 'data' || !!rows.error || !page}>
     {#if rows.loading || rows.loadingMore || columnsLoading}<LoadBar label="Loading {tab.table}" />{/if}
     {#if mode === 'ddl'}
       <DdlView bind:this={ddl} {ws} object={{ schema: tab.schema, name: tab.table, kind: tab.tableKind === 'view' ? 'view' : 'table' }} toolbar={false} />
@@ -277,20 +281,9 @@
 
 <style>
   .view { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .content { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
+  .content { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+  .content.card { margin-top: 10px; background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
   .waiting { display: flex; align-items: center; justify-content: center; gap: 8px; height: 100%; font-size: 12.5px; }
-  .error {
-    display: flex;
-    gap: 8px;
-    margin: 16px;
-    padding: 10px 12px;
-    border-radius: var(--radius);
-    color: var(--danger);
-    background: color-mix(in srgb, var(--danger) 10%, transparent);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    user-select: text;
-    -webkit-user-select: text;
-  }
+  .error { display: flex; gap: 8px; margin: 16px; padding: 10px 12px; border-radius: var(--radius); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); font-family: var(--font-mono); font-size: 12px; user-select: text; -webkit-user-select: text; }
   .error .message { white-space: pre-wrap; }
 </style>

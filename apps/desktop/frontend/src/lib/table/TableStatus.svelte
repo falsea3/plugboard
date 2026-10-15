@@ -1,20 +1,29 @@
 <script lang="ts">
-  import type { CellValue, ResultColumn } from '../api/backend';
   import { formatCount, formatDuration } from '../ui/format';
   import { MAX_ROWS, type TableRows } from './rows.svelte';
-  import ValueBar from '../grid/ValueBar.svelte';
+  import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
+
+  type Pending = { count: number; error: string; saving: boolean };
 
   let {
     rows,
     filtered,
-    selected,
-    onopen,
+    cell,
+    pending,
+    valueShown,
+    ontogglevalue,
+    ondiscard,
+    onpreview,
   }: {
     rows: TableRows;
     filtered: boolean;
-    selected: { value: CellValue; column: ResultColumn } | null;
-    onopen: () => void;
+    cell: string;
+    pending: Pending | null;
+    valueShown: boolean;
+    ontogglevalue: () => void;
+    ondiscard: () => void;
+    onpreview: () => void;
   } = $props();
 
   const fmt = (n: number) => n.toLocaleString('en-US');
@@ -30,31 +39,41 @@
   });
 </script>
 
-<div class="footer">
-  <span class="small muted">{rangeLabel}</span>
+<footer class="status">
+  {#if rangeLabel}<span class="chip">{rangeLabel}</span>{/if}
   {#if rows.loadingMore}
-    <span class="small faint loading-more"><Spinner size={10} />Loading more…</span>
+    <span class="chip"><Spinner size={10} />Loading more…</span>
   {:else if page?.hasMore && rows.atLimit}
-    <span class="small faint" title="Sort or filter to reach other rows">first {fmt(MAX_ROWS)} rows only</span>
+    <span class="chip" title="Sort or filter to reach other rows">first {fmt(MAX_ROWS)} rows only</span>
   {/if}
   {#if page && !count?.exact && page.hasMore}
-    <button class="link-btn" onclick={() => rows.countExactly()} disabled={rows.counting} title="Run COUNT(*) — can take a while on big tables">{#if rows.counting}<Spinner size={10} />Counting…{:else}Count{/if}</button>
+    <button class="chip link" onclick={() => rows.countExactly()} disabled={rows.counting} title="Run COUNT(*) — can take a while on big tables">{#if rows.counting}<Spinner size={10} />Counting…{:else}Count{/if}</button>
   {/if}
-  {#if filtered}<span class="filtered">filtered</span>{/if}
-  {#if page}<span class="small" title="How long the last fetch took">{formatDuration(page.result.durationMs)}</span>{/if}
-  <span style="flex:1"></span>
-  {#if selected}
-    <ValueBar value={selected.value} column={selected.column} {onopen} />
+  {#if filtered}<span class="chip accent">filtered</span>{/if}
+  {#if page}<span class="chip" title="How long the last fetch took">{formatDuration(page.result.durationMs)}</span>{/if}
+  {#if pending}
+    {#if pending.error}
+      <span class="chip danger" title={pending.error}><Icon name="alert" size={11} />{pending.error}</span>
+    {:else}
+      <span class="chip warn">{#if pending.saving}<Spinner size={10} />Saving…{:else}{formatCount(pending.count, 'change')} · ⌘S to save{/if}</span>
+    {/if}
+    <button class="chip link" onclick={onpreview} disabled={pending.saving}>Preview SQL</button>
+    <button class="chip link" onclick={ondiscard} disabled={pending.saving}>Discard</button>
   {/if}
-</div>
+  <span class="space"></span>
+  <button class="cell" class:on={valueShown} aria-pressed={valueShown} onclick={ontogglevalue} title={valueShown ? 'Hide the Value panel' : 'Show the Value panel'}>{cell || 'Value'}</button>
+</footer>
 
 <style>
-  .footer { flex: none; display: flex; align-items: center; gap: 6px; height: 38px; min-width: 0; padding: 8px 0 0; }
-  .small { padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; white-space: nowrap; }
-  .muted.small { color: var(--text-2); }
-  .loading-more { display: inline-flex; align-items: center; gap: 6px; }
-  .link-btn { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border: 0; border-radius: 6px; background: var(--surface); color: var(--accent-text); font-size: 12px; }
-  .link-btn:hover:not(:disabled) { background: var(--hover); }
-  .link-btn:disabled { color: var(--text-3); }
-  .filtered { padding: 2px 8px; border-radius: 6px; background: var(--accent-bg); color: var(--accent-text); font-size: 12px; }
+  .status { flex: none; display: flex; align-items: center; gap: 8px; height: 30px; min-width: 0; margin-top: 8px; font-size: 12px; color: var(--text-3); }
+  .chip { flex: none; display: inline-flex; align-items: center; gap: 5px; max-width: 360px; overflow: hidden; padding: 2px 8px; border: 0; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+  .link { color: var(--accent-text); }
+  .link:hover:not(:disabled) { background: var(--hover); }
+  .link:disabled { color: var(--text-4); }
+  .accent { background: var(--accent-bg); color: var(--accent-text); }
+  .warn { background: var(--cell-edited); color: var(--warn); }
+  .danger { flex-shrink: 1; min-width: 0; background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); user-select: text; -webkit-user-select: text; }
+  .space { flex: 1; }
+  .cell { flex: 0 1 auto; min-width: 0; overflow: hidden; padding: 2px 6px; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+  .cell:hover, .cell.on { background: var(--surface); color: var(--text); }
 </style>

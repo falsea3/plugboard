@@ -68,6 +68,8 @@ export class Workspace {
   tunnel = $state<'ok' | 'lost' | 'failed'>('ok');
   schema = $state('');
   tables = $state<TableInfo[]>([]);
+  valueShown = $state(false);
+  valueWidth = $state(280);
   tablesLoading = $state(false);
   tablesError = $state('');
   tabs = $state<Tab[]>([]);

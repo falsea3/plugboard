@@ -1,14 +1,12 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import type { TableTab } from '../app/workspace.svelte';
-  import { copyText } from '../ui/format';
-  import { copyToClipboard } from '../ui/clipboard';
   import { jsonError, jsonToSave, looksLikeJSON } from '../json/text';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import { app } from '../app/app.svelte';
 
-  let { selected }: { selected: TableTab['selected'] | null } = $props();
+  let { selected, width = 280, onclose }: { selected: TableTab['selected'] | null; width?: number; onclose: () => void } = $props();
 
   let full = $state<string | null>(null);
   let loading = $state(false);
@@ -48,10 +46,6 @@
     }
   }
 
-  function copy() {
-    if (selected) void copyToClipboard(full ?? copyText(selected.value));
-  }
-
   function apply() {
     if (!selected?.edit || !editable || !dirty) return;
     if (json && draft.trim() !== '') {
@@ -80,17 +74,16 @@
   }
 </script>
 
-<section class="value-panel" aria-label="Selected cell value">
+<section class="value-panel" aria-label="Selected cell value" style:width="{width}px">
   <header>
-    <strong>Value</strong>
-    {#if selected}
-      <button class="btn icon sm ghost" onclick={copy} title="Copy value" aria-label="Copy value"><Icon name="copy" size={13} /></button>
-    {/if}
+    <span class="title">Value</span>
+    <button class="close" onclick={onclose} title="Hide the Value panel" aria-label="Hide the Value panel"><Icon name="x" size={13} /></button>
   </header>
   {#if selected}
     <div class="field-info">
       <span class="column" title={selected.column.name}>{selected.column.name}</span>
-      <span class="type" title={selected.column.type}>{selected.column.type || 'Unknown type'}</span>
+      <span class="chip" title={selected.column.type}>{selected.column.type || 'unknown'}</span>
+      {#if selected.nullable}<span class="chip">nullable</span>{/if}
     </div>
     {#if partial}
       <div class="partial">
@@ -109,14 +102,13 @@
         spellcheck="false"
         aria-label="Value of {selected.column.name}"
       ></textarea>
-      {#if problem}<p class="problem" role="alert">{problem}</p>{/if}
+      {#if problem}<p class="problem" role="alert">{problem}</p>{:else if dirty}<p class="was">was <span>{selected.value === null ? 'NULL' : original}</span></p>{/if}
       <div class="actions">
         {#if selected.nullable && selected.value !== null}
-          <button class="btn sm ghost" onclick={() => selected?.edit?.(null)}>Set NULL</button>
+          <button class="btn sm outline" onclick={() => selected?.edit?.(null)}>Set NULL</button>
         {/if}
         <span style="flex:1"></span>
-        <button class="btn sm ghost" onclick={() => ((draft = original), (problem = ''))} disabled={!dirty}>Revert</button>
-        <button class="btn sm primary" onclick={apply} disabled={!dirty} title="Apply to the cell (⌘↵) — commit with ⌘S">Apply</button>
+        <button class="btn sm apply" onclick={apply} disabled={!dirty} title="Apply to the cell — commit with ⌘S">Apply ⌘↵</button>
       </div>
     {:else}
       <pre class:null={selected.value === null}>{selected.value === null ? 'NULL' : original}</pre>
@@ -127,62 +119,25 @@
 </section>
 
 <style>
-  .value-panel {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    background: var(--bg);
-  }
-  header {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    height: 34px;
-    padding: 0 8px 0 12px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-  }
-  strong { font-size: 12px; font-weight: 600; }
-  .field-info {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    height: 32px;
-    padding: 0 12px;
-    border-bottom: 1px solid var(--border-subtle);
-    background: var(--surface);
-  }
-  .column { min-width: 0; overflow: hidden; color: var(--text); font: 11.5px var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
-  .type { flex: none; max-width: 45%; overflow: hidden; padding: 2px 6px; border: 1px solid var(--border-subtle); border-radius: 4px; color: var(--text-3); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
-  pre, .editor {
-    flex: 1;
-    min-height: 0;
-    margin: 8px;
-    padding: 10px;
-    overflow: auto;
-    color: var(--text);
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    background: var(--surface);
-    font: 12px/1.55 var(--font-mono);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    user-select: text;
-    -webkit-user-select: text;
-  }
-  .editor { resize: none; outline: none; }
+  .value-panel { flex: none; display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 14px; border: 1px solid var(--hover); border-radius: var(--radius-lg); background: var(--elevated); overflow: auto; }
+  header { flex: none; display: flex; align-items: center; justify-content: space-between; }
+  .title { font-weight: 500; }
+  .close { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--text-4); }
+  .close:hover { background: var(--hover); color: var(--text); }
+  .field-info { flex: none; display: flex; align-items: center; gap: 6px; min-width: 0; margin-top: 10px; }
+  .column { min-width: 0; overflow: hidden; font-family: var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
+  .chip { flex: none; max-width: 45%; overflow: hidden; padding: 1px 6px; border-radius: 5px; background: var(--hover); color: var(--text-3); font-size: 10.5px; text-transform: uppercase; text-overflow: ellipsis; white-space: nowrap; }
+  .chip + .chip { text-transform: none; }
+  pre, .editor { flex: none; height: 120px; margin: 12px 0 0; padding: 10px 12px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); font: 12.5px/1.5 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; }
+  .editor { resize: vertical; outline: none; }
   .editor:focus { border-color: var(--accent); }
   pre.null, .editor.null::placeholder { color: var(--cell-null); font-style: italic; }
-  .problem { flex: none; margin: 0 8px 4px; color: var(--danger); font-size: 11.5px; }
-  .actions { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 8px 8px; }
-  .partial { flex: none; display: flex; align-items: center; gap: 8px; margin: 8px 8px 0; padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-2); font-size: 11.5px; }
+  .problem { flex: none; margin: 6px 0 0; color: var(--danger); font-size: 12px; }
+  .was { flex: none; margin: 6px 0 0; overflow: hidden; color: var(--text-4); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+  .was span { color: var(--text-2); }
+  .actions { flex: none; display: flex; align-items: center; gap: 6px; margin-top: 12px; }
+  .apply { background: var(--active); }
+  .partial { flex: none; display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-2); font-size: 11.5px; }
   .partial span { flex: 1; min-width: 0; }
   .empty { display: grid; flex: 1; place-items: center; padding: 20px; color: var(--text-3); font-size: 12px; text-align: center; }
 </style>

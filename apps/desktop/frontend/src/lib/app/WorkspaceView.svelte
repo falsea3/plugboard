@@ -10,7 +10,6 @@
   import { startDrag } from '../ui/drag';
   import DdlView from '../objects/DdlView.svelte';
   import ScriptDialogs from '../scripts/Dialogs.svelte';
-  import ValuePanel from '../table/ValuePanel.svelte';
   import KeyView from '../keys/KeyView.svelte';
   import ConsoleView from '../keys/ConsoleView.svelte';
   import ConfigView from '../admin/ConfigView.svelte';
@@ -19,10 +18,6 @@
   let { ws, visible }: { ws: Workspace; visible: boolean } = $props();
 
   let sidebarWidth = $state(264);
-  let valueWidth = $state(320);
-  let valueShown = $state(false);
-
-  const tableTab = $derived(ws.activeTab?.kind === 'table' ? ws.activeTab : null);
   const opened = new SvelteSet<string>();
   $effect(() => {
     if (ws.activeTabId) opened.add(ws.activeTabId);
@@ -33,11 +28,6 @@
     startDrag(e, 'col-resize', dx => (sidebarWidth = Math.max(220, Math.min(480, w0 + dx))));
   }
 
-  function startValueResize(e: PointerEvent) {
-    const w0 = valueWidth;
-    const max = Math.max(220, Math.min(600, window.innerWidth - sidebarWidth - 360));
-    startDrag(e, 'col-resize', dx => (valueWidth = Math.max(220, Math.min(max, w0 - dx))));
-  }
 </script>
 
 <div class="workspace" class:hidden={!visible}>
@@ -48,7 +38,7 @@
   <div class="side-resizer" onpointerdown={startResize}></div>
 
   <section class="center">
-    <TabBar {ws} bind:valueShown valueToggle={!!tableTab} />
+    <TabBar {ws} />
 
     <div class="panes">
       {#each ws.tabs as tab (tab.id)}
@@ -89,13 +79,6 @@
     </div>
   </section>
 
-  {#if valueShown && tableTab}
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="side-resizer" onpointerdown={startValueResize}></div>
-    <aside class="value-side" style:width="{valueWidth}px">
-      <ValuePanel selected={tableTab.selected ?? null} />
-    </aside>
-  {/if}
 </div>
 
 {#if visible}<ScriptDialogs {ws} />{/if}
@@ -107,16 +90,6 @@
   .side-resizer { flex: none; width: 8px; z-index: 2; cursor: col-resize; }
   .side-resizer:hover { background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 5px, transparent 5px); }
   .center { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 0 12px 10px 4px; container-type: inline-size; }
-  .value-side {
-    flex: none;
-    min-width: 0;
-    margin: 56px 12px 10px 0;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    background: var(--elevated);
-    overflow: hidden;
-  }
-
   .panes { flex: 1; min-height: 0; position: relative; }
   .pane { position: absolute; inset: 0; }
 

@@ -49,7 +49,7 @@
   const rowState = $derived(editing?.rowState(r) ?? '');
 </script>
 
-<div class="tr {rowState}" class:alt={r % 2 === 1} class:failed={editing?.isFailed(r) ?? false} class:row-selected={marked} role="row" style:height="{height}px">
+<div class="tr {rowState}" class:current={cursorCol !== null} class:failed={editing?.isFailed(r) ?? false} class:row-selected={marked} role="row" style:height="{height}px">
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
   <div class="rn" class:active={cursorCol !== null || marked} style:width="{numberWidth}px" onclick={e => onpoint(-1, e)} oncontextmenu={e => onmenu(e, -1)}>
     {#if rowState === 'new'}<span class="new-mark">+</span>{:else if rowOffset === null}·{:else}{rowOffset + r + 1}{/if}
@@ -110,9 +110,9 @@
 </div>
 
 <style>
-  .tr { display: flex; }
+  .tr { display: flex; border-bottom: 1px solid var(--grid-line); box-sizing: border-box; }
   .pad { flex: none; }
-  .tr.alt { background: var(--grid-row-alt); }
+  .tr.current { background: var(--row-current); }
   .tr.row-selected .td { background: var(--grid-selected); }
 
   .rn {
@@ -123,19 +123,19 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 10px;
+    padding-right: 12px;
     background: var(--card);
-    border-bottom: 1px solid var(--border-subtle);
-    color: var(--text-4);
+    color: var(--row-num);
     font-size: 11.5px;
   }
-  .rn.active { color: var(--accent-text); background: color-mix(in srgb, var(--accent) 10%, var(--card)); }
+  .tr.current .rn { background: var(--row-current); }
+  .rn.active { color: var(--accent-text); }
 
   .td {
+    position: relative;
     flex: none;
     padding: 0 12px;
-    line-height: 29px;
-    border-bottom: 1px solid var(--border-subtle);
+    line-height: 33px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -163,16 +163,21 @@
   }
   .tr:hover .follow, .td.selected .follow { opacity: 1; }
   .follow:hover { background: var(--accent); color: var(--on-accent); }
-  .td.number { color: var(--cell-number); }
-  .td.bool { color: var(--cell-bool); }
-  .td.null { color: var(--cell-null); font-style: italic; }
-  .td.selected {
-    background: var(--grid-selected);
-    box-shadow: inset 0 0 0 1.5px var(--accent);
-    border-radius: 6px;
+  .td.number { color: var(--cell-number); font-family: var(--font-mono); font-size: 12px; }
+  .td.bool { color: var(--cell-bool); font-family: var(--font-mono); font-size: 12px; }
+  .td.null { color: var(--row-num); font-style: italic; }
+  .td.selected::after {
+    content: '';
+    position: absolute;
+    inset: 3px 6px;
+    border: 1.5px solid var(--accent);
+    border-radius: 7px;
+    pointer-events: none;
   }
+  .td.selected { padding: 0 12px; }
 
-  .td.edited { background: color-mix(in srgb, var(--warn) 16%, transparent); }
+  .td.edited::before { content: ''; position: absolute; inset: 3px 6px; border-radius: 7px; background: var(--cell-edited); z-index: -1; }
+  .td.edited { color: var(--warn); z-index: 0; }
   .td.default { color: var(--text-3); font-style: italic; }
   .td.expr { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--text-2); font-style: italic; }
   .tr.new .td { background: color-mix(in srgb, var(--ok) 9%, transparent); }

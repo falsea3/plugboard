@@ -50,38 +50,27 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 10px 8px 4px 2px;
+    padding: 18px 8px 8px;
     border: 0;
     background: transparent;
     color: var(--text-3);
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     text-align: left;
   }
   .group:hover { color: var(--text-2); }
   .count { margin-left: auto; font-weight: 500; }
-  .item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 26px;
-    padding: 0 8px 0 2px;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-2);
-    text-align: left;
-  }
+  .item { width: 100%; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-size: 13px; text-align: left; }
   .item:hover { background: var(--hover); color: var(--text); }
-  .item.active { background: var(--accent-dim); color: var(--text); }
+  .item.active { background: var(--tree-selected); color: var(--accent-text); font-weight: 500; }
+  .item.active :global(.icon) { color: var(--accent-text); }
   .item :global(.icon) { color: var(--text-3); }
-  .twist { flex: none; display: flex; align-items: center; justify-content: center; width: 16px; height: 18px; border-radius: 4px; transition: transform 0.12s; }
+  .twist { flex: none; display: flex; align-items: center; justify-content: center; width: 12px; height: 18px; border-radius: 4px; transition: transform 0.12s; }
   .twist.open { transform: rotate(90deg); }
   .item .twist:hover { background: var(--active); }
-  .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
+  .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hint { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-size: 11px; text-align: right; }
   .value { height: 22px; padding: 0 8px 0 46px; color: var(--text-2); font-family: var(--font-mono); font-size: 11.5px; line-height: 22px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .note { padding: 8px; color: var(--danger); font-size: 11.5px; }

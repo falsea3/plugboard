@@ -13,6 +13,8 @@
   --text-2: #a6a6ac;
   --text-3: #8a8a90;
   --text-4: #6e6e74;
+  --text-soft: #c9c9ce;
+  --tab-active: #ffffff;
 
   --accent:       #5e5ce6;
   --accent-dim:   rgba(94, 92, 230, 0.2);
@@ -33,6 +35,11 @@
 
   --grid-row-alt:  rgba(255, 255, 255, 0.012);
   --grid-selected: rgba(94, 92, 230, 0.22);
+  --grid-line:     #18181b;
+  --row-num:       #4e4e54;
+  --row-current:   #17172a;
+  --tree-selected: #22223a;
+  --cell-edited:   #2a2312;
   --cell-null:     #5c5c63;
   --cell-number:   #a6a6ac;
   --cell-bool:     #b39dff;
@@ -67,6 +74,8 @@
   --text-2: #50505a;
   --text-3: #6b6b74;
   --text-4: #8a8a93;
+  --text-soft: #3a3a42;
+  --tab-active: #2d2ab8;
 
   --accent:       #5552e0;
   --accent-dim:   rgba(85, 82, 224, 0.12);
@@ -87,6 +96,11 @@
 
   --grid-row-alt:  rgba(0, 0, 0, 0.022);
   --grid-selected: rgba(79, 91, 232, 0.16);
+  --grid-line:     #efeff2;
+  --row-num:       #a4a4ac;
+  --row-current:   #f3f3fd;
+  --tree-selected: #ebebfc;
+  --cell-edited:   #fbf1dc;
   --cell-null:     #9a9aa3;
   --cell-number:   #0d7563;
   --cell-bool:     #7443cc;

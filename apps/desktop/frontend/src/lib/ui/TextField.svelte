@@ -11,6 +11,7 @@
     mono = false,
     size = 'md',
     prefix,
+    outline = false,
     ...rest
   }: Omit<HTMLInputAttributes, 'value' | 'size'> & {
     value?: string;
@@ -21,10 +22,11 @@
     mono?: boolean;
     size?: 'md' | 'sm';
     prefix?: string;
+    outline?: boolean;
   } = $props();
 </script>
 
-<label class="field" class:mono class:sm={size === 'sm'}>
+<label class="field" class:mono class:outline class:sm={size === 'sm'}>
   {#if icon}<Icon name={icon} size={14} />{/if}
   {#if prefix}<span class="prefix">{prefix}</span>{/if}
   <input bind:this={element} bind:value aria-label={label} spellcheck="false" autocomplete="off" {...rest} />
@@ -45,6 +47,7 @@
     color: var(--text-4);
     transition: border-color 0.12s, box-shadow 0.12s;
   }
+  .field.outline { background: transparent; border-color: var(--border); }
   .field.sm { height: 30px; border-radius: 9px; }
   .field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
   .field input { flex: 1; min-width: 0; height: 100%; padding: 0; background: transparent; border: 0; outline: none; color: var(--text); font-size: 13px; }

@@ -52,7 +52,7 @@ test('keeps rows under the viewport while the wheel jumps', async ({ page }) => 
         const row = hit?.closest('[role="row"]');
         const number = row?.querySelector('.rn')?.textContent?.trim();
         const middle = row ? row.getBoundingClientRect().top + 13 : y;
-        const want = String(Math.floor((el.scrollTop + middle - box.top - 36) / 30) + 1);
+        const want = String(Math.floor((el.scrollTop + middle - box.top - 40) / 34) + 1);
         if (number !== want) out.push(`jump ${i}: at ${Math.round(y - box.top)}px row ${number ?? 'none'}, want ${want}`);
       }
       await new Promise(r => setTimeout(r, 0));
@@ -146,7 +146,7 @@ test('reruns a filter as soon as its operator changes', async ({ page }) => {
 test('edits a cell from the Value panel and commits it like any edit', async ({ page }) => {
   await connect(page);
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
-  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await page.getByRole('button', { name: /^(Value|row \d+ ·)/ }).click();
   const grid = page.getByRole('grid');
   await grid.getByText('ann.novak1@example.com').click();
   const box = page.getByRole('textbox', { name: 'Value of email' });

@@ -56,8 +56,8 @@
       e.stopPropagation();
       toggle();
     }}
-  ><Icon name="chevron-right" size={10} /></span>
-  <Icon name={t.kind === 'view' ? 'view' : 'table'} size={13} />
+  ><Icon name="chevron-right" size={12} /></span>
+  <Icon name={t.kind === 'view' ? 'view' : 'table'} size={14} />
   <span class="label">{t.name}</span>
 </button>
 
@@ -71,7 +71,7 @@
       {#each columns as c (c.name)}
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="col" oncontextmenu={e => onmenu(e, c)} ondblclick={() => ws.openTable(t, undefined, 'structure')} title="{c.name} {c.type}">
-          <span class="key">{#if c.primaryKey}<Icon name="key" size={10} />{/if}</span>
+          <span class="key">{#if c.primaryKey}<Icon name="key" size={12} />{/if}</span>
           <span class="name">{c.name}</span>
           <span class="type">{c.type}</span>
         </div>
@@ -82,7 +82,7 @@
       {#each indexes as ix (ix.name)}
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="col" oncontextmenu={e => onmenu(e, undefined, ix)} title={ix.definition ?? ix.name}>
-          <span class="key">{#if ix.primary}<Icon name="key" size={10} />{/if}</span>
+          <span class="key">{#if ix.primary}<Icon name="key" size={12} />{/if}</span>
           <span class="name">{ix.name}</span>
           <span class="type">{ix.unique && !ix.primary ? 'unique · ' : ''}{ix.columns.join(', ')}</span>
         </div>
@@ -92,43 +92,22 @@
 {/if}
 
 <style>
-  .item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 26px;
-    padding: 0 8px 0 2px;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-2);
-    text-align: left;
-  }
-  .item:hover { background: var(--hover); color: var(--text); }
-  .item.active { background: var(--accent-dim); color: var(--text); }
+  .item { width: 100%; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-size: 13px; text-align: left; }
+  .item:hover { background: var(--hover); }
+  .item.active { background: var(--tree-selected); color: var(--accent-text); font-weight: 500; }
   .item :global(.icon) { color: var(--text-3); }
-  .item.active > :global(.icon) { color: var(--accent); }
-  .item.picked { background: var(--grid-selected); color: var(--text); }
-  .twist { flex: none; display: flex; align-items: center; justify-content: center; width: 16px; height: 18px; border-radius: 4px; transition: transform 0.12s; }
-  .twist:hover { background: var(--active); }
+  .item .twist :global(.icon) { color: var(--text-4); }
+  .item.active > :global(.icon) { color: var(--accent-text); }
+  .item.picked { background: var(--grid-selected); }
+  .twist { flex: none; display: flex; align-items: center; justify-content: center; width: 12px; height: 18px; border-radius: 4px; transition: transform 0.12s; }
+  .twist:hover :global(.icon) { color: var(--text); }
   .twist.open { transform: rotate(90deg); }
-  .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
-  .columns { padding: 1px 0 4px; }
-  .sub { padding: 6px 8px 2px 24px; color: var(--text-3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-  .col {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 22px;
-    padding: 0 8px 0 24px;
-    border-radius: 5px;
-    color: var(--text-2);
-    font-size: 12px;
-  }
+  .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sub { padding: 6px 8px 2px 40px; color: var(--text-4); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .col { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px 0 40px; border-radius: 8px; color: var(--text-soft); font-size: 12.5px; }
   .col:hover { background: var(--hover); color: var(--text); }
   .col.error { color: var(--danger); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .key { flex: none; display: flex; width: 12px; color: var(--text-3); }
+  .key { flex: none; display: flex; width: 14px; margin-left: -20px; margin-right: 6px; color: var(--warn); }
   .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .type { flex: none; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; }
+  .type { flex: none; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-4); font-size: 10.5px; letter-spacing: 0.03em; text-transform: uppercase; }
 </style>

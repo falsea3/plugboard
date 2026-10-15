@@ -15,7 +15,7 @@
   import type { Relation } from '../api/wire';
   import DataGrid from '../grid/DataGrid.svelte';
   import TableStatus from './TableStatus.svelte';
-  import PendingBar from './PendingBar.svelte';
+  import ValuePanel from './ValuePanel.svelte';
   import SqlPreview from './SqlPreview.svelte';
   import ValueEditor, { type ValueEdit } from './ValueEditor.svelte';
   import { TableSave } from './save.svelte';
@@ -111,9 +111,9 @@
     valueEdit = { r, c, title: `${tab.table}.${names[c]}`, value, json, readOnly: !baseEditable(r, c) };
   }
 
-  function showValue() {
-    const at = grid?.cursor();
-    if (at) openValue(at.row, at.col, colAt(at.col)?.kind === 'json');
+  function cellLabel(sel: TableTab['selected'] | undefined) {
+    if (!sel?.key) return '';
+    return `row ${Number(sel.key.split(':')[0]) + 1} · ${sel.column.name}`;
   }
 
   const setCell = (r: number, c: number, v: string | null) => (edits.set(r, c, v), grid?.showRow(r, c, false));
@@ -225,6 +225,7 @@
 
 </script>
 
+<div class="body">
 <div class="grid-area">
   <DataGrid
     bind:this={grid}
@@ -243,11 +244,18 @@
     onselect={(value, column) => ws.selectCell(tab, selection(value, column))}
   />
 </div>
-{#if edits.dirty}
-  <PendingBar count={edits.count} error={save.error} saving={save.saving} ondiscard={() => save.discard()} onpreview={() => save.showPreview(false)} oncommit={commit} />
-{:else}
-  <TableStatus {rows} {filtered} selected={tab.selected ?? null} onopen={showValue} />
-{/if}
+{#if ws.valueShown}<ValuePanel selected={tab.selected ?? null} width={ws.valueWidth} onclose={() => (ws.valueShown = false)} />{/if}
+</div>
+<TableStatus
+  {rows}
+  {filtered}
+  cell={cellLabel(tab.selected)}
+  pending={edits.dirty ? { count: edits.count, error: save.error, saving: save.saving } : null}
+  valueShown={ws.valueShown}
+  ontogglevalue={() => (ws.valueShown = !ws.valueShown)}
+  ondiscard={() => save.discard()}
+  onpreview={() => save.showPreview(false)}
+/>
 
 {#if valueEdit}
   <ValueEditor edit={valueEdit} onsave={saveValue} onclose={() => (valueEdit = null)} />
@@ -269,5 +277,6 @@
 {/if}
 
 <style>
-  .grid-area { flex: 1; min-height: 0; position: relative; }
+  .body { flex: 1; min-height: 0; display: flex; gap: 10px; margin-top: 10px; }
+  .grid-area { flex: 1; min-width: 0; position: relative; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
 </style>

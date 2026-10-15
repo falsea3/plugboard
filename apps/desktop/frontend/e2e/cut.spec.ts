@@ -21,7 +21,7 @@ test('shows a cut value as cut, and loads it whole before editing', async ({ pag
   await cell.dblclick();
   await expect(page.locator('.cell-editor, textarea.cell-input')).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await page.getByRole('button', { name: /^(Value|row \d+ ·)/ }).click();
   await cell.click();
   const panel = page.getByRole('region', { name: 'Selected cell value' });
   await expect(panel).toContainText('Showing the first 1 KB of 3.0 MB');

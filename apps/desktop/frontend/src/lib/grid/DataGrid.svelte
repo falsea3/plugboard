@@ -279,9 +279,9 @@
     height: 100%;
     overflow: auto;
     outline: none;
-    background: var(--bg);
-    font-family: var(--font-mono);
-    font-size: 12px;
+    background: var(--card);
+    font-family: var(--font-ui);
+    font-size: 13px;
     font-variant-numeric: tabular-nums;
   }
   .inner { position: relative; min-width: 100%; }

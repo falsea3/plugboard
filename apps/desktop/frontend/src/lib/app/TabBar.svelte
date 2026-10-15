@@ -7,7 +7,7 @@
   import { iconOf } from '../objects/kinds';
   import { isDirty } from '../scripts/names';
 
-  let { ws, valueShown = $bindable(), valueToggle }: { ws: Workspace; valueShown: boolean; valueToggle: boolean } = $props();
+  let { ws }: { ws: Workspace } = $props();
 
   let list = $state<HTMLElement>();
 
@@ -53,7 +53,7 @@
           onclick={e => order.clicked(e, tab.id) && (ws.activeTabId = tab.id)}
           title={tab.kind === 'table' ? `${tab.schema}.${tab.table}` : tab.title}
         >
-          <Icon name={tabIcon(tab)} size={12} />
+          <Icon name={tabIcon(tab)} size={14} />
           <span>{tab.kind === 'table' ? tab.table : tab.title}</span>
           {#if (tab.kind === 'table' || tab.kind === 'config') && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
           {#if tab.kind === 'query' && isDirty(tab)}<span class="dirty-dot" title="Unsaved changes"></span>{/if}
@@ -61,14 +61,8 @@
         <button class="tab-close" onclick={() => app.requestCloseTab(ws, tab.id)} title="Close (⌘W or middle-click)" aria-label="Close tab"><Icon name="x" size={12} /></button>
       </div>
     {/each}
-    <button class="tab-new" onclick={() => ws.newQuery()} title="New query (⌘T)"><Icon name="plus" size={13} /></button>
   </nav>
   <span class="space"></span>
-  {#if valueToggle}
-    <button class="btn ghost sm value-toggle no-drag" class:active={valueShown} aria-pressed={valueShown} onclick={() => (valueShown = !valueShown)} title={valueShown ? 'Hide Value panel' : 'Show Value panel'}>
-      <Icon name="columns" size={14} />Value
-    </button>
-  {/if}
   <button class="btn ghost icon no-drag" onclick={() => (app.settingsOpen = 'general')} title="Settings (⌘,)" aria-label="Settings"><Icon name="settings" size={16} /></button>
 </div>
 {#if order.indicator}
@@ -81,7 +75,6 @@
   .tabs { display: flex; align-items: center; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
   .tabs::-webkit-scrollbar { display: none; }
   .space { flex: 1; align-self: stretch; }
-  .value-toggle.active { background: var(--accent-bg); color: var(--accent-text); }
   .drop-indicator { position: fixed; z-index: 100; width: 2px; border-radius: 2px; background: var(--accent); pointer-events: none; }
   .tab {
     position: relative;
@@ -91,20 +84,18 @@
     gap: 2px;
     height: 34px;
     max-width: 240px;
-    padding: 0 6px 0 12px;
+    padding: 0 14px;
     border-radius: var(--radius);
-    color: var(--text-2);
+    color: var(--text-soft);
     transition: background 0.12s, color 0.12s;
   }
   .tab:hover { background: var(--elevated); color: var(--text); }
   .tab.dragging { opacity: 0.45; }
-  .tab.active { background: var(--accent-bg); color: #fff; }
+  .tab.active { background: var(--accent-bg); color: var(--tab-active); }
   .tab-main { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; font-size: 13.5px; text-align: left; user-select: none; }
   .tab-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tab-main .dirty-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
-  .tab-close { flex: none; display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: inherit; opacity: 0; }
-  .tab:hover .tab-close, .tab.active .tab-close { opacity: 0.7; }
-  .tab-close:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
-  .tab-new { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 9px; background: transparent; color: var(--text-3); }
-  .tab-new:hover { color: var(--text); background: var(--elevated); }
+  .tab-close { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: inherit; color: inherit; opacity: 0; }
+  .tab:hover .tab-close { opacity: 0.8; }
+  .tab-close:hover { opacity: 1; background: var(--active); }
 </style>

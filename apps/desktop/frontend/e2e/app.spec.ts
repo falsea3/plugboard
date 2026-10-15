@@ -98,23 +98,23 @@ test('shows the selected cell in the Value panel, hidden until asked, on table t
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const panel = page.getByRole('region', { name: 'Selected cell value' });
   await expect(panel).toBeHidden();
-  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await page.getByRole('button', { name: /^(Value|row \d+ ·)/ }).click();
   await expect(panel).toContainText('Select a cell to view its value');
   await page.getByRole('grid').getByText('ann.novak1@example.com').click();
   await expect(panel.getByRole('textbox')).toHaveValue('ann.novak1@example.com');
-  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await page.getByRole('button', { name: /^(Value|row \d+ ·)/ }).click();
   await expect(panel).toBeHidden();
-  await page.getByRole('button', { name: 'Value', exact: true }).click();
+  await page.getByRole('button', { name: /^(Value|row \d+ ·)/ }).click();
   await expect(panel.getByRole('textbox')).toHaveValue('ann.novak1@example.com');
-  await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  await page.getByRole('button', { name: /^New query/ }).click();
   await expect(panel).toBeHidden();
-  await expect(page.getByRole('button', { name: 'Value', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^(Value|row \d+ ·)/ })).toHaveCount(0);
 });
 
 test('reorders tabs by dragging and keeps a click a click', async ({ page }) => {
   await connect(page);
   const tabs = page.getByRole('navigation', { name: 'Open tabs' });
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'New query (⌘T)' }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: /^New query/ }).click();
   await expect(tabs.getByRole('tab')).toHaveText(['Query 1', 'Query 2', 'Query 3']);
   const from = (await tabs.getByRole('tab', { name: 'Query 1' }).boundingBox())!;
   const to = (await tabs.getByRole('tab', { name: 'Query 3' }).boundingBox())!;

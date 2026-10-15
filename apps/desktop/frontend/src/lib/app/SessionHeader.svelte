@@ -26,16 +26,16 @@
 
 <div class="top drag">
   <span class="lights" aria-hidden="true"></span>
-  <button class="home no-drag" onclick={() => app.goHome()} title="All connections (⇧⌘H)" aria-label="All connections"><Icon name="database" size={15} /></button>
+  <button class="home no-drag" onclick={() => app.goHome()} title="All connections (⇧⌘H)" aria-label="All connections"><Icon name="database" size={16} /></button>
 </div>
 
-<button class="conn" data-switch-anchor onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog">
+<button class="conn" data-switch-anchor onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog" aria-expanded={app.switcherOpen}>
   <ConnAvatar connection={conn} size={38} />
   <span class="meta">
     <span class="name"><span class="text">{conn.name}</span><EnvBadge env={conn.env} /></span>
-    <span class="target">
-      {#if via}<span class="via" class:down={ws.tunnel !== 'ok'} title={ws.tunnel !== 'ok' ? 'SSH connection lost — reconnecting' : `Through SSH ${conn.ssh.user}@${conn.ssh.host || conn.host}`}><Icon name="tunnel" size={10} />{ws.tunnel !== 'ok' ? 'reconnecting…' : 'SSH'}</span>{/if}
-      <span class="text">{ws.session.serverVersion}</span>
+    <span class="target" title={ws.session.serverVersion}>
+      {#if via && ws.tunnel !== 'ok'}<span class="via down" title="SSH connection lost — reconnecting"><Icon name="tunnel" size={10} />reconnecting…</span>{/if}
+      <span class="text">{engine(conn.driver).name} · {connectionTarget(conn)}</span>
     </span>
   </span>
   <Icon name="updown" size={14} />
@@ -44,7 +44,7 @@
 <button class="ro" class:on={ws.readOnly} disabled={ws.switchingReadOnly} onclick={toggleReadOnly} role="switch" aria-checked={ws.readOnly}
   title={ws.readOnly ? 'Read-only is on: writes are refused. Click to allow writes for this session.' : 'Read-only is off: writes are allowed. Click to make this session read-only.'}>
   {#if ws.switchingReadOnly}<Spinner size={12} />{:else}<Icon name={ws.readOnly ? 'lock' : 'lockOpen'} size={14} />{/if}
-  <span>{ws.switchingReadOnly ? 'Reconnecting…' : 'Read-only'}</span>
+  <span>{ws.switchingReadOnly ? 'Reconnecting…' : 'Read only'}</span>
   <span class="track" aria-hidden="true"></span>
 </button>
 
@@ -66,8 +66,8 @@
 <style>
   .confirm-text { margin: 0; color: var(--text-2); line-height: 1.5; }
   .confirm-text strong { color: var(--text); }
-  .top { display: flex; align-items: center; height: 40px; padding: 0 8px 0 0; }
-  .lights { flex: 1; }
+  .top { display: flex; align-items: center; height: 16px; padding-top: 16px; }
+  .lights { width: 70px; flex: none; }
   .home { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); }
   .home:hover { background: var(--hover); color: var(--text); }
   .conn {
@@ -75,7 +75,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 2px 8px 0;
+    margin: 12px 8px 0;
     padding: 6px 10px 6px 6px;
     border: 0;
     border-radius: 12px;
@@ -84,10 +84,11 @@
     text-align: left;
     transition: background 0.12s;
   }
-  .conn:hover { background: var(--hover); }
+  .conn:hover, .conn[aria-expanded='true'] { background: var(--hover); }
   .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .name { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--text); font-size: 14px; font-weight: 500; }
   .target { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; color: var(--text-3); }
+  .conn > :global(.icon) { color: var(--text-2); margin-right: 4px; }
   .text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .via { flex: none; display: inline-flex; align-items: center; gap: 3px; padding: 0 5px; border-radius: 4px; background: var(--active); color: var(--text-2); font-size: 10px; font-weight: 600; }
   .via.down { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
@@ -96,7 +97,7 @@
     align-items: center;
     gap: 8px;
     height: 34px;
-    margin: 10px 12px 0;
+    margin: 14px 12px 0;
     padding: 0 10px;
     border: 0;
     border-radius: var(--radius);

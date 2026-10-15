@@ -15,6 +15,9 @@
     onrefresh,
     oncopy,
     onquery,
+    rowsLabel = '',
+    dirty = false,
+    onsave,
   }: {
     mode: 'data' | 'structure' | 'ddl';
     schema: string;
@@ -28,12 +31,15 @@
     onrefresh: () => void;
     oncopy: () => void;
     onquery: () => void;
+    rowsLabel?: string;
+    dirty?: boolean;
+    onsave?: () => void;
   } = $props();
 </script>
 
 <div class="toolbar">
   <SegmentedControl label="Table view" bind:value={mode} options={[{ value: 'data', label: 'Data' }, { value: 'structure', label: 'Structure' }, { value: 'ddl', label: 'DDL' }]} />
-  <span class="title" title={`${schema}.${table}`}>{schema}.<span class="name">{table}</span></span>
+  <span class="title" title={`${schema}.${table}`}>{schema}.<span class="name">{table}</span>{#if rowsLabel}{' · '}{rowsLabel}{/if}</span>
   {#if mode === 'ddl'}
   <button class="btn outline" onclick={oncopy}><Icon name="copy" size={14} />Copy</button>
   <button class="btn outline" onclick={onquery}><Icon name="code" size={14} />Open in query</button>
@@ -49,13 +55,17 @@
     <button class="btn outline" onclick={onadd} disabled={!canAdd} title="Add row (⌘I)"><Icon name="plus" size={14} />Row</button>
   {/if}
   {/if}
-  <button class="btn outline icon" title="Refresh (⌘R)" onclick={onrefresh}><Icon name="refresh" size={14} /></button>
+  <button class="btn outline icon" title="Refresh (⌘R)" aria-label="Refresh" onclick={onrefresh}><Icon name="refresh" size={14} /></button>
+  {#if onsave && mode !== 'ddl'}
+    <button class="btn primary" onclick={onsave} disabled={!dirty} title="Save changes (⌘S)">Save<span class="kbd">⌘S</span></button>
+  {/if}
 </div>
 
 <style>
-  .toolbar { flex: none; display: flex; align-items: center; gap: 8px; height: 44px; min-width: 0; overflow: hidden; }
-  .title { flex: 1 1 auto; min-width: 0; margin-left: 4px; overflow: hidden; color: var(--text-4); text-overflow: ellipsis; white-space: nowrap; }
+  .toolbar { flex: none; display: flex; align-items: center; gap: 10px; height: 44px; margin-top: 6px; min-width: 0; overflow: hidden; }
+  .title { flex: 1 1 auto; min-width: 0; overflow: hidden; color: var(--text-4); text-overflow: ellipsis; white-space: nowrap; }
   .name { color: var(--text); }
+  .primary .kbd { background: transparent; color: inherit; opacity: 0.8; padding: 0; }
   .filter-btn.on { color: var(--accent-text); background: var(--accent-bg); border-color: transparent; }
   .count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: var(--on-accent); font-size: 11px; line-height: 18px; text-align: center; }
   .ro-reason { display: inline-flex; align-items: center; gap: 5px; flex: 0 1 auto; min-width: 12px; max-width: 200px; overflow: hidden; font-size: 12px; color: var(--text-3); white-space: nowrap; text-overflow: ellipsis; }

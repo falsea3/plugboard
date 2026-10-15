@@ -118,7 +118,7 @@
     </div>
   {:else}
     <div class="filter">
-      <TextField icon="search" kbd="⇧⌘F" placeholder="Filter tables" label="Filter tables" bind:value={filter} bind:element={input} onkeydown={onFilterKey} />
+      <TextField icon="search" kbd="⇧⌘F" placeholder="Filter tables" label="Filter tables" outline bind:value={filter} bind:element={input} onkeydown={onFilterKey} />
     </div>
 
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -132,6 +132,7 @@
           {#if group.items.length > 0 || (group.label === 'Tables' && !filter)}
             <div class="group">
               <span>{group.label}</span>
+              {#if group.label === 'Tables'}<button class="reload" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables" aria-label="Reload tables">{#if ws.tablesLoading}<Spinner size={10} label="Loading tables" />{:else}<Icon name="refresh" size={11} />{/if}</button>{/if}
               <span class="count">{group.items.length}</span>
             </div>
             {#each group.items.slice(0, limit) as t (t.name)}
@@ -173,7 +174,6 @@
       <button class="btn icon" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={15} /></button>
       {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
       {#if ws.session.engine.roles}<button class="btn icon" onclick={() => ws.openAdmin('roles')} title="Roles" aria-label="Roles"><Icon name="roles" size={15} /></button>{/if}
-      <button class="btn icon" onclick={() => ws.loadTables()} disabled={ws.tablesLoading} title="Reload tables" aria-label="Reload tables">{#if ws.tablesLoading}<Spinner size={12} label="Loading tables" />{:else}<Icon name="refresh" size={15} />{/if}</button>
     </div>
   {/if}
 </aside>
@@ -190,22 +190,28 @@
     overflow: hidden;
   }
   .schema { padding: 8px 12px 0; }
+  .schema :global(.select) { background-color: transparent; }
   .more { display: block; width: 100%; padding: 4px 12px 6px 30px; border: 0; background: none; font-size: 12px; text-align: left; cursor: pointer; }
   .more:hover { color: var(--text-2); }
-  .filter { padding: 8px 12px 4px; }
+  .filter { padding: 8px 12px 0; }
 
-  .list { flex: 1; overflow-y: auto; padding: 8px 8px 8px; }
+  .list { flex: 1; overflow-y: auto; padding: 20px 8px 8px; }
   .group {
     display: flex;
-    justify-content: space-between;
-    padding: 12px 8px 6px;
+    align-items: center;
+    gap: 6px;
+    padding: 18px 8px 8px;
     color: var(--text-3);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-  .count { font-weight: 500; }
+  .group:first-child { padding-top: 0; }
+  .count { margin-left: auto; font-weight: 500; }
+  .reload { display: grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: var(--text-4); opacity: 0; }
+  .group:hover .reload, .reload:disabled { opacity: 1; }
+  .reload:hover { background: var(--hover); color: var(--text); }
   .picked-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--border-subtle); color: var(--text-2); }
   .note { padding: 12px 8px; font-size: 12px; }
   .note.loading { display: flex; align-items: center; gap: 7px; }
