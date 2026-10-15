@@ -60,7 +60,7 @@
 <style>
   .nav { width: 232px; flex: none; display: flex; flex-direction: column; margin: 8px 0 8px 8px; border: 1px solid var(--hover); border-radius: var(--radius-xl); background: var(--elevated); }
   .top { display: flex; align-items: center; gap: 8px; height: 16px; padding: 9px 10px 0 0; }
-  .lights { width: 70px; flex: none; }
+  .lights { width: 64px; flex: none; }
   .back { min-width: 0; display: flex; align-items: center; gap: 4px; height: 26px; margin-left: auto; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .back:hover { background: var(--hover); color: var(--text); }
   h1 { margin: 0; padding: 26px 16px 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }

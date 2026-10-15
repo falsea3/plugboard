@@ -9,6 +9,7 @@ import (
 	"github.com/falsea3/plugboard/apps/desktop/internal/db"
 	"github.com/falsea3/plugboard/apps/desktop/internal/sshtunnel"
 	"github.com/falsea3/plugboard/apps/desktop/internal/store"
+	"github.com/falsea3/plugboard/apps/desktop/internal/window"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -47,6 +48,7 @@ func NewApp() *App {
 
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
+	window.Style()
 	moveOldSecrets(DataDir(), a.connections, store.OldSecrets())
 }
 

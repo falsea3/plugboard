@@ -69,7 +69,7 @@
   .confirm-text { margin: 0; color: var(--text-2); line-height: 1.5; }
   .confirm-text strong { color: var(--text); }
   .top { display: flex; align-items: center; height: 16px; padding-top: 9px; }
-  .lights { width: 70px; flex: none; }
+  .lights { width: 64px; flex: none; }
   .home { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); }
   .home:hover { background: var(--hover); color: var(--text); }
   .conn {
