@@ -3,6 +3,7 @@
   import type { CellValue, ResultColumn } from '../api/wire';
   import { copyText, toTSV } from '../ui/format';
   import { columnWidth } from './widths';
+  import { paneVisible } from '../app/pane';
   import { copyToClipboard } from '../ui/clipboard';
   import { gridMenuItems, inCellEditor, keyAction, type GridEditing, type KeyAction, type MenuAt, type MenuItem } from './grid';
   import { GridSelection } from './selection.svelte';
@@ -58,6 +59,7 @@
     show: (r, c) => showCell(r, c),
     focus: () => focusGrid(),
   });
+  const drawn = paneVisible();
   let menu = $state<{ x: number; y: number; r: number; c: number } | null>(null);
 
   let shapeKey = '';
@@ -217,6 +219,7 @@
   aria-colcount={columns.length}
 >
   <div class="inner" style:width="{totalWidth}px" style:height="{HEADER_H + rows.length * ROW_H}px">
+    {#if drawn()}
     <GridHeader
       {columns}
       widths={view.widths}
@@ -260,6 +263,7 @@
         {/each}
       </div>
     </div>
+    {/if}
   </div>
 
   {#if menu}
@@ -275,26 +279,9 @@
 </div>
 
 <style>
-  .grid {
-    position: relative;
-    height: 100%;
-    overflow: auto;
-    outline: none;
-    background: var(--card);
-    font-family: var(--font-ui);
-    font-size: 13px;
-    font-variant-numeric: tabular-nums;
-  }
+  .grid { position: relative; height: 100%; overflow: auto; outline: none; background: var(--card); font-family: var(--font-ui); font-size: 13px; font-variant-numeric: tabular-nums; }
   .inner { position: relative; min-width: 100%; }
   .body { position: sticky; }
   .rows { will-change: transform; }
-  .empty {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    padding: 28px;
-    text-align: center;
-    font-family: var(--font-ui);
-  }
+  .empty { position: absolute; left: 0; right: 0; top: 0; padding: 28px; text-align: center; font-family: var(--font-ui); }
 </style>

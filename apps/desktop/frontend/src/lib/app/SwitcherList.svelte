@@ -102,6 +102,7 @@
               <span class="state" role="status"><Spinner size={10} />Connecting…</span>
             {:else if n >= 0}
               <span class="state open-state">● {n === 0 ? 'open' : n === 1 ? '1 tab' : `${n} tabs`}</span>
+              <button class="disconnect" title="Disconnect (⇧⌘W)" aria-label="Disconnect {c.name}" onpointerdown={e => e.stopPropagation()} onclick={e => { e.stopPropagation(); const ws = app.workspaceFor(c.id); if (ws) app.requestClose(ws); }}><Icon name="x" size={12} /></button>
             {:else if c.lastUsed}
               <span class="state">{usedAgo(c.lastUsed)}</span>
             {/if}
@@ -141,6 +142,9 @@
   .target { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--text-3); }
   .state { flex: none; display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-3); }
   .open-state { color: var(--text-2); }
+  .disconnect { display: none; place-items: center; width: 22px; height: 22px; flex: none; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); }
+  .row:hover .disconnect { display: grid; }
+  .disconnect:hover { background: var(--active); color: var(--text); }
   .row.current .open-state { color: var(--accent-text); }
   .line { position: absolute; left: 14px; right: 14px; height: 2px; border-radius: 1px; background: var(--accent-hover); pointer-events: none; }
 </style>

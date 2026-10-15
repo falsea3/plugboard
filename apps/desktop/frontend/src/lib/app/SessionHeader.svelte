@@ -29,6 +29,7 @@
   <span class="lights" aria-hidden="true"></span>
   <button class="home no-drag" onclick={() => app.goHome()} title="All connections (⇧⌘H)" aria-label="All connections"><Icon name="database" size={16} /></button>
   <button class="home no-drag" onclick={() => layout.toggleSidebar()} title={layout.sidebarHidden ? 'Keep the sidebar open (⌘\\)' : 'Hide the sidebar (⌘\\)'} aria-label={layout.sidebarHidden ? 'Keep the sidebar open' : 'Hide the sidebar'}><Icon name="sidebar" size={16} /></button>
+  <button class="home no-drag" onclick={() => app.requestClose(ws)} title="Disconnect (⇧⌘W)" aria-label="Disconnect"><Icon name="unplug" size={16} /></button>
 </div>
 
 <button class="conn" data-switch-anchor onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog" aria-expanded={app.switcherOpen}>
@@ -69,7 +70,8 @@
   .confirm-text { margin: 0; color: var(--text-2); line-height: 1.5; }
   .confirm-text strong { color: var(--text); }
   .top { display: flex; align-items: center; height: 33px; }
-  .lights { width: 64px; flex: none; }
+  .lights { flex: 1; }
+  .top { padding-right: 8px; gap: 2px; }
   .home { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); }
   .home:hover { background: var(--hover); color: var(--text); }
   .conn {

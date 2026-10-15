@@ -238,22 +238,14 @@
 
   <IndexList bind:this={indexList} {sessionId} {schema} {table} />
 
-  {#if edits.dirty}
-    <PendingBar
-      count={edits.count}
-      error={saveError}
-      {saving}
-      onstop={() => api.cancelQuery(queryId)}
-      ondiscard={discard}
-      onpreview={() => showPreview(false)}
-      oncommit={commit}
-    />
-  {:else}
-    <div class="footer">
-      <span class="small muted">{formatCount(columns.length, 'column')}</span>
-      {#if !canAlter && !readOnlyReason}<span class="small faint">· This database can rename, add and drop columns here; anything else needs the SQL editor</span>{/if}
-    </div>
-  {/if}
+  <footer class="status">
+    <span class="chip">{formatCount(columns.length, 'column')}</span>
+    {#if edits.dirty}
+      <PendingBar count={edits.count} error={saveError} {saving} onstop={() => api.cancelQuery(queryId)} ondiscard={discard} onpreview={() => showPreview(false)} />
+    {:else if !canAlter && !readOnlyReason}
+      <span class="note">This database can rename, add and drop columns here; anything else needs the SQL editor</span>
+    {/if}
+  </footer>
 </div>
 
 {#if preview}
@@ -278,16 +270,8 @@
 
 <style>
   .structure { height: 100%; display: flex; flex-direction: column; }
-  .grid-wrap { flex: 1; min-height: 0; position: relative; }
-  .footer {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 37px;
-    padding: 0 10px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .small { font-size: 12px; padding: 0 4px; white-space: nowrap; }
+  .grid-wrap { flex: 1; min-height: 0; position: relative; margin-top: 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
+  .status { flex: none; display: flex; align-items: center; gap: 8px; height: 30px; min-width: 0; margin-top: 8px; font-size: 12px; color: var(--text-3); }
+  .chip { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--surface); }
+  .note { min-width: 0; overflow: hidden; color: var(--text-4); white-space: nowrap; text-overflow: ellipsis; }
 </style>

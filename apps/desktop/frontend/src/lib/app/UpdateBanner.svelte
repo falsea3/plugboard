@@ -60,18 +60,19 @@
 <style>
   .banner {
     position: fixed;
-    left: 16px;
-    bottom: 16px;
+    right: 16px;
+    top: 56px;
     z-index: 90;
     display: flex;
     align-items: flex-start;
     gap: 10px;
     width: 340px;
-    padding: 12px 12px 10px;
-    border-radius: 10px;
+    padding: 14px 12px 12px 14px;
+    border: 1px solid var(--hover);
+    border-radius: var(--radius-lg);
     background: var(--elevated);
-    box-shadow: var(--shadow-modal);
-    font-size: 12.5px;
+    box-shadow: var(--shadow-pop);
+    font-size: 13px;
     animation: slide 0.18s ease-out;
   }
   .banner > :global(.icon), .banner > :global(.spinner) { color: var(--accent); margin-top: 1px; }
@@ -79,7 +80,7 @@
   .title { font-weight: 600; color: var(--text); }
   .sub { margin-top: 2px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; }
   .actions { display: flex; gap: 6px; margin-top: 8px; }
-  .close { border: 0; background: transparent; color: var(--text-3); padding: 2px; }
-  .close:hover { color: var(--text); }
-  @keyframes slide { from { opacity: 0; transform: translateY(8px); } }
+  .close { display: grid; place-items: center; width: 24px; height: 24px; flex: none; margin: -4px -2px 0 0; border: 0; border-radius: 7px; background: transparent; color: var(--text-4); padding: 0; }
+  .close:hover { background: var(--hover); color: var(--text); }
+  @keyframes slide { from { opacity: 0; transform: translateY(-8px); } }
 </style>

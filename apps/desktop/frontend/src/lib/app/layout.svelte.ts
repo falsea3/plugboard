@@ -8,8 +8,17 @@ function read(): boolean {
   }
 }
 
+function isFullscreen(): boolean {
+  return typeof window !== 'undefined' && window.innerWidth >= screen.width && window.innerHeight >= screen.height;
+}
+
 class Layout {
   sidebarHidden = $state(read());
+  fullscreen = $state(isFullscreen());
+
+  constructor() {
+    if (typeof window !== 'undefined') window.addEventListener('resize', () => (this.fullscreen = isFullscreen()));
+  }
 
   toggleSidebar() {
     this.sidebarHidden = !this.sidebarHidden;

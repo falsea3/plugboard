@@ -60,7 +60,7 @@ test('won’t change the structure under uncommitted row edits', async ({ page }
   await page.keyboard.press('Enter');
   await page.keyboard.type('varchar(40)');
   await page.keyboard.press('Enter');
-  await page.getByRole('button', { name: /^Commit/ }).click();
+  await page.getByRole('button', { name: /^Save/ }).click();
   await expect(page.getByText('Commit or discard the 1 row change in Data first', { exact: false })).toBeVisible();
 });
 

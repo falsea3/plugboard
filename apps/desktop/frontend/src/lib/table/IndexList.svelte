@@ -68,37 +68,43 @@
     max-height: 38%;
     display: flex;
     flex-direction: column;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
+    margin-top: 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--card);
+    overflow: hidden;
   }
   header {
     flex: none;
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 30px;
-    padding: 0 12px;
+    height: 40px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--grid-line);
     font-size: 12px;
   }
-  .label { font-weight: 600; color: var(--text); }
+  .label { font-weight: 500; font-size: 13px; color: var(--text); }
   .note { display: flex; align-items: center; gap: 6px; margin: 0; padding: 0 12px 12px; font-size: 12px; }
   .note.error { color: var(--danger); user-select: text; -webkit-user-select: text; }
   .scroll { min-height: 0; overflow: auto; padding: 0 0 6px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th {
     position: sticky;
     top: 0;
-    padding: 4px 12px;
-    background: var(--surface);
+    height: 32px;
+    padding: 0 14px;
+    background: var(--card);
     color: var(--text-3);
+    font-size: 11.5px;
     font-weight: 500;
     text-align: left;
     white-space: nowrap;
   }
-  td { padding: 4px 12px; border-top: 1px solid var(--border-subtle); white-space: nowrap; color: var(--text); }
+  td { height: 32px; padding: 0 14px; border-top: 1px solid var(--grid-line); white-space: nowrap; color: var(--text); }
   td.name { display: flex; align-items: center; gap: 6px; }
-  td.name :global(.icon) { color: var(--text-2); }
-  .mono { font-family: var(--font-mono); }
-  .kind { padding: 0 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; color: var(--text-2); }
+  td.name :global(.icon) { color: var(--text-3); }
+  .mono { font-family: var(--font-mono); font-size: 12px; }
+  .kind { padding: 1px 7px; border-radius: 6px; background: var(--hover); font-size: 11.5px; color: var(--text-2); }
   .kind.strong { color: var(--text); }
 </style>

@@ -2,6 +2,7 @@
   import { SvelteSet } from 'svelte/reactivity';
   import type { Workspace } from './workspace.svelte';
   import Sidebar from './Sidebar.svelte';
+  import Pane from './Pane.svelte';
   import TabBar from './TabBar.svelte';
   import TableView from '../table/TableView.svelte';
   import QueryView from '../query/QueryView.svelte';
@@ -46,7 +47,7 @@
     <div class="side-resizer" onpointerdown={startResize}></div>
   {/if}
 
-  <section class="center" class:full={layout.sidebarHidden}>
+  <section class="center" class:full={layout.sidebarHidden} class:no-lights={layout.fullscreen}>
     <TabBar {ws} />
 
     <div class="panes">
@@ -54,6 +55,7 @@
         {@const shown = tab.id === ws.activeTabId}
         {#if shown || opened.has(tab.id)}
           <div class="pane" class:hidden={!shown}>
+            <Pane visible={visible && shown}>
             {#if tab.kind === 'table'}
               <TableView {ws} {tab} active={visible && shown} ondirty={d => (tab.dirty = d)} />
             {:else if tab.kind === 'diagram'}
@@ -71,6 +73,7 @@
             {:else}
               <QueryView {ws} {tab} />
             {/if}
+            </Pane>
           </div>
         {/if}
       {:else}
@@ -101,7 +104,7 @@
   .side.floating :global(.sidebar) { box-shadow: var(--shadow-pop); }
   .edge { position: absolute; top: 0; bottom: 0; left: 0; z-index: 39; width: 8px; }
   .center.full { padding-left: 12px; }
-  .center.full :global(.tabbar) { padding-left: 76px; }
+  .center.full:not(.no-lights) :global(.tabbar) { padding-left: 76px; }
   .side-resizer { flex: none; width: 8px; z-index: 2; cursor: col-resize; }
   .side-resizer:hover { background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 5px, transparent 5px); }
   .center { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 0 12px 10px 4px; container-type: inline-size; }

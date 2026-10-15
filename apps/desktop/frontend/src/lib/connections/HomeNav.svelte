@@ -1,5 +1,6 @@
 <script lang="ts">
   import { app } from '../app/app.svelte';
+  import { layout } from '../app/layout.svelte';
   import { ENGINES } from '../engines';
   import { GROUP_TONES, type Scope } from './home';
   import DriverMark from './DriverMark.svelte';
@@ -19,7 +20,7 @@
 </script>
 
 <aside class="nav" aria-label="Connection groups">
-  <div class="top drag">
+  <div class="top drag" class:full={layout.fullscreen} class:empty={layout.fullscreen && !back}>
     <span class="lights"></span>
     {#if back}
       <button class="back no-drag" onclick={() => app.activate(back)} title="Back to {back.connection.name} (⇧⌘H)">
@@ -61,6 +62,8 @@
   .nav { width: 232px; flex: none; display: flex; flex-direction: column; margin: 8px 0 8px 8px; border: 1px solid var(--hover); border-radius: var(--radius-xl); background: var(--elevated); }
   .top { display: flex; align-items: center; gap: 8px; height: 33px; padding: 0 10px 0 0; }
   .lights { width: 64px; flex: none; }
+  .top.full .lights { display: none; }
+  .top.empty { height: 8px; }
   .back { min-width: 0; display: flex; align-items: center; gap: 4px; height: 26px; margin-left: auto; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .back:hover { background: var(--hover); color: var(--text); }
   h1 { margin: 0; padding: 22px 16px 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }

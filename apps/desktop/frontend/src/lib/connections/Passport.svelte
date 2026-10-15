@@ -132,6 +132,7 @@
         <div class="menu-backdrop" use:dismiss={() => (menu = false)}></div>
         <div class="menu" role="menu">
           <button role="menuitem" onclick={() => ((menu = false), (app.editing = c))}><Icon name="pencil" size={13} />Edit…</button>
+          {#if ws}<button role="menuitem" onclick={() => ((menu = false), ws && app.requestClose(ws))}><Icon name="unplug" size={13} />Disconnect</button>{/if}
           <button role="menuitem" class="danger" onclick={() => ((menu = false), ondelete())}><Icon name="trash" size={13} />Delete…</button>
         </div>
       {/if}

@@ -34,6 +34,7 @@ input, textarea, [contenteditable] {
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
 input:focus-visible, textarea:focus-visible, .cm-editor :focus-visible { outline: none; }
+input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }

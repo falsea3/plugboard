@@ -231,7 +231,7 @@
     <FilterBar bind:this={filterBar} columns={page?.result.columns ?? columns} bind:rows={filterRows} onapply={applyFilters} onclose={() => (showFilters = false)} />
   {/if}
 
-  <div class="content" class:card={mode !== 'data' || !!rows.error || !page}>
+  <div class="content" class:card={mode === 'ddl' || !!rows.error || (mode === 'data' && !page)}>
     {#if rows.loading || rows.loadingMore || columnsLoading}<LoadBar label="Loading {tab.table}" />{/if}
     {#if mode === 'ddl'}
       <DdlView bind:this={ddl} {ws} object={{ schema: tab.schema, name: tab.table, kind: tab.tableKind === 'view' ? 'view' : 'table' }} toolbar={false} />

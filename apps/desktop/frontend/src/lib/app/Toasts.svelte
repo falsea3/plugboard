@@ -34,21 +34,22 @@
   .toast {
     display: flex;
     align-items: flex-start;
-    gap: 9px;
-    padding: 10px 12px;
-    border-radius: 8px;
+    gap: 10px;
+    padding: 12px 12px 12px 14px;
+    border: 1px solid var(--hover);
+    border-radius: var(--radius-lg);
     background: var(--elevated);
-    box-shadow: var(--shadow-modal);
-    font-size: 12.5px;
+    box-shadow: var(--shadow-pop);
+    font-size: 13px;
     animation: slide 0.16s ease-out;
   }
   .toast.error :global(.icon:first-child) { color: var(--danger); margin-top: 1px; }
   .toast.info :global(.icon:first-child) { color: var(--ok); margin-top: 1px; }
   .body { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
   .text { user-select: text; -webkit-user-select: text; word-break: break-word; }
-  .detail { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); user-select: text; -webkit-user-select: text; word-break: break-word; }
+  .detail { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-3); user-select: text; -webkit-user-select: text; word-break: break-word; }
   .action { margin-top: 4px; }
-  .close { border: 0; background: transparent; color: var(--text-3); padding: 2px; }
-  .close:hover { color: var(--text); }
+  .close { display: grid; place-items: center; width: 24px; height: 24px; flex: none; margin: -3px -3px 0 0; border: 0; border-radius: 7px; background: transparent; color: var(--text-4); padding: 0; }
+  .close:hover { background: var(--hover); color: var(--text); }
   @keyframes slide { from { opacity: 0; transform: translateY(8px); } }
 </style>

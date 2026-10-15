@@ -9,6 +9,8 @@
   import DiagramToolbar from './DiagramToolbar.svelte';
   import { inView, lineInView } from './layers';
   import Icon from '../ui/Icon.svelte';
+  import { paneVisible } from '../app/pane';
+  const drawn = paneVisible();
   import LoadBar from '../ui/LoadBar.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import DiagramCard from './DiagramCard.svelte';
@@ -205,7 +207,7 @@
       <div class="note faint">No tables in {tab.schema}.</div>
     {/if}
 
-    {#if diagram}
+    {#if diagram && drawn()}
       <div class="world" style:transform="translate({view.x}px, {view.y}px) scale({view.k})">
         <svg class="links" width="1" height="1" overflow="visible" aria-label="Relations">
           {#each shownLinks as l (l.index)}
