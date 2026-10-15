@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { onMount, untrack } from 'svelte';
   import { Compartment, EditorState, Prec } from '@codemirror/state';
   import { drawSelection, EditorView, highlightActiveLine, keymap, lineNumbers } from '@codemirror/view';
@@ -84,7 +85,7 @@
     {#if isJSON}<button class="btn sm ghost" onclick={format} disabled={readOnly}><Icon name="json" size={12} />{current.includes('\n') ? 'Compact' : 'Format'} JSON</button>{/if}
     {#if !readOnly}
       <button class="btn sm ghost" onclick={() => set(text)} disabled={!dirty || saving}>Revert</button>
-      <button class="btn sm primary" onclick={save} disabled={!dirty || saving} title="Save (⌘S)">{#if saving}<Spinner size={11} />{/if}Save</button>
+      <button class="btn sm primary" onclick={save} disabled={!dirty || saving} title={keys('Save (⌘S)')}>{#if saving}<Spinner size={11} />{/if}Save</button>
     {/if}
   </div>
   <div class="editor" bind:this={host}></div>

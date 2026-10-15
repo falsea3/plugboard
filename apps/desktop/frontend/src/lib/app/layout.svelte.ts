@@ -1,3 +1,5 @@
+import { isMac } from '../ui/keys';
+
 const KEY = 'plugboard.sidebarHidden';
 
 function read(): boolean {
@@ -12,7 +14,6 @@ function isFullscreen(): boolean {
   return typeof window !== 'undefined' && window.innerWidth >= screen.width && window.innerHeight >= screen.height;
 }
 
-const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.userAgent);
 
 class Layout {
   sidebarHidden = $state(read());

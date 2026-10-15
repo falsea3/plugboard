@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import type { CellValue, ResultColumn } from '../api/wire';
   import { copyText } from '../ui/format';
   import { copyToClipboard } from '../ui/clipboard';
@@ -12,8 +13,8 @@
 <div class="value-bar">
   <span class="col faint">{column.name}{column.type ? ` · ${column.type}` : ''}</span>
   <span class="val mono" class:null={value === null} title={text}>{text}</span>
-  {#if onopen && column.kind !== 'binary'}<button class="btn icon sm ghost" title="Open in editor (⇧↵)" aria-label="Open in editor" onclick={onopen}><Icon name="fit" size={12} /></button>{/if}
-  <button class="btn icon sm ghost" title="Copy value (⌘C)" onclick={() => copyToClipboard(copyText(value))}><Icon name="copy" size={12} /></button>
+  {#if onopen && column.kind !== 'binary'}<button class="btn icon sm ghost" title={keys('Open in editor (⇧↵)')} aria-label="Open in editor" onclick={onopen}><Icon name="fit" size={12} /></button>{/if}
+  <button class="btn icon sm ghost" title={keys('Copy value (⌘C)')} onclick={() => copyToClipboard(copyText(value))}><Icon name="copy" size={12} /></button>
 </div>
 
 <style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { SvelteSet } from 'svelte/reactivity';
   import type { Workspace } from './workspace.svelte';
   import Sidebar from './Sidebar.svelte';
@@ -81,10 +82,10 @@
           <p class="muted">Pick a table on the left, or</p>
           <button class="btn" onclick={() => ws.newQuery()}><Icon name="code" size={13} />Open a SQL editor</button>
           <div class="shortcuts faint">
-            <span><span class="kbd">⌘T</span> new query</span>
-            <span><span class="kbd">⌘K</span> switch connection</span>
-            <span><span class="kbd">⇧⌘F</span> filter tables</span>
-            <span><span class="kbd">⌘,</span> settings</span>
+            <span><span class="kbd">{keys('⌘T')}</span> new query</span>
+            <span><span class="kbd">{keys('⌘K')}</span> switch connection</span>
+            <span><span class="kbd">{keys('⇧⌘F')}</span> filter tables</span>
+            <span><span class="kbd">{keys('⌘,')}</span> settings</span>
           </div>
         </div>
       {/each}

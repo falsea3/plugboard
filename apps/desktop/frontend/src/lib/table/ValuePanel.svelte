@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { untrack } from 'svelte';
   import type { TableTab } from '../app/workspace.svelte';
   import { jsonError, jsonToSave, looksLikeJSON } from '../json/text';
@@ -108,7 +109,7 @@
           <button class="btn sm outline" onclick={() => selected?.edit?.(null)}>Set NULL</button>
         {/if}
         <span style="flex:1"></span>
-        <button class="btn sm apply" onclick={apply} disabled={!dirty} title="Apply to the cell — commit with ⌘S">Apply ⌘↵</button>
+        <button class="btn sm apply" onclick={apply} disabled={!dirty} title={keys('Apply to the cell — commit with ⌘S')}>Apply {keys('⌘↵')}</button>
       </div>
     {:else}
       <pre class:null={selected.value === null}>{selected.value === null ? 'NULL' : original}</pre>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { formatCount } from '../ui/format';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -23,7 +24,7 @@
 {#if error}
   <span class="chip danger" title={error}><Icon name="alert" size={11} />{error}</span>
 {:else}
-  <span class="chip warn">{#if saving}<Spinner size={10} />Saving…{:else}{formatCount(count, 'change')} · ⌘S to save{/if}</span>
+  <span class="chip warn">{#if saving}<Spinner size={10} />Saving…{:else}{formatCount(count, 'change')} · {keys('⌘S')} to save{/if}</span>
 {/if}
 {#if saving && onstop}<button class="chip link" onclick={onstop}>Stop</button>{/if}
 <button class="chip link" onclick={onpreview} disabled={saving}>Preview SQL</button>

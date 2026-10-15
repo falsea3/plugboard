@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { untrack } from 'svelte';
   import type { EditorView } from '@codemirror/view';
   import { api, type QueryRun } from '../api/backend';
@@ -143,8 +144,8 @@
       {#if running}
         <button class="btn sm stop" onclick={cancel}><Icon name="stop" size={11} />Stop</button>
       {:else}
-        <button class="btn sm primary run" onclick={() => execute(false)} title={hasSelection ? 'Run the selected text' : 'Run the statement under the cursor'}><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run'}<span class="kbd">⌘↵</span></button>
-        {#if !hasSelection}<button class="btn sm all" onclick={() => execute(true)}>Run all<span class="kbd">⇧⌘↵</span></button>{/if}
+        <button class="btn sm primary run" onclick={() => execute(false)} title={hasSelection ? 'Run the selected text' : 'Run the statement under the cursor'}><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run'}<span class="kbd">{keys('⌘↵')}</span></button>
+        {#if !hasSelection}<button class="btn sm all" onclick={() => execute(true)}>Run all<span class="kbd">{keys('⇧⌘↵')}</span></button>{/if}
       {/if}
       {#if formatAs}<button class="btn sm ghost" onclick={format} title={hasSelection ? 'Format the selection' : 'Format the script'}>Format</button>{/if}
       <span class="space"></span>
@@ -165,7 +166,7 @@
     {#if cursor}<span class="chip">Ln {cursor.line}, Col {cursor.col}</span>{/if}
     {#if cursor && cursor.statements > 1 && cursor.statement > 0}<span class="chip">statement {cursor.statement} of {cursor.statements}</span>{/if}
     <span class="space"></span>
-    <span>⌘S save script</span>
+    <span>{keys('⌘S')} save script</span>
   </footer>
 </div>
 

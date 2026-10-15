@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { app } from '../app/app.svelte';
   import { layout } from '../app/layout.svelte';
   import { ENGINES } from '../engines';
@@ -23,7 +24,7 @@
   <div class="top drag" class:full={!layout.windowButtons} class:empty={!layout.windowButtons && !back}>
     <span class="lights"></span>
     {#if back}
-      <button class="back no-drag" onclick={() => app.activate(back)} title="Back to {back.connection.name} (⇧⌘H)">
+      <button class="back no-drag" onclick={() => app.activate(back)} title={keys(`Back to ${back.connection.name} (⇧⌘H)`)}>
         <Icon name="chevron-left" size={12} />{back.connection.name}
       </button>
     {/if}
@@ -54,7 +55,7 @@
 
   <div class="bottom">
     <button class="btn new-group" onclick={onnewgroup}>New group</button>
-    <button class="btn icon" onclick={() => (app.settingsOpen = 'general')} title="Settings (⌘,)" aria-label="Settings"><Icon name="settings" size={15} /></button>
+    <button class="btn icon" onclick={() => (app.settingsOpen = 'general')} title={keys('Settings (⌘,)')} aria-label="Settings"><Icon name="settings" size={15} /></button>
   </div>
 </aside>
 

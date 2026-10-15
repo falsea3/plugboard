@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { tick } from 'svelte';
   import { dismiss } from '../ui/dismiss';
   import { app } from './app.svelte';
@@ -98,7 +99,7 @@
         <Icon name="search" size={14} />
         <!-- svelte-ignore a11y_autofocus -->
         <input bind:value={query} {onkeydown} placeholder="Find a connection" aria-label="Find a connection" spellcheck="false" autofocus />
-        <span class="kbd">⌘K</span>
+        <span class="kbd">{keys('⌘K')}</span>
       </label>
 
       {#if app.connections.length === 0}
@@ -113,7 +114,7 @@
         <button class="btn ghost sm" onclick={() => { close(); app.editing = null; }}><Icon name="plus" size={14} />Connection</button>
         <button class="btn ghost sm" onclick={() => (prompt = { group: '' })}><Icon name="group" size={14} />Group</button>
         <span class="spacer"></span>
-        {#if app.workspaces.length > 1}<span class="hint"><span class="kbd">⌃Tab</span> next open</span>{/if}
+        {#if app.workspaces.length > 1}<span class="hint"><span class="kbd">{keys('⌃Tab')}</span> next open</span>{/if}
         <button class="btn ghost sm" onclick={() => { close(); app.goHome(); }}>All</button>
       </footer>
     </div>

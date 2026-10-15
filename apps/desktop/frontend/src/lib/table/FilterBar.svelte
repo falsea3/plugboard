@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { tick } from 'svelte';
   import Icon from '../ui/Icon.svelte';
   import Select from '../ui/Select.svelte';
@@ -77,7 +78,7 @@
   <div class="actions">
     <button class="btn sm ghost" onclick={add}><Icon name="plus" size={12} />Condition</button>
     <span style="flex:1"></span>
-    <span class="hint faint"><span class="kbd">↵</span> apply · <span class="kbd">esc</span> close</span>
+    <span class="hint faint"><span class="kbd">{keys('↵')}</span> apply · <span class="kbd">esc</span> close</span>
     <button class="btn sm ghost" onclick={() => { rows = []; onapply(); onclose(); }}>Clear</button>
     <button class="btn sm primary" onclick={onapply}>Apply</button>
   </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from './keys';
   import type { HTMLInputAttributes } from 'svelte/elements';
   import Icon, { type IconName } from './Icon.svelte';
 
@@ -30,7 +31,7 @@
   {#if icon}<Icon name={icon} size={14} />{/if}
   {#if prefix}<span class="prefix">{prefix}</span>{/if}
   <input bind:this={element} bind:value aria-label={label} spellcheck="false" autocomplete="off" {...rest} />
-  {#if kbd}<span class="kbd">{kbd}</span>{/if}
+  {#if kbd}<span class="kbd">{keys(kbd)}</span>{/if}
 </label>
 
 <style>

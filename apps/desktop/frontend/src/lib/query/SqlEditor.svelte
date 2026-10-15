@@ -1,4 +1,5 @@
 <script lang="ts" module>
+  import { keys } from '../ui/keys';
   import { EditorState, RangeSet, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state';
   import { EditorView, GutterMarker, gutterLineClass } from '@codemirror/view';
   import { forEachDiagnostic, setDiagnostics, type Diagnostic } from '@codemirror/lint';
@@ -131,7 +132,7 @@
             { delay: 600 },
           ),
           lintGutter(),
-          placeholder('Write SQL…  ⌘↵ runs the statement under the cursor, ⇧⌘↵ runs everything'),
+          placeholder(keys('Write SQL…  ⌘↵ runs the statement under the cursor, ⇧⌘↵ runs everything')),
           Prec.highest(
             keymap.of([
               { key: 'Mod-Enter', run: () => (onrun(false), true) },

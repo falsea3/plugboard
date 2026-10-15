@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { untrack } from 'svelte';
   import { api, type KeyItem, type KeyValue } from '../api/backend';
   import { app } from '../app/app.svelte';
@@ -89,7 +90,7 @@
       <span class="meta faint" title="Time to live">TTL {formatTTL(value.ttl)}</span>
       <KeyActions {ws} {tab} ttl={value.ttl} onchange={change} />
     {/if}
-    <button class="btn outline icon" onclick={() => load()} title="Refresh (⌘R)" aria-label="Refresh"><Icon name="refresh" size={14} /></button>
+    <button class="btn outline icon" onclick={() => load()} title={keys('Refresh (⌘R)')} aria-label="Refresh"><Icon name="refresh" size={14} /></button>
   </div>
 
   <div class="pane-card body">

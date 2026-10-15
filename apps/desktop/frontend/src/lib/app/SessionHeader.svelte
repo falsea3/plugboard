@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import type { Workspace } from './workspace.svelte';
   import { app } from './app.svelte';
   import { layout } from './layout.svelte';
@@ -27,12 +28,12 @@
 
 <div class="top drag">
   <span class="lights" aria-hidden="true"></span>
-  <button class="home no-drag" onclick={() => app.goHome()} title="All connections (⇧⌘H)" aria-label="All connections"><Icon name="database" size={16} /></button>
-  <button class="home no-drag" onclick={() => layout.toggleSidebar()} title={layout.sidebarHidden ? 'Keep the sidebar open (⌘\\)' : 'Hide the sidebar (⌘\\)'} aria-label={layout.sidebarHidden ? 'Keep the sidebar open' : 'Hide the sidebar'}><Icon name="sidebar" size={16} /></button>
-  <button class="home no-drag" onclick={() => app.requestClose(ws)} title="Disconnect (⇧⌘W)" aria-label="Disconnect"><Icon name="unplug" size={16} /></button>
+  <button class="home no-drag" onclick={() => app.goHome()} title={keys('All connections (⇧⌘H)')} aria-label="All connections"><Icon name="database" size={16} /></button>
+  <button class="home no-drag" onclick={() => layout.toggleSidebar()} title={layout.sidebarHidden ? keys('Keep the sidebar open (⌘\\)') : keys('Hide the sidebar (⌘\\)')} aria-label={layout.sidebarHidden ? 'Keep the sidebar open' : 'Hide the sidebar'}><Icon name="sidebar" size={16} /></button>
+  <button class="home no-drag" onclick={() => app.requestClose(ws)} title={keys('Disconnect (⇧⌘W)')} aria-label="Disconnect"><Icon name="unplug" size={16} /></button>
 </div>
 
-<button class="conn" data-switch-anchor onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog" aria-expanded={app.switcherOpen}>
+<button class="conn" data-switch-anchor onclick={() => (app.switcherOpen = true)} title={keys(`${conn.name} — ${connectionTarget(conn)} · switch (⌘K)`)} aria-label="Switch connection — {conn.name}" aria-haspopup="dialog" aria-expanded={app.switcherOpen}>
   <ConnAvatar connection={conn} size={38} />
   <span class="meta">
     <span class="name"><span class="text">{conn.name}</span><EnvBadge env={conn.env} /></span>

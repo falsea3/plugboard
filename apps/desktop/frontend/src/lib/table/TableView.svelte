@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { onDestroy, tick, untrack } from 'svelte';
   import { api, type Column } from '../api/backend';
   import { app } from '../app/app.svelte';
@@ -87,14 +88,14 @@
 
   function canLeavePage(): boolean {
     if (!edits.dirty) return true;
-    app.notify('Commit (⌘S) or discard your changes first.', 'info');
+    app.notify(keys('Commit (⌘S) or discard your changes first.'), 'info');
     return false;
   }
 
   function refresh() {
     if (!canLeavePage()) return;
     if (structureDirty) {
-      app.notify('Commit (⌘S) or discard the structure changes first.', 'info');
+      app.notify(keys('Commit (⌘S) or discard the structure changes first.'), 'info');
       return;
     }
     loadColumns();

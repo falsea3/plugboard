@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { formatCount, formatDuration } from '../ui/format';
   import { MAX_ROWS, type TableRows } from './rows.svelte';
   import Icon from '../ui/Icon.svelte';
@@ -55,7 +56,7 @@
     {#if pending.error}
       <span class="chip danger" title={pending.error}><Icon name="alert" size={11} />{pending.error}</span>
     {:else}
-      <span class="chip warn">{#if pending.saving}<Spinner size={10} />Saving…{:else}{formatCount(pending.count, 'change')} · ⌘S to save{/if}</span>
+      <span class="chip warn">{#if pending.saving}<Spinner size={10} />Saving…{:else}{formatCount(pending.count, 'change')} · {keys('⌘S')} to save{/if}</span>
     {/if}
     <button class="chip link" onclick={onpreview} disabled={pending.saving}>Preview SQL</button>
     <button class="chip link" onclick={ondiscard} disabled={pending.saving}>Discard</button>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { onMount, untrack } from 'svelte';
   import { EditorState, Prec } from '@codemirror/state';
   import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, tooltips } from '@codemirror/view';
@@ -93,7 +94,7 @@
     {#if !readOnly}
       <button class="btn ghost" onclick={format} disabled={!!error}>Format</button>
       <button class="btn ghost" onclick={onclose}>Cancel</button>
-      <button class="btn primary" onclick={save} disabled={!!error}>Save<span class="kbd on-accent">⌘S</span></button>
+      <button class="btn primary" onclick={save} disabled={!!error}>Save<span class="kbd on-accent">{keys('⌘S')}</span></button>
     {:else}
       <button class="btn" onclick={onclose}>Close</button>
     {/if}

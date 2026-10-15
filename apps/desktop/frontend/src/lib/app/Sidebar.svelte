@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { isMac, keys } from '../ui/keys';
   import type { Workspace } from './workspace.svelte';
   import { FILTER_TABLES_EVENT } from './commands';
   import SessionHeader from './SessionHeader.svelte';
@@ -112,13 +113,13 @@
   {#if ws.session.engine.keyValue}
     <KeyTree {ws} {active} />
     <div class="bottom">
-      <button class="btn new" onclick={() => ws.newQuery()} title="New console (⌘T)"><Icon name="terminal" size={14} />New console</button>
+      <button class="btn new" onclick={() => ws.newQuery()} title={keys('New console (⌘T)')}><Icon name="terminal" size={14} />New console</button>
       {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
       {#if ws.session.engine.roles}<button class="btn icon" onclick={() => ws.openAdmin('roles')} title="Users" aria-label="Roles"><Icon name="roles" size={15} /></button>{/if}
     </div>
   {:else}
     <div class="filter">
-      <TextField icon="search" kbd="⇧⌘F" placeholder="Filter tables" label="Filter tables" outline bind:value={filter} bind:element={input} onkeydown={onFilterKey} />
+      <TextField icon="search" kbd={keys('⇧⌘F')} placeholder="Filter tables" label="Filter tables" outline bind:value={filter} bind:element={input} onkeydown={onFilterKey} />
     </div>
 
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -170,7 +171,7 @@
     <TreeMenus bind:this={menus} {ws} />
 
     <div class="bottom">
-      <button class="btn new" onclick={() => ws.newQuery()} title="New query (⌘T)">New query <span class="kbd">⌘T</span></button>
+      <button class="btn new" onclick={() => ws.newQuery()} title={keys('New query (⌘T)')}>New query{#if isMac} <span class="kbd">{keys('⌘T')}</span>{/if}</button>
       <button class="btn icon" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={15} /></button>
       {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
       {#if ws.session.engine.roles}<button class="btn icon" onclick={() => ws.openAdmin('roles')} title="Roles" aria-label="Roles"><Icon name="roles" size={15} /></button>{/if}

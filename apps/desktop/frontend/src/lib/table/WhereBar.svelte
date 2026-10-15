@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import Icon from '../ui/Icon.svelte';
 
   let { value = $bindable(), applied, placeholder = '', onapply }: { value: string; applied: string; placeholder?: string; onapply: () => void } = $props();
@@ -41,7 +42,7 @@
       autocomplete="off"
       aria-label="WHERE condition"
     />
-    {#if pending}<span class="hint faint"><span class="kbd">↵</span> apply · <span class="kbd">esc</span> undo</span>{/if}
+    {#if pending}<span class="hint faint"><span class="kbd">{keys('↵')}</span> apply · <span class="kbd">esc</span> undo</span>{/if}
     {#if value || applied}
       <button class="btn icon sm ghost" onclick={clear} title="Clear the condition" aria-label="Clear the condition"><Icon name="x" size={12} /></button>
     {/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { app } from './app.svelte';
   import { engine } from '../engines';
   import type { Connection } from '../api/wire';
@@ -102,7 +103,7 @@
               <span class="state" role="status"><Spinner size={10} />Connecting…</span>
             {:else if n >= 0}
               <span class="state open-state">● {n === 0 ? 'open' : n === 1 ? '1 tab' : `${n} tabs`}</span>
-              <button class="disconnect" title="Disconnect (⇧⌘W)" aria-label="Disconnect {c.name}" onpointerdown={e => e.stopPropagation()} onclick={e => { e.stopPropagation(); const ws = app.workspaceFor(c.id); if (ws) app.requestClose(ws); }}><Icon name="x" size={12} /></button>
+              <button class="disconnect" title={keys('Disconnect (⇧⌘W)')} aria-label="Disconnect {c.name}" onpointerdown={e => e.stopPropagation()} onclick={e => { e.stopPropagation(); const ws = app.workspaceFor(c.id); if (ws) app.requestClose(ws); }}><Icon name="x" size={12} /></button>
             {:else if c.lastUsed}
               <span class="state">{usedAgo(c.lastUsed)}</span>
             {/if}

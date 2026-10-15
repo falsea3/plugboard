@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { app } from './app.svelte';
   import type { Tab, Workspace } from './workspace.svelte';
   import Icon, { type IconName } from '../ui/Icon.svelte';
@@ -58,13 +59,13 @@
           {#if (tab.kind === 'table' || tab.kind === 'config') && tab.dirty}<span class="dirty-dot" title="Uncommitted changes"></span>{/if}
           {#if tab.kind === 'query' && isDirty(tab)}<span class="dirty-dot" title="Unsaved changes"></span>{/if}
         </button>
-        <button class="tab-close" onclick={() => app.requestCloseTab(ws, tab.id)} title="Close (⌘W or middle-click)" aria-label="Close tab"><Icon name="x" size={12} /></button>
+        <button class="tab-close" onclick={() => app.requestCloseTab(ws, tab.id)} title={keys('Close (⌘W or middle-click)')} aria-label="Close tab"><Icon name="x" size={12} /></button>
       </div>
     {/each}
-    <button class="tab-new" onclick={() => ws.newQuery()} title="New query (⌘T)" aria-label="New query"><Icon name="plus" size={14} /></button>
+    <button class="tab-new" onclick={() => ws.newQuery()} title={keys('New query (⌘T)')} aria-label="New query"><Icon name="plus" size={14} /></button>
   </nav>
   <span class="space"></span>
-  <button class="btn ghost icon no-drag" onclick={() => (app.settingsOpen = 'general')} title="Settings (⌘,)" aria-label="Settings"><Icon name="settings" size={16} /></button>
+  <button class="btn ghost icon no-drag" onclick={() => (app.settingsOpen = 'general')} title={keys('Settings (⌘,)')} aria-label="Settings"><Icon name="settings" size={16} /></button>
 </div>
 {#if order.indicator}
   {@const d = order.indicator}

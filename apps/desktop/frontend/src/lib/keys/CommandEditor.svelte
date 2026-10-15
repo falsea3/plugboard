@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { onMount, untrack } from 'svelte';
   import { EditorState, Prec } from '@codemirror/state';
   import { drawSelection, EditorView, highlightActiveLine, keymap, lineNumbers, placeholder } from '@codemirror/view';
@@ -42,7 +43,7 @@
           highlightActiveLine(),
           drawSelection(),
           history(),
-          placeholder('Type Redis commands, one per line — ⌘↵ runs the line under the cursor, ⇧⌘↵ runs everything'),
+          placeholder(keys('Type Redis commands, one per line — ⌘↵ runs the line under the cursor, ⇧⌘↵ runs everything')),
           autocompletion({ override: [complete], icons: false }),
           Prec.highest(
             keymap.of([

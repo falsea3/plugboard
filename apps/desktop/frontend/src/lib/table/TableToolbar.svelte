@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import Icon from '../ui/Icon.svelte';
   import SegmentedControl from '../ui/SegmentedControl.svelte';
 
@@ -44,20 +45,20 @@
   <button class="btn outline" onclick={oncopy}><Icon name="copy" size={14} />Copy</button>
   <button class="btn outline" onclick={onquery}><Icon name="code" size={14} />Open in query</button>
   {:else}
-  <button class="btn outline filter-btn" class:on={filtersOpen || filterCount > 0} onclick={onfilter} title="Filter rows (⌘F)">
+  <button class="btn outline filter-btn" class:on={filtersOpen || filterCount > 0} onclick={onfilter} title={keys('Filter rows (⌘F)')}>
     <Icon name="funnel" size={14} />Filter{#if filterCount > 0}<span class="count">{filterCount}</span>{/if}
   </button>
   {#if lockReason}
     <span class="ro-reason" title={mode === 'structure' ? "The structure can't be changed here" : 'Editing is off for this table'}><Icon name="lock" size={11} />{lockReason}</span>
   {:else if mode === 'structure'}
-    <button class="btn outline" onclick={onadd} title="Add column (⌘I)"><Icon name="plus" size={14} />Column</button>
+    <button class="btn outline" onclick={onadd} title={keys('Add column (⌘I)')}><Icon name="plus" size={14} />Column</button>
   {:else}
-    <button class="btn outline" onclick={onadd} disabled={!canAdd} title="Add row (⌘I)"><Icon name="plus" size={14} />Row</button>
+    <button class="btn outline" onclick={onadd} disabled={!canAdd} title={keys('Add row (⌘I)')}><Icon name="plus" size={14} />Row</button>
   {/if}
   {/if}
-  <button class="btn outline icon" title="Refresh (⌘R)" aria-label="Refresh" onclick={onrefresh}><Icon name="refresh" size={14} /></button>
+  <button class="btn outline icon" title={keys('Refresh (⌘R)')} aria-label="Refresh" onclick={onrefresh}><Icon name="refresh" size={14} /></button>
   {#if onsave && mode !== 'ddl'}
-    <button class="btn primary" onclick={onsave} disabled={!dirty} title="Save changes (⌘S)">Save<span class="kbd">⌘S</span></button>
+    <button class="btn primary" onclick={onsave} disabled={!dirty} title={keys('Save changes (⌘S)')}>Save<span class="kbd">{keys('⌘S')}</span></button>
   {/if}
 </div>
 

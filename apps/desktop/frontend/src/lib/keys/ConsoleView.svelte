@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { untrack } from 'svelte';
   import type { EditorView } from '@codemirror/view';
   import { api, type QueryRun } from '../api/backend';
@@ -87,8 +88,8 @@
       {#if running}
         <button class="btn sm stop" onclick={() => queryId && api.cancelQuery(queryId)}><Icon name="stop" size={11} />Stop</button>
       {:else}
-        <button class="btn sm primary run" onclick={() => execute(false)} title="Run the line under the cursor"><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run line'}<span class="kbd">⌘↵</span></button>
-        {#if !hasSelection}<button class="btn sm all" onclick={() => execute(true)}>Run all<span class="kbd">⇧⌘↵</span></button>{/if}
+        <button class="btn sm primary run" onclick={() => execute(false)} title="Run the line under the cursor"><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run line'}<span class="kbd">{keys('⌘↵')}</span></button>
+        {#if !hasSelection}<button class="btn sm all" onclick={() => execute(true)}>Run all<span class="kbd">{keys('⇧⌘↵')}</span></button>{/if}
       {/if}
       <span class="space"></span>
       {#if ws.readOnly}<span class="ro-chip" title="Commands that change data are refused. Switch it in the sidebar."><Icon name="lock" size={11} />Read only</span>{/if}

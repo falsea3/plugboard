@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { tick } from 'svelte';
   import { app } from '../app/app.svelte';
   import type { Connection } from '../api/wire';
@@ -62,7 +63,7 @@
       <div class="search no-drag">
         <TextField icon="search" placeholder="Name, host, database…" label="Search connections" bind:value={query} {onkeydown} spellcheck="false" />
       </div>
-      <span class="no-drag"><Button variant="primary" kbd="⌘N" onclick={() => (app.editing = null)}>New connection</Button></span>
+      <span class="no-drag"><Button variant="primary" kbd={keys('⌘N')} onclick={() => (app.editing = null)}>New connection</Button></span>
     </div>
 
     <div class="body">

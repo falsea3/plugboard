@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { onDestroy } from 'svelte';
   import type { MenuItem } from './grid';
   import { menuIcon } from './menuIcons';
@@ -53,7 +54,7 @@
                 <div class="sep"></div>
               {:else}
                 <button role="menuitem" class:danger={child.danger} disabled={child.disabled} onclick={() => onpick(child.id)}>
-                  {#if childIcons}{@render mark(child)}{/if}{child.label}{#if child.kbd}<span class="kbd">{child.kbd}</span>{/if}
+                  {#if childIcons}{@render mark(child)}{/if}{child.label}{#if child.kbd}<span class="kbd">{keys(child.kbd)}</span>{/if}
                 </button>
               {/if}
             {/each}
@@ -62,7 +63,7 @@
       </div>
     {:else}
       <button role="menuitem" class:danger={it.danger} disabled={it.disabled} onclick={() => onpick(it.id)} onmouseenter={() => want(null)}>
-        {@render mark(it)}{it.label}{#if it.kbd}<span class="kbd">{it.kbd}</span>{/if}
+        {@render mark(it)}{it.label}{#if it.kbd}<span class="kbd">{keys(it.kbd)}</span>{/if}
       </button>
     {/if}
   {/each}

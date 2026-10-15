@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from './keys';
   import type { Snippet } from 'svelte';
   import type { HTMLButtonAttributes } from 'svelte/elements';
   import Icon, { type IconName } from './Icon.svelte';
@@ -28,5 +29,5 @@
 <button {type} class="btn {variant} {className}" class:sm={size === 'sm'} class:icon={!children} aria-label={label} {...rest}>
   {#if icon}<Icon name={icon} size={size === 'sm' ? 13 : 14} />{/if}
   {#if children}{@render children()}{/if}
-  {#if kbd}<span class="kbd">{kbd}</span>{/if}
+  {#if kbd}<span class="kbd">{keys(kbd)}</span>{/if}
 </button>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { app } from '../app/app.svelte';
 
   const s = $derived(app.settings);
@@ -24,10 +25,10 @@
 <div class="field">
   <div class="label">Shortcuts</div>
   <dl class="keys">
-    <dt><span class="kbd">⌘↵</span></dt><dd>Run the statement under the cursor (or the selection)</dd>
-    <dt><span class="kbd">⇧⌘↵</span></dt><dd>Run the whole script</dd>
-    <dt><span class="kbd">⌘T</span></dt><dd>New query tab</dd>
-    <dt><span class="kbd">⌘K</span></dt><dd>Switch connection</dd>
+    <dt><span class="kbd">{keys('⌘↵')}</span></dt><dd>Run the statement under the cursor (or the selection)</dd>
+    <dt><span class="kbd">{keys('⇧⌘↵')}</span></dt><dd>Run the whole script</dd>
+    <dt><span class="kbd">{keys('⌘T')}</span></dt><dd>New query tab</dd>
+    <dt><span class="kbd">{keys('⌘K')}</span></dt><dd>Switch connection</dd>
   </dl>
 </div>
 

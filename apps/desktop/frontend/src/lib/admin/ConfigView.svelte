@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { untrack } from 'svelte';
   import { api, type ConfigFile, type ConfigSaved, type ConfigText } from '../api/backend';
   import { app } from '../app/app.svelte';
@@ -130,7 +131,7 @@
     <span class="space"></span>
     {#if via}<span class="via" title={via.hint}>{via.label}</span>{/if}
     <button class="btn outline icon" onclick={() => loaded && guarded(() => open(loaded!.path))} disabled={!loaded || loading} title="Reload from the server" aria-label="Reload"><Icon name="refresh" size={14} /></button>
-    <button class="btn primary" onclick={save} disabled={!dirty || saving || readOnly} title={loaded?.readOnly ? 'The server shows these settings but can’t change them' : readOnly ? 'Read-only is on — turn it off to save' : 'Save and reload the server configuration (⌘S)'}>
+    <button class="btn primary" onclick={save} disabled={!dirty || saving || readOnly} title={loaded?.readOnly ? 'The server shows these settings but can’t change them' : readOnly ? 'Read-only is on — turn it off to save' : keys('Save and reload the server configuration (⌘S)')}>
       {#if saving}<Spinner size={12} />{/if}Save &amp; reload
     </button>
   </div>

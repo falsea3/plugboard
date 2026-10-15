@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { keys } from '../ui/keys';
   import { app } from '../app/app.svelte';
   import { api, type Connection, type QueryTabState, type TestResult } from '../api/backend';
   import type { Tab } from '../app/workspace.svelte';
@@ -123,7 +124,7 @@
 
   <div class="actions">
     <button class="btn primary connect" onclick={() => app.open(c)} disabled={app.connectingId === c.id}>
-      {#if app.connectingId === c.id}<Spinner size={12} />Connecting…{:else}{ws ? 'Switch to' : 'Connect'}<span class="kbd">↵</span>{/if}
+      {#if app.connectingId === c.id}<Spinner size={12} />Connecting…{:else}{ws ? 'Switch to' : 'Connect'}<span class="kbd">{keys('↵')}</span>{/if}
     </button>
     <button class="btn ro" class:on={c.readOnly} aria-pressed={c.readOnly} onclick={toggleReadOnly} title="Open this connection read-only">Read-only</button>
     <span class="more-wrap">
