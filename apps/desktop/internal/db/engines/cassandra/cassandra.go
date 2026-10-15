@@ -128,6 +128,8 @@ func describeConnect(err error) error {
 		return apperr.New("auth", "the server refused the user name or password")
 	case strings.Contains(msg, "Keyspace") && strings.Contains(msg, "does not exist"):
 		return apperr.New("bad_database", "that keyspace doesn't exist")
+	case strings.Contains(msg, "unable to discover protocol version") && (strings.HasSuffix(msg, "EOF") || strings.Contains(msg, "connection reset")):
+		return apperr.New("conn_closed", "the server closed the connection before answering — Cassandra may still be starting, or this port belongs to another service")
 	}
 	return err
 }
