@@ -76,6 +76,7 @@ test('query', async ({ page }) => {
   await page.keyboard.press('End');
   await page.keyboard.press('ControlOrMeta+Enter');
   await expect(page.getByRole('grid').getByText('1284390.50')).toBeVisible();
+  await page.keyboard.press('ArrowLeft');
   await snap(page, 'query', ['dark', 'light']);
 });
 

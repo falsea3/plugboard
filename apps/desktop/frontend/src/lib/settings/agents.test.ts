@@ -22,5 +22,6 @@ describe('agent setup', () => {
     expect(shellQuote(exe)).toBe(exe);
     expect(shellQuote('/Users/a b/plugboard')).toBe(`'/Users/a b/plugboard'`);
     expect(shellQuote("/x/it's")).toBe(`'/x/it'\\''s'`);
+    expect(shellQuote('C:\\Users\\Ann Lee\\AppData\\Local\\Programs\\Plugboard\\plugboard.exe')).toBe('"C:\\Users\\Ann Lee\\AppData\\Local\\Programs\\Plugboard\\plugboard.exe"');
   });
 });

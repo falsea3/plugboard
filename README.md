@@ -211,8 +211,7 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 
 **AI agents (MCP)**
 
-- `claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp` (Settings ▸ AI agents shows the exact command for each client).
-- `codex mcp add plugboard -- /Users/evgn/Documents/plugboard/apps/desktop/build/bin/Plugboard.app/Contents/MacOS/plugboard mcp --create` (Settings ▸ AI agents shows the exact command for each client).
+- Add it with one command — Settings ▸ AI agents shows the exact one for Claude Code, Codex and Cursor on your system. On macOS: `claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp`; on Windows and Linux it points at the installed `plugboard.exe` or the AppImage.
 - Agents never see a password: they ask Plugboard, which connects with your saved connections, Keychain and SSH tunnels.
 - Nothing is shared until you turn on _AI agents (MCP)_ for a connection. Sessions are read-only unless you start it with `--write`, and Production is read-only for agents no matter what.
 - Every call is logged to `logs/mcp.log` in the profile folder.

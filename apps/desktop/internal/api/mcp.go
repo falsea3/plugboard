@@ -6,6 +6,9 @@ import (
 )
 
 func (a *App) MCPExecutable() string {
+	if appImage := os.Getenv("APPIMAGE"); appImage != "" {
+		return appImage
+	}
 	exe, err := os.Executable()
 	if err != nil {
 		return "plugboard"

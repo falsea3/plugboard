@@ -117,13 +117,13 @@
 </script>
 
 <div class="roles">
-  <div class="pane-bar">
-    <span class="pane-title"><strong>{noun[0].toUpperCase()}{noun.slice(1)}s</strong> · {roles.length}</span>
-    <button class="btn outline icon" onclick={() => load()} disabled={loading} title="Reload" aria-label="Reload roles"><Icon name="refresh" size={14} /></button>
-    <button class="btn primary" onclick={startNew} disabled={ws.readOnly} title={newTitle} aria-label="New {noun}"><Icon name="plus" size={14} />New {noun}</button>
-  </div>
   <div class="cols">
   <aside class="list">
+    <div class="pane-head">
+      <span class="pane-title"><strong>{noun[0].toUpperCase()}{noun.slice(1)}s</strong> · {roles.length}</span>
+      <button class="btn ghost icon" onclick={() => load()} disabled={loading} title="Reload" aria-label="Reload roles"><Icon name="refresh" size={13} /></button>
+      <button class="btn ghost icon" onclick={startNew} disabled={ws.readOnly} title={newTitle} aria-label="New {noun}"><Icon name="plus" size={14} /></button>
+    </div>
     <div class="top">
       <TextField icon="search" size="sm" bind:value={query} placeholder="Filter {noun}s" label="Filter {noun}s" />
     </div>
@@ -170,7 +170,8 @@
       </div>
     {:else}
       <div class="empty">
-        <p>Pick a {noun} on the left, or create one with New {noun}.</p>
+        <p>Pick a {noun} on the left, or</p>
+        <button class="btn primary" onclick={startNew} disabled={ws.readOnly} title={newTitle}><Icon name="plus" size={14} />New {noun}</button>
         {#if ws.readOnly}<p class="hint">Read-only is on — turn it off to create {noun}s.</p>{/if}
       </div>
     {/if}
@@ -206,7 +207,7 @@
 
 <style>
   .roles { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .cols { flex: 1; min-height: 0; display: flex; gap: 10px; margin-top: 10px; }
+  .cols { flex: 1; min-height: 0; display: flex; gap: 10px; margin-top: 6px; }
   .list { flex: none; width: 280px; display: flex; flex-direction: column; border: 1px solid var(--hover); border-radius: var(--radius-lg); background: var(--elevated); overflow: hidden; }
   .top { padding: 10px 10px 6px; }
   .items { position: relative; flex: 1; min-height: 0; overflow: auto; padding: 0 8px; }
@@ -225,6 +226,7 @@
   .actions { display: flex; gap: 8px; max-width: 720px; margin-top: 20px; }
   .empty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; color: var(--text-3); font-size: 13px; }
   .empty p { margin: 0; }
+  .empty .btn { align-self: flex-start; }
   .empty .hint { margin: 0; }
   .error { display: flex; gap: 8px; padding: 10px 12px; border-radius: var(--radius); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); font-size: 12px; user-select: text; -webkit-user-select: text; }
   .text { margin: 0; color: var(--text-2); line-height: 1.5; }

@@ -14,7 +14,9 @@ export function mcpArgs(o: { write: boolean; create: boolean }): string[] {
 }
 
 export function shellQuote(s: string): string {
-  return /^[\w@%+=:,./-]+$/.test(s) ? s : `'${s.replace(/'/g, `'\\''`)}'`;
+  if (/^[\w@%+=:,./-]+$/.test(s)) return s;
+  if (/^[A-Za-z]:\\/.test(s)) return `"${s}"`;
+  return `'${s.replace(/'/g, `'\\''`)}'`;
 }
 
 function serversJSON(exe: string, args: string[]): string {
