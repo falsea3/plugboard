@@ -187,7 +187,7 @@
 
   <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
   <div
-    class="canvas"
+    class="canvas pane-card"
     bind:this={canvas}
     bind:clientWidth={width}
     bind:clientHeight={height}
@@ -268,7 +268,7 @@
     overflow: hidden;
     outline: none;
     cursor: grab;
-    background-color: var(--bg);
+    background-color: var(--card);
     user-select: none;
     -webkit-user-select: none;
   }

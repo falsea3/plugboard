@@ -72,9 +72,9 @@
     position: absolute;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
+    border: 1px solid var(--hover);
+    border-radius: 10px;
+    background: var(--elevated);
     overflow: hidden;
     cursor: default;
     transition: opacity 0.12s;
@@ -89,8 +89,8 @@
     gap: 7px;
     height: 32px;
     padding: 0 10px;
-    border-bottom: 1px solid var(--border);
-    background: var(--elevated);
+    border-bottom: 1px solid var(--hover);
+    background: transparent;
     color: var(--text);
     font-family: var(--font-ui);
     font-size: 12.5px;

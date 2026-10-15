@@ -82,23 +82,21 @@
 </script>
 
 <div class="view">
-  <div class="toolbar">
-    {#if running}
-      <button class="btn sm" onclick={() => queryId && api.cancelQuery(queryId)}><Icon name="stop" size={11} />Stop</button>
-    {:else}
-      <button class="btn sm primary" onclick={() => execute(false)} title="Run the line under the cursor (⌘↵)"><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run line'}</button>
-      {#if !hasSelection}<button class="btn sm" onclick={() => execute(true)} title="Run every line (⇧⌘↵)">Run all</button>{/if}
-    {/if}
-    <span class="faint small"><span class="kbd">⌘↵</span> line · <span class="kbd">⇧⌘↵</span> all</span>
-    {#if ws.readOnly}
-      <span style="flex:1"></span>
-      <span class="ro-chip" title="Commands that change data are refused. Switch it in the sidebar."><Icon name="lock" size={11} />Read-only</span>
-    {/if}
-  </div>
-
-  <div class="editor" style:height="{editorHeight}px">
-    <CommandEditor value={tab.sql} onchange={text => ws.saveQuery(tab.id, text)} bind:editor bind:hasSelection onrun={execute} />
-  </div>
+  <section class="editor-card" aria-label="Console" style:height="{editorHeight}px">
+    <div class="toolbar">
+      {#if running}
+        <button class="btn sm stop" onclick={() => queryId && api.cancelQuery(queryId)}><Icon name="stop" size={11} />Stop</button>
+      {:else}
+        <button class="btn sm primary run" onclick={() => execute(false)} title="Run the line under the cursor"><Icon name="play" size={11} />{hasSelection ? 'Run selection' : 'Run line'}<span class="kbd">⌘↵</span></button>
+        {#if !hasSelection}<button class="btn sm all" onclick={() => execute(true)}>Run all<span class="kbd">⇧⌘↵</span></button>{/if}
+      {/if}
+      <span class="space"></span>
+      {#if ws.readOnly}<span class="ro-chip" title="Commands that change data are refused. Switch it in the sidebar."><Icon name="lock" size={11} />Read only</span>{/if}
+    </div>
+    <div class="editor">
+      <CommandEditor value={tab.sql} onchange={text => ws.saveQuery(tab.id, text)} bind:editor bind:hasSelection onrun={execute} />
+    </div>
+  </section>
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="splitter" onpointerdown={startResize}></div>
@@ -112,11 +110,16 @@
 {/if}
 
 <style>
-  .view { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .toolbar { flex: none; display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .small { font-size: 12px; margin-left: 6px; white-space: nowrap; }
-  .ro-chip { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 8px; border-radius: 5px; color: var(--text-2); background: var(--elevated); font-size: 11.5px; font-weight: 550; }
-  .editor { flex: none; min-height: 80px; }
-  .splitter { flex: none; height: 5px; margin-top: -2px; margin-bottom: -3px; position: relative; z-index: 3; cursor: row-resize; border-top: 1px solid var(--border); }
-  .splitter:hover { border-top: 2px solid var(--accent); }
+  .view { height: 100%; display: flex; flex-direction: column; min-width: 0; padding-bottom: 2px; }
+  .editor-card { flex: none; min-height: 120px; margin-top: 6px; display: flex; flex-direction: column; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
+  .toolbar { flex: none; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 10px; border-bottom: 1px solid var(--grid-line); }
+  .toolbar .btn.sm { height: 30px; border-radius: 9px; padding: 0 12px; gap: 7px; }
+  .run .kbd { padding: 0; background: transparent; color: inherit; opacity: 0.8; }
+  .all { background: var(--border-subtle); color: var(--text-soft); }
+  .all .kbd { padding: 0; background: transparent; color: var(--text-4); }
+  .space { flex: 1; }
+  .ro-chip { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 6px; background: var(--hover); color: var(--text-2); font-size: 12px; }
+  .editor { flex: 1; min-height: 0; }
+  .splitter { flex: none; height: 10px; cursor: row-resize; position: relative; }
+  .splitter:hover::after { content: ''; position: absolute; left: 40%; right: 40%; top: 4px; height: 2px; border-radius: 1px; background: var(--accent); }
 </style>

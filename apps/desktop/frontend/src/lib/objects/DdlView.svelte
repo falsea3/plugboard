@@ -42,16 +42,14 @@
 
 <div class="ddl">
   {#if toolbar}
-    <div class="bar">
-      <Icon name={iconOf(object)} size={13} />
-      <span class="title mono faint">{object.schema ? object.schema + '.' : ''}<span class="muted">{object.name}</span>{object.kind === 'function' || object.kind === 'procedure' ? `(${object.detail ?? ''})` : ''}</span>
-      <span style="flex:1"></span>
-      <button class="btn sm ghost" onclick={copy} disabled={!text}><Icon name="copy" size={13} />Copy</button>
-      <button class="btn sm ghost" onclick={openInQuery} disabled={!text}><Icon name="code" size={13} />Open in query</button>
-      <button class="btn icon sm ghost" onclick={load} disabled={loading} title="Reload" aria-label="Reload">{#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={13} />{/if}</button>
+    <div class="pane-bar">
+      <span class="pane-title">{object.schema ? object.schema + '.' : ''}<strong>{object.name}</strong>{object.kind === 'function' || object.kind === 'procedure' ? `(${object.detail ?? ''})` : ''} · {object.kind}</span>
+      <button class="btn outline" onclick={copy} disabled={!text}><Icon name="copy" size={14} />Copy</button>
+      <button class="btn outline" onclick={openInQuery} disabled={!text}><Icon name="code" size={14} />Open in query</button>
+      <button class="btn outline icon" onclick={load} disabled={loading} title="Reload" aria-label="Reload">{#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={14} />{/if}</button>
     </div>
   {/if}
-  <div class="body">
+  <div class="body" class:pane-card={toolbar}>
     {#if loading}<LoadBar label="Loading the DDL" />{/if}
     {#if error}
       <div class="error" role="alert"><Icon name="alert" />{error}</div>
@@ -63,29 +61,6 @@
 
 <style>
   .ddl { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .bar {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 36px;
-    padding: 0 10px 0 14px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text-2);
-  }
-  .title { font-size: 12px; }
   .body { position: relative; flex: 1; min-height: 0; }
-  .error {
-    display: flex;
-    gap: 8px;
-    margin: 16px;
-    padding: 10px 12px;
-    border-radius: var(--radius);
-    color: var(--danger);
-    background: color-mix(in srgb, var(--danger) 10%, transparent);
-    font-size: 12px;
-    user-select: text;
-    -webkit-user-select: text;
-  }
+  .error { display: flex; gap: 8px; margin: 16px; padding: 10px 12px; border-radius: var(--radius); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); font-size: 12px; user-select: text; -webkit-user-select: text; }
 </style>

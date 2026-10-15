@@ -124,3 +124,8 @@ input, textarea, [contenteditable] {
 
 .drag { --wails-draggable: drag; }
 .no-drag { --wails-draggable: no-drag; }
+
+.pane-bar { flex: none; display: flex; align-items: center; gap: 10px; height: 44px; margin-top: 6px; min-width: 0; overflow: hidden; }
+.pane-title { flex: 1 1 auto; min-width: 0; overflow: hidden; color: var(--text-4); text-overflow: ellipsis; white-space: nowrap; }
+.pane-title strong { color: var(--text); font-weight: 400; }
+.pane-card { position: relative; flex: 1; min-height: 0; margin-top: 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }

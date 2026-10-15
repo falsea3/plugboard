@@ -117,20 +117,20 @@
 </script>
 
 <div class="config">
-  <div class="bar">
+  <div class="pane-bar">
     {#key pickerKey}<Select value={picked} {options} onchange={pick} aria-label="Configuration file" class="file-select" />{/key}
     {#if picked === OTHER}
       <form class="custom" onsubmit={e => (e.preventDefault(), guarded(() => open(customPath)))}>
         <input class="input mono" bind:value={customPath} placeholder={files[0]?.path ?? "/path/to/server.conf"} spellcheck="false" aria-label="File path" />
-        <button class="btn sm" disabled={!customPath.trim()}>Open</button>
+        <button class="btn outline" disabled={!customPath.trim()}>Open</button>
       </form>
     {:else if loaded}
-      <span class="path mono faint" title={loaded.path}>{loaded.path}</span>
+      <span class="path mono" title={loaded.path}>{loaded.path}</span>
     {/if}
-    <span style="flex:1"></span>
+    <span class="space"></span>
     {#if via}<span class="via" title={via.hint}>{via.label}</span>{/if}
-    <button class="btn icon sm ghost" onclick={() => loaded && guarded(() => open(loaded!.path))} disabled={!loaded || loading} title="Reload from the server" aria-label="Reload"><Icon name="refresh" size={13} /></button>
-    <button class="btn sm primary" onclick={save} disabled={!dirty || saving || readOnly} title={loaded?.readOnly ? 'The server shows these settings but can’t change them' : readOnly ? 'Read-only is on — turn it off to save' : 'Save and reload the server configuration (⌘S)'}>
+    <button class="btn outline icon" onclick={() => loaded && guarded(() => open(loaded!.path))} disabled={!loaded || loading} title="Reload from the server" aria-label="Reload"><Icon name="refresh" size={14} /></button>
+    <button class="btn primary" onclick={save} disabled={!dirty || saving || readOnly} title={loaded?.readOnly ? 'The server shows these settings but can’t change them' : readOnly ? 'Read-only is on — turn it off to save' : 'Save and reload the server configuration (⌘S)'}>
       {#if saving}<Spinner size={12} />{/if}Save &amp; reload
     </button>
   </div>
@@ -146,7 +146,7 @@
       {/each}
     </div>
   {/if}
-  <div class="body">
+  <div class="body pane-card">
     {#if loading}<LoadBar label="Loading the file" />{/if}
     {#if error}<div class="error" role="alert"><Icon name="alert" />{error}</div>{/if}
     {#if loaded}
@@ -183,14 +183,15 @@
 
 <style>
   .config { height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  .bar { flex: none; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 10px; border-bottom: 1px solid var(--border); background: var(--surface); }
-  .bar :global(.file-select) { width: 190px; flex: none; }
+  .pane-bar :global(.file-select) { width: 200px; flex: none; }
+  .pane-bar :global(.select-button) { height: 32px; border-radius: var(--radius); }
+  .space { flex: 1; }
   .custom { display: flex; gap: 6px; flex: 1; min-width: 0; max-width: 520px; }
-  .custom .input { flex: 1; min-width: 0; height: 26px; font-size: 12px; }
-  .path { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-  .via { flex: none; padding: 0 6px; border: 1px solid var(--border); border-radius: 4px; color: var(--text-3); font-size: 11px; }
+  .custom .input { flex: 1; min-width: 0; height: 32px; font-size: 12.5px; }
+  .path { min-width: 0; overflow: hidden; color: var(--text-4); text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
+  .via { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; }
   .body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
-  .problems { flex: none; display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--danger) 8%, var(--surface)); font-size: 12px; }
+  .problems { flex: none; display: flex; flex-direction: column; gap: 2px; margin-top: 8px; padding: 10px 12px; border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); font-size: 12px; }
   .problems strong { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: var(--danger); font-weight: 500; }
   .problem { display: flex; gap: 10px; padding: 2px 0; border: 0; background: none; color: var(--text-2); font-size: 12px; text-align: left; cursor: pointer; }
   .problem:hover { color: var(--text); }

@@ -79,19 +79,20 @@
 
 <div class="view">
   {#if loading}<LoadBar />{/if}
-  <header>
+  <div class="pane-bar">
     {#if value}<span class="type t-{value.type}">{TYPE_LABEL[value.type] ?? value.type.toUpperCase()}</span>{/if}
     <span class="name mono" title={tab.key.name}>{tab.key.name}</span>
-    <button class="btn icon sm ghost" onclick={() => copyToClipboard(tab.key.name)} title="Copy key name" aria-label="Copy key name"><Icon name="copy" size={12} /></button>
-    <span style="flex:1"></span>
+    <button class="btn icon ghost" onclick={() => copyToClipboard(tab.key.name)} title="Copy key name" aria-label="Copy key name"><Icon name="copy" size={13} /></button>
+    <span class="space"></span>
     {#if value}
       <span class="meta faint">{sizeLabel(value.type, value.size)}</span>
       <span class="meta faint" title="Time to live">TTL {formatTTL(value.ttl)}</span>
       <KeyActions {ws} {tab} ttl={value.ttl} onchange={change} />
     {/if}
-    <button class="btn icon sm ghost" onclick={() => load()} title="Refresh (⌘R)" aria-label="Refresh"><Icon name="refresh" size={13} /></button>
-  </header>
+    <button class="btn outline icon" onclick={() => load()} title="Refresh (⌘R)" aria-label="Refresh"><Icon name="refresh" size={14} /></button>
+  </div>
 
+  <div class="pane-card body">
   {#if error}
     <div class="error">{error}</div>
   {:else if value?.type === 'string'}
@@ -101,14 +102,16 @@
   {:else if value}
     <div class="error faint">{value.text}</div>
   {/if}
+  </div>
 </div>
 
 <style>
   .view { position: relative; height: 100%; display: flex; flex-direction: column; min-width: 0; }
-  header { flex: none; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
-  .type { flex: none; padding: 0 6px; border: 1px solid currentColor; border-radius: 4px; font-size: 10.5px; font-weight: 650; letter-spacing: 0.03em; color: var(--accent); }
-  .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; user-select: text; -webkit-user-select: text; }
-  .meta { flex: none; font-size: 11.5px; white-space: nowrap; }
+  .space { flex: 1; }
+  .body { display: flex; flex-direction: column; }
+  .type { flex: none; padding: 1px 7px; border-radius: 6px; background: var(--accent-bg); color: var(--accent-text); font-size: 11px; font-weight: 600; letter-spacing: 0.03em; }
+  .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 13px; user-select: text; -webkit-user-select: text; }
+  .meta { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; white-space: nowrap; }
   .error { padding: 16px; color: var(--danger); font-size: 12.5px; }
   .error.faint { color: var(--text-3); }
 </style>

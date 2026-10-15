@@ -111,18 +111,18 @@
 
 <style>
   .form { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; border: 0; min-width: 0; }
-  .form-grid { grid-template-columns: 96px 1fr; max-width: 520px; }
+  .form-grid { grid-template-columns: 104px 1fr; max-width: 560px; }
   .limit { width: 90px; flex: none; }
   .host { width: 160px; flex: none; }
   .note { color: var(--text-3); font-size: 12px; }
   .check { display: flex; align-items: center; gap: 5px; flex: none; color: var(--text-2); font-size: 12px; }
   .attrs { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 18px; }
-  .label { color: var(--text-2); font-size: 12px; font-weight: 550; }
+  .label { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
   .grants-label { display: flex; align-items: center; justify-content: space-between; max-width: 720px; }
-  .rules { height: auto; min-height: 64px; max-width: 720px; padding: 6px 9px; margin-top: -8px; resize: vertical; line-height: 1.5; font-size: 12px; }
+  .rules { height: auto; min-height: 64px; max-width: 720px; padding: 8px 12px; margin-top: -8px; resize: vertical; line-height: 1.5; font-size: 12px; }
   .rules-hint { margin: -10px 0 0; }
   .members { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: -6px; }
-  .chip { display: inline-flex; align-items: center; gap: 2px; padding-left: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 12px; }
+  .chip { display: inline-flex; align-items: center; gap: 2px; padding-left: 8px; border: 0; border-radius: 8px; background: var(--hover); font-size: 12px; }
   .members :global(.add) { width: 180px; }
-  .grants { max-width: 720px; margin: -6px 0 0; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--surface); color: var(--text-2); font-size: 11.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; }
+  .grants { max-width: 720px; margin: -6px 0 0; padding: 10px 12px; border: 1px solid var(--hover); border-radius: var(--radius); background: var(--well); color: var(--text-2); font-size: 11.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; }
 </style>

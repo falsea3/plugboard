@@ -35,13 +35,8 @@
   ];
 </script>
 
-<div class="toolbar">
-  <Icon name="diagram" size={13} />
-  <span class="title mono faint">{schema}</span>
-  {#if tables !== null}
-    <span class="small faint">{formatCount(tables, 'table')} · {formatCount(relations, 'relation')}</span>
-  {/if}
-  <span style="flex:1"></span>
+<div class="pane-bar">
+  <span class="pane-title"><strong>{schema}</strong>{#if tables !== null} · {formatCount(tables, 'table')} · {formatCount(relations, 'relation')}{/if}</span>
   {#if tables}
     <div class="export" class:busy={exporting}>
       {#key picker}
@@ -49,21 +44,22 @@
       {/key}
     </div>
   {/if}
-  <button class="btn icon sm ghost" onclick={() => onzoom(1 / 1.2)} title="Zoom out (−)" aria-label="Zoom out"><Icon name="zoomOut" size={13} /></button>
-  <span class="zoom small muted">{Math.round(zoom * 100)}%</span>
-  <button class="btn icon sm ghost" onclick={() => onzoom(1.2)} title="Zoom in (+)" aria-label="Zoom in"><Icon name="zoomIn" size={13} /></button>
-  <button class="btn icon sm ghost" onclick={onfit} title="Fit to window (0)" aria-label="Fit to window"><Icon name="fit" size={13} /></button>
-  <button class="btn icon sm ghost" onclick={onreload} disabled={loading} title="Reload" aria-label="Reload">
-    {#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={13} />{/if}
+  <div class="zoom-group">
+    <button class="btn ghost icon" onclick={() => onzoom(1 / 1.2)} title="Zoom out (−)" aria-label="Zoom out"><Icon name="zoomOut" size={14} /></button>
+    <span class="zoom">{Math.round(zoom * 100)}%</span>
+    <button class="btn ghost icon" onclick={() => onzoom(1.2)} title="Zoom in (+)" aria-label="Zoom in"><Icon name="zoomIn" size={14} /></button>
+  </div>
+  <button class="btn outline icon" onclick={onfit} title="Fit to window (0)" aria-label="Fit to window"><Icon name="fit" size={14} /></button>
+  <button class="btn outline icon" onclick={onreload} disabled={loading} title="Reload" aria-label="Reload">
+    {#if loading}<Spinner size={12} />{:else}<Icon name="refresh" size={14} />{/if}
   </button>
 </div>
 
 <style>
-  .toolbar { flex: none; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px 0 14px; border-bottom: 1px solid var(--border-subtle); color: var(--text-2); }
-  .title { font-size: 12px; }
-  .small { font-size: 12px; }
-  .zoom { min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; }
-  .export { width: 110px; height: 24px; }
-  .export :global(.select-button) { height: 24px; font-size: 12px; }
+  .zoom-group { display: flex; align-items: center; height: 32px; padding: 0 2px; border: 1px solid var(--border); border-radius: var(--radius); }
+  .zoom-group .btn { width: 28px; height: 26px; }
+  .zoom { min-width: 42px; color: var(--text-2); font-size: 12px; text-align: center; font-variant-numeric: tabular-nums; }
+  .export { width: 120px; }
+  .export :global(.select-button) { height: 32px; border-radius: var(--radius); }
   .export.busy { opacity: 0.5; pointer-events: none; }
 </style>
