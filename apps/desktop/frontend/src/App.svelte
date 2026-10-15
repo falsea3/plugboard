@@ -3,7 +3,6 @@
   import { app } from './lib/app/app.svelte';
   import { hasBridge, onMenuCommand } from './lib/api/backend';
   import { handleShortcut, runCommand } from './lib/app/commands';
-  import TitleBar from './lib/app/TitleBar.svelte';
   import ConnectionsHome from './lib/connections/ConnectionsHome.svelte';
   import WorkspaceView from './lib/app/WorkspaceView.svelte';
   import ConnectionForm from './lib/connections/ConnectionForm.svelte';
@@ -24,7 +23,6 @@
 <svelte:window onkeydown={handleShortcut} />
 
 <div class="shell">
-  {#if !app.active}<TitleBar />{/if}
   <main>
     {#each app.workspaces as ws (ws.id)}
       <WorkspaceView {ws} visible={app.active === ws} />

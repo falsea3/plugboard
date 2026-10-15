@@ -1,7 +1,7 @@
-import { expect, test } from './setup';
+import { connect, expect, test } from './setup';
 
 test('edits Cassandra rows but leaves sorting and structure to CQL', async ({ page }) => {
-  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Ledger' }).getByRole('button', { name: 'Connect' }).click();
+  await connect(page, 'ledger');
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const grid = page.getByRole('grid');
   await expect(grid.getByText('ann.novak1@example.com')).toBeVisible();
@@ -15,7 +15,7 @@ test('edits Cassandra rows but leaves sorting and structure to CQL', async ({ pa
 });
 
 test('shows Cassandra roles and its settings read-only', async ({ page }) => {
-  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Ledger' }).getByRole('button', { name: 'Connect' }).click();
+  await connect(page, 'ledger');
   await page.getByRole('button', { name: 'Roles' }).click();
   await expect(page.getByRole('listbox', { name: 'Roles' }).getByRole('option')).toHaveText([/relay\s*you\s*login\s*superuser/, /readers/]);
   await expect(page.getByText('Connections')).toHaveCount(0);

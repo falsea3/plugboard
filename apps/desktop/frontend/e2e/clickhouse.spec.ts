@@ -1,7 +1,7 @@
-import { expect, test } from './setup';
+import { connect, expect, test } from './setup';
 
 test('opens ClickHouse tables read-only and leaves changes to the SQL editor', async ({ page }) => {
-  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Warehouse' }).getByRole('button', { name: 'Connect' }).click();
+  await connect(page, 'warehouse');
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const grid = page.getByRole('grid');
   await expect(grid.getByText('ann.novak1@example.com')).toBeVisible();
@@ -17,7 +17,7 @@ test('opens ClickHouse tables read-only and leaves changes to the SQL editor', a
 });
 
 test('lists ClickHouse users and roles apart, and leaves xml users alone', async ({ page }) => {
-  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Warehouse' }).getByRole('button', { name: 'Connect' }).click();
+  await connect(page, 'warehouse');
   await page.getByRole('button', { name: 'Roles' }).click();
   const list = page.getByRole('listbox', { name: 'Roles' });
   await expect(list.getByRole('option')).toHaveText([/analysts\s*role/]);

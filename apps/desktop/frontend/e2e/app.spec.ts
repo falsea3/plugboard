@@ -145,9 +145,8 @@ test('opens a connection to AI agents and shows how to add Plugboard to Claude C
   await expect(settings.getByRole('listitem')).toHaveText(['Shop · staging']);
   await page.keyboard.press('Escape');
 
-  const option = page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Music library' });
-  await option.hover();
-  await option.getByTitle('Edit').click();
+  await page.locator('.home [data-conn="music"]').click();
+  await page.getByRole('button', { name: 'Edit', exact: true }).click();
   await page.getByText('AI agents (MCP)').click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect.poll(() => page.evaluate(() => (window as any).savedConnection?.aiAccess)).toBe(true);

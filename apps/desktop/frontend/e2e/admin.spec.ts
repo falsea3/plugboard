@@ -63,7 +63,7 @@ test('creates a role through the SQL the backend writes', async ({ page }) => {
 });
 
 test('manages MySQL users with a host, and opens their grants as SQL', async ({ page }) => {
-  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Analytics' }).getByRole('button', { name: 'Connect' }).click();
+  await connect(page, 'analytics');
   await page.getByRole('button', { name: 'Roles' }).click();
   const list = page.getByRole('listbox', { name: 'Roles' });
   await expect(list.getByRole('option')).toHaveText([/reporting@%/, /root@localhost\s*you\s*all privileges/]);

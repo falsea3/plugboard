@@ -10,8 +10,9 @@ export async function shot(page: Page, name: string) {
   await page.screenshot({ path: join(shotsDir, `${name}.png`), animations: 'disabled' });
 }
 
-export async function connect(page: Page) {
-  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+export async function connect(page: Page, id = 'shop') {
+  await page.locator(`.home [data-conn="${id}"]`).click();
+  await page.getByRole('button', { name: /^(Connect|Switch to)/ }).click();
 }
 
 export const test = base.extend({

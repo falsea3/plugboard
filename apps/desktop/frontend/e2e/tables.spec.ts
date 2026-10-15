@@ -1,11 +1,10 @@
 import { connect, expect, shot, test } from './setup';
 
 test('connects, browses a table and runs a query', async ({ page }) => {
-  const options = page.getByRole('listbox', { name: 'Connections' }).getByRole('option');
-  await expect(options).toHaveCount(6);
+  await expect(page.locator('.home [data-conn]')).toHaveCount(6);
   await shot(page, 'connections');
 
-  await options.filter({ hasText: 'Shop' }).getByRole('button', { name: 'Connect' }).click();
+  await connect(page);
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();
   const grid = page.getByRole('grid');
   await expect(grid.getByText('ann.novak1@example.com')).toBeVisible();
@@ -24,12 +23,7 @@ test('connects, browses a table and runs a query', async ({ page }) => {
 });
 
 test('asks before writing to a Production connection', async ({ page }) => {
-  await page
-    .getByRole('listbox', { name: 'Connections' })
-    .getByRole('option')
-    .filter({ hasText: 'Analytics' })
-    .getByRole('button', { name: 'Connect' })
-    .click();
+  await connect(page, 'analytics');
   await expect(page.getByRole('switch', { name: /Read-only/ })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('switch', { name: /Read-only/ }).click();
   await expect(page.getByRole('dialog', { name: 'Allow writes on Production?' })).toBeVisible();

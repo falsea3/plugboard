@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test';
-import { expect, test } from './setup';
+import { connect, expect, test } from './setup';
 
 async function connectCache(page: Page) {
-  await page.getByRole('listbox', { name: 'Connections' }).getByRole('option').filter({ hasText: 'Cache' }).getByRole('button', { name: 'Connect' }).click();
+  await connect(page, 'cache');
 }
 
 const tree = (page: Page) => page.getByRole('tree', { name: 'Keys' });
