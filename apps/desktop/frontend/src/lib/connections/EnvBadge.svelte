@@ -10,16 +10,15 @@
 
 <style>
   .env {
-    padding: 0 6px;
+    padding: 0 5px;
     border-radius: 4px;
     font-size: 10px;
-    font-weight: 650;
+    font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     white-space: nowrap;
     color: var(--c);
-    background: color-mix(in srgb, var(--c) 16%, transparent);
-    border: 1px solid color-mix(in srgb, var(--c) 34%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
   }
   .local { --c: var(--env-local); }
   .dev { --c: var(--env-dev); }

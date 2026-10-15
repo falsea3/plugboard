@@ -54,55 +54,57 @@ input, textarea, [contenteditable] {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 28px;
+  height: 32px;
   padding: 0 12px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: var(--radius);
-  background: var(--elevated);
+  background: var(--hover);
   color: var(--text);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   cursor: default;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
-.btn:hover:not(:disabled) { background: var(--hover); }
-.btn:active:not(:disabled) { background: var(--active); }
-.btn:disabled { opacity: 0.5; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn:hover:not(:disabled) { background: var(--active); }
+.btn:disabled { opacity: 0.45; }
+.btn.outline { background: transparent; border-color: var(--border); color: var(--text-2); }
+.btn.outline:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
 .btn.danger { color: var(--danger); }
-.btn.primary.danger-fill, .btn.primary.danger-fill:hover:not(:disabled) { background: var(--danger); border-color: var(--danger); }
-.btn.ghost { background: transparent; border-color: transparent; }
-.btn.ghost:hover:not(:disabled) { background: var(--hover); }
-.btn.sm { height: 24px; padding: 0 8px; font-size: 12px; }
-.btn.icon { width: 28px; padding: 0; }
-.btn.icon.sm { width: 24px; }
+.btn.primary.danger-fill, .btn.primary.danger-fill:hover:not(:disabled) { background: #d2463c; color: #fff; }
+.btn.ghost { background: transparent; color: var(--text-2); }
+.btn.ghost:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+.btn.sm { height: 28px; padding: 0 10px; font-size: 12.5px; border-radius: 9px; }
+.btn.icon { width: 32px; padding: 0; }
+.btn.icon.sm { width: 28px; }
+.btn .kbd { background: transparent; border: 0; padding: 0; color: inherit; opacity: 0.6; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; }
 
 .input, .select {
-  height: 28px;
+  height: 34px;
   width: 100%;
-  padding: 0 9px;
-  border: 1px solid var(--border);
+  padding: 0 12px;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
-  font-size: 12.5px;
+  font-size: 13px;
   outline: none;
   transition: border-color 0.12s, box-shadow 0.12s;
 }
-.input::placeholder { color: var(--text-3); }
+.input::placeholder { color: var(--text-4); }
 .input:focus, .select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
-.select { appearance: none; padding-right: 26px; background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%); background-position: calc(100% - 13px) 12px, calc(100% - 9px) 12px; background-size: 4px 4px; background-repeat: no-repeat; }
+.select { appearance: none; padding-right: 28px; background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%); background-position: calc(100% - 15px) 15px, calc(100% - 11px) 15px; background-size: 4px 4px; background-repeat: no-repeat; }
 
 .form-grid {
   display: grid;
-  grid-template-columns: 84px 1fr;
+  grid-template-columns: 96px 1fr;
   align-items: center;
-  gap: 9px 12px;
+  gap: 10px 14px;
 }
 .form-grid > label, .form-grid > .label { color: var(--text-2); text-align: right; font-size: 12.5px; }
 .form-row { display: flex; gap: 8px; align-items: center; }
@@ -110,15 +112,14 @@ input, textarea, [contenteditable] {
 
 .kbd {
   display: inline-block;
-  padding: 0 4px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-family: -apple-system, system-ui, var(--font-ui);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  line-height: 16px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: var(--hover);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 18px;
   white-space: nowrap;
-  color: var(--text-2);
+  color: var(--text-3);
 }
 
 .drag { --wails-draggable: drag; }
