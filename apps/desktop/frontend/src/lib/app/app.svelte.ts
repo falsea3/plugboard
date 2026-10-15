@@ -6,6 +6,7 @@ import { setThemeMode } from './theme';
 import { engine } from '../engines';
 import { scheduleUpdateChecks } from './updateSchedule';
 import { Workspace } from './workspace.svelte';
+import { ConnectionGroups } from '../connections/library.svelte';
 
 let seq = 0;
 
@@ -21,6 +22,7 @@ export type Update =
 class AppState {
   connections = $state<Connection[]>([]);
   connectionsLoaded = $state(false);
+  groups = new ConnectionGroups(this);
   connectingId = $state('');
 
   workspaces = $state<Workspace[]>([]);
@@ -139,7 +141,8 @@ class AppState {
 
   async loadConnections() {
     try {
-      this.connections = await api.listConnections();
+      const [conns] = await Promise.all([api.listConnections(), this.groups.load()]);
+      this.connections = conns;
     } catch (err) {
       this.notify(err);
     } finally {

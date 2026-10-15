@@ -1,4 +1,4 @@
-import type { Connection, ConnectSecrets, ConnectResult, TestResult, SessionInfo } from './wire';
+import type { Arrangement, Connection, ConnectionGroup, ConnectSecrets, ConnectResult, TestResult, SessionInfo } from './wire';
 import type { TableInfo, Column, Relation, Index, Diagram, DBObject, NewIndex } from './wireSchema';
 import type { ResultSet, TableQuery, RowCount, TablePage, QueryRun, SyntaxProblem, ChangeSet, ApplyResult, StructureChange, CellQuery } from './wireQuery';
 import type { KeyEdit, KeyPage, KeyValue } from './wireKeys';
@@ -54,6 +54,8 @@ export interface QueryTabState {
 export interface GoApp {
   AppInfo(): Promise<AppInfo>;
   ListConnections(): Promise<Connection[]>;
+  ListGroups(): Promise<ConnectionGroup[]>;
+  ArrangeConnections(a: Arrangement): Promise<void>;
   SaveConnection(c: Connection): Promise<Connection>;
   DeleteConnection(id: string): Promise<void>;
   TestConnection(c: Connection): Promise<TestResult>;

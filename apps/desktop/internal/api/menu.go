@@ -47,6 +47,8 @@ func BuildMenu(a *App) *menu.Menu {
 	file := root.AddSubmenu("File")
 	file.AddText("New Connection…", keys.CmdOrCtrl("n"), emit("new-connection"))
 	file.AddText("Switch Connection…", keys.CmdOrCtrl("k"), emit("switch-connection"))
+	file.AddText("Next Connection", keys.Control("tab"), emit("next-connection"))
+	file.AddText("Previous Connection", keys.Combo("tab", keys.ControlKey, keys.ShiftKey), emit("prev-connection"))
 	file.AddText("All Connections", keys.Combo("h", keys.CmdOrCtrlKey, keys.ShiftKey), emit("home"))
 	file.AddSeparator()
 	file.AddText("New Query", keys.CmdOrCtrl("t"), emit("new-query"))

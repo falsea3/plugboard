@@ -29,7 +29,7 @@
   <button class="home no-drag" onclick={() => app.goHome()} title="All connections (⇧⌘H)" aria-label="All connections"><Icon name="database" size={15} /></button>
 </div>
 
-<button class="conn" onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog">
+<button class="conn" data-switch-anchor onclick={() => (app.switcherOpen = true)} title="{conn.name} — {connectionTarget(conn)} · switch (⌘K)" aria-label="Switch connection — {conn.name}" aria-haspopup="dialog">
   <ConnAvatar connection={conn} size={38} />
   <span class="meta">
     <span class="name"><span class="text">{conn.name}</span><EnvBadge env={conn.env} /></span>

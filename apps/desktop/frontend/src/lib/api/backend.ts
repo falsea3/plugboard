@@ -1,4 +1,4 @@
-import type { ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, CellQuery, QueryTabState, RoleSpec, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { Arrangement, ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, CellQuery, QueryTabState, RoleSpec, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -60,6 +60,8 @@ export const api = {
   listConnections: () => call(a => a.ListConnections()),
   saveConnection: (c: Connection) => call(a => a.SaveConnection(c)),
   deleteConnection: (id: string) => call(a => a.DeleteConnection(id)),
+  listGroups: () => call(a => a.ListGroups()),
+  arrangeConnections: (arr: Arrangement) => call(a => a.ArrangeConnections(arr)),
   testConnection: (c: Connection) => call(a => a.TestConnection(c)),
   connect: (id: string, secrets: Partial<ConnectSecrets> = {}) =>
     call(a => a.Connect(id, { password: '', sshPassword: '', sshPassphrase: '', ...secrets })),

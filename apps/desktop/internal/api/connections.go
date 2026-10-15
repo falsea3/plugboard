@@ -19,6 +19,14 @@ func (a *App) ListConnections() ([]model.Connection, error) {
 	return a.connections.List()
 }
 
+func (a *App) ListGroups() ([]model.ConnectionGroup, error) {
+	return a.connections.Groups()
+}
+
+func (a *App) ArrangeConnections(arr model.Arrangement) error {
+	return a.connections.Arrange(arr)
+}
+
 func (a *App) SaveConnection(c model.Connection) (model.Connection, error) {
 	return a.connections.Save(c)
 }

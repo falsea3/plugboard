@@ -14,10 +14,21 @@ export interface Connection {
   file: string;
   sslMode: string;
   env: Env;
+  group?: string;
   color: string;
   readOnly: boolean;
   aiAccess?: boolean;
   ssh: SSHTunnel;
+}
+
+export interface ConnectionGroup {
+  name: string;
+  collapsed: boolean;
+}
+
+export interface Arrangement {
+  groups: ConnectionGroup[];
+  connections: { id: string; group: string }[];
 }
 
 export type SSHAuth = 'password' | 'key' | 'agent';

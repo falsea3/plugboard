@@ -1,7 +1,6 @@
 package store
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -51,10 +50,12 @@ func (s *Connections) Save(c model.Connection) (model.Connection, error) {
 	if err := Validate(c); err != nil {
 		return model.Connection{}, err
 	}
-	all, err := s.load()
+	f, err := s.loadFile()
 	if err != nil {
 		return model.Connection{}, err
 	}
+	all := f.Connections
+	c.Group = strings.TrimSpace(c.Group)
 	if c.ID == "" {
 		c.ID = model.NewID()
 	}
@@ -86,7 +87,8 @@ func (s *Connections) Save(c model.Connection) (model.Connection, error) {
 			return model.Connection{}, fmt.Errorf("save %s: %w", f.name, err)
 		}
 	}
-	if err := s.write(all); err != nil {
+	f.Connections = all
+	if err := s.write(f); err != nil {
 		return model.Connection{}, err
 	}
 	return c, nil
@@ -95,17 +97,17 @@ func (s *Connections) Save(c model.Connection) (model.Connection, error) {
 func (s *Connections) Delete(id string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	all, err := s.load()
+	f, err := s.loadFile()
 	if err != nil {
 		return err
 	}
-	kept := slices.DeleteFunc(all, func(c model.Connection) bool { return c.ID == id })
+	f.Connections = slices.DeleteFunc(f.Connections, func(c model.Connection) bool { return c.ID == id })
 	for _, f := range secretFields {
 		if err := s.secrets.Delete(secretKey(id, f.slot)); err != nil && !errors.Is(err, ErrSecretNotFound) {
 			return err
 		}
 	}
-	return s.write(kept)
+	return s.write(f)
 }
 
 func (s *Connections) find(id string) (model.Connection, bool, error) {
@@ -119,38 +121,6 @@ func (s *Connections) find(id string) (model.Connection, bool, error) {
 		}
 	}
 	return model.Connection{}, false, nil
-}
-
-func (s *Connections) load() ([]model.Connection, error) {
-	data, err := os.ReadFile(s.path)
-	if errors.Is(err, os.ErrNotExist) {
-		return []model.Connection{}, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	var file struct {
-		Version     int                `json:"version"`
-		Connections []model.Connection `json:"connections"`
-	}
-	if err := json.Unmarshal(data, &file); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", s.path, err)
-	}
-	if file.Connections == nil {
-		file.Connections = []model.Connection{}
-	}
-	return file.Connections, nil
-}
-
-func (s *Connections) write(all []model.Connection) error {
-	slices.SortStableFunc(all, func(a, b model.Connection) int {
-		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
-	})
-	data, err := json.MarshalIndent(map[string]any{"version": 1, "connections": all}, "", "  ")
-	if err != nil {
-		return err
-	}
-	return writeFileAtomic(s.path, data, 0o600)
 }
 
 func Validate(c model.Connection) error {

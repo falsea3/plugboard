@@ -30,10 +30,26 @@ type Connection struct {
 	File         string    `json:"file"`
 	SSLMode      string    `json:"sslMode"`
 	Env          string    `json:"env"`
+	Group        string    `json:"group"`
 	Color        string    `json:"color"`
 	ReadOnly     bool      `json:"readOnly"`
 	AIAccess     bool      `json:"aiAccess"`
 	SSH          SSHTunnel `json:"ssh"`
+}
+
+type ConnectionGroup struct {
+	Name      string `json:"name"`
+	Collapsed bool   `json:"collapsed"`
+}
+
+type Arrangement struct {
+	Groups      []ConnectionGroup `json:"groups"`
+	Connections []Placement       `json:"connections"`
+}
+
+type Placement struct {
+	ID    string `json:"id"`
+	Group string `json:"group"`
 }
 
 type SSHAuth string

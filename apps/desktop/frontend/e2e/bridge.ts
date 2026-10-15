@@ -9,22 +9,22 @@ export async function installBridge(page: Page) {
   await page.addInitScript((engines: Record<string, unknown>) => {
     const connections = [
       {
-        id: 'shop', name: 'Shop', driver: 'postgres', host: 'db.internal', port: 5432, user: 'app', savePassword: true,
+        id: 'shop', group: 'Team', name: 'Shop', driver: 'postgres', host: 'db.internal', port: 5432, user: 'app', savePassword: true,
         database: 'shop', file: '', sslMode: 'require', env: 'staging', color: '', readOnly: false, aiAccess: true,
         ssh: { enabled: true, host: 'bastion.example.com', port: 22, user: 'deploy', auth: 'agent', keyFile: '' },
       },
       {
-        id: 'analytics', name: 'Analytics', driver: 'mysql', host: 'analytics.example.com', port: 3306, user: 'reporting',
+        id: 'analytics', group: 'Team', name: 'Analytics', driver: 'mysql', host: 'analytics.example.com', port: 3306, user: 'reporting',
         savePassword: true, database: 'events', file: '', sslMode: 'verify-full', env: 'prod', color: '', readOnly: true,
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
       },
       {
-        id: 'ledger', name: 'Ledger', driver: 'cassandra', host: 'cass.internal', port: 9042, user: '', savePassword: true,
+        id: 'ledger', group: 'Data', name: 'Ledger', driver: 'cassandra', host: 'cass.internal', port: 9042, user: '', savePassword: true,
         database: 'ledger', file: '', sslMode: '', env: 'dev', color: '', readOnly: false,
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
       },
       {
-        id: 'warehouse', name: 'Warehouse', driver: 'clickhouse', host: 'olap.internal', port: 9000, user: 'default', savePassword: true,
+        id: 'warehouse', group: 'Data', name: 'Warehouse', driver: 'clickhouse', host: 'olap.internal', port: 9000, user: 'default', savePassword: true,
         database: 'olap', file: '', sslMode: '', env: 'dev', color: '', readOnly: false,
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
       },
@@ -34,6 +34,8 @@ export async function installBridge(page: Page) {
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
       },
     ];
+
+    let groups = [{ name: 'Team', collapsed: false }, { name: 'Data', collapsed: false }];
 
     const tables = ['customers', 'invoices', 'order_items', 'orders', 'products', 'refunds', 'shipments']
       .map(name => ({ schema: 'public', name, kind: 'table' }))
@@ -91,6 +93,13 @@ export async function installBridge(page: Page) {
           GetSettings: () => ok(settings),
           SaveSettings: (s: typeof settings) => ok(Object.assign(settings, s)),
           ListConnections: () => ok(connections),
+          ListGroups: () => ok(groups),
+          ArrangeConnections: (a: { groups: typeof groups; connections: { id: string; group: string }[] }) => {
+            groups = a.groups;
+            const known = a.connections.flatMap(p => connections.filter(c => c.id === p.id).map(c => Object.assign(c, { group: p.group })));
+            connections.splice(0, connections.length, ...known);
+            return ok(undefined);
+          },
           SaveConnection: (c: any) => ok(((window as any).savedConnection = c)),
           DeleteConnection: () => ok(undefined),
           TestConnection: () => ok({ ok: true, serverVersion: 'PostgreSQL 17.2', latencyMs: 18.4 }),

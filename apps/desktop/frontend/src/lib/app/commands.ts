@@ -26,6 +26,10 @@ export function runCommand(command: string) {
     case 'switch-connection':
       app.switcherOpen = true;
       break;
+    case 'next-connection':
+    case 'prev-connection':
+      cycleConnection(command === 'next-connection' ? 1 : -1);
+      break;
     case 'home':
       if (app.showHome) app.leaveHome();
       else app.goHome();
@@ -64,7 +68,16 @@ export function runCommand(command: string) {
   }
 }
 
+function cycleConnection(step: number) {
+  const list = app.workspaces;
+  if (list.length === 0) return;
+  const i = list.findIndex(w => w === app.active);
+  app.activate(list[(i + step + list.length) % list.length]);
+}
+
 const SHORTCUTS: Record<string, string> = {
+  tab: 'next-connection',
+  'shift+tab': 'prev-connection',
   ',': 'settings',
   n: 'new-connection',
   k: 'switch-connection',

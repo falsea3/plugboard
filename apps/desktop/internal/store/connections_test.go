@@ -232,3 +232,36 @@ func TestMoveSecretsFromTheOldKeychain(t *testing.T) {
 		}
 	}
 }
+
+func TestArrangeKeepsOrderAndGroups(t *testing.T) {
+	s, _ := newTestStore(t)
+	a, _ := s.Save(model.Connection{Name: "b", Driver: model.SQLite, File: "a.db"})
+	b, _ := s.Save(model.Connection{Name: "a", Driver: model.SQLite, File: "b.db", Group: " Shop "})
+	c, _ := s.Save(model.Connection{Name: "c", Driver: model.SQLite, File: "c.db"})
+	groups, _ := s.Groups()
+	if len(groups) != 1 || groups[0].Name != "Shop" {
+		t.Fatalf("groups = %+v", groups)
+	}
+	err := s.Arrange(model.Arrangement{
+		Groups:      []model.ConnectionGroup{{Name: "Empty", Collapsed: true}, {Name: "Shop"}},
+		Connections: []model.Placement{{ID: c.ID, Group: "Shop"}, {ID: "gone"}, {ID: a.ID}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	all, _ := s.List()
+	var got []string
+	for _, x := range all {
+		got = append(got, x.Name+"/"+x.Group)
+	}
+	if strings.Join(got, ",") != "c/Shop,b/,a/Shop" {
+		t.Fatalf("order = %v", got)
+	}
+	if b.Group != "Shop" {
+		t.Fatalf("saved group = %q", b.Group)
+	}
+	groups, _ = s.Groups()
+	if len(groups) != 2 || groups[0].Name != "Empty" || !groups[0].Collapsed {
+		t.Fatalf("groups = %+v", groups)
+	}
+}
