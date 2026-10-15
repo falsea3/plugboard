@@ -20,7 +20,7 @@
 </script>
 
 <aside class="nav" aria-label="Connection groups">
-  <div class="top drag" class:full={layout.fullscreen} class:empty={layout.fullscreen && !back}>
+  <div class="top drag" class:full={!layout.windowButtons} class:empty={!layout.windowButtons && !back}>
     <span class="lights"></span>
     {#if back}
       <button class="back no-drag" onclick={() => app.activate(back)} title="Back to {back.connection.name} (⇧⌘H)">

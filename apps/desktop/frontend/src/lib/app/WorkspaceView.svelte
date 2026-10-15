@@ -47,7 +47,7 @@
     <div class="side-resizer" onpointerdown={startResize}></div>
   {/if}
 
-  <section class="center" class:full={layout.sidebarHidden} class:no-lights={layout.fullscreen}>
+  <section class="center" class:full={layout.sidebarHidden} class:no-lights={!layout.windowButtons}>
     <TabBar {ws} />
 
     <div class="panes">
