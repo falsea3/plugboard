@@ -114,3 +114,14 @@ func TestEditorFollowsTransactions(t *testing.T) {
 		}
 	}
 }
+
+func TestDatabaseSize(t *testing.T) {
+	s := openSQLite(t)
+	if _, err := s.Run(context.Background(), "create table t (a int)"); err != nil {
+		t.Fatal(err)
+	}
+	size, err := s.DatabaseSize(context.Background())
+	if err != nil || size <= 0 {
+		t.Fatalf("size = %d, %v", size, err)
+	}
+}

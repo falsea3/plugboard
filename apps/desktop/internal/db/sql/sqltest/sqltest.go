@@ -36,6 +36,7 @@ func Run(t *testing.T, srv Server) {
 	t.Run("Objects", func(t *testing.T) { objects(t, srv, c) })
 	t.Run("RenameTable", func(t *testing.T) { renameTable(t, srv, c) })
 	t.Run("IndexSQL", func(t *testing.T) { indexSQL(t, srv, c) })
+	t.Run("DatabaseSize", func(t *testing.T) { databaseSize(t, srv, c) })
 }
 
 func FindRelation(d model.Diagram, table string) (model.Relation, bool) {

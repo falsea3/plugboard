@@ -82,6 +82,7 @@ func (a *App) Connect(id string, secrets model.ConnectSecrets) (model.ConnectRes
 	if err != nil {
 		return model.ConnectResult{}, err
 	}
+	_ = a.connections.Touch(id, time.Now())
 	return model.ConnectResult{Session: &info}, nil
 }
 

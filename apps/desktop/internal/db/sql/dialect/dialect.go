@@ -67,6 +67,10 @@ type SortKey interface {
 	SortKey(ctx context.Context, db *sql.DB, schema, table string) ([]string, error)
 }
 
+type SizeQuery interface {
+	SizeQuery() string
+}
+
 type SyntaxCheck interface {
 	CheckSyntax(ctx context.Context, conn *sql.Conn, stmt string) error
 }

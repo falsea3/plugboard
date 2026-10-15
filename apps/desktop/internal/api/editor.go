@@ -94,3 +94,21 @@ func (a *App) CancelQuery(queryID string) {
 		cancel()
 	}
 }
+
+func (a *App) DatabaseSize(sessionID string) (int64, error) {
+	s, err := a.session(sessionID)
+	if err != nil {
+		return 0, err
+	}
+	r, ok := s.(db.SizeReader)
+	if !ok {
+		return -1, nil
+	}
+	ctx, cancel := context.WithTimeout(a.context(), 10*time.Second)
+	defer cancel()
+	size, err := r.DatabaseSize(ctx)
+	if errors.Is(err, db.ErrNotSupported) {
+		return -1, nil
+	}
+	return size, err
+}

@@ -91,3 +91,7 @@ func (d Dialect) ListColumns(ctx context.Context, db *sql.DB, schema, table stri
 	}
 	return cols, err
 }
+
+func (Dialect) SizeQuery() string {
+	return "SELECT pg_database_size(current_database())"
+}

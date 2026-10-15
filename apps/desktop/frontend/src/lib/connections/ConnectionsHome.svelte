@@ -62,7 +62,7 @@
       <div class="search no-drag">
         <TextField icon="search" placeholder="Name, host, database…" label="Search connections" bind:value={query} {onkeydown} spellcheck="false" />
       </div>
-      <span class="no-drag"><Button variant="primary" icon="plus" kbd="⌘N" onclick={() => (app.editing = null)}>New connection</Button></span>
+      <span class="no-drag"><Button variant="primary" kbd="⌘N" onclick={() => (app.editing = null)}>New connection</Button></span>
     </div>
 
     <div class="body">
@@ -114,9 +114,9 @@
   .home { height: 100%; display: flex; background: var(--bg); }
   .main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 8px 12px 10px 16px; }
   .toolbar { height: 52px; flex: none; display: flex; align-items: center; gap: 8px; }
-  .search { flex: 1; min-width: 0; max-width: 560px; }
-  .search :global(.field) { width: 100%; }
-  .toolbar > .no-drag:last-child { margin-left: auto; }
+  .search { flex: 1; min-width: 0; }
+  .search :global(.field) { width: 100%; height: 36px; border-radius: 11px; padding: 0 12px; gap: 10px; }
+  .toolbar :global(.btn.primary) { height: 36px; border-radius: 11px; padding: 0 14px; }
   .body { flex: 1; min-height: 0; display: flex; gap: 10px; }
   .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--card); color: var(--text-3); }
   .note { margin: 0; color: var(--text-2); line-height: 1.5; }

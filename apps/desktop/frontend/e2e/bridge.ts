@@ -170,6 +170,7 @@ export async function installBridge(page: Page) {
           },
           CountRows: () => ok({ count: 24813, exact: false, known: true }),
           WriteStatements: (_: string, script: string) => ok(/\b(insert|update|delete|drop|alter)\b/i.test(script) ? [script] : []),
+          DatabaseSize: () => ok(2576980378),
           CheckSyntax: (_: string, script: string) =>
             ok(script.split(';').map(t => t.trim()).filter(Boolean)
               .map((t, index) => ({ index, position: t.search(/\bfron\b/), message: 'syntax error at or near "fron"' }))

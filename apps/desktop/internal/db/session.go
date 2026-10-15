@@ -24,6 +24,10 @@ type Session interface {
 	WriteStatements(script string) []string
 }
 
+type SizeReader interface {
+	DatabaseSize(ctx context.Context) (int64, error)
+}
+
 type SyntaxChecker interface {
 	CheckSyntax(ctx context.Context, script string) ([]model.SyntaxProblem, error)
 }

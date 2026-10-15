@@ -150,3 +150,7 @@ func unescape(s string) string {
 	}
 	return b.String()
 }
+
+func (Dialect) SizeQuery() string {
+	return "SELECT CAST(COALESCE(SUM(data_length + index_length), 0) AS SIGNED) FROM information_schema.tables WHERE table_schema = DATABASE()"
+}

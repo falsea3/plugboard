@@ -1,7 +1,7 @@
 <script lang="ts">
   import { app } from '../app/app.svelte';
   import { ENGINES } from '../engines';
-  import type { Scope } from './home';
+  import { GROUP_TONES, type Scope } from './home';
   import DriverMark from './DriverMark.svelte';
   import Icon from '../ui/Icon.svelte';
 
@@ -31,12 +31,12 @@
 
   <nav aria-label="Groups">
     <button class="item" class:on={scope.kind === 'all'} aria-current={scope.kind === 'all'} onclick={() => (scope = { kind: 'all' })}>
-      <span class="dot all"></span><span class="label">All</span><span class="count">{app.connections.length}</span>
+      <span class="dot none"></span><span class="label">All</span><span class="count">{app.connections.length}</span>
     </button>
-    {#each groups as g (g.name)}
+    {#each groups as g, i (g.name)}
       {@const s = { kind: 'group', name: g.name } as Scope}
       <button class="item" class:on={same(scope, s)} aria-current={same(scope, s)} onclick={() => (scope = s)}>
-        <span class="dot" class:loose={!g.name}></span><span class="label">{g.name || 'Ungrouped'}</span><span class="count">{g.items.length}</span>
+        <span class="dot" style:background={g.name ? GROUP_TONES[i % GROUP_TONES.length] : 'var(--text-4)'}></span><span class="label">{g.name || 'Ungrouped'}</span><span class="count">{g.items.length}</span>
       </button>
     {/each}
 
@@ -44,38 +44,39 @@
       <div class="heading">Engines</div>
       {#each engines as { e, count } (e.driver)}
         {@const s = { kind: 'engine', driver: e.driver } as Scope}
-        <button class="item" class:on={same(scope, s)} aria-current={same(scope, s)} onclick={() => (scope = s)}>
-          <DriverMark driver={e.driver} size={18} /><span class="label">{e.name}</span><span class="count">{count}</span>
+        <button class="item engine" class:on={same(scope, s)} aria-current={same(scope, s)} onclick={() => (scope = s)}>
+          <DriverMark driver={e.driver} size={20} /><span class="label">{e.name}</span><span class="count">{count}</span>
         </button>
       {/each}
     {/if}
   </nav>
 
   <div class="bottom">
-    <button class="btn new-group" onclick={onnewgroup}><Icon name="group" size={14} />New group</button>
+    <button class="btn new-group" onclick={onnewgroup}>New group</button>
     <button class="btn icon" onclick={() => (app.settingsOpen = 'general')} title="Settings (⌘,)" aria-label="Settings"><Icon name="settings" size={15} /></button>
   </div>
 </aside>
 
 <style>
-  .nav { width: 232px; flex: none; display: flex; flex-direction: column; margin: 8px 0 8px 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); background: var(--elevated); }
-  .top { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 8px 0 0; }
+  .nav { width: 232px; flex: none; display: flex; flex-direction: column; margin: 8px 0 8px 8px; border: 1px solid var(--hover); border-radius: var(--radius-xl); background: var(--elevated); }
+  .top { display: flex; align-items: center; gap: 8px; height: 28px; padding: 12px 10px 0 0; }
   .lights { width: 78px; flex: none; }
   .back { min-width: 0; display: flex; align-items: center; gap: 4px; height: 26px; margin-left: auto; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .back:hover { background: var(--hover); color: var(--text); }
-  h1 { margin: 0; padding: 12px 16px 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  h1 { margin: 0; padding: 22px 16px 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
   nav { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 8px 0; }
-  .item { width: 100%; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); text-align: left; }
+  .item { width: 100%; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-soft); text-align: left; }
   .item:hover { background: var(--hover); color: var(--text); }
-  .item.on { background: var(--accent-bg); color: var(--text); }
+  .item.on { background: var(--accent-bg); color: var(--tab-active); }
   .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .count { font-size: 11.5px; color: var(--text-4); }
   .item.on .count { color: var(--accent-text); }
-  .dot { width: 8px; height: 8px; flex: none; margin: 0 5px; border-radius: 3px; background: var(--accent); opacity: 0.8; }
-  .dot.all { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-3); }
-  .dot.loose { background: var(--text-4); }
-  .item :global(.mark) { border-radius: 5px; }
+  .dot { width: 8px; height: 8px; flex: none; border-radius: 3px; }
+  .dot.none { background: transparent; }
+  .engine { color: var(--text-2); height: 28px; }
+  .engine .count { color: var(--gutter); }
+  .item :global(.mark) { border-radius: 6px; }
   .heading { padding: 18px 8px 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
   .bottom { display: flex; gap: 6px; padding: 10px 12px 12px; }
-  .new-group { flex: 1; gap: 6px; }
+  .new-group { flex: 1; }
 </style>

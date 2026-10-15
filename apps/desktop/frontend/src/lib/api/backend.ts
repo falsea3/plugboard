@@ -82,6 +82,7 @@ export const api = {
   runQuery: (sessionId: string, queryId: string, sql: string) => call(a => a.RunQuery(sessionId, queryId, sql)),
   writeStatements: (sessionId: string, script: string) => call(a => a.WriteStatements(sessionId, script)),
   checkSyntax: (sessionId: string, script: string) => call(a => a.CheckSyntax(sessionId, script)),
+  databaseSize: (sessionId: string) => call(a => a.DatabaseSize(sessionId)),
   runMore: (sessionId: string, queryId: string, statement: string, offset: number) =>
     call(a => a.RunMore(sessionId, queryId, statement, offset)),
   cancelQuery: (queryId: string) => call(a => a.CancelQuery(queryId)),

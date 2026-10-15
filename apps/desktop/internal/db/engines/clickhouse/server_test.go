@@ -205,3 +205,10 @@ func TestTruncateAndDropColumn(t *testing.T) {
 		t.Fatalf("after truncate = %v, %v", res, err)
 	}
 }
+
+func TestDatabaseSize(t *testing.T) {
+	size, err := open(t, true).DatabaseSize(context.Background())
+	if err != nil || size <= 0 {
+		t.Fatalf("size = %d, %v", size, err)
+	}
+}

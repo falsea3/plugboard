@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Connection } from '../api/wire';
-import { connectionUrl, inScope, matches, nextId, sshRoute } from './home';
+import { connectionUrl, inScope, matches, nextId, sshRoute, usedAgo } from './home';
 
 const pg = {
   id: 'a', name: 'HB Stage', driver: 'postgres', host: 'db.internal', port: 5432, user: 'app', database: 'shop', file: '', env: 'staging', group: 'HB',
@@ -31,5 +31,15 @@ describe('home', () => {
     expect(nextId(['a', 'b'], 'b', 1)).toBe('b');
     expect(nextId(['a', 'b'], 'x', -1)).toBe('b');
     expect(nextId([], 'x', 1)).toBe('');
+  });
+
+  it('says how long ago a connection was used', () => {
+    const now = Date.parse('2026-10-15T12:00:00Z');
+    expect(usedAgo('2026-10-15T11:59:40Z', now)).toBe('just now');
+    expect(usedAgo('2026-10-15T10:00:00Z', now)).toBe('2h');
+    expect(usedAgo('2026-10-14T09:00:00Z', now)).toBe('yesterday');
+    expect(usedAgo('2026-10-01T12:00:00Z', now)).toBe('2w');
+    expect(usedAgo('2026-07-01T12:00:00Z', now)).toBe('3mo');
+    expect(usedAgo(undefined, now)).toBe('');
   });
 });

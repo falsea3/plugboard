@@ -41,3 +41,11 @@ func indexSQL(t *testing.T, srv Server, c model.Connection) {
 		t.Fatalf("the index is still there after %s", drop2)
 	}
 }
+
+func databaseSize(t *testing.T, srv Server, c model.Connection) {
+	s := Open(t, srv.Dialect, c)
+	size, err := s.DatabaseSize(context.Background())
+	if err != nil || size <= 0 {
+		t.Fatalf("size = %d, %v", size, err)
+	}
+}

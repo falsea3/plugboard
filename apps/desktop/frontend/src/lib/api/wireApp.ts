@@ -76,6 +76,7 @@ export interface GoApp {
   RunQuery(sessionId: string, queryId: string, sql: string): Promise<QueryRun>;
   WriteStatements(sessionId: string, script: string): Promise<string[]>;
   CheckSyntax(sessionId: string, script: string): Promise<SyntaxProblem[]>;
+  DatabaseSize(sessionId: string): Promise<number>;
   RunMore(sessionId: string, queryId: string, statement: string, offset: number): Promise<ResultSet>;
   CancelQuery(queryId: string): Promise<void>;
   ChooseSQLiteFile(): Promise<string>;

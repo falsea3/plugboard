@@ -19,6 +19,7 @@ export interface Connection {
   readOnly: boolean;
   aiAccess?: boolean;
   ssh: SSHTunnel;
+  lastUsed?: string;
 }
 
 export interface ConnectionGroup {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cellKind, connectionTarget, calcColumnWidth, formatCell, formatDuration, toTSV } from './format';
+import { cellKind, connectionTarget, calcColumnWidth, formatBytes, formatCell, formatDuration, toTSV } from './format';
 import { emptyConnection, mysql, postgres, sqlite } from '../engines';
 
 describe('formatCell', () => {
@@ -65,5 +65,13 @@ describe('calcColumnWidth', () => {
 
   it('leaves room for the type next to the name in the header', () => {
     expect(calcColumnWidth('is_active', 'boolean', [[false]], 0)).toBeGreaterThan(calcColumnWidth('is_active', '', [[false]], 0) + 40);
+  });
+});
+
+describe('formatBytes', () => {
+  it('picks a unit and keeps one decimal below ten', () => {
+    expect(formatBytes(512)).toBe('512 B');
+    expect(formatBytes(2576980378)).toBe('2.4 GB');
+    expect(formatBytes(50 * 1024 * 1024)).toBe('50 MB');
   });
 });

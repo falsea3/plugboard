@@ -161,3 +161,7 @@ func (Dialect) EstimateRows(ctx context.Context, db *sql.DB, schema, table strin
 	}
 	return n.Int64, err == nil && n.Valid, err
 }
+
+func (Dialect) SizeQuery() string {
+	return "SELECT toInt64(sum(bytes_on_disk)) FROM system.parts WHERE active AND database = currentDatabase()"
+}

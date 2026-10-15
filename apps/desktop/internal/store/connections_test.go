@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
@@ -263,5 +264,22 @@ func TestArrangeKeepsOrderAndGroups(t *testing.T) {
 	groups, _ = s.Groups()
 	if len(groups) != 2 || groups[0].Name != "Empty" || !groups[0].Collapsed {
 		t.Fatalf("groups = %+v", groups)
+	}
+}
+
+func TestTouchRemembersLastUseAcrossSaves(t *testing.T) {
+	s, _ := newTestStore(t)
+	c, _ := s.Save(model.Connection{Name: "a", Driver: model.SQLite, File: "a.db"})
+	at := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
+	if err := s.Touch(c.ID, at); err != nil {
+		t.Fatal(err)
+	}
+	c.Name = "b"
+	if _, err := s.Save(c); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := s.Get(c.ID)
+	if got.LastUsed != "2026-10-01T12:00:00Z" {
+		t.Fatalf("lastUsed = %q", got.LastUsed)
 	}
 }

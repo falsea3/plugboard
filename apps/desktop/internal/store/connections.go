@@ -69,6 +69,9 @@ func (s *Connections) Save(c model.Connection) (model.Connection, error) {
 	if i := slices.IndexFunc(all, func(p model.Connection) bool { return p.ID == c.ID }); i >= 0 {
 		prev := all[i]
 		old = &prev
+		if c.LastUsed == "" {
+			c.LastUsed = prev.LastUsed
+		}
 		all[i] = c
 	} else {
 		all = append(all, c)

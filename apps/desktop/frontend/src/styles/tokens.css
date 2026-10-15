@@ -41,6 +41,7 @@
   --tree-selected: #22223a;
   --cell-edited:   #2a2312;
   --gutter:        #3e3e44;
+  --well:          #111113;
   --stmt-bg:       #16162a;
   --stmt-head:     #1e1e3a;
   --stmt-num:      #8a88e8;
@@ -106,6 +107,7 @@
   --tree-selected: #ebebfc;
   --cell-edited:   #fbf1dc;
   --gutter:        #b4b4bc;
+  --well:          #f4f4f6;
   --stmt-bg:       #f5f5fe;
   --stmt-head:     #ebebfc;
   --stmt-num:      #6b68e0;

@@ -35,6 +35,7 @@ type Connection struct {
 	ReadOnly     bool      `json:"readOnly"`
 	AIAccess     bool      `json:"aiAccess"`
 	SSH          SSHTunnel `json:"ssh"`
+	LastUsed     string    `json:"lastUsed,omitempty"`
 }
 
 type ConnectionGroup struct {

@@ -7,6 +7,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
@@ -52,6 +53,21 @@ func (s *Connections) Arrange(a model.Arrangement) error {
 	}
 	f.Connections = arranged
 	f.Groups = a.Groups
+	return s.write(f)
+}
+
+func (s *Connections) Touch(id string, at time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	f, err := s.loadFile()
+	if err != nil {
+		return err
+	}
+	i := slices.IndexFunc(f.Connections, func(c model.Connection) bool { return c.ID == id })
+	if i < 0 {
+		return nil
+	}
+	f.Connections[i].LastUsed = at.UTC().Format(time.RFC3339)
 	return s.write(f)
 }
 

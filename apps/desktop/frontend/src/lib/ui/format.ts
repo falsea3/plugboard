@@ -62,3 +62,14 @@ export function calcColumnWidth(name: string, type: string, rows: CellValue[][],
   }
   return Math.round(Math.min(Math.max(longest * charW + 24, 64), fit ? 800 : 360));
 }
+
+export function formatBytes(n: number): string {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let v = n;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  return i === 0 ? `${v} B` : `${v < 10 ? v.toFixed(1) : Math.round(v)} ${units[i]}`;
+}
