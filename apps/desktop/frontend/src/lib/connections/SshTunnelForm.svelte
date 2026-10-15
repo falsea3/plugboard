@@ -1,7 +1,7 @@
 <script lang="ts">
   import { api, type Connection, type SSHAuth } from '../api/backend';
   import Icon from '../ui/Icon.svelte';
-  import ToggleRow from '../ui/ToggleRow.svelte';
+  import Switch from '../ui/Switch.svelte';
 
   let {
     form = $bindable(),
@@ -17,6 +17,13 @@
     { value: 'agent', label: 'SSH agent' },
   ];
   const viaDbHost = $derived(!form.ssh.host.trim());
+  const summary = $derived.by(() => {
+    if (!form.ssh.enabled) return 'off';
+    const host = form.ssh.host.trim() || form.host || 'database host';
+    const port = Number(form.ssh.port) && Number(form.ssh.port) !== 22 ? `:${form.ssh.port}` : '';
+    const auth = auths.find(a => a.value === form.ssh.auth)?.label.toLowerCase() ?? '';
+    return `${form.ssh.user ? form.ssh.user + '@' : ''}${host}${port} · ${auth}`;
+  });
 
   async function chooseKey() {
     try {
@@ -28,18 +35,23 @@
   }
 </script>
 
-<div class="form-grid">
-  <span></span>
-  <ToggleRow bind:checked={form.ssh.enabled}>
-    {#snippet title()}Connect through an SSH server{/snippet}
-    {#if viaDbHost}
-      Plugboard signs in to <strong>{form.host || 'the database host'}</strong> over SSH and reaches the database there on <code>127.0.0.1:{form.port || defaultPort}</code>. Set an SSH host to go through a separate bastion instead.
-    {:else}
-      Plugboard signs in to <strong>{form.ssh.host}</strong> and connects from there to <code>{form.host || '127.0.0.1'}:{form.port || defaultPort}</code> — the database host as that server sees it.
-    {/if}
-  </ToggleRow>
-
+<section class="card" class:on={form.ssh.enabled}>
+  <div class="card-head">
+    <span class="what">
+      <span class="title">SSH tunnel</span>
+      <span class="summary">{summary}</span>
+    </span>
+    <Switch bind:checked={form.ssh.enabled} label="SSH tunnel" />
+  </div>
   {#if form.ssh.enabled}
+  <p class="hint route">
+    {#if viaDbHost}
+      Signs in to <strong>{form.host || 'the database host'}</strong> over SSH and reaches the database there on <code>127.0.0.1:{form.port || defaultPort}</code>. Set an SSH host to go through a separate bastion.
+    {:else}
+      Signs in to <strong>{form.ssh.host}</strong> and connects from there to <code>{form.host || '127.0.0.1'}:{form.port || defaultPort}</code> — the database host as that server sees it.
+    {/if}
+  </p>
+  <div class="form-grid">
     <label for="cf-ssh-host">SSH host</label>
     <div class="form-row">
       <input id="cf-ssh-host" class="input" bind:value={form.ssh.host} placeholder={form.host ? `Optional — same as database host (${form.host})` : 'Optional — same as database host'} spellcheck="false" autocomplete="off" />
@@ -73,29 +85,25 @@
     {/if}
 
     <span></span>
-    <p class="hint">Secrets follow “Save in Keychain” on the General tab. On first connect the server’s host key is remembered; if it ever changes, Plugboard refuses to connect.</p>
+    <p class="hint">Secrets follow “Save passwords in the Keychain”. On first connect the server’s host key is remembered; if it ever changes, Plugboard refuses to connect.</p>
+  </div>
   {/if}
-</div>
+</section>
 
 <style>
+  .card { margin-top: 18px; padding: 12px 14px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface); }
+  .card.on .form-grid { margin-top: 12px; grid-template-columns: 89px minmax(0, 1fr); }
+  .card-head { display: flex; align-items: center; gap: 10px; }
+  .what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .title { font-weight: 500; }
+  .summary { color: var(--text-3); }
+  .summary::before { content: ' · '; }
+  .route { margin-top: 8px; }
+  .route strong { color: var(--text-2); font-weight: 550; }
   .hint { margin: 0; color: var(--text-3); font-size: 11.5px; line-height: 1.45; }
   code { font-family: var(--font-mono); font-size: 11px; }
-  .segmented {
-    display: flex;
-    padding: 2px;
-    border-radius: 7px;
-    background: var(--elevated);
-    border: 1px solid var(--border-subtle);
-  }
-  .segmented button {
-    flex: 1;
-    height: 24px;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-2);
-    font-size: 12px;
-    font-weight: 500;
-  }
-  .segmented button.on { background: var(--bg); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+  .segmented { display: flex; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .segmented button { flex: 1; height: 26px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font-size: 12.5px; }
+  .segmented button:hover { color: var(--text); }
+  .segmented button.on { background: var(--active); color: var(--text); font-weight: 500; }
 </style>

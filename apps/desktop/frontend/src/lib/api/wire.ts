@@ -14,7 +14,7 @@ export interface Connection {
   file: string;
   sslMode: string;
   env: Env;
-  group?: string;
+  group: string;
   color: string;
   readOnly: boolean;
   aiAccess?: boolean;

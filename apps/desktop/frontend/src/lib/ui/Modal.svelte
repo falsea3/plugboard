@@ -15,12 +15,14 @@
     width = 480,
     onclose,
     children,
+    header,
     footer,
   }: {
     title: string;
     width?: number;
     onclose: () => void;
     children: Snippet;
+    header?: Snippet;
     footer?: Snippet;
   } = $props();
 
@@ -46,7 +48,7 @@
 
 <div class="backdrop" use:dismiss={onclose}>
   <div class="modal" role="dialog" aria-modal="true" aria-label={title} style:width="{width}px">
-    <header>{title}</header>
+    <header>{#if header}{@render header()}{:else}{title}{/if}</header>
     <div class="body">{@render children()}</div>
     {#if footer}
       <footer>{@render footer()}</footer>
@@ -69,28 +71,26 @@
     max-height: calc(100vh - 64px);
     display: flex;
     flex-direction: column;
-    border-radius: var(--radius-lg);
-    background: var(--bg);
+    border-radius: calc(var(--radius-xl) + 2px);
+    background: var(--elevated);
     box-shadow: var(--shadow-modal);
     animation: pop 0.14s ease-out;
   }
   header {
-    padding: 14px 18px 4px;
-    font-size: 14px;
+    padding: 18px 20px 4px;
+    font-size: 15px;
     font-weight: 600;
   }
   .body {
-    padding: 10px 18px 16px;
+    padding: 12px 20px 18px;
     overflow: auto;
   }
   footer {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 18px;
-    border-top: 1px solid var(--border-subtle);
-    background: var(--surface);
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
   }
   @keyframes fade { from { opacity: 0; } }
   @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(0.985); } }

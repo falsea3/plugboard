@@ -12,6 +12,8 @@
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
   import UrlImport from './UrlImport.svelte';
+  import ConnAvatar from './ConnAvatar.svelte';
+  import ToggleCard from '../ui/ToggleCard.svelte';
   import SshTunnelForm from './SshTunnelForm.svelte';
   import { formatDuration } from '../ui/format';
 
@@ -45,7 +47,7 @@
         }
       : blank,
   );
-  let tab = $state<'general' | 'ssh'>('general');
+  let showUrl = $state(false);
   let testing = $state(false);
   let saving = $state(false);
   let test = $state<TestResult | null>(null);
@@ -64,15 +66,14 @@
   const keyMoved = $derived(!!start && form.ssh.keyFile !== start.ssh?.keyFile);
   function secretHint(what: string, moved: boolean, otherwise = 'Optional'): string {
     if (!hasStored) return otherwise;
-    return moved ? `Enter it again — the saved ${what} doesn't carry over to this change` : `Optional — keeps the saved ${what}`;
+    return moved ? `Enter the ${what} again` : `Saved — leave empty to keep`;
   }
   const formEngine = $derived(engine(form.driver));
 
   function setDriver(d: Driver) {
     if (d === form.driver) return;
     const fresh = emptyConnection(engine(d));
-    form = { ...fresh, id: form.id, name: form.name, env: form.env, password: form.password, savePassword: form.savePassword, readOnly: form.readOnly, ssh: form.ssh };
-    if (engine(d).file) tab = 'general';
+    form = { ...fresh, id: form.id, name: form.name, group: form.group, env: form.env, password: form.password, savePassword: form.savePassword, readOnly: form.readOnly, ssh: form.ssh };
     test = null;
   }
 
@@ -85,19 +86,21 @@
       ...parsed,
       id: form.id,
       name: form.name || parsed.name,
+      group: form.group,
       env: form.env,
       readOnly: form.readOnly,
       savePassword: form.savePassword,
       ssh: form.ssh,
     };
     test = null;
-    tab = 'general';
+    showUrl = false;
   }
 
   function normalized(): Connection {
     const c = $state.snapshot(form) as Connection;
     const e = engine(c.driver);
     c.name = c.name.trim();
+    c.group = (c.group ?? '').trim();
     if (!c.name) {
       c.name = e.file ? nameFromFile(e, c.file) : `${c.host}${c.database ? '/' + c.database : ''}`;
     }
@@ -146,31 +149,28 @@
   }
 </script>
 
-<Modal title={editing ? 'Edit connection' : 'New connection'} width={560} {onclose}>
+<Modal title={editing ? 'Edit connection' : 'New connection'} width={640} {onclose}>
+  {#snippet header()}
+    <div class="head">
+      <ConnAvatar connection={{ ...form, name: form.name || formEngine.name }} size={40} showDriver={false} />
+      <div class="head-text">
+        <div class="head-title">{editing ? 'Edit connection' : 'New connection'}</div>
+        <div class="head-sub">or <button type="button" class="link" onclick={() => (showUrl = !showUrl)}>paste a URL</button> — postgres://, mysql://, redis://…</div>
+      </div>
+      <button type="button" class="btn ghost icon close" onclick={onclose} aria-label="Close"><Icon name="x" size={15} /></button>
+    </div>
+  {/snippet}
+
   <form id="connection-form" {onsubmit}>
-    <UrlImport onimport={importParsed} />
+    {#if showUrl}<div class="url"><UrlImport onimport={importParsed} /></div>{/if}
 
     <DriverPicker driver={form.driver} onpick={setDriver} />
 
-    {#if !formEngine.file}
-      <div class="tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={tab === 'general'} class:on={tab === 'general'} onclick={() => (tab = 'general')}>General</button>
-        <button type="button" role="tab" aria-selected={tab === 'ssh'} class:on={tab === 'ssh'} onclick={() => (tab = 'ssh')}>
-          SSH Tunnel
-          {#if form.ssh.enabled}<span class="on-dot" title="SSH tunnel is on"></span>{/if}
-        </button>
-      </div>
-    {/if}
+    <div class="fields">
+      <DbFields bind:form passwordHint={secretHint('password', dbMoved)} onenv={onEnvChange} onerror={m => (error = m)} />
+    </div>
 
-    {#if tab === 'general'}
-      <DbFields
-        bind:form
-        passwordHint={secretHint('password', dbMoved)}
-        onenv={onEnvChange}
-        onreadonly={() => (readOnlyTouched = true)}
-        onerror={m => (error = m)}
-      />
-    {:else}
+    {#if !formEngine.file}
       <SshTunnelForm
         bind:form
         defaultPort={formEngine.defaultPort}
@@ -180,15 +180,13 @@
       />
     {/if}
 
-    {#if test}
-      <div class="result" class:ok={test.ok} role="status">
-        <Icon name={test.ok ? 'check' : 'alert'} />
-        {#if test.ok}
-          <span>Connected{form.ssh.enabled && !formEngine.file ? ' via SSH' : ''} · {test.serverVersion} · {formatDuration(test.latencyMs)}</span>
-        {:else}
-          <span>{test.error}</span>
-        {/if}
-      </div>
+    <div class="toggles">
+      <ToggleCard bind:checked={form.readOnly} onchange={() => (readOnlyTouched = true)} title="Read only" hint="Writes are refused" />
+      <ToggleCard bind:checked={form.aiAccess} title="AI agents (MCP)" hint="Open to MCP clients" />
+    </div>
+
+    {#if test && !test.ok}
+      <div class="result" role="status"><Icon name="alert" /><span>{test.error}</span></div>
     {/if}
     {#if error}
       <div class="result" role="alert"><Icon name="alert" /><span>{error}</span></div>
@@ -196,48 +194,32 @@
   </form>
 
   {#snippet footer()}
-    <button type="button" class="btn" onclick={runTest} disabled={testing}>{#if testing}<Spinner size={11} />Testing…{:else}Test{/if}</button>
+    <button type="button" class="btn outline" onclick={runTest} disabled={testing}>{#if testing}<Spinner size={11} />Testing…{:else}Test{/if}</button>
+    {#if test?.ok}
+      <span class="tested" role="status">
+        <span class="dot"></span>Connected{form.ssh.enabled && !formEngine.file ? ' via SSH' : ''} · {test.serverVersion} · {formatDuration(test.latencyMs)}
+      </span>
+    {/if}
     <span style="flex:1"></span>
-    <button type="button" class="btn" onclick={onclose}>Cancel</button>
+    <button type="button" class="btn ghost" onclick={onclose}>Cancel</button>
     <button type="button" class="btn" onclick={() => save(false)} disabled={saving}>Save</button>
-    <button type="submit" form="connection-form" class="btn primary" disabled={saving}>Connect</button>
+    <button type="submit" form="connection-form" class="btn primary" disabled={saving}>Save &amp; connect</button>
   {/snippet}
 </Modal>
 
 <style>
-  .tabs {
-    display: flex;
-    gap: 2px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .tabs button {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 30px;
-    padding: 0 12px;
-    border: 0;
-    background: transparent;
-    color: var(--text-2);
-    font-size: 12.5px;
-    font-weight: 500;
-  }
-  .tabs button:hover { color: var(--text); }
-  .tabs button.on { color: var(--text); }
-  .tabs button.on::after {
-    content: '';
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: -1px;
-    height: 2px;
-    border-radius: 2px;
-    background: var(--accent);
-  }
-  .on-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
-
+  .head { display: flex; align-items: center; gap: 12px; font-weight: 400; }
+  .head-text { flex: 1; min-width: 0; }
+  .head-title { font-size: 16px; font-weight: 600; }
+  .head-sub { color: var(--text-3); font-size: 12px; }
+  .link { padding: 0; border: 0; background: transparent; color: var(--accent-text); font: inherit; }
+  .link:hover { text-decoration: underline; }
+  .close { margin: -6px -6px 0 0; align-self: flex-start; }
+  .url { margin-bottom: 14px; }
+  .fields { margin-top: 20px; }
+  .toggles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+  .tested { min-width: 0; display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--ok); font-size: 12.5px; }
+  .dot { width: 6px; height: 6px; flex: none; border-radius: 50%; background: currentColor; }
   .result {
     display: flex;
     align-items: flex-start;
@@ -253,8 +235,4 @@
     word-break: break-word;
   }
   .result :global(.icon) { margin-top: 1px; }
-  .result.ok {
-    color: var(--ok);
-    background: color-mix(in srgb, var(--ok) 10%, transparent);
-  }
 </style>

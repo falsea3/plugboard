@@ -148,7 +148,7 @@ test('opens a connection to AI agents and shows how to add Plugboard to Claude C
   await page.locator('.home [data-conn="music"]').click();
   await page.getByRole('button', { name: 'Edit', exact: true }).click();
   await page.getByText('AI agents (MCP)').click();
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as any).savedConnection?.aiAccess)).toBe(true);
 });
 

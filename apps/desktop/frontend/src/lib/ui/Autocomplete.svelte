@@ -6,11 +6,15 @@
     suggestions,
     id,
     autofocus = false,
+    mono = true,
+    placeholder = '',
   }: {
     value: string;
     suggestions: string[];
     id: string;
     autofocus?: boolean;
+    mono?: boolean;
+    placeholder?: string;
   } = $props();
 
   let input = $state<HTMLInputElement>();
@@ -110,7 +114,9 @@
   <input
     bind:this={input}
     {id}
-    class="input mono"
+    class="input"
+    class:mono
+    {placeholder}
     bind:value
     spellcheck="false"
     autocomplete="off"

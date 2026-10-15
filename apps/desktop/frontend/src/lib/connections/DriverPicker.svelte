@@ -9,34 +9,30 @@
 <div class="drivers" role="radiogroup" aria-label="Database">
   {#each ENGINES as e (e.driver)}
     <button type="button" role="radio" aria-checked={driver === e.driver} aria-label={e.name} class="driver" class:selected={driver === e.driver} onclick={() => onpick(e.driver)}>
-      <DriverMark driver={e.driver} size={26} />
+      <DriverMark driver={e.driver} size={24} />
       <span>{e.name}</span>
     </button>
   {/each}
 </div>
 
 <style>
-  .drivers {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 14px 0;
-  }
+  .drivers { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
   .driver {
+    height: 64px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 9px;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    justify-content: center;
+    gap: 6px;
+    padding: 0 4px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
     background: var(--surface);
-    font-weight: 500;
-    text-align: left;
+    color: var(--text-2);
+    font-size: 12px;
   }
-  .driver:hover { background: var(--hover); }
-  .driver.selected {
-    border-color: var(--accent);
-    background: var(--accent-dim);
-    box-shadow: 0 0 0 1px var(--accent);
-  }
+  .driver span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .driver:hover { background: var(--hover); color: var(--text); }
+  .driver.selected { border-color: var(--accent); background: var(--accent-bg); color: var(--text); }
+  .driver :global(.mark) { border-radius: 7px; }
 </style>

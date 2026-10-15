@@ -1,34 +1,28 @@
 <script lang="ts">
-  import { api, type Connection, type Env } from '../api/backend';
+  import { api, type Connection } from '../api/backend';
+  import { app } from '../app/app.svelte';
   import { engine, nameFromFile } from '../engines';
   import Icon from '../ui/Icon.svelte';
   import Select from '../ui/Select.svelte';
-  import ToggleRow from '../ui/ToggleRow.svelte';
+  import Autocomplete from '../ui/Autocomplete.svelte';
+  import EnvPicker from './EnvPicker.svelte';
 
   let {
     form = $bindable(),
     passwordHint,
     onenv,
-    onreadonly,
     onerror,
-  }: { form: Connection; passwordHint: string; onenv: () => void; onreadonly: () => void; onerror: (message: string) => void } = $props();
+  }: { form: Connection; passwordHint: string; onenv: () => void; onerror: (message: string) => void } = $props();
 
-  const envs: { value: Env; label: string }[] = [
-    { value: '', label: 'None' },
-    { value: 'local', label: 'Local' },
-    { value: 'dev', label: 'Development' },
-    { value: 'staging', label: 'Staging' },
-    { value: 'prod', label: 'Production' },
-  ];
   const sslModes = [
-    { value: '', label: 'Preferred', hint: 'encrypt if the server can' },
-    { value: 'disable', label: 'Disabled' },
-    { value: 'require', label: 'Required', hint: 'encrypt, trust any certificate' },
-    { value: 'verify-full', label: 'Verify certificate' },
+    { value: '', label: 'SSL preferred', hint: 'encrypt if the server can' },
+    { value: 'disable', label: 'SSL off' },
+    { value: 'require', label: 'SSL required', hint: 'encrypt, trust any certificate' },
+    { value: 'verify-full', label: 'SSL verified' },
   ];
   const e = $derived(engine(form.driver));
-  const sslOptions = $derived(e.canPreferSsl ? sslModes : [{ value: '', label: 'Disabled' }, ...sslModes.slice(2)]);
-
+  const sslOptions = $derived(e.canPreferSsl ? sslModes : [{ value: '', label: 'SSL off' }, ...sslModes.slice(2)]);
+  const groups = $derived(app.groups.sections.map(s => s.name).filter(Boolean));
   async function chooseFile() {
     try {
       const path = await api.chooseSQLiteFile();
@@ -44,10 +38,13 @@
 
 <div class="form-grid">
   <label for="cf-name">Name</label>
-  <div class="form-row">
-    <input id="cf-name" class="input" bind:value={form.name} placeholder={e.file ? 'Optional — named after the file' : 'Optional — e.g. Production replica'} autocomplete="off" spellcheck="false" />
-    <div class="env"><Select bind:value={form.env} options={envs} onchange={onenv} aria-label="Environment tag" /></div>
-  </div>
+  <input id="cf-name" class="input" bind:value={form.name} placeholder={e.file ? 'Optional — named after the file' : 'Optional — e.g. Production replica'} autocomplete="off" spellcheck="false" />
+
+  <label for="cf-group">Group</label>
+  <Autocomplete id="cf-group" bind:value={form.group} suggestions={groups} mono={false} placeholder="Optional — e.g. Shop" />
+
+  <span class="label">Environment</span>
+  <EnvPicker bind:value={form.env} onchange={onenv} />
 
   {#if e.file}
     <label for="cf-file">File</label>
@@ -58,48 +55,28 @@
   {:else}
     <label for="cf-host">Host</label>
     <div class="form-row">
-      <input id="cf-host" class="input" bind:value={form.host} placeholder="127.0.0.1" spellcheck="false" autocomplete="off" />
-      <input class="input port" type="number" bind:value={form.port} min="1" max="65535" aria-label="Port" placeholder={String(e.defaultPort)} />
+      <input id="cf-host" class="input mono" bind:value={form.host} placeholder="127.0.0.1" spellcheck="false" autocomplete="off" />
+      <input class="input mono port" type="number" bind:value={form.port} min="1" max="65535" aria-label="Port" placeholder={String(e.defaultPort)} />
     </div>
 
     <label for="cf-user">User</label>
-    <input id="cf-user" class="input" bind:value={form.user} placeholder={e.userHint} spellcheck="false" autocomplete="off" />
-
-    <label for="cf-password">Password</label>
     <div class="form-row">
-      <input id="cf-password" class="input" type="password" bind:value={form.password} placeholder={passwordHint} autocomplete="off" />
-      <label class="check"><input type="checkbox" bind:checked={form.savePassword} />Save in Keychain</label>
+      <input id="cf-user" class="input" bind:value={form.user} placeholder={e.userHint} spellcheck="false" autocomplete="off" />
+      <input class="input" type="password" bind:value={form.password} placeholder={passwordHint === 'Optional' ? 'Password' : passwordHint} aria-label="Password" autocomplete="off" />
     </div>
 
+    <span></span>
+    <label class="check"><input type="checkbox" bind:checked={form.savePassword} />Save passwords in the Keychain</label>
+
     <label for="cf-db">Database</label>
-    <input id="cf-db" class="input" bind:value={form.database} placeholder={e.databaseHint} spellcheck="false" autocomplete="off" />
-
-    <label for="cf-ssl">SSL</label>
-    <Select id="cf-ssl" bind:value={form.sslMode} options={sslOptions} aria-label="SSL" />
+    <div class="form-row">
+      <input id="cf-db" class="input" bind:value={form.database} placeholder={e.databaseHint} spellcheck="false" autocomplete="off" />
+      <div class="ssl"><Select id="cf-ssl" bind:value={form.sslMode} options={sslOptions} aria-label="SSL" /></div>
+    </div>
   {/if}
-
-  <span></span>
-  <ToggleRow bind:checked={form.readOnly} onchange={onreadonly}>
-    {#snippet title()}<Icon name="lock" size={13} />Read-only{/snippet}
-    The session can only read. Writes are refused by Plugboard and by the server. You can switch it per session from the sidebar.
-  </ToggleRow>
-
-  <span></span>
-  <ToggleRow bind:checked={form.aiAccess}>
-    {#snippet title()}<Icon name="terminal" size={13} />AI agents (MCP){/snippet}
-    Claude Code, Cursor and other agents can read this database through Plugboard — see Settings ▸ AI agents. They only ever see connections with this on, and never write to Production.
-  </ToggleRow>
 </div>
 
 <style>
-  .env { width: 132px; flex: none; }
-  .check {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: none;
-    color: var(--text-2);
-    font-size: 12px;
-    white-space: nowrap;
-  }
+  .ssl { width: 150px; flex: none; }
+  .check { display: flex; align-items: center; gap: 7px; margin-top: -4px; color: var(--text-3); font-size: 12px; }
 </style>

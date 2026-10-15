@@ -6,6 +6,7 @@
   import Panel from './Panel.svelte';
   import Switch from './Switch.svelte';
   import ToggleRow from './ToggleRow.svelte';
+  import ToggleCard from './ToggleCard.svelte';
   import Select from './Select.svelte';
   import EnvBadge from '../connections/EnvBadge.svelte';
 
@@ -76,6 +77,10 @@
     <div class="row">
       <Switch bind:checked={on} label="Switch" />
       <Switch small checked={false} label="Small switch" />
+    </div>
+    <div class="grid">
+      <ToggleCard bind:checked={on} title="Read only" hint="Writes are refused" />
+      <ToggleCard checked={false} title="AI agents (MCP)" hint="Open to MCP clients" />
     </div>
     <div style="max-width: 420px">
       <ToggleRow bind:checked={on}>

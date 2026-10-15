@@ -32,6 +32,7 @@ export function emptyConnection(e: Engine = ENGINES[0]): Connection {
   return {
     id: '',
     name: '',
+    group: '',
     driver: e.driver,
     host: e.file ? '' : '127.0.0.1',
     port: e.defaultPort,
