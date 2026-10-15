@@ -8,6 +8,33 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-15
+
+A new look for the whole app, connection groups, and a home screen that tells you about each database.
+
+### Changed
+
+- **A new design.** A floating sidebar, pill tabs, cards for the grid, the editor and every result, softer colours in both themes, and quieter inputs and menus. Rows are taller, text reads in the interface font and numbers in mono, the selected cell is framed and an edited one tinted until you save.
+- **The table screen** has *Save* in its toolbar with the row count, the status under the grid, and the Value panel beside the grid — open it from the cell label in the bottom right. Column widths are measured, so names next to the key and sort icons aren't cut.
+- **The SQL editor** tints the statement `⌘↵` will run, marks what ran last in the margin, and shows the line and statement you're on. *Format* lays out the script or the selection; results can be copied or exported as CSV.
+- **Structure, DDL, the diagram, server config, roles and Redis** follow the same layout, with their actions in the card's header.
+- On Windows and Linux shortcuts read `Ctrl+…`, and no space is kept for macOS window buttons.
+
+### Added
+
+- **Connection groups.** Put connections into groups, collapse them, and drag connections and groups into the order you want.
+- **A switcher under the connection name** (`⌘K`) with groups and search, `⌃Tab` / `⌃⇧Tab` between open connections, and *Disconnect* from the sidebar header, the switcher or `⇧⌘W`.
+- **A home screen with a passport for each connection:** its address and SSH route, latency, database size, schemas, the tabs you left open, and when you last used it. Filter the list by group or engine.
+- **A new connection form:** engine tiles, a group, the environment as a switch, the SSH tunnel as a card, and the test result next to *Test*.
+- **Hide the sidebar** (`⌘\` or the button in its header); it slides back in from the window's edge.
+- Database objects (functions, sequences, types, triggers, extensions) sit under one *Objects* heading as folders.
+
+### Fixed
+
+- A selected numeric foreign-key cell showed its value under the follow arrow.
+- Scrolling sideways quickly through a table could show empty columns for a moment.
+- Tabs and connections in the background no longer keep their tables and diagrams drawn, so many open tabs stay light.
+
 ## [0.7.6] - 2026-10-14
 
 ### Fixed

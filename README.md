@@ -34,12 +34,12 @@ No accounts, no cloud sync, no telemetry — just you and your data.
 
 Grab the latest build from the [releases page](https://github.com/falsea3/plugboard/releases/latest).
 
-| Platform | File |
-| --- | --- |
+| Platform                                  | File                                                 |
+| ----------------------------------------- | ---------------------------------------------------- |
 | macOS 12+ on Apple Silicon (M1 and later) | `-darwin-arm64.dmg` — drag Plugboard to Applications |
-| macOS 12+ on Intel | `-darwin-amd64.dmg` |
-| Windows 10/11 (x64 or Arm64) | `-installer.exe` |
-| Linux (x64) | `.AppImage` — `chmod +x`, then run it |
+| macOS 12+ on Intel                        | `-darwin-amd64.dmg`                                  |
+| Windows 10/11 (x64 or Arm64)              | `-installer.exe`                                     |
+| Linux (x64)                               | `.AppImage` — `chmod +x`, then run it                |
 
 Plugboard looks for a new version when it starts and offers to install it, or installs it by itself if you turn that on in Settings. Every release ships SHA-256 checksums and signatures, and the app refuses an update that fails either. What changed in each version is in the [changelog](CHANGELOG.md).
 
@@ -48,8 +48,8 @@ Plugboard looks for a new version when it starts and offers to install it, or in
 
 The builds aren't signed by Apple or Microsoft yet. Check the download against `SHA256SUMS.txt` on the release page, then:
 
-- **macOS** — *"can't be opened because Apple cannot check it"*: open it once, then click **Open Anyway** in System Settings ▸ Privacy & Security. If it says the app *is damaged*, run `xattr -dr com.apple.quarantine "/Applications/Plugboard.app"`.
-- **Windows** — SmartScreen's *"Windows protected your PC"*: click **More info** ▸ **Run anyway**.
+- **macOS** — _"can't be opened because Apple cannot check it"_: open it once, then click **Open Anyway** in System Settings ▸ Privacy & Security. If it says the app _is damaged_, run `xattr -dr com.apple.quarantine "/Applications/Plugboard.app"`.
+- **Windows** — SmartScreen's _"Windows protected your PC"_: click **More info** ▸ **Run anyway**.
 
 You do this once; updates the app installs itself don't ask again.
 
@@ -76,7 +76,7 @@ Group connections by project, drag them into the order you like, and see everyth
 
 ### Tables that feel like a spreadsheet
 
-Type into a cell, `⇧↵` for a big editor, `⌘S` to save. Pending changes are tinted until you commit them, and *Preview SQL* shows exactly what will run. Long values and JSON open in their own editor with validation and formatting.
+Type into a cell, `⇧↵` for a big editor, `⌘S` to save. Pending changes are tinted until you commit them, and _Preview SQL_ shows exactly what will run. Long values and JSON open in their own editor with validation and formatting.
 
 <table>
   <tr>
@@ -148,14 +148,16 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 ## Features
 
 **Connections**
+
 - PostgreSQL, MySQL and MariaDB, SQLite files, ClickHouse, Cassandra, and Redis or Valkey — several open at once, each with its own tabs.
 - Groups you can collapse and reorder, a switcher on `⌘K`, `⌃Tab` between open connections, and when you last used each one.
-- Tag a connection *local*, *dev*, *staging* or *prod*, so you always know where you are.
+- Tag a connection _local_, _dev_, _staging_ or _prod_, so you always know where you are.
 - Paste a connection URL — `postgres://…`, `mysql://…`, `clickhouse://…`, `cassandra://…`, `redis://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
 - **SSH tunnels** through a bastion, or straight into the database server, with a password, a private key or ssh-agent. A dropped tunnel comes back on its own.
 - Passwords stay in the system keychain (Keychain, Windows Credential Manager, Secret Service) — never in a file on disk.
 
 **Hard to break production by accident**
+
 - **Read-only connections**, on by default for anything tagged Production. Plugboard refuses writing statements before they run, and the database session itself is read-only too, so a statement that slips past one still meets the other.
 - Writes to a Production connection ask first, and show exactly what they will run.
 - Edits in the grid are applied in one transaction — every change lands, or none does — and a value too long for its column is an error, never quietly cut short.
@@ -163,16 +165,18 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 - A changed SSH host key is refused until you've seen the new fingerprint and trusted it.
 
 **Tables**
+
 - Big tables page by primary key, so scrolling through millions of rows stays as fast as the first screen. The row count shows the server's estimate at once and the exact number on request.
-- Filter with a plain `WHERE` condition or by column (`⌘F`): equals, contains, starts with, in a list, is NULL and more — or right-click a cell and *Filter by this value*.
+- Filter with a plain `WHERE` condition or by column (`⌘F`): equals, contains, starts with, in a list, is NULL and more — or right-click a cell and _Filter by this value_.
 - Edit like a spreadsheet: type into a cell, `⌥⌫` for NULL, `⌘I` to add a row, `⌘⌫` to delete. Right-click offers what fits the column — true/false, `now()`, DEFAULT, the values of an enum.
-- Changes wait until `⌘S`; *Preview SQL* shows the statements first. The Value panel shows the selected cell in full.
+- Changes wait until `⌘S`; _Preview SQL_ shows the statements first. The Value panel shows the selected cell in full.
 - Huge values (megabytes of JSON or text) arrive cut short and load in full only when you ask.
 - Structure, DDL and indexes for every table; functions, sequences, types, triggers and extensions in the sidebar.
 - Follow a foreign key: the arrow in a key cell opens the row it points at.
 - A schema diagram of tables, columns and foreign keys, laid out for you, exported as PNG or SVG.
 
 **SQL editor**
+
 - Highlighting for each database's dialect, completion of table names, and formatting.
 - `⌘↵` runs the highlighted statement under the cursor, `⇧⌘↵` the whole script, Stop cancels.
 - Statements share one connection, so `BEGIN … COMMIT`, `SET` and temporary tables behave the way you expect.
@@ -181,60 +185,66 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 - Save queries as scripts per connection; open tabs come back the next time you connect.
 
 **ClickHouse**
+
 - Databases, tables and views from `system.*`, with each table's sorting key and data-skipping indexes, dictionaries and SQL functions.
 - Tables open read-only — ClickHouse has no transactions and its updates are background mutations, so changes go through the SQL editor, where you see exactly what runs.
 - The editor checks syntax with `EXPLAIN AST` as you type, which parses without running anything.
 
 **Cassandra**
+
 - Keyspaces, tables, materialized views, user types, functions and secondary indexes, with partition and clustering keys shown as the primary key.
 - Tables page through the server's own paging, so a large table scrolls without `OFFSET`.
 - Edit rows in the grid: each change is a lightweight transaction (`IF EXISTS` / `IF NOT EXISTS`), so it lands on exactly the row you saw.
 - A CQL editor that keeps `BEGIN BATCH … APPLY BATCH` together and follows `USE`. Works through SSH tunnels to a whole cluster.
 
 **Redis**
+
 - Keys as a tree, grouped by `:`, from every database, scanned page by page so a huge keyspace doesn't stall the server.
 - Strings, hashes, lists, sets, sorted sets and streams each open in a view that fits them; set a TTL, rename or delete a key.
 - Changes that depend on what's there run atomically and refuse if someone else changed the value first.
 - A command console on its own connection, so `SELECT`, `MULTI … EXEC` and `WATCH` work.
 
 **Server admin**
+
 - Server configuration files for PostgreSQL, Redis, ClickHouse and Cassandra, with the server's check before a reload.
 - Users and roles for PostgreSQL, MySQL and MariaDB, ClickHouse, Cassandra and Redis ACLs — always shown as SQL before they run.
 
 **AI agents (MCP)**
+
 - `claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp` (Settings ▸ AI agents shows the exact command for each client).
+- `codex mcp add plugboard -- /Users/evgn/Documents/plugboard/apps/desktop/build/bin/Plugboard.app/Contents/MacOS/plugboard mcp --create` (Settings ▸ AI agents shows the exact command for each client).
 - Agents never see a password: they ask Plugboard, which connects with your saved connections, Keychain and SSH tunnels.
-- Nothing is shared until you turn on *AI agents (MCP)* for a connection. Sessions are read-only unless you start it with `--write`, and Production is read-only for agents no matter what.
+- Nothing is shared until you turn on _AI agents (MCP)_ for a connection. Sessions are read-only unless you start it with `--write`, and Production is read-only for agents no matter what.
 - Every call is logged to `logs/mcp.log` in the profile folder.
 
 ## Keyboard
 
 `Ctrl` instead of `⌘` on Windows and Linux.
 
-| Keys | Does |
-| --- | --- |
-| `⌘K` | Switch connection |
-| `⌃Tab` / `⌃⇧Tab` | Next / previous open connection |
-| `⇧⌘H` | All connections |
-| `⌘\` | Hide or show the sidebar |
-| `⌘T` · `⌘W` | New query tab · close the tab |
-| `⌘1` … `⌘9` | Go to a tab |
-| `⌘↵` · `⇧⌘↵` | Run the statement under the cursor · run everything |
-| `⌘S` | Save changes, or save the script |
-| `⌘F` · `⇧⌘F` | Filter rows · filter the table list |
-| `⌘I` · `⌘⌫` | Add a row · delete the selected rows |
-| `⇧↵` | Open the cell in a big editor |
-| `⌘R` | Reload |
+| Keys             | Does                                                |
+| ---------------- | --------------------------------------------------- |
+| `⌘K`             | Switch connection                                   |
+| `⌃Tab` / `⌃⇧Tab` | Next / previous open connection                     |
+| `⇧⌘H`            | All connections                                     |
+| `⌘\`             | Hide or show the sidebar                            |
+| `⌘T` · `⌘W`      | New query tab · close the tab                       |
+| `⌘1` … `⌘9`      | Go to a tab                                         |
+| `⌘↵` · `⇧⌘↵`     | Run the statement under the cursor · run everything |
+| `⌘S`             | Save changes, or save the script                    |
+| `⌘F` · `⇧⌘F`     | Filter rows · filter the table list                 |
+| `⌘I` · `⌘⌫`      | Add a row · delete the selected rows                |
+| `⇧↵`             | Open the cell in a big editor                       |
+| `⌘R`             | Reload                                              |
 
 ## Local-first
 
 Your connections live in a plain JSON file in your profile folder and your passwords in the system keychain. Plugboard talks to your databases, your SSH servers and, at launch, to GitHub to look for updates — nothing else.
 
-| | Profile folder |
-| --- | --- |
-| macOS | `~/Library/Application Support/Plugboard` |
-| Windows | `%AppData%\Plugboard` |
-| Linux | `~/.config/Plugboard` |
+|         | Profile folder                            |
+| ------- | ----------------------------------------- |
+| macOS   | `~/Library/Application Support/Plugboard` |
+| Windows | `%AppData%\Plugboard`                     |
+| Linux   | `~/.config/Plugboard`                     |
 
 ---
 
