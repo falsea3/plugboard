@@ -5,6 +5,7 @@
   import type { Section } from '../connections/groups';
   import { GroupDrag } from '../connections/groupDrag.svelte';
   import { connectionTarget } from '../ui/format';
+  import { usedAgo } from '../connections/home';
   import ConnAvatar from '../connections/ConnAvatar.svelte';
   import EnvBadge from '../connections/EnvBadge.svelte';
   import Icon from '../ui/Icon.svelte';
@@ -101,6 +102,8 @@
               <span class="state" role="status"><Spinner size={10} />Connecting…</span>
             {:else if n >= 0}
               <span class="state open-state">● {n === 0 ? 'open' : n === 1 ? '1 tab' : `${n} tabs`}</span>
+            {:else if c.lastUsed}
+              <span class="state">{usedAgo(c.lastUsed)}</span>
             {/if}
           </div>
         {/each}
