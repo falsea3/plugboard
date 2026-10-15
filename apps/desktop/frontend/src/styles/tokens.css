@@ -35,6 +35,7 @@
 
   --grid-row-alt:  rgba(255, 255, 255, 0.012);
   --grid-selected: rgba(94, 92, 230, 0.22);
+  --editor-selection: rgba(124, 122, 255, 0.38);
   --grid-line:     #18181b;
   --row-num:       #4e4e54;
   --row-current:   #17172a;
@@ -42,8 +43,8 @@
   --cell-edited:   #2a2312;
   --gutter:        #3e3e44;
   --well:          #111113;
-  --stmt-bg:       #16162a;
-  --stmt-head:     #1e1e3a;
+  --stmt-bg:       rgba(94, 92, 230, 0.07);
+  --stmt-head:     rgba(94, 92, 230, 0.13);
   --stmt-num:      #8a88e8;
   --cell-null:     #5c5c63;
   --cell-number:   #a6a6ac;
@@ -101,6 +102,7 @@
 
   --grid-row-alt:  rgba(0, 0, 0, 0.022);
   --grid-selected: rgba(79, 91, 232, 0.16);
+  --editor-selection: rgba(85, 82, 224, 0.24);
   --grid-line:     #efeff2;
   --row-num:       #a4a4ac;
   --row-current:   #f3f3fd;
@@ -108,8 +110,8 @@
   --cell-edited:   #fbf1dc;
   --gutter:        #b4b4bc;
   --well:          #f4f4f6;
-  --stmt-bg:       #f5f5fe;
-  --stmt-head:     #ebebfc;
+  --stmt-bg:       rgba(85, 82, 224, 0.04);
+  --stmt-head:     rgba(85, 82, 224, 0.08);
   --stmt-num:      #6b68e0;
   --cell-null:     #9a9aa3;
   --cell-number:   #0d7563;

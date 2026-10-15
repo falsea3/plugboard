@@ -15,24 +15,28 @@
   const toggle = (set: SvelteSet<string>, key: string) => (set.has(key) ? set.delete(key) : set.add(key));
 </script>
 
+{#if groups.length > 0}
+  <div class="heading"><span>Objects</span><span class="count">{groups.reduce((n, g) => n + g.items.length, 0)}</span></div>
+{/if}
 {#each groups as g (g.label)}
   {@const open = openGroups.has(g.label) || !!filter.trim()}
-  <button class="group" aria-expanded={open} onclick={() => toggle(openGroups, g.label)}>
-    <span class="twist" class:open><Icon name="chevron-right" size={9} /></span>
-    <span>{g.label}</span>
-    <span class="count">{g.items.length}</span>
+  <button class="item folder" aria-expanded={open} onclick={() => toggle(openGroups, g.label)}>
+    <span class="twist" class:open><Icon name="chevron-right" size={12} /></span>
+    <Icon name={g.icon} size={14} />
+    <span class="label">{g.label}</span>
+    <span class="hint">{g.items.length}</span>
   </button>
   {#if open}
     {#each g.items as o (keyOf(o))}
       {@const key = keyOf(o)}
-      <button class="item" class:active={active === key} onclick={() => ws.openDDL(o)} oncontextmenu={e => onmenu(e, o)} title="{o.name} {hintOf(o)}">
+      <button class="item nested" class:active={active === key} onclick={() => ws.openDDL(o)} oncontextmenu={e => onmenu(e, o)} title="{o.name} {hintOf(o)}">
         {#if o.values?.length}
           <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-          <span class="twist" class:open={openItems.has(key)} onclick={e => (e.stopPropagation(), toggle(openItems, key))}><Icon name="chevron-right" size={10} /></span>
+          <span class="twist" class:open={openItems.has(key)} onclick={e => (e.stopPropagation(), toggle(openItems, key))}><Icon name="chevron-right" size={12} /></span>
         {:else}
           <span class="twist"></span>
         {/if}
-        <Icon name={iconOf(o)} size={13} />
+        <Icon name={iconOf(o)} size={14} />
         <span class="label">{o.name}</span>
         <span class="hint">{hintOf(o)}</span>
       </button>
@@ -45,23 +49,10 @@
 {#if ws.objectsError}<div class="note">{ws.objectsError}</div>{/if}
 
 <style>
-  .group {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 18px 8px 8px;
-    border: 0;
-    background: transparent;
-    color: var(--text-3);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    text-align: left;
-  }
-  .group:hover { color: var(--text-2); }
-  .count { margin-left: auto; font-weight: 500; }
+  .heading { display: flex; justify-content: space-between; padding: 18px 8px 8px; color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .count { font-weight: 500; }
+  .item.nested { padding-left: 22px; }
+  .item.folder .twist :global(.icon), .item .twist :global(.icon) { color: var(--text-4); }
   .item { width: 100%; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-size: 13px; text-align: left; }
   .item:hover { background: var(--hover); color: var(--text); }
   .item.active { background: var(--tree-selected); color: var(--accent-text); font-weight: 500; }
@@ -71,7 +62,7 @@
   .twist.open { transform: rotate(90deg); }
   .item .twist:hover { background: var(--active); }
   .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .hint { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-size: 11px; text-align: right; }
-  .value { height: 22px; padding: 0 8px 0 46px; color: var(--text-2); font-family: var(--font-mono); font-size: 11.5px; line-height: 22px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hint { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-4); font-size: 11.5px; text-align: right; }
+  .value { height: 22px; padding: 0 8px 0 60px; color: var(--text-2); font-family: var(--font-mono); font-size: 11.5px; line-height: 22px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .note { padding: 8px; color: var(--danger); font-size: 11.5px; }
 </style>

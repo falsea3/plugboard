@@ -61,6 +61,7 @@
         <button class="tab-close" onclick={() => app.requestCloseTab(ws, tab.id)} title="Close (⌘W or middle-click)" aria-label="Close tab"><Icon name="x" size={12} /></button>
       </div>
     {/each}
+    <button class="tab-new" onclick={() => ws.newQuery()} title="New query (⌘T)" aria-label="New query"><Icon name="plus" size={14} /></button>
   </nav>
   <span class="space"></span>
   <button class="btn ghost icon no-drag" onclick={() => (app.settingsOpen = 'general')} title="Settings (⌘,)" aria-label="Settings"><Icon name="settings" size={16} /></button>
@@ -97,5 +98,7 @@
   .tab-main .dirty-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
   .tab-close { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: inherit; color: inherit; opacity: 0; }
   .tab:hover .tab-close { opacity: 0.8; }
+  .tab-new { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: var(--radius); background: transparent; color: var(--text-3); }
+  .tab-new:hover { background: var(--elevated); color: var(--text); }
   .tab-close:hover { opacity: 1; background: var(--active); }
 </style>

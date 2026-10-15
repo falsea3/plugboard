@@ -35,7 +35,7 @@ function calc(state: EditorState, syntax: SqlSyntax): Marks {
     info.statements = stmt.count;
     info.statement = stmt.index + 1;
   }
-  if (stmt && stmt.index >= 0) {
+  if (stmt && stmt.index >= 0 && stmt.count > 1 && state.selection.main.empty) {
     const last = doc.lineAt(stmt.to).number;
     let first = doc.lineAt(stmt.from).number;
     while (first < last && /^\s*(--.*)?$/.test(doc.line(first).text)) first++;

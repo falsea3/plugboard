@@ -7,7 +7,7 @@
   import { formatBytes } from '../ui/format';
   import { dismiss } from '../ui/dismiss';
   import { connectionUrl, sshRoute } from './home';
-  import DriverMark from './DriverMark.svelte';
+  import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -71,7 +71,7 @@
 <aside class="passport" aria-label={c.name}>
   <div class="top">
     <div class="head">
-      <DriverMark driver={c.driver} size={44} />
+      <ConnAvatar connection={c} size={44} />
       <div class="who">
         <div class="title"><span class="text">{c.name}</span><EnvBadge env={c.env} /></div>
         <div class="sub">{server} · {c.group || 'Ungrouped'}</div>
@@ -143,7 +143,7 @@
   .passport { width: 372px; flex: none; display: flex; flex-direction: column; overflow-y: auto; border: 1px solid var(--hover); border-radius: var(--radius-lg); background: var(--elevated); }
   .top { padding: 18px 18px 0; }
   .head { display: flex; align-items: center; gap: 12px; }
-  .head :global(.mark) { border-radius: 12px; }
+  .head { --avatar-ring: var(--elevated); }
   .who { flex: 1; min-width: 0; }
   .title { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 16px; font-weight: 600; }
   .text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

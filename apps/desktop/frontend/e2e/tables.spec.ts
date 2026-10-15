@@ -12,7 +12,7 @@ test('connects, browses a table and runs a query', async ({ page }) => {
   await grid.getByText('dana.ito4@example.com').click();
   await shot(page, 'table');
 
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText(
     'SELECT c.country, count(*) AS customers, sum(o.total) AS revenue\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE c.is_active\nGROUP BY c.country\nORDER BY revenue DESC;',
@@ -135,7 +135,7 @@ test('shows that a table and a query are still loading', async ({ page }) => {
   await expect(page.getByText('600 of')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
 
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1');
   await page.getByRole('button', { name: /^Run ⌘/ }).click();
@@ -205,7 +205,7 @@ test('keeps unfolded tables showing their columns after a schema change in the e
   await side.getByRole('button', { name: 'customers', exact: true }).locator('.twist').click();
   const cols = side.getByRole('group', { name: 'Columns of customers' });
   await expect(cols.getByText('email', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('alter table customers add column nickname text');
   await page.getByRole('button', { name: /^Run ⌘/ }).click();

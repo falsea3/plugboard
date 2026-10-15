@@ -55,7 +55,7 @@
 <div class="filters" bind:this={bar} {onkeydown}>
   {#each rows as row, i (row.id)}
     <div class="row" data-row={row.id} class:off={!row.on}>
-      <span class="join">{i === 0 ? 'Where' : 'and'}</span>
+      <span class="join">{i === 0 ? 'where' : 'and'}</span>
       <input type="checkbox" bind:checked={row.on} onchange={onapply} title={row.on ? 'Turn this condition off' : 'Turn this condition on'} />
       <div class="col"><Select bind:value={row.column} options={columns.map(c => ({ value: c.name, label: c.name }))} onchange={() => ready(row) && onapply()} aria-label="Column" /></div>
       <div class="op"><Select bind:value={row.op} options={OPS} onchange={() => ready(row) && onapply()} aria-label="Operator" /></div>
@@ -84,23 +84,17 @@
 </div>
 
 <style>
-  .filters {
-    flex: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 8px 10px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-  .row { display: flex; align-items: center; gap: 6px; }
+  .filters { flex: none; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--hover); border-radius: var(--radius); background: var(--surface); }
+  .row { display: flex; align-items: center; gap: 8px; }
   .row.off .col, .row.off .op, .row.off .value { opacity: 0.45; }
-  .join { width: 42px; flex: none; text-align: right; color: var(--text-3); font-size: 12px; }
-  .col { width: 180px; flex: none; height: 26px; }
-  .op { width: 120px; flex: none; height: 26px; }
-  .col :global(.select-button), .op :global(.select-button) { height: 26px; }
-  .value { flex: 1; min-width: 120px; height: 26px; }
+  .join { width: 40px; flex: none; color: var(--text-4); font-family: var(--font-mono); font-size: 12.5px; }
+  input[type='checkbox'] { flex: none; margin: 0; accent-color: var(--accent); }
+  .col { width: 200px; flex: none; }
+  .op { width: 130px; flex: none; }
+  .col :global(.select-button), .op :global(.select-button) { height: 32px; border-radius: 9px; }
+  .value { flex: 1; min-width: 120px; height: 32px; border-radius: 9px; font-size: 12.5px; }
   .no-value { flex: 1; }
   .actions { display: flex; align-items: center; gap: 6px; padding-left: 48px; }
+  .actions .btn.sm { height: 30px; border-radius: 9px; }
   .hint { font-size: 11.5px; margin-right: 6px; }
 </style>

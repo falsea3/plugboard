@@ -2,7 +2,7 @@ import { connect, expect, test } from './setup';
 
 test('marks a typo while typing SQL', async ({ page }) => {
   await connect(page);
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('selec * from customers');
   await expect(page.locator('.cm-lintRange-error')).toHaveText('selec');
@@ -12,7 +12,7 @@ test('marks a typo while typing SQL', async ({ page }) => {
 
 test('keeps Run all after running the statement under the cursor', async ({ page }) => {
   await connect(page);
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1;\nselect 2;');
   await page.keyboard.press('ControlOrMeta+Enter');
@@ -23,7 +23,7 @@ test('keeps Run all after running the statement under the cursor', async ({ page
 
 test('marks what the last run ran, whatever ran before', async ({ page }) => {
   await connect(page);
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1;\nselect 2;\nselect 3;');
   await page.getByRole('button', { name: 'Run all' }).click();
@@ -40,7 +40,7 @@ test('marks what the last run ran, whatever ran before', async ({ page }) => {
 
 test('underlines what the server can\'t parse', async ({ page }) => {
   await connect(page);
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.insertText('select 1;\nselect * fron customers');
   await expect(page.locator('.cm-lintRange-error')).toHaveText('fron');

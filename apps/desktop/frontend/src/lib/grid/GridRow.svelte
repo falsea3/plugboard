@@ -187,4 +187,5 @@
   .tr.deleted .rn, .tr.failed .rn { color: var(--danger); }
   .new-mark { color: var(--ok); font-weight: 700; font-size: 13px; }
   .td.editing { position: relative; overflow: visible; z-index: 4; padding: 0; }
+  .td.editing::after, .td.editing::before { display: none; }
 </style>

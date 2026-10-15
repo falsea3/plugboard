@@ -73,6 +73,8 @@ func main() {
 				TitlebarAppearsTransparent: true,
 				HideTitle:                  true,
 				FullSizeContent:            true,
+				UseToolbar:                 true,
+				HideToolbarSeparator:       true,
 			},
 			WebviewIsTransparent: true,
 		},

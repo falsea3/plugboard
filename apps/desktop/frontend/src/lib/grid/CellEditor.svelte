@@ -54,20 +54,20 @@
 
 <style>
   .cell-editor.list { padding: 0; box-shadow: none; background: none; overflow: visible; white-space: normal; }
-  .cell-editor.list :global(.select-button) { height: 28px; border-radius: 3px; }
+  .cell-editor.list :global(.select-button) { height: 26px; border-radius: 7px; }
   .cell-editor {
     position: absolute;
-    top: -1px;
-    left: -1px;
-    width: calc(100% + 2px);
-    height: 28px;
+    top: 3px;
+    left: 6px;
+    width: calc(100% - 12px);
+    height: 26px;
     margin: 0;
-    padding: 4px 8px;
+    padding: 3px 6px;
     border: 0;
-    border-radius: 3px;
+    border-radius: 7px;
     outline: none;
-    box-shadow: 0 0 0 2px var(--accent), 0 6px 20px rgba(0, 0, 0, 0.25);
-    background: var(--bg);
+    box-shadow: 0 0 0 1.5px var(--accent), 0 6px 20px rgba(0, 0, 0, 0.25);
+    background: var(--card);
     color: var(--text);
     font: inherit;
     line-height: 20px;
@@ -76,7 +76,7 @@
     white-space: pre;
   }
   .cell-editor.multi {
-    width: max(calc(100% + 2px), 340px);
+    width: max(calc(100% - 12px), 340px);
     height: 132px;
     white-space: pre-wrap;
     overflow: auto;

@@ -5,7 +5,7 @@
   import Modal from '../ui/Modal.svelte';
   import { copyToClipboard } from '../ui/clipboard';
   import NameModal from './NameModal.svelte';
-  import { scriptMenu } from './names';
+  import { isDirty, scriptMenu } from './names';
 
   let { ws, filter }: { ws: Workspace; filter: string } = $props();
 
@@ -17,6 +17,10 @@
   const names = $derived(ws.scripts.names.filter(n => n.toLowerCase().includes(filter.trim().toLowerCase())));
   const active = $derived(ws.activeTab?.kind === 'query' ? ws.activeTab.script : undefined);
   const shown = $derived(open || !!filter.trim());
+
+  function isDirtyName(name: string) {
+    return ws.tabs.some(t => t.kind === 'query' && t.script === name && isDirty(t));
+  }
 
   function pick(id: string, name: string) {
     menu = null;
@@ -34,8 +38,7 @@
 </script>
 
 {#if names.length > 0}
-  <button class="group" aria-expanded={shown} onclick={() => (open = !open)}>
-    <span class="twist" class:open={shown}><Icon name="chevron-right" size={9} /></span>
+  <button class="group" aria-expanded={shown} onclick={() => (open = !open)} title={shown ? 'Hide scripts' : 'Show scripts'}>
     <span>Scripts</span>
     <span class="count">{names.length}</span>
   </button>
@@ -48,8 +51,8 @@
         oncontextmenu={e => (e.preventDefault(), (menu = { x: e.clientX, y: e.clientY, name }))}
         title={name}
       >
-        <span class="twist"></span>
         <span class="label">{name}</span>
+        {#if isDirtyName(name)}<span class="dirty"></span>{/if}
       </button>
     {/each}
   {/if}
@@ -89,10 +92,13 @@
 {/if}
 
 <style>
+  .dirty { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
+  .item { padding-left: 26px !important; }
   .group {
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 4px;
     padding: 18px 8px 8px;
     border: 0;
@@ -111,8 +117,6 @@
   .item.active { background: var(--tree-selected); color: var(--accent-text); font-weight: 500; }
   .item.active :global(.icon) { color: var(--accent-text); }
   .item :global(.icon) { color: var(--text-3); }
-  .twist { flex: none; display: flex; align-items: center; justify-content: center; width: 12px; height: 18px; transition: transform 0.12s; }
-  .twist.open { transform: rotate(90deg); }
   .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .text { margin: 0; color: var(--text-2); line-height: 1.5; }
 </style>

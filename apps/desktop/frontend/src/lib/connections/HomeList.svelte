@@ -5,7 +5,7 @@
   import type { Section } from './groups';
   import { GroupDrag } from './groupDrag.svelte';
   import { connectionUrl, usedAgo } from './home';
-  import DriverMark from './DriverMark.svelte';
+  import ConnAvatar from './ConnAvatar.svelte';
   import EnvBadge from './EnvBadge.svelte';
   import Icon from '../ui/Icon.svelte';
   import Spinner from '../ui/Spinner.svelte';
@@ -89,7 +89,7 @@
             ondblclick={() => app.open(c)}
             onkeydown={() => {}}
           >
-            <span class="avatar">{#if arranging}<span class="grip"><Icon name="grip" size={12} /></span>{/if}<DriverMark driver={c.driver} size={24} /></span>
+            <span class="avatar">{#if arranging}<span class="grip"><Icon name="grip" size={12} /></span>{/if}<ConnAvatar connection={c} size={28} /></span>
             <span class="name"><span class="live" class:on={live}></span><span class="text">{c.name}</span><EnvBadge env={c.env} />{#if c.readOnly}<span class="mark" title="Read-only"><Icon name="lock" size={10} /></span>{/if}</span>
             <span class="url">{url.address}{url.database}</span>
             <span class="server">{server(c)}</span>
@@ -125,7 +125,8 @@
   .row.selected { background: var(--tree-selected); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
   .lifted { opacity: 0.4; }
   .avatar { position: relative; display: flex; justify-content: center; }
-  .avatar :global(.mark) { border-radius: 7px; }
+  .row { --avatar-ring: var(--card); }
+  .row:hover { --avatar-ring: var(--hover); }
   .avatar .grip { position: absolute; left: -4px; top: 50%; transform: translateY(-50%); visibility: hidden; }
   .row:hover .avatar .grip { visibility: visible; }
   .name { display: flex; align-items: center; gap: 7px; min-width: 0; }

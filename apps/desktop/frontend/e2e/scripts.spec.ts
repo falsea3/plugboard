@@ -6,7 +6,7 @@ const script = (page: Page, name: string) => page.getByRole('complementary').get
 
 test('asks before closing an edited query and saves it as a script', async ({ page }) => {
   await connect(page);
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.type('select 42');
   await expect(tabs(page).getByTitle('Unsaved changes')).toBeVisible();
@@ -34,11 +34,11 @@ test('asks before closing an edited query and saves it as a script', async ({ pa
 
 test('closes unchanged queries at once and drops unsaved text on request', async ({ page }) => {
   await connect(page);
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.keyboard.press('ControlOrMeta+w');
   await expect(tabs(page).getByRole('tab')).toHaveCount(0);
 
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').click();
   await page.keyboard.type('select 1');
   await tabs(page).getByRole('button', { name: 'Close tab' }).click();
@@ -57,7 +57,7 @@ test('saves an open script with ⌘S and keeps query tabs across restarts', asyn
   await page.keyboard.press('ControlOrMeta+s');
   await expect(tabs(page).getByTitle('Unsaved changes')).toHaveCount(0);
 
-  await page.getByRole('button', { name: /^New query/ }).click();
+  await page.getByRole('button', { name: 'New query', exact: true }).click();
   await page.locator('.cm-content').last().click();
   await page.keyboard.type('select now()');
   await expect(tabs(page).getByTitle('Unsaved changes')).toBeVisible();
