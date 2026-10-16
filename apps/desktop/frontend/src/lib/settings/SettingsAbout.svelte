@@ -54,8 +54,8 @@
     {/if}
   </div>
   <p class="blurb">
-    A native database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis. Connections and credentials stay on this
-    computer — passwords are kept in the system keychain, and Plugboard sends no telemetry.
+    A native database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis. Passwords are kept in the system keychain
+    and never leave this computer; nothing is synced to a cloud, and Plugboard sends no telemetry.
   </p>
   <dl class="details">
     <dt>Version</dt><dd class="mono">{info?.version ?? '—'}</dd>

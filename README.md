@@ -2,8 +2,8 @@
 
 # Plugboard
 
-**A fast, local-first database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis.**<br>
-Your connections and passwords stay on your machine, and nothing is sent anywhere.
+**A fast database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis.**<br>
+Passwords stay in your system keychain and never leave your computer. Nothing is synced to a cloud.
 
 [![CI](https://github.com/falsea3/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/falsea3/plugboard/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/falsea3/plugboard?sort=semver)](https://github.com/falsea3/plugboard/releases/latest)
@@ -23,7 +23,7 @@ Your connections and passwords stay on your machine, and nothing is sent anywher
   <tr>
     <td align="center"><b>6 engines</b><br><sub>PostgreSQL · MySQL / MariaDB · SQLite<br>ClickHouse · Cassandra · Redis / Valkey</sub></td>
     <td align="center"><b>Safe on production</b><br><sub>read-only sessions, a confirm before<br>every write, one transaction per save</sub></td>
-    <td align="center"><b>Local-first</b><br><sub>passwords in the system keychain,<br>connections in a plain JSON file</sub></td>
+    <td align="center"><b>Your passwords stay yours</b><br><sub>kept in the system keychain,<br>never sent or synced anywhere</sub></td>
     <td align="center"><b>Agent-ready</b><br><sub>a built-in MCP server for<br>Claude Code, Cursor and Codex</sub></td>
   </tr>
 </table>
@@ -235,9 +235,9 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 | `⇧↵`             | Open the cell in a big editor                       |
 | `⌘R`             | Reload                                              |
 
-## Local-first
+## Your passwords stay with you
 
-Your connections live in a plain JSON file in your profile folder and your passwords in the system keychain. Plugboard talks to your databases, your SSH servers and, at launch, to GitHub to look for updates — nothing else.
+Passwords are kept in the system keychain (Keychain on macOS, Credential Manager on Windows, Secret Service on Linux) and never leave your computer. Nothing is synced to a cloud: your connections live in a plain JSON file in your profile folder. Plugboard talks to your databases, your SSH servers and, at launch, to GitHub to look for updates — nothing else.
 
 |         | Profile folder                            |
 | ------- | ----------------------------------------- |

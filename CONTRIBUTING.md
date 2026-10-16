@@ -8,8 +8,8 @@ By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 - **Found a security problem?** Don't open a public issue. Follow [SECURITY.md](SECURITY.md).
 - **Fixing a bug?** Go ahead and open a pull request.
-- **Adding a feature or changing behaviour?** Open an issue first. Plugboard is deliberately
-  local-first and careful with production data, and it's much cheaper to agree on the shape
+- **Adding a feature or changing behaviour?** Open an issue first. Plugboard deliberately keeps
+  credentials on the user's machine and is careful with production data, and it's much cheaper to agree on the shape
   of a change before it's written than to turn down a finished pull request.
 
 ## Development setup

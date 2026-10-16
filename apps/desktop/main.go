@@ -60,7 +60,7 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: options.NewRGBA(17, 17, 19, 255),
+		BackgroundColour: options.NewRGBA(11, 11, 12, 255),
 		Menu:             api.BuildMenu(app),
 		OnStartup:        app.Startup,
 		OnShutdown:       app.Shutdown,
