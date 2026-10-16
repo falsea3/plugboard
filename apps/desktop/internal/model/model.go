@@ -125,20 +125,21 @@ type SessionInfo struct {
 }
 
 type EngineFeatures struct {
-	Syntax             SQLSyntax `json:"syntax"`
-	BooleanType        bool      `json:"booleanType"`
-	CanUpdateToDefault bool      `json:"canUpdateToDefault"`
-	CanAlterColumns    bool      `json:"canAlterColumns"`
-	TransactionalDDL   bool      `json:"transactionalDDL"`
-	ColumnTypes        []string  `json:"columnTypes"`
-	KeyValue           bool      `json:"keyValue"`
-	Editable           bool      `json:"editable"`
-	StructureEditable  bool      `json:"structureEditable"`
-	Sortable           bool      `json:"sortable"`
-	CanRenameTables    bool      `json:"canRenameTables"`
-	ServerConfig       bool      `json:"serverConfig"`
-	Roles              bool      `json:"roles"`
-	Dumps              bool      `json:"dumps"`
+	Syntax             SQLSyntax    `json:"syntax"`
+	BooleanType        bool         `json:"booleanType"`
+	CanUpdateToDefault bool         `json:"canUpdateToDefault"`
+	CanAlterColumns    bool         `json:"canAlterColumns"`
+	TransactionalDDL   bool         `json:"transactionalDDL"`
+	ColumnTypes        []string     `json:"columnTypes"`
+	KeyValue           bool         `json:"keyValue"`
+	Editable           bool         `json:"editable"`
+	StructureEditable  bool         `json:"structureEditable"`
+	Sortable           bool         `json:"sortable"`
+	CanRenameTables    bool         `json:"canRenameTables"`
+	ServerConfig       bool         `json:"serverConfig"`
+	Roles              bool         `json:"roles"`
+	Dumps              bool         `json:"dumps"`
+	DumpFormats        []DumpFormat `json:"dumpFormats,omitempty"`
 }
 
 type SQLSyntax struct {

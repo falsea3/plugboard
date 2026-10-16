@@ -88,7 +88,7 @@
     gap: 2px;
     height: 34px;
     max-width: 240px;
-    padding: 0 14px;
+    padding: 0 6px 0 14px;
     border-radius: var(--radius);
     color: var(--text-soft);
     transition: background 0.12s, color 0.12s;
@@ -99,7 +99,7 @@
   .tab-main { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; font-size: 13.5px; text-align: left; user-select: none; }
   .tab-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tab-main .dirty-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
-  .tab-close { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: inherit; color: inherit; opacity: 0; }
+  .tab-close { flex: none; margin-left: 4px; display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: inherit; color: inherit; opacity: 0; }
   .tab:hover .tab-close { opacity: 0.8; }
   .tab-new { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: var(--radius); background: transparent; color: var(--text-3); }
   .tab-new:hover { background: var(--elevated); color: var(--text); }

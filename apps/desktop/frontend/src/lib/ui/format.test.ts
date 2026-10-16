@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cellKind, connectionTarget, formatBytes, formatCell, formatDuration, toTSV } from './format';
+import { cellKind, clip, connectionTarget, formatBytes, formatCell, formatDuration, toTSV } from './format';
 import { emptyConnection, mysql, postgres, sqlite } from '../engines';
 
 describe('formatCell', () => {
@@ -53,5 +53,13 @@ describe('formatBytes', () => {
     expect(formatBytes(512)).toBe('512 B');
     expect(formatBytes(2576980378)).toBe('2.4 GB');
     expect(formatBytes(50 * 1024 * 1024)).toBe('50 MB');
+  });
+});
+
+describe('clip', () => {
+  it('keeps short text and cuts long text to a fixed length with an ellipsis', () => {
+    expect(clip('short', 10)).toBe('short');
+    expect(clip('Updating row 2 failed — nothing was saved', 16)).toBe('Updating row 2…');
+    expect(clip('🎉🎉🎉🎉🎉', 3)).toBe('🎉🎉…');
   });
 });

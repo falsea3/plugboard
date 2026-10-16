@@ -7,6 +7,7 @@ type DumpOptions struct {
 	Clean     bool     `json:"clean"`
 	Inserts   bool     `json:"inserts"`
 	Owners    bool     `json:"owners"`
+	Format    string   `json:"format"`
 }
 
 type DumpProgress struct {
@@ -57,4 +58,11 @@ type DumpFile struct {
 	Path string `json:"path"`
 	Name string `json:"name"`
 	Size int64  `json:"size"`
+}
+
+type DumpFormat struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
+	Ext   string `json:"ext"`
+	Hint  string `json:"hint"`
 }

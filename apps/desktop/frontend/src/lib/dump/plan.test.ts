@@ -4,16 +4,16 @@ import { dumpDetail, dumpName, dumpOptions, dumpShare, dumpStep, importShare } f
 describe('dump plan', () => {
   it('names the file after the database and the time', () => {
     const at = new Date(2026, 9, 6, 9, 5);
-    expect(dumpName('shop', 'Local', at)).toBe('shop-2026-10-06-0905.sql');
-    expect(dumpName('', 'My DB / prod', at)).toBe('My_DB_prod-2026-10-06-0905.sql');
-    expect(dumpName('/var/data/app.db', '', at)).toBe('var_data_app.db-2026-10-06-0905.sql');
-    expect(dumpName('', '', at)).toBe('dump-2026-10-06-0905.sql');
+    expect(dumpName('shop', 'Local', '.sql', at)).toBe('shop-2026-10-06-0905.sql');
+    expect(dumpName('', 'My DB / prod', '.dump', at)).toBe('My_DB_prod-2026-10-06-0905.dump');
+    expect(dumpName('/var/data/app.db', '', '.sql', at)).toBe('var_data_app.db-2026-10-06-0905.sql');
+    expect(dumpName('', '', '.tar', at)).toBe('dump-2026-10-06-0905.tar');
   });
 
   it('sends no schema list when all are picked and drops options that do not apply', () => {
-    expect(dumpOptions('all', ['a', 'b'], ['a', 'b'], true, true, true)).toEqual({ schemas: [], structure: true, data: true, clean: true, inserts: true, owners: true });
-    expect(dumpOptions('structure', ['a'], ['a', 'b'], true, true)).toEqual({ schemas: ['a'], structure: true, data: false, clean: true, inserts: false, owners: false });
-    expect(dumpOptions('data', ['a', 'b'], ['a', 'b'], true, false, true)).toEqual({ schemas: [], structure: false, data: true, clean: false, inserts: false, owners: false });
+    expect(dumpOptions('all', ['a', 'b'], ['a', 'b'], true, true, true)).toEqual({ schemas: [], structure: true, data: true, clean: true, inserts: true, owners: true, format: 'sql' });
+    expect(dumpOptions('structure', ['a'], ['a', 'b'], true, true)).toEqual({ schemas: ['a'], structure: true, data: false, clean: true, inserts: false, owners: false, format: 'sql' });
+    expect(dumpOptions('data', ['a', 'b'], ['a', 'b'], true, false, true, 'custom')).toEqual({ schemas: [], structure: false, data: true, clean: false, inserts: false, owners: false, format: 'custom' });
   });
 
   it('describes progress', () => {

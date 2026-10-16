@@ -18,6 +18,9 @@
   let clean = $state(false);
   let inserts = $state(false);
   let owners = $state(false);
+  const formats = $derived(ws.session.engine.dumpFormats ?? []);
+  let format = $state(untrack(() => ws.session.engine.dumpFormats?.[0]?.id ?? 'sql'));
+  const chosen = $derived(formats.find(f => f.id === format));
   const job = new ExportJob();
 
   function toggle(s: string) {
@@ -25,7 +28,7 @@
   }
 
   async function start() {
-    const res = await job.run(ws.session.sessionId, dumpName(ws.connection.database, ws.connection.name), dumpOptions(what, picked, all, clean, inserts, owners));
+    const res = await job.run(ws.session.sessionId, dumpName(ws.connection.database, ws.connection.name, chosen?.ext ?? '.sql'), dumpOptions(what, picked, all, clean, inserts, owners, format));
     if (res?.path) app.notify(`Dump saved to ${res.path}`, 'info');
     else if (job.error && job.error.code !== 'canceled') app.notify(job.error);
   }
@@ -48,6 +51,10 @@
     </div>
   {:else}
     <div class="form">
+      {#if formats.length > 1}
+        <SegmentedControl label="Format" bind:value={format} options={formats.map(f => ({ value: f.id, label: f.label }))} />
+        {#if chosen?.hint}<p class="hint faint">{chosen.hint}</p>{/if}
+      {/if}
       <SegmentedControl label="What to export" bind:value={what} options={[
         { value: 'all', label: 'Structure and data' },
         { value: 'structure', label: 'Structure only' },

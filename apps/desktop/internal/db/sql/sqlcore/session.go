@@ -116,12 +116,20 @@ func Features(d dialect.Dialect) model.EngineFeatures {
 		ServerConfig:       isServerConfig(d),
 		Roles:              isRoles(d),
 		Dumps:              isDump(d),
+		DumpFormats:        dumpFormats(d),
 	}
 }
 
 func isDump(d dialect.Dialect) bool {
 	_, ok := d.(dialect.Dump)
 	return ok
+}
+
+func dumpFormats(d dialect.Dialect) []model.DumpFormat {
+	if dd, ok := d.(dialect.Dump); ok {
+		return dd.DumpFormats()
+	}
+	return nil
 }
 
 func isServerConfig(d dialect.Dialect) bool {

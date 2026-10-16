@@ -70,6 +70,7 @@ type SortKey interface {
 
 type Dump interface {
 	Dump(ctx context.Context, conn *sql.Conn, opts model.DumpOptions, w io.Writer, progress func(model.DumpProgress)) error
+	DumpFormats() []model.DumpFormat
 }
 
 type Archive interface {

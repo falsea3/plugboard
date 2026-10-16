@@ -93,6 +93,15 @@
 
   let menus = $state<TreeMenus>();
   let dumpAt = $state<{ x: number; y: number } | null>(null);
+  let barWidth = $state(0);
+
+  function newButton(width: number, icons: number, label: number, full: number) {
+    const room = width - 24 - icons * 38;
+    return room >= full ? 'full' : room >= label ? 'label' : 'icon';
+  }
+  const engineIcons = $derived(Number(ws.session.engine.serverConfig) + Number(ws.session.engine.roles));
+  const queryFit = $derived(barWidth ? newButton(barWidth, 1 + Number(ws.session.engine.dumps) + engineIcons, 78, isMac ? 110 : 78) : 'full');
+  const consoleFit = $derived(barWidth ? newButton(barWidth, engineIcons, 112, 112) : 'full');
 
   function openDumpMenu(e: MouseEvent) {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -121,8 +130,8 @@
 
   {#if ws.session.engine.keyValue}
     <KeyTree {ws} {active} />
-    <div class="bottom">
-      <button class="btn new" onclick={() => ws.newQuery()} title={keys('New console (⌘T)')}><Icon name="terminal" size={14} />New console</button>
+    <div class="bottom" class:compact={consoleFit === 'icon'} bind:clientWidth={barWidth}>
+      <button class="btn new" class:icon={consoleFit === 'icon'} onclick={() => ws.newQuery()} title={keys('New console (⌘T)')} aria-label={keys('New console (⌘T)')}><Icon name="terminal" size={14} />{#if consoleFit !== 'icon'}New console{/if}</button>
       {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
       {#if ws.session.engine.roles}<button class="btn icon" onclick={() => ws.openAdmin('roles')} title="Users" aria-label="Roles"><Icon name="roles" size={15} /></button>{/if}
     </div>
@@ -182,8 +191,8 @@
       <GridMenu items={dumpMenu()} x={dumpAt.x} y={dumpAt.y} onpick={id => { dumpAt = null; app.dump = { ws, mode: id === 'dump-export' ? 'export' : 'import' }; }} onclose={() => (dumpAt = null)} />
     {/if}
 
-    <div class="bottom">
-      <button class="btn new" onclick={() => ws.newQuery()} title={keys('New query (⌘T)')}>New query{#if isMac} <span class="kbd">{keys('⌘T')}</span>{/if}</button>
+    <div class="bottom" class:compact={queryFit === 'icon'} bind:clientWidth={barWidth}>
+      <button class="btn new" class:icon={queryFit === 'icon'} onclick={() => ws.newQuery()} title={keys('New query (⌘T)')} aria-label={keys('New query (⌘T)')}>{#if queryFit === 'icon'}<Icon name="plus" size={15} />{:else}New query{#if isMac && queryFit === 'full'} <span class="kbd">{keys('⌘T')}</span>{/if}{/if}</button>
       <button class="btn icon" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={15} /></button>
       {#if ws.session.engine.dumps}<button class="btn icon" onclick={e => openDumpMenu(e)} title="Export or import a dump" aria-label="Dumps" aria-haspopup="menu"><Icon name="transfer" size={15} /></button>{/if}
       {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
@@ -233,6 +242,8 @@
 
   .bottom { display: flex; align-items: center; gap: 6px; padding: 10px 12px 12px; }
   .bottom .new { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; }
+  .bottom .new { padding: 0 8px; }
   .bottom .new .kbd { flex-shrink: 1; min-width: 0; overflow: hidden; }
   .bottom .btn.icon { flex: none; width: 32px; color: var(--text-2); }
+  .bottom.compact .btn { flex: 1; width: auto; min-width: 28px; padding: 0; }
 </style>

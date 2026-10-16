@@ -139,12 +139,14 @@ func nonEmpty(parts []string) []string {
 }
 
 type pgSequence struct {
-	oid   uint32
-	name  string
-	ddl   string
-	owned sql.NullString
-	ident bool
-	opts  string
+	oid    uint32
+	name   string
+	ddl    string
+	owned  sql.NullString
+	ident  bool
+	opts   string
+	schema string
+	rel    string
 }
 
 func (d Dialect) loadSequences(ctx context.Context, q queryer, schemas []string) ([]pgSequence, error) {
@@ -156,6 +158,7 @@ func (d Dialect) loadSequences(ctx context.Context, q queryer, schemas []string)
 		var ownerSchema, ownerRel, ownerCol sql.NullString
 		err := r.Scan(&x.oid, &schema, &rel, &typ, &start, &min, &max, &inc, &cache, &cycle, &ownerSchema, &ownerRel, &ownerCol, &x.ident)
 		x.name = d.QuoteIdent(schema) + "." + d.QuoteIdent(rel)
+		x.schema, x.rel = schema, rel
 		if ownerCol.Valid {
 			x.owned = sql.NullString{String: d.QuoteIdent(ownerSchema.String) + "." + d.QuoteIdent(ownerRel.String) + "." + d.QuoteIdent(ownerCol.String), Valid: true}
 		}

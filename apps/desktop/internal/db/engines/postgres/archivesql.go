@@ -10,10 +10,17 @@ import (
 
 func (d Dialect) ReadArchive(r io.Reader) (io.Reader, bool, error) {
 	br := bufio.NewReaderSize(r, 1<<20)
-	if head, _ := br.Peek(5); string(head) != "PGDMP" {
+	head, _ := br.Peek(512)
+	var a *archive
+	var err error
+	switch {
+	case len(head) >= 5 && string(head[:5]) == "PGDMP":
+		a, err = readArchive(br)
+	case len(head) >= 262 && string(head[257:262]) == "ustar":
+		a, err = readTarArchive(br)
+	default:
 		return br, false, nil
 	}
-	a, err := readArchive(br)
 	if err != nil {
 		return nil, true, err
 	}
@@ -117,6 +124,9 @@ func (d Dialect) archiveEntry(a *archive, st *archiveState, e tocEntry) error {
 	}
 	if !e.hasData || (e.desc != "TABLE DATA" && e.desc != "BLOBS") {
 		return nil
+	}
+	if a.tar != nil {
+		return a.tar.data(a, e, w)
 	}
 	typ, err := a.findBlock(e.id, st.skipped)
 	if err != nil {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { keys } from '../ui/keys';
-  import { formatCount, formatDuration } from '../ui/format';
+  import { clip, formatCount, formatDuration } from '../ui/format';
   import { MAX_ROWS, type TableRows } from './rows.svelte';
   import Icon from '../ui/Icon.svelte';
   import { journal } from '../app/journal.svelte';
@@ -55,7 +55,7 @@
   {#if page}<span class="chip" title="How long the last fetch took">{formatDuration(page.result.durationMs)}</span>{/if}
   {#if pending}
     {#if pending.error}
-      <button class="chip danger" title="Show the whole error in the journal (⇧⌘J)" onclick={() => journal.show()}><Icon name="alert" size={11} />{pending.error}</button>
+      <button class="chip danger" title="Show the whole error in the journal (⇧⌘J)" onclick={() => journal.show()}><Icon name="alert" size={11} /><span class="msg">{clip(pending.error, 48)}</span><span class="open"><Icon name="rows" size={12} /></span></button>
     {:else}
       <span class="chip warn">{#if pending.saving}<Spinner size={10} />Saving…{:else}{formatCount(pending.count, 'change')} · {keys('⌘S')} to save{/if}</span>
     {/if}
@@ -68,7 +68,11 @@
 
 <style>
   .status { flex: none; display: flex; align-items: center; gap: 8px; height: 30px; min-width: 0; margin-top: 8px; font-size: 12px; color: var(--text-3); }
-  .chip { flex: none; display: inline-flex; align-items: center; gap: 5px; max-width: 360px; overflow: hidden; padding: 2px 8px; border: 0; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+  .chip { flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border: 0; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; white-space: nowrap; }
+  .chip .msg { overflow: hidden; text-overflow: ellipsis; }
+  .chip :global(.icon) { flex: none; }
+  .chip .open { display: inline-flex; margin-left: 3px; padding-left: 6px; border-left: 1px solid color-mix(in srgb, currentColor 30%, transparent); opacity: 0.8; }
+  .chip:hover .open { opacity: 1; }
   .act { flex: none; height: 26px; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 12px; }
   .accent { background: var(--accent-bg); color: var(--accent-text); }
   .warn { background: var(--cell-edited); color: var(--warn); }

@@ -13,6 +13,7 @@
   let {
     title,
     width = 480,
+    above = false,
     onclose,
     children,
     header,
@@ -20,6 +21,7 @@
   }: {
     title: string;
     width?: number;
+    above?: boolean;
     onclose: () => void;
     children: Snippet;
     header?: Snippet;
@@ -46,7 +48,7 @@
 
 <svelte:window {onkeydown} />
 
-<div class="backdrop" use:dismiss={onclose}>
+<div class="backdrop" class:above use:dismiss={onclose}>
   <div class="modal" role="dialog" aria-modal="true" aria-label={title} style:width="{width}px">
     <header>{#if header}{@render header()}{:else}{title}{/if}</header>
     <div class="body">{@render children()}</div>
@@ -66,6 +68,7 @@
     background: rgba(0, 0, 0, 0.42);
     animation: fade 0.12s ease-out;
   }
+  .backdrop.above { z-index: 95; }
   .modal {
     max-width: calc(100vw - 32px);
     max-height: calc(100vh - 64px);

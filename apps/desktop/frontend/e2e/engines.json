@@ -93,7 +93,27 @@
     "canRenameTables": true,
     "serverConfig": true,
     "roles": true,
-    "dumps": true
+    "dumps": true,
+    "dumpFormats": [
+      {
+        "id": "sql",
+        "label": "SQL",
+        "ext": ".sql",
+        "hint": "Plain SQL that psql or any SQL tool can run. Name the file .sql.gz to compress it."
+      },
+      {
+        "id": "custom",
+        "label": "Custom",
+        "ext": ".dump",
+        "hint": "pg_dump's custom format, compressed: pg_restore can list it, restore single tables and run in parallel."
+      },
+      {
+        "id": "tar",
+        "label": "Tar",
+        "ext": ".tar",
+        "hint": "pg_dump's tar format: pg_restore reads it, and tar unpacks it into a file per table."
+      }
+    ]
   },
   "sqlite": {
     "syntax": {

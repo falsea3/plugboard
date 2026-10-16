@@ -130,9 +130,9 @@ func (d Dialect) dumpOwners(ctx context.Context, q queryer, schemas []string, op
 		}
 		acls = append(acls, los...)
 	}
-	o.section("Owners and privileges")
+	o.sec = sectionNone
 	for _, a := range acls {
-		o.line(fmt.Sprintf("ALTER %s %s OWNER TO %s;", a.alter, a.name, a.owner))
+		o.obj("ACL", "", a.name, fmt.Sprintf("ALTER %s %s OWNER TO %s;", a.alter, a.name, a.owner))
 	}
 	for _, a := range acls {
 		if !a.set {
@@ -145,7 +145,7 @@ func (d Dialect) dumpOwners(ctx context.Context, q queryer, schemas []string, op
 		for _, g := range grantList(a.grants) {
 			lines = append(lines, fmt.Sprintf("GRANT %s ON %s %s TO %s%s;", g[2], a.on, a.name, g[0], withGrant(g[1])))
 		}
-		o.line(strings.Join(lines, "\n"))
+		o.obj("ACL", "", a.name, strings.Join(lines, "\n"))
 	}
 	for _, load := range []func() ([]string, error){
 		func() ([]string, error) { return d.loadColumnGrants(ctx, q, schemas) },
@@ -156,7 +156,7 @@ func (d Dialect) dumpOwners(ctx context.Context, q queryer, schemas []string, op
 			return err
 		}
 		for _, l := range lines {
-			o.line(l)
+			o.obj("ACL", "", "", l)
 		}
 	}
 	return nil

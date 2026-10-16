@@ -96,7 +96,6 @@
   .size { font-size: 12px; }
   .hint { margin: 0; font-size: 11.5px; line-height: 1.45; }
   .hint strong { color: var(--text-2); font-weight: 550; }
-  .hint code { font-family: var(--font-mono); font-size: 11px; }
   .sure { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
   .sure strong { color: var(--danger); }
   .warn { margin: 0; color: var(--warn); font-size: 12px; }

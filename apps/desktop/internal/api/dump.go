@@ -18,7 +18,30 @@ const (
 	ImportEvent = "import:progress"
 )
 
-var dumpFilters = []runtime.FileFilter{{DisplayName: "SQL dump", Pattern: "*.sql;*.gz;*.dump;*.backup"}}
+var dumpFilters = []runtime.FileFilter{{DisplayName: "Dump", Pattern: "*.sql;*.gz;*.dump;*.backup;*.tar"}}
+
+var saveFilters = map[string]runtime.FileFilter{
+	".sql":  {DisplayName: "SQL dump", Pattern: "*.sql;*.gz"},
+	".dump": {DisplayName: "Archive", Pattern: "*.dump;*.backup"},
+	".tar":  {DisplayName: "Tar archive", Pattern: "*.tar"},
+}
+
+func dumpPath(name, chosen string) (string, bool) {
+	ext := strings.ToLower(filepath.Ext(name))
+	filter, ok := saveFilters[ext]
+	if !ok {
+		ext, filter = ".sql", saveFilters[".sql"]
+	}
+	lower := strings.ToLower(chosen)
+	fits := false
+	for _, p := range strings.Split(filter.Pattern, ";") {
+		fits = fits || strings.HasSuffix(lower, strings.TrimPrefix(p, "*"))
+	}
+	if !fits {
+		chosen += ext
+	}
+	return chosen, ext == ".sql" && strings.HasSuffix(strings.ToLower(chosen), ".gz")
+}
 
 func (a *App) dumper(id string) (db.Dumper, error) {
 	s, err := a.session(id)
@@ -39,19 +62,17 @@ func (a *App) ExportDump(sessionID, jobID, name string, opts model.DumpOptions) 
 	path, err := runtime.SaveFileDialog(a.context(), runtime.SaveDialogOptions{
 		Title:                "Export dump",
 		DefaultFilename:      name,
-		Filters:              dumpFilters,
+		Filters:              []runtime.FileFilter{saveFilters[strings.ToLower(filepath.Ext(name))]},
 		CanCreateDirectories: true,
 	})
 	if err != nil || path == "" {
 		return model.DumpResult{}, err
 	}
-	if !strings.HasSuffix(strings.ToLower(path), ".sql") && !strings.HasSuffix(strings.ToLower(path), ".gz") {
-		path += ".sql"
-	}
+	path, gz := dumpPath(name, path)
 	ctx, done := a.cancellable(jobID, 0)
 	defer done()
 	res := model.DumpResult{Path: path}
-	err = writeDump(path, func(w io.Writer) error {
+	err = writeDump(path, gz, func(w io.Writer) error {
 		return d.Dump(ctx, opts, w, func(p model.DumpProgress) {
 			res.Bytes, res.Rows, res.Tables = p.Bytes, p.Rows, p.Done
 			runtime.EventsEmit(a.ctx, DumpEvent, jobID, p)
@@ -63,7 +84,7 @@ func (a *App) ExportDump(sessionID, jobID, name string, opts model.DumpOptions) 
 	return res, err
 }
 
-func writeDump(path string, dump func(io.Writer) error) error {
+func writeDump(path string, gz bool, dump func(io.Writer) error) error {
 	part := path + ".part"
 	f, err := os.Create(part)
 	if err != nil {
@@ -72,7 +93,7 @@ func writeDump(path string, dump func(io.Writer) error) error {
 	buf := bufio.NewWriterSize(f, 1<<20)
 	var w io.Writer = buf
 	var zw *gzip.Writer
-	if strings.HasSuffix(strings.ToLower(path), ".gz") {
+	if gz {
 		zw = gzip.NewWriter(buf)
 		w = zw
 	}

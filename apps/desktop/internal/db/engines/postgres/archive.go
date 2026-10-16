@@ -40,6 +40,8 @@ type archive struct {
 	intSize     int
 	offSize     int
 	compression byte
+	format      byte
+	tar         *tarSource
 	entries     []tocEntry
 }
 
@@ -62,6 +64,7 @@ type tocEntry struct {
 	owner      string
 	deps       []int
 	hasData    bool
+	file       string
 }
 
 var errNotArchive = errors.New("not a pg_dump archive")
@@ -151,8 +154,8 @@ func readArchive(r *bufio.Reader) (*archive, error) {
 	if a.version >= v1_7 {
 		a.offSize = int(a.byte())
 	}
-	if format := a.byte(); format != 1 {
-		return nil, fmt.Errorf("this pg_dump archive is in format %d; only the custom format (-Fc) is read here", format)
+	if a.format = a.byte(); a.format != formatCustom && a.format != formatTar {
+		return nil, fmt.Errorf("this pg_dump archive is in format %d, which this app doesn't read", a.format)
 	}
 	a.header()
 	a.toc()
@@ -237,9 +240,14 @@ func (a *archive) toc() {
 				e.deps = append(e.deps, id)
 			}
 		}
-		e.hasData = a.offset() != offsetNoData
-		if a.version < v1_7 {
-			a.int()
+		if a.format == formatTar {
+			e.file = a.str().s
+			e.hasData = e.file != ""
+		} else {
+			e.hasData = a.offset() != offsetNoData
+			if a.version < v1_7 {
+				a.int()
+			}
 		}
 		a.entries = append(a.entries, e)
 	}

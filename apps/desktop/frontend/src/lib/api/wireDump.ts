@@ -5,6 +5,14 @@ export interface DumpOptions {
   clean: boolean;
   inserts: boolean;
   owners: boolean;
+  format: string;
+}
+
+export interface DumpFormat {
+  id: string;
+  label: string;
+  ext: string;
+  hint: string;
 }
 
 export interface DumpProgress {

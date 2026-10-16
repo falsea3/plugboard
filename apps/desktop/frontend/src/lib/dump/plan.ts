@@ -4,13 +4,13 @@ import { formatBytes, formatCount } from '../ui/format';
 
 export type DumpWhat = 'all' | 'structure' | 'data';
 
-export function dumpName(database: string, name: string, now = new Date()): string {
+export function dumpName(database: string, name: string, ext = '.sql', now = new Date()): string {
   const base = (database || name || 'dump').replace(/[^\p{L}\p{N}._-]+/gu, '_').replace(/^_+|_+$/g, '') || 'dump';
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${base}-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.sql`;
+  return `${base}-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${ext}`;
 }
 
-export function dumpOptions(what: DumpWhat, schemas: string[], all: string[], clean: boolean, inserts: boolean, owners = false): DumpOptions {
+export function dumpOptions(what: DumpWhat, schemas: string[], all: string[], clean: boolean, inserts: boolean, owners = false, format = 'sql'): DumpOptions {
   return {
     schemas: schemas.length === all.length ? [] : schemas,
     structure: what !== 'data',
@@ -18,6 +18,7 @@ export function dumpOptions(what: DumpWhat, schemas: string[], all: string[], cl
     clean: clean && what !== 'data',
     inserts: inserts && what !== 'structure',
     owners: owners && what !== 'data',
+    format,
   };
 }
 

@@ -102,17 +102,15 @@ func (d Dialect) dumpBefore(ctx context.Context, q queryer, c *pgCatalog, schema
 	if opts.Clean {
 		d.dumpClean(c, o)
 	}
-	o.section("Schemas and extensions")
 	for _, s := range schemas {
-		o.line("CREATE SCHEMA IF NOT EXISTS " + d.QuoteIdent(s) + ";")
+		o.obj("SCHEMA", "", s, "CREATE SCHEMA IF NOT EXISTS "+d.QuoteIdent(s)+";")
 	}
 	for _, e := range c.extensions {
-		o.line(e)
+		o.obj("EXTENSION", "", "", e)
 	}
 	for _, oid := range c.largeObjs {
-		o.line(fmt.Sprintf("SELECT pg_catalog.lo_create('%d');", oid))
+		o.obj("BLOB", "", fmt.Sprint(oid), fmt.Sprintf("SELECT pg_catalog.lo_create('%d');", oid))
 	}
-	o.section("Types and functions")
 	late := map[uint32]bool{}
 	for _, t := range c.types {
 		for _, dep := range t.deps {
@@ -142,10 +140,9 @@ func (d Dialect) dumpBefore(ctx context.Context, q queryer, c *pgCatalog, schema
 			}
 		}
 	}
-	o.section("Sequences and tables")
 	for _, s := range c.sequences {
 		if !s.ident {
-			o.line(s.ddl)
+			o.obj("SEQUENCE", s.schema, s.rel, s.ddl)
 		}
 	}
 	for _, r := range c.rels {
@@ -164,11 +161,11 @@ func (d Dialect) dumpBefore(ctx context.Context, q queryer, c *pgCatalog, schema
 				checks = append(checks, x)
 			}
 		}
-		o.line(d.dumpTableDDL(r, parent, c.cols[r.oid], checks, c.identityFor(d, r)))
+		o.obj("TABLE", r.schema, r.name, d.dumpTableDDL(r, parent, c.cols[r.oid], checks, c.identityFor(d, r)))
 	}
 	for _, s := range c.sequences {
 		if !s.ident && s.owned.Valid {
-			o.line("ALTER SEQUENCE " + s.name + " OWNED BY " + s.owned.String + ";")
+			o.obj("SEQUENCE OWNED BY", s.schema, s.rel, "ALTER SEQUENCE "+s.name+" OWNED BY "+s.owned.String+";")
 		}
 	}
 	return nil
@@ -179,21 +176,30 @@ func (d Dialect) emitType(ctx context.Context, q queryer, t pgType, o *dumpOut) 
 	if err != nil {
 		return fmt.Errorf("type %s.%s: %w", t.schema, t.name, err)
 	}
-	o.line(ddl)
+	desc := "TYPE"
+	if t.kind == "d" {
+		desc = "DOMAIN"
+	}
+	o.obj(desc, t.schema, t.name, ddl)
 	return nil
 }
+
+var funcDesc = map[string]string{"a": "AGGREGATE", "p": "PROCEDURE"}
 
 func (d Dialect) emitFunc(ctx context.Context, q queryer, f pgFunc, o *dumpOut) error {
 	ddl, err := d.functionDDL(ctx, q, f)
 	if err != nil {
 		return fmt.Errorf("function %s: %w", f.name, err)
 	}
-	o.line(ddl)
+	desc := funcDesc[f.kind]
+	if desc == "" {
+		desc = "FUNCTION"
+	}
+	o.obj(desc, "", f.name, ddl)
 	return nil
 }
 
 func (d Dialect) dumpClean(c *pgCatalog, o *dumpOut) {
-	o.section("Drop existing objects")
 	for i := len(c.views) - 1; i >= 0; i-- {
 		kind := "VIEW"
 		if c.views[i].rel.kind == "m" {

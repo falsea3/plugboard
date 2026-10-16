@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
 )
 
 func loadLargeObjects(ctx context.Context, q queryer) ([]uint32, error) {
@@ -23,30 +24,17 @@ func (d Dialect) largeObjectACLs(ctx context.Context, q queryer) ([]pgACL, error
 		FROM pg_largeobject_metadata m ORDER BY m.oid`)
 }
 
-func (d Dialect) largeObjectData(ctx context.Context, q queryer, oid uint32, onlyMissing bool, o *dumpOut) error {
-	create := fmt.Sprintf("SELECT pg_catalog.lo_create('%d')", oid)
-	if onlyMissing {
-		create += fmt.Sprintf(" WHERE NOT EXISTS (SELECT 1 FROM pg_catalog.pg_largeobject_metadata WHERE oid = '%d')", oid)
-	}
-	if onlyMissing {
-		fmt.Fprintf(o, "%s;\n", create)
-	}
-	lw := &loWriter{w: o, oid: oid}
+func readLargeObject(ctx context.Context, q queryer, oid uint32, w io.Writer) error {
 	for off := int64(0); ; off += loChunk {
 		var chunk []byte
 		if err := q.QueryRowContext(ctx, `SELECT lo_get($1::oid, $2, $3)`, oid, off, loChunk).Scan(&chunk); err != nil {
 			return fmt.Errorf("large object %d: %w", oid, err)
 		}
-		if _, err := lw.Write(chunk); err != nil {
+		if _, err := w.Write(chunk); err != nil {
 			return err
 		}
 		if len(chunk) < loChunk {
-			break
+			return nil
 		}
 	}
-	if err := lw.flush(); err != nil {
-		return err
-	}
-	_, err := fmt.Fprintln(o)
-	return err
 }

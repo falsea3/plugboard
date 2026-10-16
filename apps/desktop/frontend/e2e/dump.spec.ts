@@ -13,9 +13,24 @@ test('exports the structure of a database with progress', async ({ page }) => {
   await expect(dialog.getByText('Saved 1.2 MB with 24,813 rows from 7 tables.')).toBeVisible();
   const last = await page.evaluate(() => (window as any).lastDump);
   expect(last.name).toMatch(/^shop-\d{4}-\d\d-\d\d-\d{4}\.sql$/);
-  expect(last.opts).toEqual({ schemas: [], structure: true, data: false, clean: true, inserts: false, owners: false });
+  expect(last.opts).toEqual({ schemas: [], structure: true, data: false, clean: true, inserts: false, owners: false, format: 'sql' });
   await dialog.getByRole('button', { name: 'Done' }).click();
   await expect(dialog).toBeHidden();
+});
+
+test('exports a pg_restore archive', async ({ page }) => {
+  await connect(page);
+  await page.getByRole('button', { name: 'Dumps' }).click();
+  await page.getByRole('menuitem', { name: 'Export dump…' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Export dump' });
+  await dialog.getByRole('tab', { name: 'Custom' }).click();
+  await expect(dialog.getByText('pg_restore can list it')).toBeVisible();
+  await page.screenshot({ path: 'test-results/s-export-format.png' });
+  await dialog.getByRole('button', { name: 'Export…' }).click();
+  await expect(dialog.getByText(/^Saved/)).toBeVisible();
+  const last = await page.evaluate(() => (window as any).lastDump);
+  expect(last.name).toMatch(/^shop-.*\.dump$/);
+  expect(last.opts.format).toBe('custom');
 });
 
 test('stops an export', async ({ page }) => {

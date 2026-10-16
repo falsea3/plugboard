@@ -47,7 +47,7 @@
 {/if}
 
 {#if showNotes && u}
-  <Modal title="What’s new in {u.info.version}" width={520} onclose={() => (showNotes = false)}>
+  <Modal title="What’s new in {u.info.version}" width={520} above onclose={() => (showNotes = false)}>
     <ReleaseNotes markdown={u.info.notes} />
     {#snippet footer()}
       <button class="btn ghost" onclick={download}>Release page</button>

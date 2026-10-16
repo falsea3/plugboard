@@ -93,6 +93,23 @@ test('opens What’s new from the update banner every time', async ({ page }) =>
   }
 });
 
+test('shows What’s new above Settings', async ({ page }) => {
+  await page.addInitScript(() => {
+    const app = (window as any).go.api.App;
+    app.CheckForUpdate = () => Promise.resolve({ available: { version: '9.9.9', notes: '### Added\n\n- **Thing.** It works.', publishedAt: '', releaseUrl: 'https://example.com' } });
+  });
+  await page.reload();
+  const banner = page.getByRole('status').filter({ hasText: 'is available' });
+  await expect(banner).toBeVisible({ timeout: 8000 });
+  await page.keyboard.press('ControlOrMeta+,');
+  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+  await banner.getByRole('button', { name: 'What’s new' }).click();
+  const notes = page.getByRole('dialog', { name: 'What’s new in 9.9.9' });
+  await notes.getByRole('button', { name: 'Close' }).click({ timeout: 3000 });
+  await expect(notes).toHaveCount(0);
+  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+});
+
 test('shows the selected cell in the Value panel, hidden until asked, on table tabs only', async ({ page }) => {
   await connect(page);
   await page.getByRole('complementary').getByText('customers', { exact: true }).click();

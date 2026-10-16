@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
+	"strings"
 
 	"github.com/falsea3/plugboard/apps/desktop/internal/model"
 )
@@ -84,7 +86,7 @@ func (d Dialect) enabledTriggers(ctx context.Context, q queryer, schemas []strin
 var enableTrigger = map[string]string{"A": "ENABLE ALWAYS TRIGGER", "R": "ENABLE REPLICA TRIGGER"}
 
 func (d Dialect) dumpData(ctx context.Context, conn *sql.Conn, c *pgCatalog, schemas []string, opts model.DumpOptions, o *dumpOut) error {
-	o.state.Phase = "data"
+	o.sec = sectionData
 	rels, loose := c.dataOrder()
 	var triggers []pgTrigger
 	if !opts.Structure {
@@ -92,61 +94,72 @@ func (d Dialect) dumpData(ctx context.Context, conn *sql.Conn, c *pgCatalog, sch
 		if triggers, err = d.enabledTriggers(ctx, conn, schemas); err != nil {
 			return err
 		}
-		o.section("Foreign keys and triggers off while rows load")
 		for _, x := range loose {
-			o.line(fmt.Sprintf("ALTER TABLE %s DROP CONSTRAINT %s;", d.relName(c.byOid[x.rel]), d.QuoteIdent(x.name)))
+			r := c.byOid[x.rel]
+			o.obj("FK CONSTRAINT", r.schema, r.name+" "+x.name, fmt.Sprintf("ALTER TABLE %s DROP CONSTRAINT %s;", d.relName(r), d.QuoteIdent(x.name)))
 		}
 		for _, t := range triggers {
-			o.line(fmt.Sprintf("ALTER TABLE %s DISABLE TRIGGER %s;", t.rel, d.QuoteIdent(t.name)))
+			o.obj("TRIGGER", "", t.name, fmt.Sprintf("ALTER TABLE %s DISABLE TRIGGER %s;", t.rel, d.QuoteIdent(t.name)))
 		}
 	}
-	o.section("Data")
 	for _, r := range rels {
-		if err := d.tableData(ctx, conn, c, r, opts, o); err != nil {
-			return err
-		}
+		d.tableData(ctx, conn, c, r, opts, o)
 	}
-	for _, oid := range c.largeObjs {
-		if err := d.largeObjectData(ctx, conn, oid, !opts.Structure, o); err != nil {
-			return err
+	if len(c.largeObjs) > 0 {
+		if !opts.Structure {
+			for _, oid := range c.largeObjs {
+				o.obj("BLOB", "", fmt.Sprint(oid), fmt.Sprintf("SELECT pg_catalog.lo_create('%d') WHERE NOT EXISTS (SELECT 1 FROM pg_catalog.pg_largeobject_metadata WHERE oid = '%d');", oid, oid))
+			}
 		}
+		o.data(dumpEntry{desc: "BLOBS", tag: "BLOBS", oids: c.largeObjs, blob: func(oid uint32, w io.Writer) error { return readLargeObject(ctx, conn, oid, w) }})
 	}
 	if !opts.Structure {
-		o.section("Foreign keys and triggers back on")
+		o.sec = sectionPostData
 		for _, x := range loose {
-			o.line(d.constraintSQL(c.byOid[x.rel], x))
+			r := c.byOid[x.rel]
+			o.obj("FK CONSTRAINT", r.schema, r.name+" "+x.name, d.constraintSQL(r, x))
 		}
 		for _, t := range triggers {
 			verb, ok := enableTrigger[t.enabled]
 			if !ok {
 				verb = "ENABLE TRIGGER"
 			}
-			o.line(fmt.Sprintf("ALTER TABLE %s %s %s;", t.rel, verb, d.QuoteIdent(t.name)))
+			o.obj("TRIGGER", "", t.name, fmt.Sprintf("ALTER TABLE %s %s %s;", t.rel, verb, d.QuoteIdent(t.name)))
 		}
 		d.refreshViews(c, o)
 	}
 	return nil
 }
 
-func (d Dialect) tableData(ctx context.Context, conn *sql.Conn, c *pgCatalog, r pgRel, opts model.DumpOptions, o *dumpOut) error {
+func (d Dialect) tableData(ctx context.Context, conn *sql.Conn, c *pgCatalog, r pgRel, opts model.DumpOptions, o *dumpOut) {
 	name := d.relName(r)
-	o.state.Object = r.schema + "." + r.name
-	o.report()
-	defer func() { o.state.Done++ }()
 	cols := d.dataColumns(c.cols[r.oid])
-	if len(cols) == 0 {
+	e := dumpEntry{desc: "TABLE DATA", ns: r.schema, tag: r.name}
+	if !opts.Inserts {
+		e.copyStmt = fmt.Sprintf("COPY %s (%s) FROM stdin;\n", name, strings.Join(cols, ", "))
+	}
+	e.rows = func(w io.Writer) error {
+		o.state.Object = r.schema + "." + r.name
+		o.report()
+		defer func() { o.state.Done++ }()
+		if len(cols) == 0 {
+			return nil
+		}
+		var n int64
+		var err error
+		if opts.Inserts {
+			n, err = d.insertsOut(ctx, conn, w, name, cols, c.alwaysIdentity(r.oid))
+		} else {
+			n, err = d.copyOut(ctx, conn, w, name, cols)
+		}
+		o.state.Rows += n
+		if err != nil {
+			return fmt.Errorf("%s: %w", name, err)
+		}
 		return nil
 	}
-	var n int64
-	var err error
-	if opts.Inserts {
-		n, err = d.insertsOut(ctx, conn, o, name, cols, c.alwaysIdentity(r.oid))
-	} else {
-		n, err = d.copyOut(ctx, conn, o, name, cols)
+	if len(cols) == 0 {
+		e.copyStmt = ""
 	}
-	o.state.Rows += n
-	if err != nil {
-		return fmt.Errorf("%s: %w", name, err)
-	}
-	return nil
+	o.data(e)
 }

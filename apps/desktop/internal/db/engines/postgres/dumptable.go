@@ -86,9 +86,6 @@ func (d Dialect) dataColumns(cols []pgCol) []string {
 
 func (d Dialect) copyOut(ctx context.Context, conn *sql.Conn, w io.Writer, name string, cols []string) (int64, error) {
 	list := strings.Join(cols, ", ")
-	if _, err := fmt.Fprintf(w, "COPY %s (%s) FROM stdin;\n", name, list); err != nil {
-		return 0, err
-	}
 	var rows int64
 	err := conn.Raw(func(dc any) error {
 		tag, err := dc.(*stdlib.Conn).Conn().PgConn().CopyTo(ctx, w, fmt.Sprintf("COPY %s (%s) TO STDOUT", name, list))
@@ -98,7 +95,7 @@ func (d Dialect) copyOut(ctx context.Context, conn *sql.Conn, w io.Writer, name 
 	if err != nil {
 		return rows, err
 	}
-	_, err = io.WriteString(w, "\\.\n\n")
+	_, err = io.WriteString(w, "\\.\n")
 	return rows, err
 }
 

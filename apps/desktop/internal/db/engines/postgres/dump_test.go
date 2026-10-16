@@ -108,6 +108,16 @@ func TestDumpRoundTrip(t *testing.T) {
 		sameDump(t, want, dumpText(t, ins, full))
 	})
 
+	for _, format := range []string{"custom", "tar"} {
+		t.Run(format+" archive", func(t *testing.T) {
+			owned := model.DumpOptions{Structure: true, Data: true, Owners: true}
+			archived := model.DumpOptions{Structure: true, Data: true, Owners: true, Format: format}
+			arch := scratchDB(t, "plugboard_dump_"+format)
+			restore(t, arch, dumpText(t, src, archived))
+			sameDump(t, dumpText(t, src, owned), dumpText(t, arch, owned))
+		})
+	}
+
 	t.Run("owners and privileges", func(t *testing.T) {
 		owned := model.DumpOptions{Structure: true, Data: true, Owners: true}
 		with := dumpText(t, src, owned)
@@ -181,9 +191,9 @@ func TestImportPgArchive(t *testing.T) {
 	}
 	owned := model.DumpOptions{Structure: true, Data: true, Owners: true}
 	want := dumpText(t, src, owned)
-	for _, kind := range []string{"gzip", "none", "lz4", "zstd", "inserts"} {
-		t.Run(kind, func(t *testing.T) {
-			file, err := os.ReadFile("testdata/pg_dump17." + kind + ".dump")
+	for _, name := range []string{"gzip.dump", "none.dump", "lz4.dump", "zstd.dump", "inserts.dump", "tar"} {
+		t.Run(name, func(t *testing.T) {
+			file, err := os.ReadFile("testdata/pg_dump17." + name)
 			if err != nil {
 				t.Fatal(err)
 			}

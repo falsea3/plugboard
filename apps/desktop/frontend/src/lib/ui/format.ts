@@ -62,3 +62,8 @@ export function formatBytes(n: number): string {
   }
   return i === 0 ? `${v} B` : `${v < 10 ? v.toFixed(1) : Math.round(v)} ${units[i]}`;
 }
+
+export function clip(text: string, max: number): string {
+  const chars = Array.from(text);
+  return chars.length <= max ? text : chars.slice(0, max - 1).join('').trimEnd() + '…';
+}

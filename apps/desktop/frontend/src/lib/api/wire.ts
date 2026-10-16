@@ -98,6 +98,7 @@ export interface EngineFeatures {
   serverConfig: boolean;
   roles: boolean;
   dumps: boolean;
+  dumpFormats?: import('./wireDump').DumpFormat[];
 }
 
 export interface SqlSyntax {
