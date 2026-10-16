@@ -124,3 +124,4 @@ export * from './wireQuery';
 export * from './wireApp';
 export * from './wireAdmin';
 export * from './wireDump';
+export * from './wireImport';

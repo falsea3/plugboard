@@ -109,6 +109,9 @@ export const api = {
   saveExport: (name: string, data: string) => call(a => a.SaveExport(name, data)),
   exportDump: (sessionId: string, jobId: string, name: string, opts: DumpOptions) => call(a => a.ExportDump(sessionId, jobId, name, opts)),
   pickDumpFile: () => call(a => a.PickDumpFile()),
+  findDBeaver: () => call(a => a.FindDBeaver()),
+  chooseDBeaverFolder: () => call(a => a.ChooseDBeaverFolder()),
+  importDBeaver: (root: string, keys: string[]) => call(a => a.ImportDBeaver(root, keys)),
   importDump: (sessionId: string, jobId: string, path: string, opts: ImportOptions) => call(a => a.ImportDump(sessionId, jobId, path, opts)),
   readCell: (sessionId: string, q: CellQuery) => call(a => a.ReadCell(sessionId, q)),
   editKey: (sessionId: string, db: string, edit: Partial<KeyEdit> & { key: string; op: string }) =>

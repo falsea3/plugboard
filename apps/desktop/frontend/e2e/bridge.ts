@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { installKeys } from './bridgeKeys';
 import { installAdmin } from './bridgeAdmin';
 import { installDump } from './bridgeDump';
+import { installImport } from './bridgeImport';
 
 const engines = JSON.parse(readFileSync(new URL('./engines.json', import.meta.url), 'utf8'));
 
@@ -233,4 +234,5 @@ export async function installBridge(page: Page) {
   await installKeys(page, engines.redis);
   await installAdmin(page);
   await installDump(page);
+  await installImport(page);
 }

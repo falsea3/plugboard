@@ -14,12 +14,14 @@
   import Spinner from '../ui/Spinner.svelte';
   import Modal from '../ui/Modal.svelte';
   import PromptModal from '../ui/PromptModal.svelte';
+  import DBeaverImport from './DBeaverImport.svelte';
 
   let query = $state('');
   let scope = $state<Scope>({ kind: 'all' });
   let selected = $state(app.workspaces.find(w => w.id === app.activeId)?.connection.id ?? '');
   let deleting = $state<Connection | null>(null);
   let prompt = $state<{ group: string } | null>(null);
+  let importing = $state(false);
   let promptError = $state('');
   let list = $state<ReturnType<typeof HomeList>>();
 
@@ -63,6 +65,7 @@
       <div class="search no-drag">
         <TextField icon="search" placeholder="Name, host, database…" label="Search connections" bind:value={query} {onkeydown} spellcheck="false" />
       </div>
+      <span class="no-drag"><Button variant="ghost" onclick={() => (importing = true)}>Import from DBeaver</Button></span>
       <span class="no-drag"><Button variant="primary" kbd={keys('⌘N')} onclick={() => (app.editing = null)}>New connection</Button></span>
     </div>
 
@@ -74,6 +77,7 @@
           <Icon name="database" size={28} />
           <span>No connections yet</span>
           <Button onclick={() => (app.editing = null)}>Create the first one</Button>
+          <Button variant="ghost" onclick={() => (importing = true)}>Import from DBeaver</Button>
         </div>
       {:else}
         {#if visible.length === 0 && !arranging}
@@ -97,6 +101,10 @@
       <button class="btn primary danger-fill" onclick={() => { app.deleteConnection(target.id); deleting = null; }}>Delete</button>
     {/snippet}
   </Modal>
+{/if}
+
+{#if importing}
+  <DBeaverImport onclose={() => (importing = false)} />
 {/if}
 
 {#if prompt}

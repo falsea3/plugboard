@@ -4,6 +4,7 @@ import type { ResultSet, TableQuery, RowCount, TablePage, QueryRun, SyntaxProble
 import type { KeyEdit, KeyPage, KeyValue } from './wireKeys';
 import type { ConfigFile, ConfigSaved, ConfigText, RoleList, RoleSpec } from './wireAdmin';
 import type { DumpFile, DumpOptions, DumpResult, ImportOptions, ImportResult } from './wireDump';
+import type { ImportDone, ImportScan } from './wireImport';
 
 export interface AppInfo {
   name: string;
@@ -107,6 +108,9 @@ export interface GoApp {
   SaveExport(name: string, data: string): Promise<string>;
   ExportDump(sessionId: string, jobId: string, name: string, opts: DumpOptions): Promise<DumpResult>;
   PickDumpFile(): Promise<DumpFile>;
+  FindDBeaver(): Promise<ImportScan>;
+  ChooseDBeaverFolder(): Promise<ImportScan>;
+  ImportDBeaver(root: string, keys: string[]): Promise<ImportDone>;
   ImportDump(sessionId: string, jobId: string, path: string, opts: ImportOptions): Promise<ImportResult>;
   ReadCell(sessionId: string, q: CellQuery): Promise<string>;
   ListScripts(connId: string): Promise<string[]>;
