@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="p" x1="32" y1="0" x2="32" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2c2c2c"/>
+      <stop offset="1" stop-color="#141414"/>
+    </linearGradient>
+    <linearGradient id="a" x1="111.499" y1="37.0224" x2="111.499" y2="235.049" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4F4F4"/>
+      <stop offset="1" stop-color="#B4B4B4"/>
+    </linearGradient>
+    <linearGradient id="b" x1="111.499" y1="0" x2="111.499" y2="74.9058" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#CDCDCD"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#p)"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="14.5" stroke="#fff" stroke-opacity="0.08"/>
+  <svg x="14" y="14" width="36" height="36" viewBox="-6.5 0 236 236">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M0.00842244 37.0224L0.00120866 37.4529L0.0011914 197.597C0.0011914 197.74 0.00360027 197.884 0.00840518 198.027C0.695293 218.513 50.3482 235.049 111.499 235.049C172.65 235.049 222.31 218.513 222.997 198.027C223 197.932 222.999 197.836 222.998 197.74C222.997 197.692 222.997 197.644 222.997 197.597V37.4789C222.955 58.1517 173.052 74.9059 111.499 74.9059C49.9205 74.9059 0.00120866 58.1376 0.00120866 37.4529C0.00120866 37.3092 0.00361753 37.1657 0.00842244 37.0224ZM222.997 37.4269C222.997 37.2919 222.994 37.1571 222.99 37.0224L222.997 37.4269Z" fill="url(#a)"/>
+    <ellipse cx="111.499" cy="37.4529" rx="111.498" ry="37.4529" fill="url(#b)"/>
+    <path d="M143.999 151.025L113.234 171.695C112.645 172.091 112.645 172.959 113.234 173.355L143.999 194.025" stroke="#4A4A4A" stroke-width="16" stroke-linecap="round"/>
+    <path d="M79.999 117.025L110.764 137.695C111.353 138.091 111.353 138.959 110.764 139.355L79.999 160.025" stroke="#111" stroke-width="16" stroke-linecap="round"/>
+  </svg>
+</svg>

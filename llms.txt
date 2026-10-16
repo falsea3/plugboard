@@ -1,0 +1,53 @@
+# Plugboard
+
+> Free open-source database GUI for macOS, Windows and Linux — PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra, Redis. A TablePlus and DBeaver alternative.
+
+A desktop client for PostgreSQL, MySQL, MariaDB, SQLite, ClickHouse, Cassandra and Redis. Edit rows right in the grid, commit them in one transaction, and get asked before anything writes to production.
+
+- Download: https://github.com/falsea3/plugboard/releases/latest
+- Source code (MIT): https://github.com/falsea3/plugboard
+- README: https://github.com/falsea3/plugboard#readme
+- Changelog: https://github.com/falsea3/plugboard/blob/main/CHANGELOG.md
+
+## Features
+
+- Connections: Every database you work with, one keystroke away. PostgreSQL, MySQL / MariaDB, SQLite, ClickHouse, Cassandra, Redis / Valkey, ⌘K switcher, Groups, Prod / staging tags, Paste a URL, SSH tunnels, Import from DBeaver.
+- Tables: Fast even on millions of rows. Keyset paging, Filters, Follow a foreign key, Value panel, Huge values on demand.
+- Editing: Edit like a spreadsheet, commit like a DBA. Inline edits, NULL & DEFAULT, Enum values, JSON editor, Preview SQL, One transaction.
+- SQL editor: Runs what you mean, on one connection. Dialect highlighting, Completion, Server-checked syntax, Real transactions, Saved scripts, CSV export.
+- Schema: See and change how it fits together. Structure tab, Indexes, DDL, ER diagram, PNG / SVG export.
+- Redis: Keys as a tree, values as they are. Key tree, Every data type, TTL & rename, Console, MULTI / EXEC.
+- ClickHouse & Cassandra: Not an afterthought. Sorting keys, EXPLAIN AST checks, Server paging, LWT edits, CQL batches.
+- Dumps: pg_dump’s formats, without pg_dump. .sql / .sql.gz, Custom (-Fc), Tar, COPY or INSERT, Owners & privileges, Import with progress.
+- Server admin: Run the server, not just the data. postgresql.conf, pg_hba.conf, Users & roles, Redis ACLs, SQL shown first.
+- AI agents (MCP): Let Claude Code, Codex and Cursor look — not touch. Built-in MCP server, One command to add, Read-only by default, Agents never see a password, Opt-in per connection, Every call logged.
+
+## FAQ
+
+### Which databases does Plugboard support?
+
+PostgreSQL, MySQL and MariaDB, SQLite files, ClickHouse, Cassandra, and Redis or Valkey — several connections open at once, each with its own tabs.
+
+### Is it really free?
+
+Yes. It is open source under the MIT license, with no account, no trial and no paid tier.
+
+### Is Plugboard a TablePlus or DBeaver alternative?
+
+It covers the same daily work — browsing and editing tables, a SQL editor, structure, SSH tunnels — as a small native-feeling app, free on macOS, Windows and Linux. Connections from DBeaver import in one go.
+
+### Can it open pg_dump files?
+
+Yes. It imports plain SQL dumps (also .gz) and pg_dump’s custom (-Fc) and tar archives, and exports in the same formats, which pg_restore reads.
+
+### How do AI agents use it?
+
+Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with the command from Settings ▸ AI agents. Agents see only connections you allow, read-only unless you say otherwise, and never get a password.
+
+### macOS says the app can’t be opened. What now?
+
+The builds aren’t signed by Apple yet. Open it once, then click Open Anyway in System Settings ▸ Privacy & Security. You only do this once.
+
+### Windows shows “Windows protected your PC”.
+
+The builds aren’t signed by Microsoft yet. Click More info ▸ Run anyway. Updates the app installs itself don’t ask again.
