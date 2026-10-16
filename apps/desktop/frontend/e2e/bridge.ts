@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { installKeys } from './bridgeKeys';
 import { installAdmin } from './bridgeAdmin';
+import { installDump } from './bridgeDump';
 
 const engines = JSON.parse(readFileSync(new URL('./engines.json', import.meta.url), 'utf8'));
 
@@ -34,6 +35,9 @@ export async function installBridge(page: Page) {
         ssh: { enabled: false, host: '', port: 22, user: '', auth: 'password', keyFile: '' },
       },
     ];
+
+    const sessionOf = (c: (typeof connections)[number]) =>
+      ({ sessionId: `s-${c.id}`, connection: c, serverVersion: 'PostgreSQL 17.2', schemas: ['analytics', 'public'], defaultSchema: 'public', engine: engines[c.driver] });
 
     let groups = [{ name: 'Team', collapsed: false }, { name: 'Data', collapsed: false }];
 
@@ -103,11 +107,8 @@ export async function installBridge(page: Page) {
           SaveConnection: (c: any) => ok(((window as any).savedConnection = c)),
           DeleteConnection: () => ok(undefined),
           TestConnection: () => ok({ ok: true, serverVersion: 'PostgreSQL 17.2', latencyMs: 18.4 }),
-          Connect: (id: string) => {
-            const c = connections.find(x => x.id === id)!;
-            return ok({ session: { sessionId: `s-${id}`, connection: c, serverVersion: 'PostgreSQL 17.2', schemas: ['analytics', 'public'], defaultSchema: 'public', engine: engines[c.driver] } });
-          },
-          SetReadOnly: () => Promise.reject(new Error('not in the demo')),
+          Connect: (id: string) => ok({ session: sessionOf(connections.find(x => x.id === id)!) }),
+          SetReadOnly: (sid: string, on: boolean) => ok(sessionOf({ ...connections.find(x => `s-${x.id}` === sid)!, readOnly: on })),
           Disconnect: () => ok(undefined),
           ListTables: () => ok(tables),
           DescribeTable: () => ok(columns),
@@ -231,4 +232,5 @@ export async function installBridge(page: Page) {
   }, engines);
   await installKeys(page, engines.redis);
   await installAdmin(page);
+  await installDump(page);
 }

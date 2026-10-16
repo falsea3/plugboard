@@ -43,7 +43,8 @@
     "sortable": true,
     "canRenameTables": true,
     "serverConfig": false,
-    "roles": true
+    "roles": true,
+    "dumps": false
   },
   "postgres": {
     "syntax": {
@@ -91,7 +92,8 @@
     "sortable": true,
     "canRenameTables": true,
     "serverConfig": true,
-    "roles": true
+    "roles": true,
+    "dumps": true
   },
   "sqlite": {
     "syntax": {
@@ -120,7 +122,8 @@
     "sortable": true,
     "canRenameTables": true,
     "serverConfig": false,
-    "roles": false
+    "roles": false,
+    "dumps": false
   },
   "redis": {
     "syntax": {
@@ -143,7 +146,8 @@
     "sortable": false,
     "canRenameTables": false,
     "serverConfig": true,
-    "roles": true
+    "roles": true,
+    "dumps": false
   },
   "clickhouse": {
     "syntax": {
@@ -192,7 +196,8 @@
     "sortable": true,
     "canRenameTables": true,
     "serverConfig": true,
-    "roles": true
+    "roles": true,
+    "dumps": false
   },
   "cassandra": {
     "syntax": {
@@ -238,6 +243,7 @@
     "sortable": false,
     "canRenameTables": false,
     "serverConfig": true,
-    "roles": true
+    "roles": true,
+    "dumps": false
   }
 }

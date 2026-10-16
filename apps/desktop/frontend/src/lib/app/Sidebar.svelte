@@ -10,6 +10,9 @@
   import type { TableInfo } from '../api/wire';
   import TableNode from './TableNode.svelte';
   import TreeMenus from './TreeMenus.svelte';
+  import GridMenu from '../grid/GridMenu.svelte';
+  import { app } from './app.svelte';
+  import { dumpMenu } from '../dump/plan';
   import ObjectGroups from '../objects/ObjectGroups.svelte';
   import ScriptList from '../scripts/ScriptList.svelte';
   import KeyTree from '../keys/KeyTree.svelte';
@@ -89,6 +92,12 @@
   });
 
   let menus = $state<TreeMenus>();
+  let dumpAt = $state<{ x: number; y: number } | null>(null);
+
+  function openDumpMenu(e: MouseEvent) {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    dumpAt = { x: r.left, y: r.top - 2 * 27 - 14 };
+  }
 
   function onFilterKey(e: KeyboardEvent) {
     if (e.key === 'Enter' && visible.length > 0) ws.openTable(visible[0]);
@@ -169,10 +178,14 @@
     {/if}
 
     <TreeMenus bind:this={menus} {ws} />
+    {#if dumpAt}
+      <GridMenu items={dumpMenu()} x={dumpAt.x} y={dumpAt.y} onpick={id => { dumpAt = null; app.dump = { ws, mode: id === 'dump-export' ? 'export' : 'import' }; }} onclose={() => (dumpAt = null)} />
+    {/if}
 
     <div class="bottom">
       <button class="btn new" onclick={() => ws.newQuery()} title={keys('New query (⌘T)')}>New query{#if isMac} <span class="kbd">{keys('⌘T')}</span>{/if}</button>
       <button class="btn icon" onclick={() => ws.openDiagram()} title="Schema diagram" aria-label="Schema diagram"><Icon name="diagram" size={15} /></button>
+      {#if ws.session.engine.dumps}<button class="btn icon" onclick={e => openDumpMenu(e)} title="Export or import a dump" aria-label="Dumps" aria-haspopup="menu"><Icon name="transfer" size={15} /></button>{/if}
       {#if ws.session.engine.serverConfig}<button class="btn icon" onclick={() => ws.openAdmin('config')} title="Server config" aria-label="Server config"><Icon name="config" size={15} /></button>{/if}
       {#if ws.session.engine.roles}<button class="btn icon" onclick={() => ws.openAdmin('roles')} title="Roles" aria-label="Roles"><Icon name="roles" size={15} /></button>{/if}
     </div>

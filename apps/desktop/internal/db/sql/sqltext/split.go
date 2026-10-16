@@ -7,48 +7,76 @@ import (
 
 func Split(script string, syn Syntax) []string {
 	var out []string
-	start := 0
-	n := len(script)
 	delim := ";"
-	var b blocks
-	flush := func(end int) {
-		stmt := strings.TrimSpace(script[start:end])
-		if stmt != "" && FirstKeyword(stmt) != "" {
+	for pos := 0; pos < len(script); {
+		from, end, next, d, _ := scanStatement(script, pos, delim, syn, true)
+		delim = d
+		if stmt := strings.TrimSpace(script[from:end]); stmt != "" && FirstKeyword(stmt) != "" {
 			out = append(out, stmt)
 		}
-		b = blocks{}
+		pos = next
 	}
-	for i := 0; i < n; i++ {
-		switch c := script[i]; {
-		case b.words == 0 && (c == 'D' || c == 'd') && strings.TrimSpace(script[start:i]) == "":
-			if d, next, ok := delimiterAt(script, i); ok {
-				delim, start, i = d, next, next
+	return out
+}
+
+func scanStatement(s string, start int, delim string, syn Syntax, eof bool) (from, end, next int, d string, found bool) {
+	n := len(s)
+	from = start
+	var b blocks
+	for i := start; i < n; i++ {
+		switch c := s[i]; {
+		case b.words == 0 && c == '\\' && blank(s[from:i], syn):
+			nl := strings.IndexByte(s[i:], '\n')
+			if nl < 0 {
+				if !eof {
+					return from, n, n, delim, false
+				}
+				return i, n, n, delim, true
+			}
+			return i, i + nl, i + nl + 1, delim, true
+		case b.words == 0 && (c == 'D' || c == 'd') && blank(s[from:i], syn):
+			if nd, after, ok := delimiterAt(s, i); ok {
+				if after == n && !eof {
+					return from, n, n, delim, false
+				}
+				delim, from, i = nd, after, after
 				continue
 			}
-			i = wordEnd(script, i, &b)
-		case delim != ";" && strings.HasPrefix(script[i:], delim):
-			flush(i)
-			i += len(delim) - 1
-			start = i + 1
-		case isWordByte(c) && (i == 0 || !isWordByte(script[i-1])):
-			i = wordEnd(script, i, &b)
+			i = wordEnd(s, i, &b)
+		case delim != ";" && strings.HasPrefix(s[i:], delim):
+			return from, i, i + len(delim), delim, true
+		case isWordByte(c) && (i == 0 || !isWordByte(s[i-1])):
+			i = wordEnd(s, i, &b)
 		case c == '\'' || c == '"' || c == '`':
-			i = skipQuoted(script, i, c, escapesBackslash(script, i, syn))
-		case lineCommentAt(script, i, syn):
-			i = skipLine(script, i)
-		case c == '/' && i+1 < n && script[i+1] == '*':
-			i = skipBlockComment(script, i)
+			i = skipQuoted(s, i, c, escapesBackslash(s, i, syn))
+		case lineCommentAt(s, i, syn):
+			i = skipLine(s, i)
+		case c == '/' && i+1 < n && s[i+1] == '*':
+			i = skipBlockComment(s, i)
 		case c == '$' && syn.DollarQuotes:
-			if end, ok := skipDollarQuoted(script, i); ok {
-				i = end
+			if e, ok := skipDollarQuoted(s, i); ok {
+				i = e
 			}
 		case c == ';' && delim == ";" && !b.open():
-			flush(i)
-			start = i + 1
+			return from, i, i + 1, delim, true
 		}
 	}
-	flush(n)
-	return out
+	return from, n, n, delim, false
+}
+
+func blank(s string, syn Syntax) bool {
+	for i := 0; i < len(s); i++ {
+		switch {
+		case s[i] <= ' ':
+		case lineCommentAt(s, i, syn):
+			i = skipLine(s, i)
+		case s[i] == '/' && i+1 < len(s) && s[i+1] == '*':
+			i = skipBlockComment(s, i)
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func wordEnd(s string, i int, b *blocks) int {

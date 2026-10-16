@@ -3,6 +3,7 @@ package dialect
 import (
 	"context"
 	"database/sql"
+	"io"
 
 	"github.com/falsea3/plugboard/apps/desktop/internal/db/sql/sqltext"
 	"github.com/falsea3/plugboard/apps/desktop/internal/model"
@@ -65,6 +66,18 @@ type Dialect interface {
 
 type SortKey interface {
 	SortKey(ctx context.Context, db *sql.DB, schema, table string) ([]string, error)
+}
+
+type Dump interface {
+	Dump(ctx context.Context, conn *sql.Conn, opts model.DumpOptions, w io.Writer, progress func(model.DumpProgress)) error
+}
+
+type Archive interface {
+	ReadArchive(r io.Reader) (io.Reader, bool, error)
+}
+
+type CopyIn interface {
+	CopyIn(ctx context.Context, conn *sql.Conn, stmt string, data io.Reader) (int64, error)
 }
 
 type SizeQuery interface {

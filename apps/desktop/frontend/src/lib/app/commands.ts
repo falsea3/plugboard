@@ -36,6 +36,10 @@ export function runCommand(command: string) {
       if (app.showHome) app.leaveHome();
       else app.goHome();
       break;
+    case 'export-dump':
+    case 'import-dump':
+      if (ws?.session.engine.dumps) app.dump = { ws, mode: command === 'export-dump' ? 'export' : 'import' };
+      break;
     case 'journal':
       journal.toggle();
       break;

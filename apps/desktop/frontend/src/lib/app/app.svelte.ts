@@ -37,6 +37,7 @@ class AppState {
   passwordFor = $state<Connection | null>(null);
   switcherOpen = $state(false);
   settingsOpen = $state<SettingsSection | null>(null);
+  dump = $state<{ ws: Workspace; mode: 'export' | 'import' } | null>(null);
 
   hostKeyChange = $state<(HostKeyChange & { connection: Connection; secrets?: Partial<ConnectSecrets> }) | null>(null);
 

@@ -26,6 +26,8 @@ const BY_ID: Record<string, IconName> = {
   'sort-default': 'sortDefault',
   fit: 'fitWidth',
   'tree-open': 'table',
+  'dump-export': 'download',
+  'dump-import': 'upload',
   'tree-structure': 'columns',
   'tree-query': 'code',
   'tree-diagram': 'diagram',

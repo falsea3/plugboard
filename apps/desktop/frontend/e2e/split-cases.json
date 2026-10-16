@@ -117,5 +117,14 @@
       "update t set batch = 1",
       "commit"
     ]
+  },
+  {
+    "name": "psql meta-lines after comments are left out",
+    "engine": "postgres",
+    "in": "--\n-- dump\n--\n\n\\restrict abc\n\n-- from 17\nSET x = 1;\n\\connect - other\nselect 1;\n\\unrestrict abc\n",
+    "want": [
+      "-- from 17\nSET x = 1",
+      "select 1"
+    ]
   }
 ]

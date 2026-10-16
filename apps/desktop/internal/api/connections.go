@@ -160,12 +160,14 @@ func (a *App) Disconnect(sessionID string) error {
 
 func (a *App) ChooseSQLiteFile() (string, error) {
 	return runtime.OpenFileDialog(a.context(), runtime.OpenDialogOptions{
-		Title: "Open SQLite database",
-		Filters: []runtime.FileFilter{
-			{DisplayName: "SQLite databases", Pattern: "*.db;*.sqlite;*.sqlite3;*.db3"},
-			{DisplayName: "All files", Pattern: "*"},
-		},
+		Title:   "Open SQLite database",
+		Filters: sqliteFilters,
 	})
+}
+
+var sqliteFilters = []runtime.FileFilter{
+	{DisplayName: "SQLite databases", Pattern: "*.db;*.sqlite;*.sqlite3;*.db3"},
+	{DisplayName: "All files", Pattern: "*"},
 }
 
 func (a *App) ChooseSSHKeyFile() (string, error) {

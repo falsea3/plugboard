@@ -1,6 +1,8 @@
 <script lang="ts" module>
   import plus from '@phosphor-icons/core/regular/plus.svg?raw';
   import download from '@phosphor-icons/core/regular/download-simple.svg?raw';
+  import upload from '@phosphor-icons/core/regular/upload-simple.svg?raw';
+  import transfer from '@phosphor-icons/core/regular/arrows-down-up.svg?raw';
   import arrowCircleUp from '@phosphor-icons/core/regular/arrow-circle-up.svg?raw';
   import x from '@phosphor-icons/core/regular/x.svg?raw';
   import search from '@phosphor-icons/core/regular/magnifying-glass.svg?raw';
@@ -73,7 +75,7 @@
     'chevron-left': chevronLeft, 'chevron-right': chevronRight, 'chevron-down': chevronDown, 'chevrons-left': chevronsLeft, 'chevrons-right': chevronsRight,
     database, unplug, trash, pencil, code, key, columns, rows, folder, check, alert, copy,
     arrowUp, arrowDown, settings, sun, moon, monitor, shield, info, terminal, timer, link, lock, lockOpen, tunnel, funnel,
-    download, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, json, restore, sortDefault, fitWidth,
+    download, upload, transfer, update: arrowCircleUp, 'check-mark': checkMark, diagram, zoomIn, zoomOut, fit, follow, json, restore, sortDefault, fitWidth,
     function: fn, procedure, sequence, dictionary, enum: enumType, domain, trigger, extension, event, ddl, config, roles, updown, grip, group, sidebar,
   } as const;
 

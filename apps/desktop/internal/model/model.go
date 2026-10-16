@@ -138,6 +138,7 @@ type EngineFeatures struct {
 	CanRenameTables    bool      `json:"canRenameTables"`
 	ServerConfig       bool      `json:"serverConfig"`
 	Roles              bool      `json:"roles"`
+	Dumps              bool      `json:"dumps"`
 }
 
 type SQLSyntax struct {

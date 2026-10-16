@@ -115,7 +115,13 @@ func Features(d dialect.Dialect) model.EngineFeatures {
 		CanRenameTables:    true,
 		ServerConfig:       isServerConfig(d),
 		Roles:              isRoles(d),
+		Dumps:              isDump(d),
 	}
+}
+
+func isDump(d dialect.Dialect) bool {
+	_, ok := d.(dialect.Dump)
+	return ok
 }
 
 func isServerConfig(d dialect.Dialect) bool {

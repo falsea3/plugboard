@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"io"
 
 	"github.com/falsea3/plugboard/apps/desktop/internal/apperr"
 	"github.com/falsea3/plugboard/apps/desktop/internal/model"
@@ -22,6 +23,11 @@ type Session interface {
 	Run(ctx context.Context, script string) ([]model.ResultSet, error)
 	RunMore(ctx context.Context, stmt string, offset int) (model.ResultSet, error)
 	WriteStatements(script string) []string
+}
+
+type Dumper interface {
+	Dump(ctx context.Context, opts model.DumpOptions, w io.Writer, progress func(model.DumpProgress)) error
+	Import(ctx context.Context, r io.Reader, total int64, opts model.ImportOptions, progress func(model.ImportProgress)) (model.ImportResult, error)
 }
 
 type SizeReader interface {

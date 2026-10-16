@@ -5,6 +5,7 @@ import { treeMenu } from '../app/tree';
 import { objectMenu } from '../objects/kinds';
 import { keyMenu } from '../keys/folders';
 import { scriptMenu } from '../scripts/names';
+import { dumpMenu } from '../dump/plan';
 
 describe('menu icons', () => {
   it('gives every action of one kind the same icon', () => {
@@ -31,6 +32,7 @@ describe('sidebar menus', () => {
       objectMenu(),
       keyMenu(false),
       scriptMenu(),
+      dumpMenu(),
     ];
     for (const item of menus.flat()) {
       if (item !== 'sep') expect(menuIcon(item.id), item.id).toBeDefined();

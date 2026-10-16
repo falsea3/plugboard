@@ -30,8 +30,13 @@ export function statementRanges(script: string, syntax: SqlSyntax): StatementRan
 
   for (let i = 0; i < n; i++) {
     const c = script[i];
-    const d = blocks.words === 0 && (c === 'D' || c === 'd') && script.slice(start, i).trim() === '' ? delimiterAt(script, i) : null;
-    if (d) {
+    const lead = blocks.words === 0 && (c === 'D' || c === 'd' || c === '\\') && blank(script.slice(start, i), syntax);
+    const d = lead && c !== '\\' ? delimiterAt(script, i) : null;
+    if (lead && c === '\\') {
+      const nl = script.indexOf('\n', i);
+      i = nl < 0 ? n - 1 : nl;
+      start = i + 1;
+    } else if (d) {
       delim = d.delim;
       start = d.next;
       i = d.next;
@@ -71,6 +76,18 @@ export function statementAt(script: string, pos: number, syntax: SqlSyntax): Sta
     if (pos <= r.to + 1) return pos >= r.from ? r : (best ?? r);
   }
   return best;
+}
+
+function blank(s: string, syntax: SqlSyntax): boolean {
+  for (let i = 0; i < s.length; i++) {
+    if (s.charCodeAt(i) <= 32) continue;
+    if (lineCommentAt(s, i, syntax)) i = skipLine(s, i);
+    else if (s[i] === '/' && s[i + 1] === '*') {
+      const end = s.indexOf('*/', i + 2);
+      i = end < 0 ? s.length : end + 1;
+    } else return false;
+  }
+  return true;
 }
 
 export function lineCommentAt(s: string, i: number, syntax: SqlSyntax): boolean {

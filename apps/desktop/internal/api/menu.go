@@ -54,6 +54,10 @@ func BuildMenu(a *App) *menu.Menu {
 	file.AddText("New Query", keys.CmdOrCtrl("t"), emit("new-query"))
 	file.AddText("Add Row", keys.CmdOrCtrl("i"), emit("add-row"))
 	file.AddText("Commit Changes", keys.CmdOrCtrl("s"), emit("commit"))
+	file.AddSeparator()
+	file.AddText("Export Dump…", nil, emit("export-dump"))
+	file.AddText("Import Dump…", nil, emit("import-dump"))
+	file.AddSeparator()
 	file.AddText("Close Tab", keys.CmdOrCtrl("w"), emit("close-tab"))
 	file.AddText("Close Connection", keys.Combo("w", keys.CmdOrCtrlKey, keys.ShiftKey), emit("close-connection"))
 

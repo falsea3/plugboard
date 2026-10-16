@@ -13,6 +13,8 @@
   import Toasts from './lib/app/Toasts.svelte';
   import UpdateBanner from './lib/app/UpdateBanner.svelte';
   import JournalPanel from './lib/app/JournalPanel.svelte';
+  import ExportModal from './lib/dump/ExportModal.svelte';
+  import ImportModal from './lib/dump/ImportModal.svelte';
 
   let secrets = $state({ password: '', sshPassword: '', sshPassphrase: '' });
 
@@ -151,6 +153,12 @@
 
 {#if app.switcherOpen}
   <ConnectionSwitcher />
+{/if}
+
+{#if app.dump?.mode === 'export'}
+  <ExportModal ws={app.dump.ws} onclose={() => (app.dump = null)} />
+{:else if app.dump?.mode === 'import'}
+  <ImportModal ws={app.dump.ws} onclose={() => (app.dump = null)} />
 {/if}
 
 {#if app.settingsOpen}

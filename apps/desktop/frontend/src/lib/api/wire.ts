@@ -97,6 +97,7 @@ export interface EngineFeatures {
   canRenameTables: boolean;
   serverConfig: boolean;
   roles: boolean;
+  dumps: boolean;
 }
 
 export interface SqlSyntax {
@@ -121,3 +122,4 @@ export * from './wireKeys';
 export * from './wireQuery';
 export * from './wireApp';
 export * from './wireAdmin';
+export * from './wireDump';

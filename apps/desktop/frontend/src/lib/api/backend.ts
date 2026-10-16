@@ -1,4 +1,4 @@
-import type { Arrangement, ChangeSet, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, CellQuery, QueryTabState, RoleSpec, Settings, StructureChange, TableQuery, TunnelState } from './wire';
+import type { Arrangement, ChangeSet, DumpOptions, DumpProgress, ImportOptions, ImportProgress, ConnectSecrets, Connection, DBObject, GoApp, KeyEdit, NewIndex, CellQuery, QueryTabState, RoleSpec, Settings, StructureChange, TableQuery, TunnelState } from './wire';
 
 export * from './wire';
 
@@ -107,6 +107,9 @@ export const api = {
   saveRole: (sessionId: string, from: string, to: RoleSpec) => call(a => a.SaveRole(sessionId, from, to)),
   dropRole: (sessionId: string, id: string) => call(a => a.DropRole(sessionId, id)),
   saveExport: (name: string, data: string) => call(a => a.SaveExport(name, data)),
+  exportDump: (sessionId: string, jobId: string, name: string, opts: DumpOptions) => call(a => a.ExportDump(sessionId, jobId, name, opts)),
+  pickDumpFile: () => call(a => a.PickDumpFile()),
+  importDump: (sessionId: string, jobId: string, path: string, opts: ImportOptions) => call(a => a.ImportDump(sessionId, jobId, path, opts)),
   readCell: (sessionId: string, q: CellQuery) => call(a => a.ReadCell(sessionId, q)),
   editKey: (sessionId: string, db: string, edit: Partial<KeyEdit> & { key: string; op: string }) =>
     call(a => a.EditKey(sessionId, db, { field: '', value: '', score: '', old: '', index: 0, ...edit })),
@@ -136,4 +139,12 @@ export function onMenuCommand(cb: (command: string) => void): () => void {
 
 export function onTunnelState(cb: (s: TunnelState) => void): () => void {
   return window.runtime?.EventsOn?.('session:tunnel', data => cb(data as TunnelState)) ?? (() => {});
+}
+
+export function onDumpProgress(job: string, cb: (p: DumpProgress) => void): () => void {
+  return window.runtime?.EventsOn?.('dump:progress', (id, p) => id === job && cb(p as DumpProgress)) ?? (() => {});
+}
+
+export function onImportProgress(job: string, cb: (p: ImportProgress) => void): () => void {
+  return window.runtime?.EventsOn?.('import:progress', (id, p) => id === job && cb(p as ImportProgress)) ?? (() => {});
 }
