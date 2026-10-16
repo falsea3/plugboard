@@ -71,6 +71,7 @@ func BuildMenu(a *App) *menu.Menu {
 	}
 	view.AddSeparator()
 	view.AddText("Toggle Sidebar", keys.CmdOrCtrl("\\"), emit("toggle-sidebar"))
+	view.AddText("Journal", keys.Combo("j", keys.CmdOrCtrlKey, keys.ShiftKey), emit("journal"))
 	view.AddText("Refresh", keys.CmdOrCtrl("r"), emit("refresh"))
 	view.AddText("Filter Rows", keys.CmdOrCtrl("f"), emit("filter"))
 	view.AddText("Filter Tables", keys.Combo("f", keys.CmdOrCtrlKey, keys.ShiftKey), emit("filter-tables"))

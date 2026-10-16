@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { journal } from './journal.svelte';
   import { keys } from '../ui/keys';
   import { app } from './app.svelte';
   import type { Tab, Workspace } from './workspace.svelte';
@@ -65,6 +66,7 @@
     <button class="tab-new" onclick={() => ws.newQuery()} title={keys('New query (⌘T)')} aria-label="New query"><Icon name="plus" size={14} /></button>
   </nav>
   <span class="space"></span>
+  <button class="btn ghost icon no-drag journal-btn" onclick={() => journal.toggle()} title={keys('Journal (⇧⌘J)')} aria-label="Journal"><Icon name="rows" size={15} />{#if journal.unseen}<span class="unseen"></span>{/if}</button>
   <button class="btn ghost icon no-drag" onclick={() => (app.settingsOpen = 'general')} title={keys('Settings (⌘,)')} aria-label="Settings"><Icon name="settings" size={16} /></button>
 </div>
 {#if order.indicator}
@@ -102,4 +104,6 @@
   .tab-new { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: var(--radius); background: transparent; color: var(--text-3); }
   .tab-new:hover { background: var(--elevated); color: var(--text); }
   .tab-close:hover { opacity: 1; background: var(--active); }
+  .journal-btn { position: relative; }
+  .unseen { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--danger); }
 </style>

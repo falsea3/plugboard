@@ -5,6 +5,8 @@ import { mount } from 'svelte';
 import App from './App.svelte';
 import Kit from './lib/ui/Kit.svelte';
 
-const app = mount(import.meta.env.DEV && location.hash === '#kit' ? Kit : App, { target: document.getElementById('app')! });
+const kit = import.meta.env.DEV && location.hash === '#kit';
+if (kit) document.getElementById('boot')?.remove();
+const app = mount(kit ? Kit : App, { target: document.getElementById('app')! });
 
 export default app;

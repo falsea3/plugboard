@@ -3,6 +3,7 @@
   import { formatCount, formatDuration } from '../ui/format';
   import { MAX_ROWS, type TableRows } from './rows.svelte';
   import Icon from '../ui/Icon.svelte';
+  import { journal } from '../app/journal.svelte';
   import Spinner from '../ui/Spinner.svelte';
 
   type Pending = { count: number; error: string; saving: boolean };
@@ -48,18 +49,18 @@
     <span class="chip" title="Sort or filter to reach other rows">first {fmt(MAX_ROWS)} rows only</span>
   {/if}
   {#if page && !count?.exact && page.hasMore}
-    <button class="chip link" onclick={() => rows.countExactly()} disabled={rows.counting} title="Run COUNT(*) — can take a while on big tables">{#if rows.counting}<Spinner size={10} />Counting…{:else}Count{/if}</button>
+    <button class="btn sm outline act" onclick={() => rows.countExactly()} disabled={rows.counting} title="Run COUNT(*) for the exact number — can take a while on big tables">{#if rows.counting}<Spinner size={10} />Counting…{:else}<Icon name="sequence" size={13} />Count rows{/if}</button>
   {/if}
   {#if filtered}<span class="chip accent">filtered</span>{/if}
   {#if page}<span class="chip" title="How long the last fetch took">{formatDuration(page.result.durationMs)}</span>{/if}
   {#if pending}
     {#if pending.error}
-      <span class="chip danger" title={pending.error}><Icon name="alert" size={11} />{pending.error}</span>
+      <button class="chip danger" title="Show the whole error in the journal (⇧⌘J)" onclick={() => journal.show()}><Icon name="alert" size={11} />{pending.error}</button>
     {:else}
       <span class="chip warn">{#if pending.saving}<Spinner size={10} />Saving…{:else}{formatCount(pending.count, 'change')} · {keys('⌘S')} to save{/if}</span>
     {/if}
-    <button class="chip link" onclick={onpreview} disabled={pending.saving}>Preview SQL</button>
-    <button class="chip link" onclick={ondiscard} disabled={pending.saving}>Discard</button>
+    <button class="btn sm outline act" onclick={onpreview} disabled={pending.saving}><Icon name="code" size={13} />Preview SQL</button>
+    <button class="btn sm outline act" onclick={ondiscard} disabled={pending.saving}><Icon name="restore" size={13} />Discard</button>
   {/if}
   <span class="space"></span>
   <button class="cell" class:on={valueShown} aria-pressed={valueShown} onclick={ontogglevalue} title={valueShown ? 'Hide the Value panel' : 'Show the Value panel'}>{cell || 'Value'}</button>
@@ -68,12 +69,10 @@
 <style>
   .status { flex: none; display: flex; align-items: center; gap: 8px; height: 30px; min-width: 0; margin-top: 8px; font-size: 12px; color: var(--text-3); }
   .chip { flex: none; display: inline-flex; align-items: center; gap: 5px; max-width: 360px; overflow: hidden; padding: 2px 8px; border: 0; border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
-  .link { color: var(--accent-text); }
-  .link:hover:not(:disabled) { background: var(--hover); }
-  .link:disabled { color: var(--text-4); }
+  .act { flex: none; height: 26px; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 12px; }
   .accent { background: var(--accent-bg); color: var(--accent-text); }
   .warn { background: var(--cell-edited); color: var(--warn); }
-  .danger { flex-shrink: 1; min-width: 0; background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); user-select: text; -webkit-user-select: text; }
+  .danger { flex-shrink: 1; min-width: 0; cursor: pointer; background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); user-select: text; -webkit-user-select: text; }
   .space { flex: 1; }
   .cell { flex: 0 1 auto; min-width: 0; overflow: hidden; padding: 2px 6px; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
   .cell:hover, .cell.on { background: var(--surface); color: var(--text); }

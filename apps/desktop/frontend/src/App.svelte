@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { app } from './lib/app/app.svelte';
+  import { app, needsSecrets } from './lib/app/app.svelte';
+  import { lastOpen, rememberOpen } from './lib/app/reopen';
   import { hasBridge, onMenuCommand } from './lib/api/backend';
   import { handleShortcut, runCommand } from './lib/app/commands';
   import ConnectionsHome from './lib/connections/ConnectionsHome.svelte';
@@ -11,11 +12,41 @@
   import Modal from './lib/ui/Modal.svelte';
   import Toasts from './lib/app/Toasts.svelte';
   import UpdateBanner from './lib/app/UpdateBanner.svelte';
+  import JournalPanel from './lib/app/JournalPanel.svelte';
 
   let secrets = $state({ password: '', sshPassword: '', sshPassphrase: '' });
 
-  if (hasBridge()) app.init();
-  else app.connectionsLoaded = true;
+  let reopened = $state(false);
+
+  function booted() {
+    const boot = document.getElementById('boot');
+    if (!boot) return;
+    boot.classList.add('done');
+    setTimeout(() => boot.remove(), 250);
+  }
+
+  async function reopenLast() {
+    const { ids, active } = lastOpen();
+    for (const id of ids) {
+      const c = app.connections.find(x => x.id === id);
+      if (c && !needsSecrets(c)) await app.open(c);
+    }
+    const ws = app.workspaces.find(w => w.connection.id === active);
+    if (ws) app.activate(ws);
+  }
+
+  if (hasBridge()) app.init().then(() => (booted(), reopenLast())).finally(() => (reopened = true));
+  else {
+    app.connectionsLoaded = true;
+    reopened = true;
+    booted();
+  }
+
+  $effect(() => {
+    const ids = app.workspaces.map(w => w.connection.id);
+    const active = app.active?.connection.id ?? '';
+    if (reopened) rememberOpen(ids, active);
+  });
 
   onMount(() => onMenuCommand(runCommand));
 </script>
@@ -131,6 +162,7 @@
 {/if}
 
 <UpdateBanner />
+<JournalPanel />
 <Toasts />
 
 <style>

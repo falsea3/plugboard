@@ -34,7 +34,16 @@ input, textarea, [contenteditable] {
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
 input:focus-visible, textarea:focus-visible, .cm-editor :focus-visible { outline: none; }
-input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
+input[type='radio'] { accent-color: var(--accent); }
+input[type='number'] { -moz-appearance: textfield; }
+input[type='number']::-webkit-inner-spin-button, input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type='checkbox']:not(.switch input) { -webkit-appearance: none; appearance: none; flex: none; display: inline-grid; place-content: center; width: 16px; height: 16px; margin: 0; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); cursor: default; transition: background 0.12s, border-color 0.12s; }
+input[type='checkbox']:not(.switch input):hover { border-color: var(--focus-border); }
+input[type='checkbox']:not(.switch input):checked { border-color: var(--accent); background: var(--accent); }
+input[type='checkbox']:not(.switch input)::after { content: ''; width: 9px; height: 5px; margin-top: -2px; border: solid var(--on-accent); border-width: 0 0 1.75px 1.75px; transform: rotate(-45deg) scale(0); transition: transform 0.1s; }
+input[type='checkbox']:not(.switch input):checked::after { transform: rotate(-45deg) scale(1); }
+input[type='checkbox']:not(.switch input):indeterminate { border-color: var(--accent); background: var(--accent); }
+input[type='checkbox']:not(.switch input):disabled { opacity: 0.5; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }

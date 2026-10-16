@@ -3,7 +3,7 @@
 # Plugboard
 
 **A fast, local-first database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis.**<br>
-No accounts, no cloud sync, no telemetry — just you and your data.
+Your connections and passwords stay on your machine, and nothing is sent anywhere.
 
 [![CI](https://github.com/falsea3/plugboard/actions/workflows/ci.yml/badge.svg)](https://github.com/falsea3/plugboard/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/falsea3/plugboard?sort=semver)](https://github.com/falsea3/plugboard/releases/latest)

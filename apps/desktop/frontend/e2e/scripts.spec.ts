@@ -47,7 +47,7 @@ test('closes unchanged queries at once and drops unsaved text on request', async
   await expect(script(page, 'Query 1')).toHaveCount(0);
 });
 
-test('saves an open script with ⌘S and keeps query tabs across restarts', async ({ page }) => {
+test('saves an open script with ⌘S and reopens the connection with its tabs after a restart', async ({ page }) => {
   await connect(page);
   await script(page, 'monthly revenue').click();
   await page.locator('.cm-content').click();
@@ -63,7 +63,7 @@ test('saves an open script with ⌘S and keeps query tabs across restarts', asyn
   await expect(tabs(page).getByTitle('Unsaved changes')).toBeVisible();
 
   await page.reload();
-  await connect(page);
+  await expect(page.getByRole('button', { name: 'Switch connection — Shop' })).toBeVisible();
   await expect(tabs(page).getByRole('tab')).toHaveText(['monthly revenue', 'Query 1']);
   await expect(page.locator('.pane:not(.hidden) .cm-content')).toHaveText('select now()');
   await expect(tabs(page).getByTitle('Unsaved changes')).toHaveCount(1);
@@ -86,4 +86,15 @@ test('renames and deletes scripts from the sidebar', async ({ page }) => {
   await page.getByRole('dialog', { name: 'Delete “revenue”?' }).getByRole('button', { name: 'Delete' }).click();
   await expect(script(page, 'revenue')).toHaveCount(0);
   await expect(tabs(page).getByTitle('Unsaved changes')).toBeVisible();
+});
+
+test('brings back table tabs after a disconnect', async ({ page }) => {
+  await connect(page);
+  const side = page.getByRole('complementary');
+  await side.getByText('customers', { exact: true }).click();
+  await side.getByText('orders', { exact: true }).click();
+  await page.getByRole('button', { name: 'Disconnect' }).click();
+  await connect(page);
+  await expect(tabs(page).getByRole('tab')).toHaveText(['customers', 'orders']);
+  await expect(tabs(page).getByRole('tab', { name: 'orders' })).toHaveAttribute('aria-selected', 'true');
 });

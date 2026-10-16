@@ -1,5 +1,6 @@
 <script lang="ts">
   import { keys } from '../ui/keys';
+  import { untrack } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import type { Workspace } from './workspace.svelte';
   import Sidebar from './Sidebar.svelte';
@@ -23,6 +24,11 @@
   let sidebarWidth = $state(264);
   let peek = $state(false);
   const opened = new SvelteSet<string>();
+  $effect(() => {
+    for (const t of ws.tabs) void t.id;
+    void ws.activeTabId;
+    untrack(() => ws.scripts.persist());
+  });
   $effect(() => {
     if (ws.activeTabId) opened.add(ws.activeTabId);
   });

@@ -6,6 +6,7 @@ import { setThemeMode } from './theme';
 import { engine } from '../engines';
 import { scheduleUpdateChecks } from './updateSchedule';
 import { Workspace } from './workspace.svelte';
+import { journal } from './journal.svelte';
 import { ConnectionGroups } from '../connections/library.svelte';
 
 let seq = 0;
@@ -267,6 +268,7 @@ class AppState {
   notify(err: unknown, kind: Toast['kind'] = 'error', extra: { detail?: string; action?: Toast['action']; sticky?: boolean } = {}) {
     const text = err instanceof Error ? err.message : String(err);
     const detail = extra.detail ?? (err instanceof AppError ? err.detail : '');
+    journal.add(kind, text, detail);
     const toast: Toast = { id: ++seq, kind, text, detail, action: extra.action };
     this.toasts.push(toast);
     if (!extra.sticky) setTimeout(() => this.dismiss(toast.id), kind === 'error' ? 7000 : 3000);

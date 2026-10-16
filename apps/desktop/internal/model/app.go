@@ -42,9 +42,13 @@ func DefaultSettings() Settings {
 }
 
 type QueryTab struct {
-	Title  string `json:"title"`
-	SQL    string `json:"sql"`
-	Script string `json:"script,omitempty"`
-	Saved  string `json:"saved"`
-	Active bool   `json:"active,omitempty"`
+	Title     string `json:"title"`
+	SQL       string `json:"sql"`
+	Script    string `json:"script,omitempty"`
+	Saved     string `json:"saved"`
+	Active    bool   `json:"active,omitempty"`
+	Kind      string `json:"kind,omitempty"`
+	Schema    string `json:"schema,omitempty"`
+	Table     string `json:"table,omitempty"`
+	TableKind string `json:"tableKind,omitempty"`
 }

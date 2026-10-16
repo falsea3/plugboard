@@ -55,8 +55,7 @@
   </div>
   <p class="blurb">
     A native database client for PostgreSQL, MySQL, SQLite, ClickHouse, Cassandra and Redis. Connections and credentials stay on this
-    computer — passwords are kept in the system keychain, and Plugboard has no accounts, no cloud sync
-    and no telemetry.
+    computer — passwords are kept in the system keychain, and Plugboard sends no telemetry.
   </p>
   <dl class="details">
     <dt>Version</dt><dd class="mono">{info?.version ?? '—'}</dd>
@@ -73,7 +72,6 @@
       <button class="btn sm" onclick={() => api.openLogs().catch(err => app.notify(err))}>Open</button>
     </dd>
   </dl>
-  <p class="copyright">{info?.copyright ?? ''} · Part of the Relay family of developer tools.</p>
 </div>
 
 <style>
@@ -104,5 +102,4 @@
   .details .mono { font-size: 11.5px; }
   .data-dir { display: flex; align-items: center; gap: 8px; }
   .data-dir .mono { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .copyright { margin: 16px 0 0; font-size: 11.5px; color: var(--text-3); }
 </style>

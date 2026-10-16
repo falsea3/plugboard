@@ -28,9 +28,18 @@ export class Scripts {
     try {
       const [tabs, names] = await Promise.all([api.queryTabs(this.conn), api.listScripts(this.conn)]);
       this.names = names;
-      const restored = tabs.map(t => this.ws.addQuery({ title: t.title, sql: t.sql, saved: t.saved, script: t.script || undefined }, false));
-      const active = restored[tabs.findIndex(t => t.active)];
-      if (active && !this.ws.activeTabId) this.ws.activeTabId = active.id;
+      const before = this.ws.activeTabId;
+      let active = '';
+      for (const t of tabs) {
+        if (t.kind === 'table' && t.schema && t.table) {
+          this.ws.openTable({ schema: t.schema, name: t.table, kind: t.tableKind ?? 'table' });
+          if (t.active) active = this.ws.activeTabId;
+        } else {
+          const q = this.ws.addQuery({ title: t.title, sql: t.sql, saved: t.saved, script: t.script || undefined }, false);
+          if (t.active) active = q.id;
+        }
+      }
+      this.ws.activeTabId = before || active || this.ws.tabs[0]?.id || '';
     } catch (err) {
       this.notify(err);
     } finally {
@@ -55,7 +64,12 @@ export class Scripts {
       return;
     }
     this.saving = true;
-    const tabs = this.ws.tabs.filter((t): t is QueryTab => t.kind === 'query').map(t => toState(t, t.id === this.ws.activeTabId));
+    const tabs = this.ws.tabs.flatMap(t => {
+      const active = t.id === this.ws.activeTabId;
+      if (t.kind === 'query') return [toState(t, active)];
+      if (t.kind === 'table') return [{ kind: 'table' as const, title: t.table, sql: '', saved: '', schema: t.schema, table: t.table, tableKind: t.tableKind, active }];
+      return [];
+    });
     api
       .saveQueryTabs(this.conn, tabs)
       .catch(err => this.notify(err))

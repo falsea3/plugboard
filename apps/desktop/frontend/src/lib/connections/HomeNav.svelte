@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { journal } from '../app/journal.svelte';
   import { keys } from '../ui/keys';
   import { app } from '../app/app.svelte';
   import { layout } from '../app/layout.svelte';
@@ -55,6 +56,7 @@
 
   <div class="bottom">
     <button class="btn new-group" onclick={onnewgroup}>New group</button>
+  <button class="btn icon journal-btn" onclick={() => journal.toggle()} title={keys('Journal (⇧⌘J)')} aria-label="Journal"><Icon name="rows" size={15} />{#if journal.unseen}<span class="unseen"></span>{/if}</button>
     <button class="btn icon" onclick={() => (app.settingsOpen = 'general')} title={keys('Settings (⌘,)')} aria-label="Settings"><Icon name="settings" size={15} /></button>
   </div>
 </aside>
@@ -83,4 +85,6 @@
   .heading { padding: 18px 8px 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
   .bottom { display: flex; gap: 6px; padding: 10px 12px 12px; }
   .new-group { flex: 1; }
+  .journal-btn { position: relative; }
+  .unseen { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--danger); }
 </style>

@@ -49,6 +49,10 @@ export interface QueryTabState {
   script?: string;
   saved: string;
   active?: boolean;
+  kind?: 'table';
+  schema?: string;
+  table?: string;
+  tableKind?: 'table' | 'view';
 }
 
 export interface GoApp {

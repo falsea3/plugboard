@@ -73,13 +73,13 @@
   }
   .window {
     display: grid;
-    grid-template-columns: 188px 1fr;
-    width: 720px;
-    height: 520px;
+    grid-template-columns: 176px 1fr;
+    width: 660px;
+    min-height: 340px;
     max-width: calc(100vw - 32px);
     max-height: calc(100vh - 48px);
-    border-radius: 12px;
-    background: var(--bg);
+    border-radius: calc(var(--radius-xl) + 2px);
+    background: var(--elevated);
     box-shadow: var(--shadow-modal);
     overflow: hidden;
     animation: pop 0.14s ease-out;
@@ -89,8 +89,8 @@
     flex-direction: column;
     gap: 2px;
     padding: 14px 10px;
-    background: var(--surface);
-    border-right: 1px solid var(--border-subtle);
+    background: transparent;
+    border-right: 1px solid var(--hover);
   }
   .nav-title { padding: 2px 10px 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); }
   nav button {
@@ -100,17 +100,17 @@
     height: 30px;
     padding: 0 10px;
     border: 0;
-    border-radius: 6px;
+    border-radius: 8px;
     background: transparent;
     color: var(--text-2);
     font-size: 13px;
     text-align: left;
   }
   nav button:hover { background: var(--hover); color: var(--text); }
-  nav button.on { background: var(--accent-dim); color: var(--text); }
-  nav button.on :global(.icon) { color: var(--accent); }
+  nav button.on { background: var(--tree-selected); color: var(--accent-text); font-weight: 500; }
+  nav button.on :global(.icon) { color: var(--accent-text); }
 
-  .content { position: relative; padding: 22px 28px; overflow-y: auto; }
+  .content { position: relative; padding: 20px 24px; overflow-y: auto; }
   .close {
     position: absolute;
     top: 14px;
@@ -120,13 +120,13 @@
     width: 26px;
     height: 26px;
     border: 0;
-    border-radius: 6px;
+    border-radius: 8px;
     background: transparent;
     color: var(--text-3);
   }
   .close:hover { background: var(--hover); color: var(--text); }
-  .content :global(h2) { margin: 0 0 18px; font-size: 17px; font-weight: 650; }
-  .content :global(.field) { padding: 14px 0; border-top: 1px solid var(--border-subtle); }
+  .content :global(h2) { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+  .content :global(.field) { padding: 12px 0; border-top: 1px solid var(--hover); }
   .content :global(.field.row) { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
   .content :global(.label) { display: flex; align-items: center; gap: 6px; font-weight: 550; margin-bottom: 2px; }
   .content :global(.hint) { margin: 2px 0 0; font-size: 12px; color: var(--text-3); max-width: 380px; }
