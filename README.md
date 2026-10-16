@@ -209,6 +209,12 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 - Server configuration files for PostgreSQL, Redis, ClickHouse and Cassandra, with the server's check before a reload.
 - Users and roles for PostgreSQL, MySQL and MariaDB, ClickHouse, Cassandra and Redis ACLs — always shown as SQL before they run.
 
+**Dumps (PostgreSQL)**
+
+- Export a whole database or chosen schemas as a `.sql` or `.sql.gz` file: structure, data or both, rows as `COPY` or `INSERT`, optionally dropping what's there first and carrying owners and privileges. Checked against `pg_dump`, which reads the same database back from it.
+- Import plain SQL files — Plugboard's own, `pg_dump`'s, `.gz` — and `pg_dump`'s custom-format archives (`-Fc`, any compression), in one transaction or statement by statement, with progress and Stop. Every failed statement is listed with its error.
+- A data-only dump loads into existing tables: foreign keys and triggers are switched off while the rows go in and back on after.
+
 **AI agents (MCP)**
 
 - Add it with one command — Settings ▸ AI agents shows the exact one for Claude Code, Codex and Cursor on your system. On macOS: `claude mcp add plugboard -- /Applications/Plugboard.app/Contents/MacOS/plugboard mcp`; on Windows and Linux it points at the installed `plugboard.exe` or the AppImage.

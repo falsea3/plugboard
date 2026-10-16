@@ -8,6 +8,28 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-16
+
+Dumps for PostgreSQL, a journal for every error, and the tabs and connections you had open come back.
+
+### Added
+
+- **Export and import dumps (PostgreSQL).** The transfer button under the sidebar or *File ▸ Export Dump… / Import Dump…*. Export a database or chosen schemas — structure, data or both, rows as `COPY` or `INSERT`, *Replace what's there*, *Owners and privileges*, `.sql` or `.sql.gz`. Import Plugboard's dumps, plain `pg_dump` files and `pg_dump -Fc` archives, all or nothing in one transaction or statement by statement, with progress and Stop; failed statements are listed and go to the journal.
+- **A journal** (`⇧⌘J`) with every error and notice in full, ready to copy. A cut-off error in a toast opens it.
+- **Tabs come back.** Table tabs are saved with query tabs and return after a disconnect, and the connections open when you quit reopen on the next launch (those that ask for a password don't).
+- A loader while the app starts.
+
+### Changed
+
+- *Preview SQL*, *Discard* and *Count* look like buttons; checkboxes are drawn by the app and number fields lost their spinners.
+- Settings fits its content.
+- A table in the sidebar expands only from its arrow; a double-click no longer does.
+- About and the README say what keeps your data safe — passwords in the system keychain, nothing synced to a cloud.
+
+### Fixed
+
+- Column names in the grid header stay whole; only the type label gives way.
+
 ## [1.0.1] - 2026-10-15
 
 ### Fixed
