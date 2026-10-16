@@ -8,6 +8,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-10-16
+
+### Added
+
+- **Dumps in pg_restore's formats.** Export a PostgreSQL database as SQL, as pg_dump's custom format (`.dump`) or as tar (`.tar`); `pg_restore` restores both, lists them and restores single tables. Import reads `pg_dump -Ft` tar archives as well as `-Fc`.
+
+### Fixed
+
+- *What's new* opens above Settings instead of underneath it.
+- A long table name in a tab ends before the close button instead of running under it.
+- The error next to *Save* is cut to a fixed length with an ellipsis and carries the journal icon, which opens the whole text.
+- The buttons under the sidebar fit a narrow sidebar: the shortcut goes first, then *New query* turns into `+`, and the buttons share the width evenly.
+
 ## [1.0.2] - 2026-10-16
 
 Dumps for PostgreSQL, a journal for every error, and the tabs and connections you had open come back.

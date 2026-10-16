@@ -211,8 +211,8 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 
 **Dumps (PostgreSQL)**
 
-- Export a whole database or chosen schemas as a `.sql` or `.sql.gz` file: structure, data or both, rows as `COPY` or `INSERT`, optionally dropping what's there first and carrying owners and privileges. Checked against `pg_dump`, which reads the same database back from it.
-- Import plain SQL files — Plugboard's own, `pg_dump`'s, `.gz` — and `pg_dump`'s custom-format archives (`-Fc`, any compression), in one transaction or statement by statement, with progress and Stop. Every failed statement is listed with its error.
+- Export a whole database or chosen schemas as SQL (`.sql`, `.sql.gz`) or in pg_dump's custom and tar formats, which `pg_restore` reads: structure, data or both, rows as `COPY` or `INSERT`, optionally dropping what's there first and carrying owners and privileges. Checked against `pg_dump`, which reads the same database back from it.
+- Import plain SQL files — Plugboard's own, `pg_dump`'s, `.gz` — and `pg_dump`'s archives (`-Fc` with any compression, `-Ft`), in one transaction or statement by statement, with progress and Stop. Every failed statement is listed with its error.
 - A data-only dump loads into existing tables: foreign keys and triggers are switched off while the rows go in and back on after.
 
 **AI agents (MCP)**

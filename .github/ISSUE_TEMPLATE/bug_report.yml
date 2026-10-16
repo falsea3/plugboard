@@ -15,7 +15,7 @@ body:
     attributes:
       label: Plugboard version
       description: Settings ▸ About.
-      placeholder: "1.0.2"
+      placeholder: "1.0.3"
     validations:
       required: true
 
