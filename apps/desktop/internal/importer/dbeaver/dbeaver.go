@@ -71,20 +71,32 @@ func (h *dsHandler) UnmarshalJSON(b []byte) error {
 
 func Workspaces() []string {
 	home, _ := os.UserHomeDir()
-	var root string
-	switch runtime.GOOS {
+	config, _ := os.UserConfigDir()
+	var out []string
+	for _, dir := range workspaceDirs(runtime.GOOS, home, config, os.Getenv("XDG_DATA_HOME")) {
+		if len(projects(dir)) > 0 {
+			out = append(out, dir)
+		}
+	}
+	return out
+}
+
+func workspaceDirs(goos, home, config, xdgData string) []string {
+	switch goos {
 	case "darwin":
-		root = filepath.Join(home, "Library", "DBeaverData", "workspace6")
+		return []string{filepath.Join(home, "Library", "DBeaverData", "workspace6")}
 	case "windows":
-		dir, _ := os.UserConfigDir()
-		root = filepath.Join(dir, "DBeaverData", "workspace6")
-	default:
-		root = filepath.Join(home, ".local", "share", "DBeaverData", "workspace6")
+		return []string{filepath.Join(config, "DBeaverData", "workspace6")}
 	}
-	if _, err := os.Stat(root); err != nil {
-		return nil
+	data := xdgData
+	if data == "" {
+		data = filepath.Join(home, ".local", "share")
 	}
-	return []string{root}
+	return []string{
+		filepath.Join(data, "DBeaverData", "workspace6"),
+		filepath.Join(home, ".var", "app", "io.dbeaver.DBeaverCommunity", "data", "DBeaverData", "workspace6"),
+		filepath.Join(home, "snap", "dbeaver-ce", "current", ".local", "share", "DBeaverData", "workspace6"),
+	}
 }
 
 type project struct {

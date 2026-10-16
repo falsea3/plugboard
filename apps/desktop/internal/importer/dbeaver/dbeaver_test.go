@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/falsea3/plugboard/apps/desktop/internal/model"
@@ -90,5 +91,31 @@ func TestBrokenCredentials(t *testing.T) {
 	os.WriteFile(filepath.Join(root, "credentials-config.json"), []byte("not encrypted at all, sorry"), 0o644)
 	if _, err := Read(root); err == nil {
 		t.Fatal("a broken credentials file should be an error")
+	}
+}
+
+func TestWorkspaceDirs(t *testing.T) {
+	j := filepath.Join
+	cases := []struct {
+		goos, home, config, xdg string
+		want                    []string
+	}{
+		{"darwin", "/Users/ann", "", "", []string{j("/Users/ann", "Library", "DBeaverData", "workspace6")}},
+		{"windows", `C:\Users\ann`, `C:\Users\ann\AppData\Roaming`, "", []string{j(`C:\Users\ann\AppData\Roaming`, "DBeaverData", "workspace6")}},
+		{"linux", "/home/ann", "", "", []string{
+			j("/home/ann", ".local", "share", "DBeaverData", "workspace6"),
+			j("/home/ann", ".var", "app", "io.dbeaver.DBeaverCommunity", "data", "DBeaverData", "workspace6"),
+			j("/home/ann", "snap", "dbeaver-ce", "current", ".local", "share", "DBeaverData", "workspace6"),
+		}},
+		{"linux", "/home/ann", "", "/data/ann", []string{
+			j("/data/ann", "DBeaverData", "workspace6"),
+			j("/home/ann", ".var", "app", "io.dbeaver.DBeaverCommunity", "data", "DBeaverData", "workspace6"),
+			j("/home/ann", "snap", "dbeaver-ce", "current", ".local", "share", "DBeaverData", "workspace6"),
+		}},
+	}
+	for _, c := range cases {
+		if got := workspaceDirs(c.goos, c.home, c.config, c.xdg); !slices.Equal(got, c.want) {
+			t.Errorf("%s: %q, want %q", c.goos, got, c.want)
+		}
 	}
 }
