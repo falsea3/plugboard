@@ -152,6 +152,7 @@ Plugboard is also an MCP server. Add it to Claude Code, Codex or Cursor with one
 - PostgreSQL, MySQL and MariaDB, SQLite files, ClickHouse, Cassandra, and Redis or Valkey — several open at once, each with its own tabs.
 - Groups you can collapse and reorder, a switcher on `⌘K`, `⌃Tab` between open connections, and when you last used each one.
 - Tag a connection _local_, _dev_, _staging_ or _prod_, so you always know where you are.
+- Bring your connections over from DBeaver in one go — groups, SSH tunnels and saved passwords included.
 - Paste a connection URL — `postgres://…`, `mysql://…`, `clickhouse://…`, `cassandra://…`, `redis://…`, a JDBC URL or a line from a `.env` file — and the form fills itself in.
 - **SSH tunnels** through a bastion, or straight into the database server, with a password, a private key or ssh-agent. A dropped tunnel comes back on its own.
 - Passwords stay in the system keychain (Keychain, Windows Credential Manager, Secret Service) — never in a file on disk.

@@ -8,6 +8,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-10-16
+
+### Added
+
+- **Import connections from DBeaver.** *Import from DBeaver* on the home screen finds DBeaver's connections, shows which are already here or can't be opened, and brings the rest over with their folders as groups, SSH tunnels, SSL, environment and the passwords DBeaver saved, which go to the system keychain.
+
 ## [1.0.3] - 2026-10-16
 
 ### Added
