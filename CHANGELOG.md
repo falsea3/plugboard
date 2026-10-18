@@ -8,6 +8,16 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-10-18
+
+### Added
+
+- **Pictures for connections.** Click the avatar in the connection form to give a connection a picture instead of its initials — PNG, JPEG, WebP, GIF or SVG, cropped to a square. It shows everywhere the avatar does, with the engine's badge in the corner.
+
+### Fixed
+
+- The app icon on Windows and Linux fills its square instead of carrying the margin macOS icons have.
+
 ## [1.0.4] - 2026-10-16
 
 ### Added
