@@ -105,7 +105,9 @@ export async function installBridge(page: Page) {
             connections.splice(0, connections.length, ...known);
             return ok(undefined);
           },
-          SaveConnection: (c: any) => ok(((window as any).savedConnection = c)),
+          SaveConnection: (c: any) => ok(((window as any).savedConnection = { ...c, id: c.id || 'new-conn' })),
+          ConnectionImages: () => ok({ ...((window as any).pictures ?? {}) }),
+          SetConnectionImage: (id: string, url: string) => ok(void ((window as any).lastPicture = { id, url })),
           DeleteConnection: () => ok(undefined),
           TestConnection: () => ok({ ok: true, serverVersion: 'PostgreSQL 17.2', latencyMs: 18.4 }),
           Connect: (id: string) => ok({ session: sessionOf(connections.find(x => x.id === id)!) }),

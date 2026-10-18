@@ -23,6 +23,7 @@ const (
 type App struct {
 	ctx         context.Context
 	connections *store.Connections
+	avatars     *store.Avatars
 	settings    *store.Settings
 	scripts     *store.Scripts
 	menu        *appMenu
@@ -38,6 +39,7 @@ func NewApp() *App {
 	dir := DataDir()
 	return &App{
 		connections: store.NewConnections(dir, store.NewSecrets(dir)),
+		avatars:     store.NewAvatars(dir),
 		settings:    store.NewSettings(dir),
 		scripts:     store.NewScripts(dir),
 		sessions:    map[string]db.Session{},

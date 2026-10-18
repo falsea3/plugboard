@@ -106,6 +106,8 @@ export const api = {
   roleSQL: (sessionId: string, from: string, to: RoleSpec) => call(a => a.RoleSQL(sessionId, from, to)),
   saveRole: (sessionId: string, from: string, to: RoleSpec) => call(a => a.SaveRole(sessionId, from, to)),
   dropRole: (sessionId: string, id: string) => call(a => a.DropRole(sessionId, id)),
+  connectionImages: () => call(a => a.ConnectionImages()),
+  setConnectionImage: (id: string, dataURL: string) => call(a => a.SetConnectionImage(id, dataURL)),
   saveExport: (name: string, data: string) => call(a => a.SaveExport(name, data)),
   exportDump: (sessionId: string, jobId: string, name: string, opts: DumpOptions) => call(a => a.ExportDump(sessionId, jobId, name, opts)),
   pickDumpFile: () => call(a => a.PickDumpFile()),

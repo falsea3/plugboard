@@ -13,6 +13,7 @@
   import Spinner from '../ui/Spinner.svelte';
   import UrlImport from './UrlImport.svelte';
   import ConnAvatar from './ConnAvatar.svelte';
+  import { pictures, squarePicture } from './pictures.svelte';
   import ToggleCard from '../ui/ToggleCard.svelte';
   import SshTunnelForm from './SshTunnelForm.svelte';
   import { formatDuration } from '../ui/format';
@@ -123,6 +124,23 @@
     }
   }
 
+  let picture = $state<string | undefined>(undefined);
+  let pictureInput = $state<HTMLInputElement>();
+  const shownPicture = $derived(picture ?? pictures.byId[form.id] ?? '');
+
+  async function pickPicture(e: Event) {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    try {
+      picture = await squarePicture(file);
+      error = '';
+    } catch (err) {
+      error = err instanceof Error ? err.message : String(err);
+    }
+  }
+
   async function save(andConnect: boolean) {
     saving = true;
     error = '';
@@ -134,6 +152,7 @@
         sshPassphrase: c.ssh.passphrase ?? '',
       };
       const saved = await app.saveConnection(c);
+      if (picture !== undefined) await pictures.set(saved.id, picture);
       onclose();
       if (andConnect) onconnect(saved, saved.savePassword ? undefined : typed);
     } catch (err) {
@@ -152,7 +171,14 @@
 <Modal title={editing ? 'Edit connection' : 'New connection'} width={640} {onclose}>
   {#snippet header()}
     <div class="head">
-      <ConnAvatar connection={{ ...form, name: form.name || formEngine.name }} size={40} showDriver={false} />
+      <span class="pic">
+        <button type="button" class="pic-pick" onclick={() => pictureInput?.click()} title="Choose a picture" aria-label="Choose a picture">
+          <ConnAvatar connection={{ ...form, name: form.name || formEngine.name }} size={40} showDriver={false} picture={shownPicture} />
+          <span class="pic-hover"><Icon name="pencil" size={13} /></span>
+        </button>
+        {#if shownPicture}<button type="button" class="pic-remove" onclick={() => (picture = '')} title="Remove the picture" aria-label="Remove the picture"><Icon name="x" size={9} /></button>{/if}
+        <input bind:this={pictureInput} type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg" hidden onchange={pickPicture} />
+      </span>
       <div class="head-text">
         <div class="head-title">{editing ? 'Edit connection' : 'New connection'}</div>
         <div class="head-sub">or <button type="button" class="link" onclick={() => (showUrl = !showUrl)}>paste a URL</button> — postgres://, mysql://, redis://…</div>
@@ -210,6 +236,12 @@
 <style>
   .head { display: flex; align-items: center; gap: 12px; font-weight: 400; }
   .head-text { flex: 1; min-width: 0; }
+  .pic { position: relative; flex: none; }
+  .pic-pick { position: relative; display: block; padding: 0; border: 0; border-radius: 24%; background: transparent; }
+  .pic-hover { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 24%; background: rgba(0, 0, 0, 0.45); color: #fff; opacity: 0; transition: opacity 0.12s; }
+  .pic-pick:hover .pic-hover, .pic-pick:focus-visible .pic-hover { opacity: 1; }
+  .pic-remove { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; width: 16px; height: 16px; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--elevated); color: var(--text-2); opacity: 0; }
+  .pic:hover .pic-remove, .pic-remove:focus-visible { opacity: 1; }
   .head-title { font-size: 16px; font-weight: 600; }
   .head-sub { color: var(--text-3); font-size: 12px; }
   .link { padding: 0; border: 0; background: transparent; color: var(--accent-text); font: inherit; }

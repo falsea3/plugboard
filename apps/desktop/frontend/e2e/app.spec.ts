@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { connect, expect, test } from './setup';
 
 test('says the app is up to date instead of offering the check again', async ({ page }) => {
@@ -35,6 +36,25 @@ test('says when the last run crashed and offers the log', async ({ page }) => {
   await expect(toast).toContainText('logs/crash.log');
   await toast.getByRole('button', { name: 'Show log' }).click();
   await expect(toast).toBeHidden();
+});
+
+test('gives a connection a picture instead of its initials', async ({ page }) => {
+  await page.addInitScript(() => ((window as any).pictures = { analytics: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }));
+  await page.reload();
+  await expect(page.locator('.home [data-conn="analytics"] img.picture')).toHaveCount(1);
+  await expect(page.locator('.home [data-conn="shop"] img.picture')).toHaveCount(0);
+
+  await page.getByRole('button', { name: /New connection/ }).first().click();
+  const dialog = page.getByRole('dialog', { name: 'New connection' });
+  await dialog.getByLabel('Name').fill('Pictures');
+  await dialog.getByLabel('Host').fill('pics.internal');
+  await dialog.locator('input[type=file]').setInputFiles(fileURLToPath(new URL('../src/lib/assets/plugboard-mark.png', import.meta.url)));
+  await expect(dialog.locator('img.picture')).toHaveCount(1);
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  const saved = await page.evaluate(() => (window as any).lastPicture);
+  expect(saved.id).toBe('new-conn');
+  expect(saved.url).toMatch(/^data:image\/png;base64,/);
 });
 
 test('keeps a dialog open when a drag inside it ends outside', async ({ page }) => {

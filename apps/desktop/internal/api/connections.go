@@ -35,7 +35,21 @@ func (a *App) DeleteConnection(id string) error {
 	if err := a.connections.Delete(id); err != nil {
 		return err
 	}
+	if err := a.avatars.Delete(id); err != nil {
+		return err
+	}
 	return a.scripts.ForgetTabs(id)
+}
+
+func (a *App) ConnectionImages() (map[string]string, error) {
+	return a.avatars.All()
+}
+
+func (a *App) SetConnectionImage(id, dataURL string) error {
+	if dataURL == "" {
+		return a.avatars.Delete(id)
+	}
+	return a.avatars.Set(id, dataURL)
 }
 
 func (a *App) TestConnection(c model.Connection) model.TestResult {

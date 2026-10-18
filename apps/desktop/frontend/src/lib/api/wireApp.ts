@@ -63,6 +63,8 @@ export interface GoApp {
   ListGroups(): Promise<ConnectionGroup[]>;
   ArrangeConnections(a: Arrangement): Promise<void>;
   SaveConnection(c: Connection): Promise<Connection>;
+  ConnectionImages(): Promise<Record<string, string>>;
+  SetConnectionImage(id: string, dataURL: string): Promise<void>;
   DeleteConnection(id: string): Promise<void>;
   TestConnection(c: Connection): Promise<TestResult>;
   Connect(id: string, secrets: ConnectSecrets): Promise<ConnectResult>;

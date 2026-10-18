@@ -3,6 +3,7 @@ import {
   type Connection, type ConnectSecrets, type HostKeyChange, type Settings, type TunnelState, type UpdateInfo,
 } from '../api/backend';
 import { setThemeMode } from './theme';
+import { pictures } from '../connections/pictures.svelte';
 import { engine } from '../engines';
 import { scheduleUpdateChecks } from './updateSchedule';
 import { Workspace } from './workspace.svelte';
@@ -143,7 +144,7 @@ class AppState {
 
   async loadConnections() {
     try {
-      const [conns] = await Promise.all([api.listConnections(), this.groups.load()]);
+      const [conns] = await Promise.all([api.listConnections(), this.groups.load(), pictures.load()]);
       this.connections = conns;
     } catch (err) {
       this.notify(err);

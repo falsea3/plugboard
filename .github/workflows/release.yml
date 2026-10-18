@@ -156,8 +156,8 @@ jobs:
           mkdir -p release AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/512x512/apps
           cp apps/desktop/build/bin/plugboard release/plugboard-linux-amd64
           cp apps/desktop/build/bin/plugboard AppDir/usr/bin/plugboard
-          cp apps/desktop/build/appicon.png AppDir/usr/share/icons/hicolor/512x512/apps/plugboard.png
-          cp apps/desktop/build/appicon.png AppDir/plugboard.png
+          cp apps/desktop/build/linux/plugboard.png AppDir/usr/share/icons/hicolor/512x512/apps/plugboard.png
+          cp apps/desktop/build/linux/plugboard.png AppDir/plugboard.png
           printf '%s\n' '[Desktop Entry]' 'Type=Application' 'Name=Plugboard' 'Exec=plugboard' 'Icon=plugboard' \
             'Categories=Development;Database;' 'Comment=Desktop database client' > AppDir/plugboard.desktop
           cp AppDir/plugboard.desktop AppDir/usr/share/applications/

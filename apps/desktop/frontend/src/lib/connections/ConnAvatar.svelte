@@ -33,12 +33,19 @@
 
 <script lang="ts">
   import DriverMark from './DriverMark.svelte';
+  import { pictures } from './pictures.svelte';
 
-  let { connection, size = 32, showDriver = true }: { connection: Connection; size?: number; showDriver?: boolean } = $props();
+  let { connection, size = 32, showDriver = true, picture }: { connection: Connection; size?: number; showDriver?: boolean; picture?: string } = $props();
+
+  const src = $derived(picture ?? pictures.byId[connection.id] ?? '');
 </script>
 
-<span class="avatar" style:width="{size}px" style:height="{size}px" style:background={gradient(connection)}>
-  <span class="letters" style:font-size="{Math.round(size * 0.4)}px">{initials(connection.name)}</span>
+<span class="avatar" style:width="{size}px" style:height="{size}px" style:background={src ? 'var(--surface)' : gradient(connection)}>
+  {#if src}
+    <img class="picture" {src} alt="" draggable="false" />
+  {:else}
+    <span class="letters" style:font-size="{Math.round(size * 0.4)}px">{initials(connection.name)}</span>
+  {/if}
   {#if showDriver}
     <span class="driver" style:--d="{Math.max(12, Math.round(size * 0.4))}px">
       <DriverMark driver={connection.driver} size={Math.max(12, Math.round(size * 0.4))} round />
@@ -55,6 +62,7 @@
     border-radius: 24%;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
   }
+  .picture { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
   .letters {
     color: #fff;
     font-weight: 700;
